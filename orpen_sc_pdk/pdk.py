@@ -39,6 +39,8 @@ from orpen_sc_pdk.cells import (
     straight,
     straight_to_circular_strip,
     taper,
+    tsv_concentric_signal_coupon,
+    tsv_ground_stitched_cpw,
 )
 from orpen_sc_pdk.ports import register_sim_port_types
 from orpen_sc_pdk.tech import (
@@ -96,6 +98,8 @@ _cells = {
     "cpw_meander_airbridge_lumped_coupon": cpw_meander_airbridge_lumped_coupon,
     "cpw_meander_airbridge_wave_coupon": cpw_meander_airbridge_wave_coupon,
     "finite_ground_cpw_coupon": finite_ground_cpw_coupon,
+    "tsv_concentric_signal_coupon": tsv_concentric_signal_coupon,
+    "tsv_ground_stitched_cpw": tsv_ground_stitched_cpw,
 }
 
 _cross_sections = {

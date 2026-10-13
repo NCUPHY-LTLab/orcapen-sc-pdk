@@ -60,10 +60,10 @@ flip-chip for opposing faces/bumps.
 
 ::: {.callout-note title="Inspect physical and effective heights together"}
 
-[Multilevel contacts](../../notebooks/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb)
+[Multilevel contacts](../../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb)
 provides the physical source view for bumps, posts and decks.
-[SimplePad Q3D](../../notebooks/ComponentSimulation/SimplePad/aedt_q3d.ipynb)
-and [SimplePad HFSS EPR](../../notebooks/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb)
+[SimplePad Q3D](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb)
+and [SimplePad HFSS EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb)
 provide the corresponding Solid/Thin Film case choices. Inspect the prepared
 Z map, then native body/sheet extents and material assignments; a source stack
 table alone does not demonstrate those native observations.

@@ -61,7 +61,7 @@ strips for distinct curve laws; explicitly placed variants for transforms.
 
 ::: {.callout-note title="Inspect the declared shape first"}
 
-[Curves, holes and transforms](../../notebooks/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb)
+[Curves, holes and transforms](../../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb)
 keeps the source contour, curve declaration and actual placed reference
 together. Use it to identify the requested boundary before examining the
 backend's native edges/loops. Compare the annulus hole, strip endpoints and

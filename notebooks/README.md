@@ -1,100 +1,92 @@
 # Notebooks
 
-This folder contains public Jupyter notebooks for `orpen-sc-pdk`.
+## SCGSim examples
 
-## Contributors
+`SCGSimExamples/` contains the component and cross-section examples maintained
+by OrPen for SCGSim use. Their single editable sources are under
+`src/SCGSimExamples/`; matching IPYNBs are generated execution/download files.
+The corresponding layouts live in `orpen_sc_pdk/cells/simulation/scgsim/` and
+remain available through the unified `orpen_sc_pdk.cells` entry point and PDK.
 
-Notebook authorities live under `src/`, outside the Python package import
-scope. The Pages × Notebook suite and six Kosen2024 Xmon authorities are Quarto
-QMD files; matching IPYNBs are derived publication artifacts, not independent
-editable sources. Families not yet migrated retain their existing Jupytext
-`py:percent` authority. Historical Xmon outputs and evidence retain their
-original identity and are not execution of a revised source.
-
-Pages explain user/tool requirements; notebooks own concrete case settings and
-real SCGSim calls. The current suite is source-only and CONVERGING. It includes
-SimplePad/CircularPad, finite-CPW Palace and AEDT cases, the shared 17-bridge
-RLC/Lumped/Wave family, three GeometrySemantics observations and Q2D. Native
-modeling, meshing, solving and returned-run analysis are distinct explicit
-stages. The body-first Driven Modal interface is unavailable at the selected
-checkpoint; its QMD is a nonexecutable historical authoring note, not a usable
-replacement. The earlier finite-CPW Terminal entry remains historical.
-
-Simulation notebooks are organized by simulation scope, then by the public
-thing being simulated:
+Pages explain the physical problem, model and expected outputs. Notebooks own
+the concrete dimensions, settings and public API calls. Solver examples use a
+complete preparation, solve and returned-result workflow; preparation-only and
+existing-run analysis are explicit alternatives where the backend provides them.
+Geometry observations have no solver. Opening or rendering documentation does
+not execute cells or establish native geometry, convergence or solved results.
+The TSV examples currently retain their model-inspection stages while their
+solve controls are being selected; the Modal entry is an authoring note, not a
+complete solver example. Neither is presented as a finished full workflow.
 
 ```text
-ComponentSimulation/
-  SimplePad/
-  CircularPad/
-  GeometrySemantics/
-    geometry_source_ownership.ipynb
-    geometry_curves_holes_transforms.ipynb
-    geometry_multilevel_contacts.ipynb
-  CpwMeanderAirbridge/
-    aedt_hfss_eigenmode_rlc.ipynb
-    aedt_hfss_driven_terminal_lumped.ipynb
-    aedt_hfss_driven_terminal_wave.ipynb
-  CpwFiniteGround/
-    palace_eigenmode.ipynb
-    aedt_hfss_driven_modal.ipynb
-    aedt_hfss_driven_terminal.ipynb
-    aedt_hfss_eigenmode.ipynb
-    aedt_q3d.ipynb
-  Kosen2024_Xmon/
-    palace_route_a_eigenmode.ipynb
-    palace_route_a_electrostatic.ipynb
-    palace_route_b_eigenmode.ipynb
-    palace_route_b_electrostatic.ipynb
-CrossSectionSimulation/
-  CpwFiniteGround/
-    aedt_q2d.ipynb
-Research/
-  FieldCalculator/
-    aedt_hfss_eigenmode_mask_integrals.ipynb
+notebooks/
+  SCGSimExamples/
+    ComponentSimulation/
+      SimplePad/
+      CircularPad/
+      CpwFiniteGround/
+      CpwMeanderAirbridge/
+      GeometrySemantics/
+      TSV/
+    CrossSectionSimulation/
+      CpwFiniteGround/
+  src/SCGSimExamples/          # canonical QMD sources, same case structure
+  ComponentSimulation/        # separately retained historical examples/evidence
+  Public_Docs/                # layout catalog
+  Tools/                      # general inspection tools
+  Research/                   # separately scoped research
 ```
 
-The FieldCalculator research notebook is a canonical QMD under
-`src/Research/FieldCalculator/` with a clean derived IPYNB. It studies native
-HFSS masked surface integrals on a public generic PEC vacuum cavity, without
-GDS/PDK/SGB geometry or device-loss claims. Its explicit actions separate one
-adaptive solve, postprocessing a copied sealed project, and AEDT-free plotting
-of hash-verified saved measurements. Local evidence stays in that notebook
-family's `.artifacts/` directory; this research scope remains `CONVERGING`.
+Source layout families do not define a solver matrix: one layout can serve
+several questions, and not every layout needs a solve. Keep OrPen's materials,
+physical layers, source occurrences, holes, contact intent and explicit Net
+meaning intact. SCGSim owns reusable lowering, meshes, handoff, execution,
+Resolve and Report; notebooks do not implement a second solver runtime.
 
-Future `ChipSimulation`, `CrossSectionSimulation`, and `CircuitSimulation`
-folders use the same pattern. Solver/backend identity belongs in notebook
-filenames, not in a top-level `AEDTSimulation` or SGB tutorial folder.
+## Edit and generate
 
-Regenerate all QMD-backed publication notebooks after editing their sources:
+The canonical `.qmd` owns prose, code order and settings. Derived `.ipynb`
+files are not independently editable sources. Include-only `_source_input.qmd`
+fragments remain next to the consuming QMDs; generated notebooks contain their
+cells and do not require the fragment when executing.
+
+Regenerate the QMD-backed notebooks after editing:
 
 ```bash
 just convert-notebooks
 ```
 
-Generation is explicit and produces clean IPYNBs. `just check-notebooks`
-instead renders every QMD to a temporary notebook and compares Markdown, code,
-order, metadata, and stable cell identities without executing or overwriting
-the tracked IPYNBs. Pages uses the check-only path, so saved publication
-outputs may exist only in the derived IPYNB.
+`just check-notebooks` renders temporary notebooks and compares ordered source,
+code-cell IDs and metadata without executing or overwriting publication files.
+Code cells have stable IDs, null execution counts and empty outputs. Retain
+executed notebooks separately with their source, input, runtime and run identity;
+never copy historical output into a changed source as proof of execution.
 
-Build the Quarto documentation and notebook pages with:
+The current solver examples use the fixed
+[SCGSim v2 RC1 checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
+Each source states its exact runtime and optional backend prerequisites.
+Source-only geometry observations and historical examples retain their own
+declared checkpoints. Ordinary project dependencies and pins are not silently
+changed by a notebook environment. AEDT and Palace remain separate notebooks.
 
-```bash
-just docs
-```
+## Models and evidence
 
-Notebook examples in this public repo must not include private layout/IP, GDS
-inputs, private run folders, or private benchmark numbers.
+The PDK base M1 film is 100 nm. TSV examples represent die-face metal as Thin
+Film and preserve hollow walls and perforated Silicon as Solid. Airbridge
+decks are local films; posts and indium bumps retain finite Solid declarations.
+Other explicitly authored models keep their declared representation. Q2D uses
+its own Nb 0.2 µm section, 10 µm gap and 40 µm grounds, not an automatic 3D slice.
 
-OrPen owns components, PDK facts and notebook case meaning. `scgsim.geometry`
-owns the source geometry boundary; `scgsim.palace` and `scgsim.aedt` own backend
-lowering, handoff, execution receipts, Resolve and Report. The current suite
-authors against [SCGSim v2 RC1](https://github.com/OrPenStrike/scgsim/tree/85d8bedb733b1e17737d935029618351b30ea5de)
-in a separate consumer environment; the ordinary environment and pins are
-unchanged. Follow each source's environment instructions. AEDT remains optional.
+Historical Xmon/finite-CPW entries and saved evidence remain outside the current
+SCGSim example set with their original inputs and output attribution. An
+authoring note is not a runnable solver example. Source availability and a
+successful documentation render do not prove an AEDT model, solve or physics
+result. The current examples remain CONVERGING.
 
-The current PDK base film is 0.1 µm. Q2D retains its explicitly authored Nb
-0.2 µm section with 10 µm gap and 40 µm grounds, not an inferred 3D slice.
-Use the [suite catalog](../docs/simulation/notebooks.qmd) for requirement links
-and local canonical-source/derived-notebook downloads.
+Public notebooks contain no private layouts, private run paths or private
+native evidence. See the [Simulation catalog](../docs/simulation/notebooks.qmd)
+for requirements, example pages and downloads. Build the docs with `just docs`.
+
+The FieldCalculator research notebook remains separately scoped under
+`src/Research/FieldCalculator/`; its actual execution/evidence does not become
+SCGSim example evidence through this organization change.

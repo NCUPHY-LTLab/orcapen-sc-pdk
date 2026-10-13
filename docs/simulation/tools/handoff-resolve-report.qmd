@@ -63,10 +63,10 @@ checklist. Publication of private run data is not part of this requirement.
 ::: {.callout-note title="Continue in the same backend notebook"}
 
 Follow the Prepare, Handoff, returned-run Resolve and Report stages in
-[SimplePad Palace Electrostatic](../../notebooks/ComponentSimulation/SimplePad/palace_electrostatic.ipynb),
-[CircularPad Palace Eigenmode](../../notebooks/ComponentSimulation/CircularPad/palace_eigenmode.ipynb),
-[SimplePad Q3D](../../notebooks/ComponentSimulation/SimplePad/aedt_q3d.ipynb)
-or [SimplePad HFSS EPR](../../notebooks/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb),
+[SimplePad Palace Electrostatic](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb),
+[CircularPad Palace Eigenmode](../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb),
+[SimplePad Q3D](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb)
+or [SimplePad HFSS EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb),
 according to the requested quantity. Open returned-run analysis in a fresh
 process; Resolve and Report are reading stages, not instructions for another
 solve. Keep saved-field evaluation and file-only loss reanalysis separate.

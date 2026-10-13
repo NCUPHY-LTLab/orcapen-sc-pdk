@@ -186,9 +186,13 @@ def _m1_layer_level(
     mesh_order: int,
     info: dict[str, Any] | None = None,
 ) -> LayerLevel:
-    kwargs: dict[str, Any] = {}
-    if info is not None:
-        kwargs["info"] = info
+    # Source-owned physical identity; interval remains the authored zmin/thickness.
+    layer_info = dict(info) if info is not None else {}
+    layer_info["aedt_modeling"] = {
+        "physical_layer_id": f"orpen_sc_pdk:{name}",
+        "kind": "stack_film",
+        "contact_side": "lower" if outward == 1 else "upper",
+    }
 
     return LayerLevel(
         name=name,
@@ -207,7 +211,7 @@ def _m1_layer_level(
         ),
         material="Al",
         mesh_order=mesh_order,
-        **kwargs,
+        info=layer_info,
     )
 
 
@@ -319,6 +323,11 @@ def _face_layer_levels(
                 "airbridge_part": "pier",
                 "geometry": {"geometry_source": "gds_polygon"},
                 "airbridge_process": airbridge_process,
+                "aedt_modeling": {
+                    "physical_layer_id": f"orpen_sc_pdk:{prefix}_AIRBRIDGE_VIA",
+                    "kind": "retained_solid",
+                    "contact_side": None,
+                },
             },
         ),
         f"{prefix}_AIRBRIDGE": _face_layer_level(
@@ -336,6 +345,11 @@ def _face_layer_levels(
                 "airbridge_part": "deck",
                 "geometry": {"geometry_source": "gds_polygon"},
                 "airbridge_process": airbridge_process,
+                "aedt_modeling": {
+                    "physical_layer_id": f"orpen_sc_pdk:{prefix}_AIRBRIDGE",
+                    "kind": "local_film",
+                    "contact_side": "lower" if face == "TOP" else "upper",
+                },
             },
         ),
         f"{prefix}_SIM_BOUNDARY": _face_port_sheet_layer_level(
@@ -495,6 +509,19 @@ def get_layer_stack() -> LayerStack:
                 zmin=-SUBSTRATE_THICKNESS_UM,
                 material="TiN",
                 mesh_order=3,
+                info={
+                    "simulation_role": "conductor",
+                    "layer_type": "via",
+                    "die": "D0",
+                    "substrate_level_id": "D0_SUBSTRATE",
+                    "contact_level_ids": ["D0_BOTTOM_M1", "D0_TOP_M1"],
+                    "physical_model": "finite_through_substrate_solid",
+                    "aedt_modeling": {
+                        "physical_layer_id": "orpen_sc_pdk:D0_TOP_TSV",
+                        "kind": "retained_solid",
+                        "contact_side": None,
+                    },
+                },
             ),
             "D1_BOTTOM_TSV": LayerLevel(
                 name="D1_BOTTOM_TSV",
@@ -503,6 +530,19 @@ def get_layer_stack() -> LayerStack:
                 zmin=d1_substrate_zmin,
                 material="TiN",
                 mesh_order=3,
+                info={
+                    "simulation_role": "conductor",
+                    "layer_type": "via",
+                    "die": "D1",
+                    "substrate_level_id": "D1_SUBSTRATE",
+                    "contact_level_ids": ["D1_BOTTOM_M1", "D1_TOP_M1"],
+                    "physical_model": "finite_through_substrate_solid",
+                    "aedt_modeling": {
+                        "physical_layer_id": "orpen_sc_pdk:D1_BOTTOM_TSV",
+                        "kind": "retained_solid",
+                        "contact_side": None,
+                    },
+                },
             ),
             "D0_TOP_INDIUM": _face_layer_level(
                 name="D0_TOP_INDIUM",
@@ -535,6 +575,11 @@ def get_layer_stack() -> LayerStack:
                     "simulation_role": "conductor",
                     "layer_type": "via",
                     "part_role": "bump_body",
+                    "aedt_modeling": {
+                        "physical_layer_id": "orpen_sc_pdk:D0_D1_INDIUM_BUMP",
+                        "kind": "retained_solid",
+                        "contact_side": None,
+                    },
                     "host_void_semantic_id": "D0_TO_D1_GAP",
                     "geometry": {
                         "geometry_source": "gds_polygon",
@@ -569,7 +614,8 @@ def get_layer_views() -> LayerViews:
 LAYER_STACK = get_layer_stack()
 LAYER_VIEWS = get_layer_views()
 LAYER_CONNECTIVITY: list[ConnectivitySpec] = [
-    ("D0_TOP_M1_DRAW", "D0_TOP_TSV", "D1_BOTTOM_M1_DRAW"),
+    ("D0_BOTTOM_M1_DRAW", "D0_TOP_TSV", "D0_TOP_M1_DRAW"),
+    ("D1_BOTTOM_M1_DRAW", "D1_BOTTOM_TSV", "D1_TOP_M1_DRAW"),
     ("D0_TOP_M1_DRAW", "D0_TOP_IND", "D1_BOTTOM_M1_DRAW"),
     ("D0_TOP_M1_DRAW", "D0_TOP_AB_DRAW", "D0_TOP_M1_DRAW"),
     ("D1_BOTTOM_M1_DRAW", "D1_BOTTOM_AB_DRAW", "D1_BOTTOM_M1_DRAW"),

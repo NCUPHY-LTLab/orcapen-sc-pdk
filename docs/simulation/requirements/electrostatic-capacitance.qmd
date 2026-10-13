@@ -35,13 +35,13 @@ readback establishes the model actually used for extraction.
 
 ### Palace
 
-Use [SimplePad electrostatic](../../notebooks/ComponentSimulation/SimplePad/palace_electrostatic.ipynb).
+Use [SimplePad electrostatic](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb).
 Follow its source construction, model/mesh preparation and solver handoff.
 Analyze the returned run separately, preserving conductor ordering and units.
 
 ### AEDT
 
-Use [SimplePad Q3D](../../notebooks/ComponentSimulation/SimplePad/aedt_q3d.ipynb).
+Use [SimplePad Q3D](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb).
 Construct the same intended conductor arrangement, inspect native material and
 Net assignments, and extract the requested capacitance matrix. The Q3D
 boundary and matrix convention must be stated before comparing with Palace.

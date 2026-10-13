@@ -1,6 +1,6 @@
 ---
-title: "Pages × Notebook catalog"
-description: "Canonical source-only cases, downloadable notebooks and separately retained historical evidence."
+title: "SCGSim examples"
+description: "Component and cross-section notebooks with explicit settings, execution stages and returned-result analysis."
 sidebar: simulation
 ---
 
@@ -9,8 +9,10 @@ component or cross-section from this PDK. SCGSim owns every reusable simulation
 stage: semantic geometry, mesh/config generation, handoff, result resolution,
 and reports.
 
-Notebook folders classify the simulated thing first. A thing may contain
-Palace, AEDT, single-run, or sweep notebooks without duplicating runtime logic.
+Current examples live in `notebooks/SCGSimExamples/`. Within that set, folders
+classify the simulated component or cross-section; filenames identify the
+backend. Layout factories live in `cells/simulation/scgsim/` and keep their
+public PDK names. Tools, research and historical evidence remain separate.
 
 Start with the [Simulation requirements](../notebooks.qmd), then select an
 example for the observation it can actually support:
@@ -24,14 +26,15 @@ example for the observation it can actually support:
   and [Lumped/Wave Terminal](requirements/driven-terminal.qmd), with their own
   explicitly authored loads and excitation; ordinary eigenmode is not a substitute.
 
-Pages explain the intended physical product and tool behavior. Notebooks own
-case settings, source observations and explicit operation stages. The current
-suite is **SOURCE ONLY / CONVERGING**: authoring and clean publication artifacts
-do not establish native geometry, mesh or solved-result coverage.
+Pages explain why to simulate a system and what to inspect. Notebooks fix the
+actual geometry, numerical settings and API calls. Solver examples follow the
+complete preparation, solve and returned-result workflow; source geometry
+examples focus on their stated observations. All execution stages remain
+explicit, and viewing or rendering a notebook does not run its cells.
 
-## Current source-only suite
+## Select an example
 
-The suite targets [SCGSim v2 RC1](https://github.com/OrPenStrike/scgsim/tree/85d8bedb733b1e17737d935029618351b30ea5de)
+Solver examples target [SCGSim v2 RC1](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
 in a separate consumer environment. Follow each source's environment instructions;
 the ordinary project environment and pins are unchanged. Canonical QMDs own
 Markdown, code order and settings. Clean derived IPYNBs are downloadable
@@ -39,24 +42,24 @@ publication/execution artifacts, not another editable authority.
 
 | Case | Notebook / download | Canonical source download |
 | --- | --- | --- |
-| Source ownership | [View](../notebooks/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb) · <a href="../notebooks/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/GeometrySemantics/geometry_source_ownership.qmd" download>QMD</a> |
-| Curves, holes and transforms | [View](../notebooks/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb) · <a href="../notebooks/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.qmd" download>QMD</a> |
-| Multilevel contacts | [View](../notebooks/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb) · <a href="../notebooks/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.qmd" download>QMD</a> |
-| SimplePad Q3D | [View](../notebooks/ComponentSimulation/SimplePad/aedt_q3d.ipynb) · <a href="../notebooks/ComponentSimulation/SimplePad/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/SimplePad/aedt_q3d.qmd" download>QMD</a> |
-| SimplePad HFSS Eigenmode/EPR | [View](../notebooks/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../notebooks/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" download>QMD</a> |
-| SimplePad Palace Electrostatic | [View](../notebooks/ComponentSimulation/SimplePad/palace_electrostatic.ipynb) · <a href="../notebooks/ComponentSimulation/SimplePad/palace_electrostatic.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/SimplePad/palace_electrostatic.qmd" download>QMD</a> |
-| SimplePad Palace Eigenmode/EPR | [View](../notebooks/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../notebooks/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/SimplePad/palace_eigenmode.qmd" download>QMD</a> |
-| CircularPad Palace Eigenmode/EPR | [View](../notebooks/ComponentSimulation/CircularPad/palace_eigenmode.ipynb) · <a href="../notebooks/ComponentSimulation/CircularPad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/CircularPad/palace_eigenmode.qmd" download>QMD</a> |
-| Finite CPW Palace Eigenmode/EPR | [View](../notebooks/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb) · <a href="../notebooks/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/CpwFiniteGround/palace_eigenmode.qmd" download>QMD</a> |
-| Finite CPW HFSS Eigenmode | [View](../notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb) · <a href="../notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd" download>QMD</a> |
-| Finite CPW Q3D AC/RL | [View](../notebooks/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb) · <a href="../notebooks/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/CpwFiniteGround/aedt_q3d.qmd" download>QMD</a> |
-| Shared resonator — RLC Eigenmode | [View](../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb) · <a href="../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.qmd" download>QMD</a> |
-| Shared resonator — Lumped Terminal | [View](../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb) · <a href="../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.qmd" download>QMD</a> |
-| Shared resonator — Wave Terminal | [View](../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb) · <a href="../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.qmd" download>QMD</a> |
-| Finite CPW Q2D section | [View](../notebooks/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb) · <a href="../notebooks/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.qmd" download>QMD</a> |
+| Source ownership | [View](../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.qmd" download>QMD</a> |
+| Curves, holes and transforms | [View](../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.qmd" download>QMD</a> |
+| Multilevel contacts | [View](../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.qmd" download>QMD</a> |
+| SimplePad Q3D | [View](../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.qmd" download>QMD</a> |
+| SimplePad HFSS Eigenmode/EPR | [View](../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" download>QMD</a> |
+| SimplePad Palace Electrostatic | [View](../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.qmd" download>QMD</a> |
+| SimplePad Palace Eigenmode/EPR | [View](../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" download>QMD</a> |
+| CircularPad Palace Eigenmode/EPR | [View](../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.qmd" download>QMD</a> |
+| Finite CPW Palace Eigenmode/EPR | [View](../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.qmd" download>QMD</a> |
+| Finite CPW HFSS Eigenmode | [View](../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd" download>QMD</a> |
+| Finite CPW Q3D AC/RL | [View](../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.qmd" download>QMD</a> |
+| Shared resonator — RLC Eigenmode | [View](../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.qmd" download>QMD</a> |
+| Shared resonator — Lumped Terminal | [View](../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.qmd" download>QMD</a> |
+| Shared resonator — Wave Terminal | [View](../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.qmd" download>QMD</a> |
+| Finite CPW Q2D section | [View](../notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb) · <a href="../notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.qmd" download>QMD</a> |
 
 The three resonator QMDs share one authoring cell. Download its companion
-<a href="../notebooks/src/ComponentSimulation/CpwMeanderAirbridge/_source_input.qmd" download>_source_input.qmd</a>
+<a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/_source_input.qmd" download>_source_input.qmd</a>
 to the same directory when rebuilding those QMDs. Their derived IPYNBs already
 contain that cell and do not need the companion.
 
@@ -71,16 +74,31 @@ keeps its Nb 0.2 µm thickness, 10 µm gap and 40 µm grounds; it is not an
 automatic slice or equivalent result of a 3D coupon. Concrete settings remain
 in the notebooks rather than being repeated in requirement pages.
 
-### Driven Modal compatibility blocker
+### Driven Modal authoring note
 
-The selected SCGSim checkpoint has no body-first Driven Modal interface.
-The [historical Modal authoring note](../notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb)
-and its <a href="../notebooks/src/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.qmd" download>nonexecutable QMD</a>
-retain the authored case without guessed native-object bindings. A usable
-current Modal notebook remains incomplete; Terminal is not a substitute.
+The [Modal authoring note](../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb)
+and its <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.qmd" download>QMD</a>
+describe the intended case, but are not executable notebooks. They are kept
+separate from the full solver examples; Terminal results do not stand in for
+Modal results.
 
 Historical output is not execution of these revised sources. The current suite
 does not claim that every branch is complete, supported or natively observed.
+
+## TSV examples
+
+The [TSV model-inspection guide](tsv-model-inspection.qmd) links three OrPen-owned
+canonical examples: Concentric Q3D, Concentric HFSS Eigenmode and TSV-grounded
+CPW Driven Terminal Wave. They use the same fixed SCGSim checkpoint and
+the same source-owned hollow TSV geometry, with face films as sheets and TSV
+walls / perforated Silicon as solids. Each has explicit source, handoff, native
+Prepare Only and file-only returned-model stages. Their full solve workflows
+are not yet authored: the frequency, mode and convergence controls still need
+to be selected. Prepare Only is an inspection option, not the intended limit
+of these examples.
+
+Their QMDs own concrete settings and APIs. Old Solid projects remain historical
+execution evidence, not output of the new mixed-representation notebook source.
 
 ## Existing component examples and historical evidence
 

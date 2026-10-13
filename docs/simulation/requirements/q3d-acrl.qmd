@@ -44,7 +44,7 @@ for this current-path-dependent AC/RL extraction.
 
 ### AEDT
 
-Use [Finite CPW Q3D](../../notebooks/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb).
+Use [Finite CPW Q3D](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb).
 Construct the native bodies, inspect material and Net assignments, bind the
 source/sink pair and extract the requested families. Analyze returned matrices
 separately from preparation.

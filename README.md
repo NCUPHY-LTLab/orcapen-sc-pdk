@@ -73,18 +73,32 @@ remain unchanged.
 
 | Family | Factory or canonical source | Scope |
 | --- | --- | --- |
-| 01 square pad | [`square_pad_capacitor`](orpen_sc_pdk/cells/simulation/simple_pad.py) | Single-die island and nonmetal locator |
-| 02 circular disk | [`circular_pad_capacitor`](orpen_sc_pdk/cells/simulation/simple_pad.py) | Default inner radius is zero |
-| 03 annulus | [`circular_pad_capacitor(inner_radius_um=80)`](orpen_sc_pdk/cells/simulation/simple_pad.py) | Same factory; hole is not Ground |
-| 04 curved strips | [`straight_to_circular_strip`](orpen_sc_pdk/cells/simulation/simple_pad.py), [`interpolation_spline_strip`, `bspline_strip`](orpen_sc_pdk/cells/simulation/spline_strip.py) | Three distinct source definitions; no native curve-equivalence claim |
-| 05 finite CPW | [`finite_ground_cpw_coupon`](orpen_sc_pdk/cells/simulation/cpw_coupons.py) | Shared source factory with explicit finite Signal and two Ground strips |
-| 06 flip-chip pad | [`flip_chip_pad_coupon`](orpen_sc_pdk/cells/simulation/test_components.py) | Two dies and four bumps; source contact geometry, not native contact proof |
-| 07 CPW airbridge | [`cpw_airbridge_coupon`](orpen_sc_pdk/cells/simulation/test_components.py) | CPW with airbridge deck/piers; source geometry, not native conformity proof |
+| 01 square pad | [`square_pad_capacitor`](orpen_sc_pdk/cells/simulation/scgsim/simple_pad.py) | Single-die island and nonmetal locator |
+| 02 circular disk | [`circular_pad_capacitor`](orpen_sc_pdk/cells/simulation/scgsim/simple_pad.py) | Default inner radius is zero |
+| 03 annulus | [`circular_pad_capacitor(inner_radius_um=80)`](orpen_sc_pdk/cells/simulation/scgsim/simple_pad.py) | Same factory; hole is not Ground |
+| 04 curved strips | [`straight_to_circular_strip`](orpen_sc_pdk/cells/simulation/scgsim/simple_pad.py), [`interpolation_spline_strip`, `bspline_strip`](orpen_sc_pdk/cells/simulation/scgsim/spline_strip.py) | Three distinct source definitions; no native curve-equivalence claim |
+| 05 finite CPW | [`finite_ground_cpw_coupon`](orpen_sc_pdk/cells/simulation/scgsim/cpw_coupons.py) | Shared source factory with explicit finite Signal and two Ground strips |
+| 06 flip-chip pad | [`flip_chip_pad_coupon`](orpen_sc_pdk/cells/simulation/scgsim/test_components.py) | Two dies and four bumps; source contact geometry, not native contact proof |
+| 07 CPW airbridge | [`cpw_airbridge_coupon`](orpen_sc_pdk/cells/simulation/scgsim/test_components.py) | CPW with airbridge deck/piers; source geometry, not native conformity proof |
 
 The [source test-components guide](docs/public-pdk-examples/test-components.md)
 records definitions and limits. Layout availability does not mean every native
 test is implemented or completed. The nominal single-die base Al film is
 100 nm (0.1 µm); retained results keep their original stack and provenance.
+
+### SCGSim examples
+
+Layouts intended for SCGSim examples live in
+`orpen_sc_pdk/cells/simulation/scgsim/`. Their public factory names remain
+available through `orpen_sc_pdk.cells` and the active PDK.
+
+The corresponding notebooks live in `notebooks/SCGSimExamples/`, with one
+editable QMD source under `notebooks/src/SCGSimExamples/`. Choose a case from
+the [Simulation catalog](docs/simulation/notebooks.qmd): solver examples
+provide settings, preparation, solving and returned-result analysis; source
+geometry examples focus on their stated geometry observations. Prepare Only
+is a selectable execution stage where supported, not the purpose of the suite.
+Opening or rendering documentation never starts a solver.
 
 ### External Reference Boundary
 

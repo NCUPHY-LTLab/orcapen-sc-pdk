@@ -37,13 +37,13 @@ notebook. They are calculation settings, not a new accuracy or design Gate.
 ### Palace
 
 A Palace loaded-mode comparison must state its own physical load and boundary
-treatment. The [SimplePad Palace LC notebook](../../notebooks/ComponentSimulation/SimplePad/palace_eigenmode.ipynb)
+treatment. The [SimplePad Palace LC notebook](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb)
 illustrates a separately authored inductive model; it is not the selected
 assembly or a substitution for its general RLC network.
 
 ### AEDT
 
-Use [CPW–meander RLC Eigenmode](../../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb).
+Use [CPW–meander RLC Eigenmode](../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb).
 Construct the selected source, bind the support and electrical treatment,
 inspect their native placement and values, and solve the loaded modes.
 Analyze the returned run separately.

@@ -40,14 +40,14 @@ Ordinary modes are distinct from
 
 ### Palace
 
-Use [Finite CPW Palace Eigenmode](../../notebooks/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb).
+Use [Finite CPW Palace Eigenmode](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb).
 Build the source and prescribed region, inspect the prepared model and mesh,
 then hand off the eigenmode solve. Resolve a returned run independently of
 source preparation.
 
 ### AEDT
 
-Use [Finite CPW HFSS Eigenmode](../../notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb).
+Use [Finite CPW HFSS Eigenmode](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb).
 Inspect the native bodies, materials, metal representation and exterior before
 solving. Retain mode identities and saved fields with the applied adaptive setup.
 

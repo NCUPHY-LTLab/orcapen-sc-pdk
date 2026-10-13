@@ -1,0 +1,68 @@
+---
+title: "TSV · AEDT model inspection"
+description: "OrPen-owned source and three prepare-only notebooks for a hollow TSV system."
+sidebar: simulation
+---
+
+These examples first build an inspectable AEDT model. They answer a concrete
+question: are the face conductors, hollow TSV walls, perforated substrate and
+electrical assignments represented as intended before a solver setup is chosen?
+OrPen owns the layouts and canonical notebooks; SCGSim supplies the reusable
+preparation, native transaction and returned-model reader.
+
+## System and representation
+
+- **Concentric system:** annular Signal pads on both die faces connect through
+  the central hollow TSV. Four surrounding TSVs connect the two separate Ground
+  planes. The Signal opening and bore are not Ground.
+- **Ground-stitched CPW:** a through Signal reaches the two exterior cuts; two
+  rows of TSVs stitch top and back Ground. It is a full 3D system, not a uniform
+  Q2D section or a claim of optimal TSV spacing.
+- **Model:** face metal/landings use Thin Film. Hollow TiN walls and cut Silicon
+  remain finite Solid. The physical source thickness and material identity stay
+  recorded; the backend handles declared source-to-effective Z mapping.
+
+The canonical factories in `orpen_sc_pdk.cells.simulation.scgsim.tsv` own shapes,
+holes, source occurrences and contact intent. Concrete dimensions,
+Net membership and enclosure controls live in each notebook.
+
+## Select the notebook
+
+| Example | Assignment to inspect | View / download |
+| --- | --- | --- |
+| Concentric Q3D | Signal/Ground Nets; face sheets, hollow wall solids and cut Si | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.qmd" download>QMD</a> |
+| Concentric Eigenmode | Closed 3D model, without ports, loads or junctions | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.qmd" download>QMD</a> |
+| TSV-grounded CPW Terminal | Exterior Wave cuts, Signal/reference membership and terminal order | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.qmd" download>QMD</a> |
+
+The three QMDs include one canonical
+<a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/_source_input.qmd" download>source-input companion</a>.
+Download it beside the QMDs when rebuilding them; generated IPYNBs already
+contain its cells. Use the fixed
+[SCGSim model-only checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
+with this OrPen candidate in an isolated runtime. Other notebook families keep
+their own declared checkpoints and historical evidence.
+
+## Workflow and expected output
+
+1. Build the canonical layout and inspect detached source facts.
+2. Adopt the notebook's explicit Nets and model representation, then prepare a
+   fresh handoff. This is source/backend input preparation, not a native model.
+3. Select the explicit native **Prepare Only** action to build, read back, save
+   and release the model. No Analysis Setup or sweep is created.
+4. Use `resolve_prepared_model` in a fresh kernel to inspect the returned model
+   and its actual `.aedt` identity without rebuilding it.
+
+Inspect the actual body/sheet and assignment records, together with the saved
+project and necessary unsolved companions. Preserve inconclusive contact or
+boundary queries as unknown. Keep writable Human inspection copies separate
+from hash-bound producer files.
+
+::: {.callout-note title="Model inspection, not a solve result"}
+There is no C/G matrix, eigenfrequency, S-data, field or EPR result in this
+stage. Source contacts and a saved model do not prove native electrical
+continuity or numerical accuracy. Future solve settings are a separate task.
+:::
+
+These canonical sources and clean notebooks are a local **CONVERGING**
+candidate. Rendering them does not execute their cells; older Solid models are
+not outputs of the current mixed Thin Film/Solid examples.

@@ -44,8 +44,8 @@ data or establish port-kind equivalence.
 
 ### AEDT
 
-Use the separate [Lumped notebook](../../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb)
-and [Wave notebook](../../notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb).
+Use the separate [Lumped notebook](../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb)
+and [Wave notebook](../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb).
 Construct the selected variant, inspect native Terminal assignments and
 reference conductors, then perform adaptation and the requested sweep.
 Resolve each returned run independently.

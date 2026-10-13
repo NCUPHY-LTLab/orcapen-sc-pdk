@@ -56,10 +56,10 @@ boundaries, and bump/airbridge coupons for interfaces.
 
 ::: {.callout-note title="Read the mesh beside the requested quantity"}
 
-Use [CircularPad Palace Eigenmode](../../notebooks/ComponentSimulation/CircularPad/palace_eigenmode.ipynb)
+Use [CircularPad Palace Eigenmode](../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb)
 for curved-boundary geometry and mode/participation history.
-[SimplePad Palace Electrostatic](../../notebooks/ComponentSimulation/SimplePad/palace_electrostatic.ipynb)
-and [SimplePad Palace Eigenmode](../../notebooks/ComponentSimulation/SimplePad/palace_eigenmode.ipynb)
+[SimplePad Palace Electrostatic](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb)
+and [SimplePad Palace Eigenmode](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb)
 provide the simpler capacitance and mode cases. Inspect the saved mesh's
 element types, boundary membership and selected local coordinates before
 interpreting the returned refinement history.

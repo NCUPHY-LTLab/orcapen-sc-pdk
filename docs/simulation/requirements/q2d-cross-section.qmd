@@ -47,7 +47,7 @@ per-length conventions rather than re-labeling mode output as Q2D extraction.
 
 ### AEDT
 
-Use [Finite-ground CPW Q2D](../../notebooks/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb).
+Use [Finite-ground CPW Q2D](../../notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb).
 Create the native section, inspect conductor/reference grouping and materials,
 then extract the requested per-length matrices. Resolve the returned data
 independently of the live section session.

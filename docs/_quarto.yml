@@ -12,11 +12,11 @@ project:
     - "simulation/**/*.qmd"
     - "papers/*.md"
     - "notebooks/Public_Docs/component_gallery.ipynb"
-    - "notebooks/ComponentSimulation/SimplePad/aedt_q3d.ipynb"
-    - "notebooks/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb"
-    - "notebooks/ComponentSimulation/SimplePad/palace_electrostatic.ipynb"
-    - "notebooks/ComponentSimulation/SimplePad/palace_eigenmode.ipynb"
-    - "notebooks/ComponentSimulation/CircularPad/palace_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb"
@@ -24,30 +24,35 @@ project:
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/aedt_q3d.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.ipynb"
     - "notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_terminal.ipynb"
-    - "notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb"
-    - "notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb"
-    - "notebooks/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb"
-    - "notebooks/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb"
-    - "notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb"
-    - "notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb"
-    - "notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb"
-    - "notebooks/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb"
-    - "notebooks/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb"
-    - "notebooks/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb"
-    - "notebooks/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb"
+    - "notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb"
     - "reference/*.qmd"
     - "!notebooks/src/"
   resources:
     - _static/images/components/*.svg
     - _static/images/test-components/*
-    - "notebooks/ComponentSimulation/SimplePad/*.ipynb"
-    - "notebooks/ComponentSimulation/CircularPad/*.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/*.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CircularPad/*.ipynb"
     - "notebooks/ComponentSimulation/CpwFiniteGround/*.ipynb"
-    - "notebooks/ComponentSimulation/CpwMeanderAirbridge/*.ipynb"
-    - "notebooks/ComponentSimulation/GeometrySemantics/*.ipynb"
-    - "notebooks/CrossSectionSimulation/CpwFiniteGround/*.ipynb"
-    - "notebooks/src/ComponentSimulation/**/*.qmd"
-    - "notebooks/src/CrossSectionSimulation/**/*.qmd"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/*.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/*.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/TSV/*.ipynb"
+    - "notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/*.ipynb"
+    - "notebooks/SCGSimExamples/**/*.ipynb"
+    - "notebooks/src/SCGSimExamples/**/*.qmd"
+    - "notebooks/src/ComponentSimulation/Kosen2024_Xmon/**/*.qmd"
   pre-render:
     - uv run --project .. --group docs quartodoc build
 
@@ -110,17 +115,17 @@ website:
             - simulation/tools/contacts-multilevel.qmd
             - simulation/tools/mesh-fem-amr.qmd
             - simulation/tools/handoff-resolve-report.qmd
-        - section: Notebooks
+        - section: SCGSim examples
           contents:
             - simulation/notebooks.qmd
             - features/scgsim-integration.md
             - section: Pad examples
               contents:
-                - notebooks/ComponentSimulation/SimplePad/aedt_q3d.ipynb
-                - notebooks/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb
-                - notebooks/ComponentSimulation/SimplePad/palace_electrostatic.ipynb
-                - notebooks/ComponentSimulation/SimplePad/palace_eigenmode.ipynb
-                - notebooks/ComponentSimulation/CircularPad/palace_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb
             - section: Xmon examples and historical evidence
               contents:
                 - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb
@@ -131,21 +136,27 @@ website:
                 - notebooks/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.ipynb
             - section: CPW examples
               contents:
-                - notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb
-                - notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb
-                - notebooks/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb
-                - notebooks/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb
-                - notebooks/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb
+                - notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb
             - section: Launcher / exterior-cut pair
               contents:
-                - notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb
-                - notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb
-                - notebooks/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb
             - section: Source geometry observations
               contents:
-                - notebooks/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb
-                - notebooks/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb
-                - notebooks/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb
+            - section: TSV examples
+              contents:
+                - simulation/tsv-model-inspection.qmd
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb
     - id: api
       title: API
       contents:

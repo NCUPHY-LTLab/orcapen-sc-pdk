@@ -60,7 +60,7 @@ component objects.
 
 ::: {.callout-note title="Follow the source into the model"}
 
-Use [Source ownership](../../notebooks/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb)
+Use [Source ownership](../../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb)
 for local regions, named occurrences, placed coordinates and final Net
 membership. Inspect its source observations first, then the corresponding
 backend notebook's native body/group mapping and returned-result labels.

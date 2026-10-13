@@ -59,7 +59,7 @@ question. No new numerical contact tolerance is specified.
 
 ::: {.callout-note title="Follow each intended interface"}
 
-[Multilevel contacts](../../notebooks/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb)
+[Multilevel contacts](../../notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb)
 shows the bump/lower-Ground and bump/upper-Ground interfaces, and the
 deck/post/base-Ground chain. Inspect source footprints and Z first, actual
 native contact/clearance next, and mesh or terminal assignment before reading

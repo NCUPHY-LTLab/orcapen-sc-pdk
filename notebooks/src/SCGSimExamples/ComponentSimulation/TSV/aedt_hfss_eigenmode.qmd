@@ -1,0 +1,194 @@
+---
+title: "TSV Concentric · HFSS Eigenmode model inspection"
+jupyter: python3
+execute:
+  enabled: false
+---
+
+Use the same Concentric Signal/stitched Ground system as the
+[Q3D notebook](aedt_q3d.ipynb), now in an HFSS Eigenmode design.
+Inspect the enclosed 3D model before deciding its mode-search settings.
+This example has no junction, lumped load, drive port or EPR request; it is not
+yet a qubit-frequency calculation.
+See the [TSV guide](../../../../simulation/tsv-model-inspection.qmd) and
+[Eigenmode requirement](../../../../simulation/requirements/eigenmode.qmd).
+
+Use this OrPen source candidate with the fixed
+[SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
+in an isolated Python 3.12/3.13 runtime. The native stage uses AEDT 2024 R2 /
+PyAEDT 1.3.0. No ordinary dependency pin is changed here.
+
+## Setup and Imports
+
+Public source and model-record imports do not open an AEDT Desktop.
+
+## Setup and Run Controls
+
+```{python}
+#| id: tsv-eigenmode-controls
+import hashlib
+import subprocess
+import sys
+from dataclasses import replace
+from importlib.metadata import version
+from pathlib import Path
+from uuid import uuid4
+
+from IPython.display import display
+from scgsim.aedt import (
+    prepare_hfss_eigenmode_from_geometry,
+    prepare_planar_geometry_input,
+    resolve_prepared_model,
+)
+from scgsim.geometry import GeometryBuildInput, LayoutPolygonSpec, SemanticEntitySpec
+
+import orpen_sc_pdk
+from orpen_sc_pdk.cells import get_tsv_source_records, tsv_concentric_signal_coupon
+
+WORKFLOW_ACTION = "source"  # source | prepare_handoff | build_model | inspect_model
+DIE = "D0"
+DIE_SIDE_UM = 1000.0
+BORE_DIAMETER_UM = 60.0
+WALL_THICKNESS_UM = 0.2
+SIGNAL_OUTER_RADIUS_UM = 100.0
+GAP_UM = 20.0
+GROUND_TSV_OFFSET_UM = 300.0
+MODEL = "thin_film"
+RUN_CONTROL = None
+RUN_ID = f"tsv-concentric-eigenmode-{uuid4().hex[:12]}"
+OUTPUT_ROOT = Path(".artifacts/SCGSimExamples/TSV")
+RUN_DIR = OUTPUT_ROOT / RUN_ID
+SOURCE_DIR = OUTPUT_ROOT / f"{RUN_ID}-source"
+RETURNED_RUN_DIR = None  # Explicit actual returned run for fresh-kernel inspect_model.
+PROJECT_NAME = "TSVConcentricEigenmodeThinFilmModelOnly"
+DESIGN_NAME = "Eigenmode"
+REGION_PADDING_XYZ_UM = (250.0, 250.0, 1000.0)
+GEOMETRY_WORKERS = 1
+RESOURCES = None  # No solver HPC request; model-process allocation is arranged separately.
+SIGNAL_ENTITY_IDS = (f"{DIE}/TOP_SIGNAL", f"{DIE}/BOTTOM_SIGNAL", f"{DIE}/SIGNAL_WALL")
+GROUND_ENTITY_IDS = (f"{DIE}/TOP_GROUND", f"{DIE}/BACK_GROUND") + tuple(
+    f"{DIE}/GROUND_TSV_{i}" for i in range(4)
+)
+orpen_sc_pdk.activate()
+display({name: version(name) for name in ("orpen-sc-pdk", "gdsfactory", "scgsim")})
+```
+
+`source` stays at layout/source records; `prepare_handoff` performs backend
+input preparation; `build_model` executes only the native model transaction.
+`inspect_model` reads a returned package without rebuilding it. Resource flags
+are not a CAD/aggregate hard cap; native execution needs an available allocation.
+
+## Create Simulation Component / Coupon
+
+```{python}
+#| id: tsv-eigenmode-coupon
+if WORKFLOW_ACTION != "inspect_model":
+    coupon = tsv_concentric_signal_coupon(
+        die=DIE,
+        die_side_um=DIE_SIDE_UM,
+        bore_diameter_um=BORE_DIAMETER_UM,
+        wall_thickness_um=WALL_THICKNESS_UM,
+        signal_outer_radius_um=SIGNAL_OUTER_RADIUS_UM,
+        gap_um=GAP_UM,
+        ground_tsv_offset_um=GROUND_TSV_OFFSET_UM,
+    )
+    coupon.plot()
+```
+
+The central hollow wall joins the two annular Signal pads by source intent;
+four outer hollow walls join the Ground planes. Silicon is explicitly cut at
+all five bores. M1 and substrate thickness come from the selected PDK levels.
+
+## Initialize AEDT Project / App
+
+The later `build_model` CLI initializes its own HFSS Eigenmode Desktop/design.
+Source authoring below does not attach to an existing Human or solver session.
+
+{{< include _source_input.qmd >}}
+
+## Simulation Configuration
+
+```{python}
+#| id: tsv-eigenmode-handoff
+HANDOFF = None
+if WORKFLOW_ACTION in {"prepare_handoff", "build_model"}:
+    geometry = prepare_planar_geometry_input(build_input, prepared_stack=stack, modeling=MODEL)
+    HANDOFF = prepare_hfss_eigenmode_from_geometry(
+        modeling=MODEL,
+        geometry=geometry,
+        project_name=PROJECT_NAME,
+        design_name=DESIGN_NAME,
+        run_control=RUN_CONTROL,
+        output_dir=RUN_DIR,
+        geometry_workers=GEOMETRY_WORKERS,
+        resources=RESOURCES,
+    )
+    display(HANDOFF)
+```
+
+The surrounding Region follows the explicit enclosure. Closed HFSS exterior
+treatment is retained: no Radiation or PML is requested. `None` does not create
+an Analysis Setup, search frequency, mode count or adaptive pass settings.
+Thin Film affects face metal only; vertical TSV walls retain their finite volume.
+
+## Solve and Export
+
+**Model-only: no solve.** The CLI performs build/readback/save/release only.
+
+```{python}
+#| id: tsv-eigenmode-native
+if WORKFLOW_ACTION == "build_model":
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scgsim.aedt.run",
+            "--handoff",
+            str(HANDOFF.metadata_path),
+            "--execute",
+            "--prepare-only",
+        ],
+        check=True,
+    )
+```
+
+## Adaptive-Pass Convergence / Solver Diagnostics
+
+No adaptive pass or eigenmode search has occurred. Preserve native preparation
+errors and missing readbacks; do not retry or fabricate a convergence history.
+
+## Results: Plots and Readable Tables
+
+### Physics Analysis Results
+
+Inspect sheet versus solid bodies, source/effective Z, the five Silicon bores,
+empty TSV centers and material assignments. No eigenfrequency, mode, Q, field
+or participation is expected. Native contact/query missingness is not evidence
+of electrical continuity.
+
+```{python}
+#| id: tsv-eigenmode-readback
+PREPARED_MODEL = None
+if WORKFLOW_ACTION == "inspect_model":
+    PREPARED_MODEL = resolve_prepared_model(RETURNED_RUN_DIR)
+    display(PREPARED_MODEL.project_path)
+    display(PREPARED_MODEL.readback)
+```
+
+### Simulation Performance / Benchmarks
+
+Preserve actual preparation, save and owned-session release evidence. There
+are no adaptive histories or solved benchmarks in this model-only stage.
+
+```{python}
+#| id: tsv-eigenmode-model-stage
+if PREPARED_MODEL is not None:
+    display({"mode": PREPARED_MODEL.mode, "model_stage": PREPARED_MODEL.model_stage})
+```
+
+## Save and Release AEDT
+
+The native transaction saves and releases its own Desktop. Open a separate
+writable project copy with its necessary companions for Human geometry review;
+do not edit the hash-bound producer. Earlier Solid projects retain their own
+execution identity and are not current notebook outputs.

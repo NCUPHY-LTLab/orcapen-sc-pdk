@@ -43,7 +43,7 @@ calculation because the CPW source is shared.
 
 ### AEDT
 
-Use [Finite CPW HFSS Driven Modal](../../notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb).
+Use [Finite CPW HFSS Driven Modal](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb).
 Construct and inspect the native coupon, materials and port integration lines.
 Solve the adaptive setup and requested sweep, then resolve returned data
 independently of the live model session.

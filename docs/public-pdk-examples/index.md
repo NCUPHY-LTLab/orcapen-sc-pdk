@@ -37,6 +37,12 @@ and the [visible Test Components Set](test-components.md).
 
 ## Components Layout
 
+Reusable design cells live in `cells/layout/`. The layout factories selected
+for [SCGSim examples](../simulation/notebooks.qmd) live in
+`cells/simulation/scgsim/`; both use the same public `orpen_sc_pdk.cells`
+entry point and registered PDK factory names. The folder describes source
+purpose, not a native-solver qualification.
+
 Inspect four current default factory previews with Askr's inline Image Viewer.
 Deep teal is actual DRAW `1/0`; soft light teal is actual ETCH `1/1`;
 auxiliary masks, domains and locators are omitted. Missing ETCH is not invented.

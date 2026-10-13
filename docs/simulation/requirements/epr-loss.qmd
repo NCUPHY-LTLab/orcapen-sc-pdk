@@ -37,14 +37,14 @@ or a measured lifetime.
 
 ### Palace
 
-Use [SimplePad Palace LC/EPR](../../notebooks/ComponentSimulation/SimplePad/palace_eigenmode.ipynb).
+Use [SimplePad Palace LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb).
 Prepare the selected interface and port treatment, retain mesh/field provenance
 through the solve, and resolve the returned energy contributions for the
 requested mode. Keep bulk, surface and signed port views identifiable.
 
 ### AEDT
 
-Use [SimplePad HFSS LC/EPR](../../notebooks/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb).
+Use [SimplePad HFSS LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb).
 Inspect native interface and junction selections, solve with the requested
 saved fields, and evaluate the selected native field integrals. Resolve those
 observations with their mode/pass and normalization identity.

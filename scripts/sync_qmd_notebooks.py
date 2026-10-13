@@ -192,7 +192,8 @@ def main() -> int:
 
     source_root = args.source_root.resolve()
     output_root = args.output_root.resolve()
-    sources = sorted(source_root.rglob("*.qmd"))
+    # Underscore QMDs are include-only cells, not independently runnable notebooks.
+    sources = sorted(path for path in source_root.rglob("*.qmd") if not path.name.startswith("_"))
     if not sources:
         raise NotebookPairError(f"no canonical QMD notebooks found under {source_root}")
 
