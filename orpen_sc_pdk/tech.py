@@ -169,9 +169,9 @@ def _derived_m1_layer(
         layer2=DerivedLayer(
             layer1=LogicalLayer(layer=etch_layer),
             layer2=LogicalLayer(layer=draw_layer),
-            operation="-",
+            operation="not",
         ),
-        operation="-",
+        operation="not",
     )
 
 
