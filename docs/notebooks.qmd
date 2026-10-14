@@ -10,7 +10,7 @@ to canonical notebook cases. Pages explain the intended product and observations
 notebooks own concrete settings and real tool calls. No new solved results are
 claimed for the source-only suite.
 
-OrPen owns fabrication facts, public source layouts and the user's model intent.
+OrcaPen owns fabrication facts, public source layouts and the user's model intent.
 SCGSim owns the reusable toolchain that must carry those facts through native
 modeling, execution and returned results. A notebook is an operation and
 evidence entry point; it does not replace either contract.
@@ -20,12 +20,12 @@ evidence entry point; it does not replace either contract.
 The layers describe **who needs what**, not a ranking of important and minor
 features.
 
-- **Layer 1 · OrPen user requirements** states the physical product and the
+- **Layer 1 · OrcaPen user requirements** states the physical product and the
   high-level Palace/AEDT workflow required to produce it.
 - **Layer 2 · SCGSim tool requirements** states the geometry, model, numerical
   evidence and portable-result requirements shared by those workflows.
 
-OrPen is the requirements customer: it supplies source/process facts and model
+OrcaPen is the requirements customer: it supplies source/process facts and model
 intent, and inspects the final product. SCGSim owns implementation and solver
 integration. These pages do not prescribe API calls or track implementation status.
 
@@ -33,7 +33,7 @@ Read a Layer 1 page first, follow its Layer 2 links, and only then select a
 layout and notebook. One requirement may need several notebooks; one layout
 may support several requirements. Neither count is fixed.
 
-## Layer 1 · OrPen user requirements
+## Layer 1 · OrcaPen user requirements
 
 | I need to… | Requirement contract |
 | --- | --- |

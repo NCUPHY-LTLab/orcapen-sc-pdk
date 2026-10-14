@@ -5,15 +5,20 @@ sidebar: simulation
 ---
 
 The model must identify which metal/dielectric representation produced the
-result. OrPen supplies physical process facts; the simulation case chooses
+result. OrcaPen supplies physical process facts; the simulation case chooses
 the approximation.
 
-## Input supplied by OrPen
+## Input supplied by OrcaPen
 
 - Material identity/properties and explicit native-library or ideal-conductor intent.
 - Physical layer identities, aliases, layer/datatype selectors and body membership.
 - Z intervals, thicknesses, host die and lower/upper contact orientation.
-- Stack-bearing film, local deck/film and retained post/bump declarations.
+- Neutral `physical_layer` declarations: stack-bearing film, local film and finite volume.
+
+The selected `LayerLevel.info["physical_layer"]` payload is carried unchanged
+on normalized Entity and stack metadata. Only actually occupied levels are
+selected. Physical intervals, materials and contacts remain source facts;
+retaining a finite body or collapsing a film is the explicit profile's action.
 
 Interface-loss film thickness is separate from metal thickness. Source
 superconducting identity does not authorize an invented kinetic-inductance model.
@@ -44,8 +49,13 @@ superconducting identity does not authorize an invented kinetic-inductance model
 
 :::
 
-Route A/B and solid/thin-film are different backend model choices, not names
-for interchangeable geometry. Q2D uses explicitly authored section materials
+One `ApproximationProfile(name, revision, parameters)` selects the common
+interpretation; revision is `v1` and parameters are explicit. Palace Route B,
+Thin Film, substrate-face and metal-gap-equivalent remain distinct choices,
+not interchangeable geometry. Substrate-face binds each physical film to an
+explicit normalized supporting Entity and side. Metal-gap-equivalent needs
+two opposing substrate dies; a single die is not silently extended or replaced.
+Q2D uses explicitly authored section materials
 and thickness, not an automatic 3D stack collapse.
 
 ## Final product to inspect

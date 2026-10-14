@@ -1,6 +1,6 @@
-# OrPen SC PDK Agent Instructions
+# OrcaPen SC PDK Agent Instructions
 
-This is the public `OrPenStrike/orpen-sc-pdk` repository. The registered OrPen
+This is the public `OrPenStrike/orcapen-sc-pdk` repository. The registered OrcaPen
 SC PDK Repo Lead owns its tracked production source. Private layout, parameters,
 notebooks, and evidence stay private; QPDK is reference/example material only;
 SCGSim owns reusable solver/runtime/result behavior.
@@ -9,8 +9,8 @@ SCGSim owns reusable solver/runtime/result behavior.
 
 1. `README.md`
 2. `pyproject.toml`
-3. `orpen_sc_pdk/pdk.py`
-4. `orpen_sc_pdk/tech.py`
+3. `orcapen_sc_pdk/pdk.py`
+4. `orcapen_sc_pdk/tech.py`
 5. `docs/home/pdk-responsibilities.md`
 6. `docs/features/scgsim-integration.md`
 

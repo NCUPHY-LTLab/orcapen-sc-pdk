@@ -9,6 +9,8 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Inspect the finite-ground CPW's eigenmodes. See the
@@ -19,12 +21,10 @@ explicitly replacing the prior Nb sheet model. It has no wave/lumped ports.
 The body-first facade uses native mesh behavior; it does not expose the prior
 CPW `LengthMeshSpec` operation.
 
-Use [SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
-in a separately selected consumer environment. The exact source revision is recorded
-in the controls below. Execution is disabled; no native solve or returned-result
-claim is made. The default `run` prepares and solves the case, then reads its results.
-`AUTHORING_ONLY` constructs non-solving inputs; `prepare_handoff` creates
-a portable package, and `analyze_handoff` reads an independent returned directory.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
 ## Setup and Imports
 
@@ -45,12 +45,12 @@ from scgsim.aedt import (
     EigenmodeSim,
     resolve_results,
 )
-from scgsim.geometry import GeometryPlan
+from scgsim.geometry import ApproximationProfile, GeometryPlan
 
-import orpen_sc_pdk
-from orpen_sc_pdk.cells import finite_ground_cpw_coupon
-from orpen_sc_pdk.materials import get_material_records
-from orpen_sc_pdk.tech import get_single_die_layer_stack
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import finite_ground_cpw_coupon
+from orcapen_sc_pdk.materials import get_material_records
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
 ```
 
 ## Setup and Run Controls
@@ -62,9 +62,10 @@ RUN_ID = f"cpw_hfss_eigenmode_{uuid4().hex}"
 OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SCGSimExamples" / "CpwFiniteGround"
 RUN_DIR = OUTPUT_ROOT / RUN_ID
 RETURNED_RUN_DIR = None  # Set independently to an immutable returned-run directory.
-SCGSIM_RUNTIME_REVISION = "c9270c7e76e0b2df187dddde462079e00d410dd0"
+SCGSIM_RUNTIME_SOURCE = "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED"
 RESOURCES = AedtResources(cores=4, ram_limit_percent=30)
 MODELING = "solid"
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODELING, revision="v1", parameters={})
 # CPW trace length along X (um).
 trace_length_um = 500.0
 # Signal conductor width (um).
@@ -97,7 +98,7 @@ maximum_delta_frequency_percent = 5.0
 ```{python}
 #| id: hfss-eigenmode-2
 if WORKFLOW_ACTION != "analyze_handoff":
-    orpen_sc_pdk.activate()
+    orcapen_sc_pdk.activate()
     gf.clear_cache()
     coupon = finite_ground_cpw_coupon(
         trace_length_um=trace_length_um,
@@ -179,7 +180,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
 ```{python}
 #| id: hfss-eigenmode-7
 if WORKFLOW_ACTION != "analyze_handoff":
-    sim = EigenmodeSim(modeling=MODELING)
+    sim = EigenmodeSim(modeling=APPROXIMATION_PROFILE.name)
     sim.set_plan(snapshot)
     sim.set_output_dir(RUN_DIR)
     # No wave or lumped excitations in this Eigenmode case.

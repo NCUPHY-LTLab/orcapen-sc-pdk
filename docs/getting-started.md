@@ -3,20 +3,22 @@ title: "Get Started"
 ---
 
 Use Python 3.12 or 3.13 and the GDSFactory version selected by this package.
-Install OrPen in your existing Python environment:
+Install the reviewed local OrcaPen `0.1.0.dev2` candidate wheel in your existing
+Python environment, substituting the actual artifact path:
 
 ```bash
-python -m pip install "orpen-sc-pdk @ git+https://github.com/OrPenStrike/orpen-sc-pdk.git@develop"
+python -m pip install /path/to/orcapen_sc_pdk-0.1.0.dev2-py3-none-any.whl
 ```
 
-This selects the public `develop` line, not a stable release. Record the exact
-revision your environment resolves so the installation can be reproduced.
+The candidate is local only: it has not been uploaded to a registry or PyPI.
+Record the exact version and wheel digest. See [Distribution and handoff](distribution.md)
+for review, GDSFactory+ use and future organization-registry publication.
 
 ## Activate and build
 
 ```python
 import gdsfactory as gf
-from orpen_sc_pdk import activate, get_pdk
+from orcapen_sc_pdk import activate, get_pdk
 
 activate()
 component = gf.get_component("resonator", length=3500)
@@ -29,7 +31,7 @@ open the cell. This is optional; the build above does not require a viewer.
 
 Dimensions are in micrometres. Public factory defaults are preview settings,
 not measured device specifications; choose your own process and design
-parameters. Activate OrPen before resolving named cells or
+parameters. Activate OrcaPen before resolving named cells or
 cross-sections; do not silently substitute another PDK.
 
 Choose the existing [Cells](public-pdk-examples/index.md) and read their typed

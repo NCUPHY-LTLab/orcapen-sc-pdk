@@ -1,8 +1,14 @@
 ---
 title: "17-bridge CPW–meander · HFSS Lumped RLC Eigenmode"
-jupyter: python3
+jupyter:
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Use the launcher variant to observe modes with two explicit linear resistive
@@ -12,10 +18,10 @@ does not irrevocably select a solver treatment. Read the
 [Lumped RLC requirement](../../../../simulation/requirements/lumped-rlc-eigenmode.qmd)
 for the system and expected outputs.
 
-This clean source targets [SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
-Use a separately selected authoring runtime with the PDK candidate, AEDT 2024.2
-and PyAEDT 1.3.0 for eventual execution. Rendering runs no code. No result from
-an earlier runtime is attached to this source.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
 ## Action and identity
 
@@ -31,6 +37,7 @@ from uuid import uuid4
 from IPython.display import display
 from scgsim.aedt import AedtResources, EigenmodeRunControl, EigenmodeSim, LumpedRlc, resolve_results
 from scgsim.geometry import (
+    ApproximationProfile,
     GeometryBuildInput,
     LayoutPolygonSpec,
     LumpedSupport,
@@ -39,11 +46,10 @@ from scgsim.geometry import (
     apply_vacuum_region_to_stack,
 )
 
-import orpen_sc_pdk
-from orpen_sc_pdk.cells import cpw_meander_airbridge_lumped_coupon
-from orpen_sc_pdk.cells.simulation import get_cpw_meander_airbridge_source_records
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import cpw_meander_airbridge_lumped_coupon
+from orcapen_sc_pdk.cells.simulation import get_cpw_meander_airbridge_source_records
 
-orpen_sc_pdk.activate()
 WORKFLOW_ACTION = "run"  # author | prepare_handoff | prepare_only | run | analyze
 VARIANT = "lumped"
 RUN_ID = f"meander-rlc-{uuid4().hex[:12]}"
@@ -51,12 +57,12 @@ OUTPUT_ROOT = Path("notebooks/.artifacts/SCGSimExamples/ComponentSimulation/CpwM
 RUN_DIR = OUTPUT_ROOT / RUN_ID
 RETURNED_RUN_DIR = OUTPUT_ROOT / "returned-run"  # Explicit relocated completed/partial input.
 ANALYSIS_KIND = "strict"  # strict | receipt_only (for incomplete returns)
-display({name: version(name) for name in ("scgsim", "gdsfactory", "orpen-sc-pdk")})
+display({name: version(name) for name in ("scgsim", "gdsfactory", "orcapen-sc-pdk")})
 ```
 
 ## Layout and physical stack
 
-![Selected launcher source geometry; not a native model.](https://raw.githubusercontent.com/OrPenStrike/orpen-sc-pdk/f4f509843c2c7177773798bf6a8a906f94c63a11/docs/_static/images/test-components/driven-terminal-lumped-resonator.png)
+![Selected launcher source geometry; not a native model.](https://raw.githubusercontent.com/OrPenStrike/orcapen-sc-pdk/f4f509843c2c7177773798bf6a8a906f94c63a11/docs/_static/images/test-components/driven-terminal-lumped-resonator.png)
 
 The source is Al M1 0…0.1 µm, Al posts 0.1…3.1 µm and Al decks 3.1…3.4 µm
 on the PDK Si substrate. The 17 full-landing bridges join Ground across slots,
@@ -66,6 +72,7 @@ their normals and directed Signal→Ground contacts are distinct facts.
 ```{python}
 #| id: meander-rlc-layout
 if WORKFLOW_ACTION != "analyze":
+    orcapen_sc_pdk.activate()
     coupon = cpw_meander_airbridge_lumped_coupon()
     coupon.plot()
 ```
@@ -84,6 +91,7 @@ the HFSS exterior uses its closed default boundary, not a radiation condition.
 ```{python}
 #| id: meander-rlc-settings
 MODEL = "thin_film"  # solid | thin_film; an explicit model choice, not source rewrite.
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODEL, revision="v1", parameters={})
 resistance_ohm = 50.0
 inductance_h = None
 capacitance_f = None
@@ -100,7 +108,7 @@ run_control = EigenmodeRunControl(
 resources = AedtResources(cores=4, ram_limit_percent=20)
 geometry_workers = 1
 if WORKFLOW_ACTION != "analyze":
-    sim = EigenmodeSim(modeling=MODEL)
+    sim = EigenmodeSim(modeling=APPROXIMATION_PROFILE.name)
     sim.set_geometry(build_input)
     sim.set_stack(stack)
     sim.set_eigenmode(

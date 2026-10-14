@@ -1,33 +1,45 @@
 ---
-title: "TSV Concentric · Q3D model inspection"
-jupyter: python3
+title: "TSV Concentric · Q3D C/G extraction"
+jupyter:
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Build a Concentric Signal joined through a hollow TSV, with separate top and
-bottom Ground planes connected by four Ground TSVs. This notebook inspects the
-Q3D model and Net assignments; it does **not** extract a capacitance matrix.
+bottom Ground planes connected by four Ground TSVs. The default full-run flow
+extracts C/G at 5 GHz with at most three adaptive passes and 1% convergence.
+AC R/L is off. These are Human-confirmed first-trial controls, not accuracy
+or scientific-success criteria. Native execution and shared-runtime admission
+remain pending; this source authoring is not a solved result.
 See the [TSV model-inspection guide](../../../../simulation/tsv-model-inspection.qmd)
 and [capacitance requirement](../../../../simulation/requirements/electrostatic-capacitance.qmd).
 
-Use this OrPen source candidate with the fixed
-[SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
-in an isolated Python 3.12/3.13 environment. AEDT 2024 R2 and the checkpoint's
-PyAEDT 1.3.0 cohort are needed only for the explicit native transaction.
-Ordinary project dependency pins are not changed by this notebook.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
+
 
 ## Setup and Imports
 
-The following cells use public OrPen source and SCGSim models. No Desktop opens
+The following cells use public OrcaPen source and SCGSim models. No Desktop opens
 during imports or source authoring.
 
 ## Setup and Run Controls
 
-`source` constructs the layout and source records only. `prepare_handoff`
-creates a fresh backend input package; `build_model` additionally opens an owned
-Desktop, builds, saves and releases the model. `inspect_model` reads only an
-explicit returned run in a fresh kernel. No action here performs Analyze.
+`run` prepares a fresh handoff, invokes the full-solve CLI, then reads actual
+results. `prepare_handoff` stops at the portable inputs; `source` constructs
+layout/source records only. `analyze_handoff` reads an explicit returned root
+without constructing a coupon, calling the getter, writing GDS, preparing or
+launching the CLI. Separately, `build_model` uses `run_control=None` and the
+candidate's native model-only Prepare Only model transaction; `inspect_model` reads that
+returned model. Neither model-only action represents Model+Setup or reuse.
 
 ```{python}
 #| id: tsv-q3d-controls
@@ -41,18 +53,26 @@ from pathlib import Path
 from uuid import uuid4
 
 from IPython.display import display
-from scgsim.aedt import PdkMaterial, prepare_q3d_from_geometry, resolve_prepared_model
+from scgsim.aedt import (
+    MatrixRunControl,
+    PdkMaterial,
+    prepare_q3d_from_geometry,
+    resolve_prepared_model,
+    resolve_results,
+)
 from scgsim.geometry import (
+    ApproximationProfile,
     GeometryBuildInput,
     GeometryPlanSnapshot,
     LayoutPolygonSpec,
     SemanticEntitySpec,
 )
 
-import orpen_sc_pdk
-from orpen_sc_pdk.cells import get_tsv_source_records, tsv_concentric_signal_coupon
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import get_tsv_source_records, tsv_concentric_signal_coupon
 
-WORKFLOW_ACTION = "source"  # source | prepare_handoff | build_model | inspect_model
+# Actions: run | prepare_handoff | analyze_handoff | source | build_model | inspect_model
+WORKFLOW_ACTION = "run"
 DIE = "D0"
 DIE_SIDE_UM = 1000.0
 BORE_DIAMETER_UM = 60.0
@@ -61,22 +81,50 @@ SIGNAL_OUTER_RADIUS_UM = 100.0
 GAP_UM = 20.0
 GROUND_TSV_OFFSET_UM = 300.0
 MODEL = "thin_film"  # face films become sheets; TSV levels remain retained_solid.
-RUN_CONTROL = None
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODEL, revision="v1", parameters={})
+SETUP_NAME = "Setup1"
+EXTRACTION_FREQUENCY_GHZ = 5.0
+MAXIMUM_PASSES = 3
+CONVERGENCE_PERCENT = 1.0
+MINIMUM_PASSES = 1
+MINIMUM_CONVERGED_PASSES = 1
+PERCENT_REFINEMENT = 30.0
+RUN_CONTROL = (
+    None
+    if WORKFLOW_ACTION == "build_model"
+    else MatrixRunControl(
+        setup_name=SETUP_NAME,
+        frequency_ghz=EXTRACTION_FREQUENCY_GHZ,
+        maximum_passes=MAXIMUM_PASSES,
+        convergence_percent=CONVERGENCE_PERCENT,
+        minimum_passes=MINIMUM_PASSES,
+        minimum_converged_passes=MINIMUM_CONVERGED_PASSES,
+        percent_refinement=PERCENT_REFINEMENT,
+    )
+)
 RUN_ID = f"tsv-concentric-q3d-{uuid4().hex[:12]}"
 OUTPUT_ROOT = Path(".artifacts/SCGSimExamples/TSV")
 RUN_DIR = OUTPUT_ROOT / RUN_ID
 SOURCE_DIR = OUTPUT_ROOT / f"{RUN_ID}-source"
-RETURNED_RUN_DIR = None  # Set to the actual returned run when selecting inspect_model.
-PROJECT_NAME = "TSVConcentricQ3DThinFilmModelOnly"
+RETURNED_RUN_DIR = None  # Set an explicit actual root for analyze_handoff or inspect_model.
+PROJECT_NAME = "TSVConcentricQ3DThinFilm"
 DESIGN_NAME = "Q3D"
 REGION_PADDING_XYZ_UM = (250.0, 250.0, 1000.0)
-RESOURCES = None  # No solver HPC request; model-process allocation is arranged separately.
+RESOURCES = None  # No host allocation selected here; native admission is separate.
 SIGNAL_ENTITY_IDS = (f"{DIE}/TOP_SIGNAL", f"{DIE}/BOTTOM_SIGNAL", f"{DIE}/SIGNAL_WALL")
 GROUND_ENTITY_IDS = (f"{DIE}/TOP_GROUND", f"{DIE}/BACK_GROUND") + tuple(
     f"{DIE}/GROUND_TSV_{i}" for i in range(4)
 )
-orpen_sc_pdk.activate()
-display({name: version(name) for name in ("orpen-sc-pdk", "gdsfactory", "scgsim")})
+if WORKFLOW_ACTION not in {
+    "run",
+    "prepare_handoff",
+    "analyze_handoff",
+    "source",
+    "build_model",
+    "inspect_model",
+}:
+    raise ValueError("Unknown WORKFLOW_ACTION")
+display({name: version(name) for name in ("orcapen-sc-pdk", "gdsfactory", "scgsim")})
 ```
 
 Solver resource flags are not an aggregate OS cap or CAD containment mechanism.
@@ -88,7 +136,8 @@ added to this terminal-free C/G model.
 
 ```{python}
 #| id: tsv-q3d-coupon
-if WORKFLOW_ACTION != "inspect_model":
+if WORKFLOW_ACTION not in {"analyze_handoff", "inspect_model"}:
+    orcapen_sc_pdk.activate()
     coupon = tsv_concentric_signal_coupon(
         die=DIE,
         die_side_um=DIE_SIDE_UM,
@@ -103,12 +152,12 @@ if WORKFLOW_ACTION != "inspect_model":
 
 M1 Al thickness and the 500 µm Silicon substrate come from the PDK. The 0.2 µm
 TiN wall is a finite solid; its interior remains empty. These are nominal
-OrPen research dimensions, not a reproduction of a cited fabrication process.
+OrcaPen research dimensions, not a reproduction of a cited fabrication process.
 
 ## Initialize AEDT Project / App
 
 The selected design is Q3D. The native CLI owns initialization later during
-`build_model`; no manual Desktop attachment or second client is used here.
+`run` or `build_model`; no manual Desktop attachment or second client is used here.
 
 {{< include _source_input.qmd >}}
 
@@ -117,7 +166,7 @@ The selected design is Q3D. The native CLI owns initialization later during
 ```{python}
 #| id: tsv-q3d-handoff
 HANDOFF = None
-if WORKFLOW_ACTION in {"prepare_handoff", "build_model"}:
+if WORKFLOW_ACTION in {"run", "prepare_handoff", "build_model"}:
     # Public detached record, not a claim that GeometryPlan.prepare registered these children.
     snapshot = GeometryPlanSnapshot(
         build_input, json.dumps(stack), gds_bytes, gds_sha256, tuple(source["source_occurrences"])
@@ -134,7 +183,7 @@ if WORKFLOW_ACTION in {"prepare_handoff", "build_model"}:
     }
     HANDOFF = prepare_q3d_from_geometry(
         snapshot,
-        modeling=MODEL,
+        modeling=APPROXIMATION_PROFILE.name,
         output_dir=RUN_DIR,
         project_name=PROJECT_NAME,
         design_name=DESIGN_NAME,
@@ -150,17 +199,19 @@ if WORKFLOW_ACTION in {"prepare_handoff", "build_model"}:
 
 The detached snapshot binds the freshly exported GDS to the same source
 occurrences and holes. Physical Al/TiN identities are retained; native ideal
-superconductor treatment follows the PDK material declaration. `None` means
-there is no Analysis Setup, extraction frequency or adaptive-pass selection.
+superconductor treatment follows the PDK material declaration. The frozen
+geometry helper fixes `solve_ac_rl=False`; it exposes no separate AC R/L option.
+Only `build_model` omits the Analysis Setup by passing `run_control=None`.
 
 ## Solve and Export
 
-**Model-only: no solve.** The explicit CLI action builds, reads, saves and
-releases the prepared model; it never calls Analyze in this notebook.
+`run` invokes the actual full-solve CLI. `build_model` alone adds the real
+`--prepare-only` flag for a model-only build/readback/save/release transaction.
+Native failures propagate through `check=True`; no retry or synthetic result is supplied.
 
 ```{python}
 #| id: tsv-q3d-native
-if WORKFLOW_ACTION == "build_model":
+if WORKFLOW_ACTION in {"run", "build_model"}:
     subprocess.run(
         [
             sys.executable,
@@ -169,50 +220,67 @@ if WORKFLOW_ACTION == "build_model":
             "--handoff",
             str(HANDOFF.metadata_path),
             "--execute",
-            "--prepare-only",
-        ],
+        ]
+        + (["--prepare-only"] if WORKFLOW_ACTION == "build_model" else []),
         check=True,
     )
 ```
 
 ## Adaptive-Pass Convergence / Solver Diagnostics
 
-No adaptive pass or convergence history is expected. Keep actual native
-preparation errors and save/release failures visible instead of retrying.
+Read actual returned numerical and performance evidence before interpreting
+physics. Three passes is a short first-trial endpoint, not proof of convergence.
+Missing/corrupt results and save/release failures remain strict resolver errors.
+
+```{python}
+#| id: tsv-q3d-resolve
+RESULT = None
+PREPARED_MODEL = None
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    RESULT = resolve_results(HANDOFF.run_dir if WORKFLOW_ACTION == "run" else RETURNED_RUN_DIR)
+    RESULT.show_all_results(show_details=True)
+elif WORKFLOW_ACTION in {"build_model", "inspect_model"}:
+    PREPARED_MODEL = resolve_prepared_model(
+        HANDOFF.run_dir if WORKFLOW_ACTION == "build_model" else RETURNED_RUN_DIR
+    )
+```
 
 ## Results: Plots and Readable Tables
 
 ### Physics Analysis Results
 
-No C/G matrix, field energy or electrical-continuity result is expected.
-Inspect actual sheet/solid membership, Silicon bores, material and Signal/Ground
-assignments. Empty or inconclusive contact queries remain unknown.
+The solved C/G tables retain actual net ordering, frequency, units and result
+identity. Model-only inspection instead shows sheet/solid membership, Silicon
+bores and assignments; it cannot substitute for C/G or electrical-continuity
+results. Empty or inconclusive native queries remain unknown.
 
 ```{python}
 #| id: tsv-q3d-readback
-PREPARED_MODEL = None
-if WORKFLOW_ACTION == "inspect_model":
-    PREPARED_MODEL = resolve_prepared_model(RETURNED_RUN_DIR)
+if RESULT is not None:
+    display(RESULT.physics_results())
+elif PREPARED_MODEL is not None:
     display(PREPARED_MODEL.project_path)
     display(PREPARED_MODEL.readback)
 ```
 
 ### Simulation Performance / Benchmarks
 
-There are no adaptive passes or solved benchmarks. Preserve preparation/save/
-release provenance from the returned package; a successful model build is not
-capacitance accuracy or convergence evidence.
+Display actual solved timing/pass/mesh evidence separately from physics. The
+model-only branch retains its preparation/save/release provenance without a
+solved benchmark or convergence claim.
 
 ```{python}
 #| id: tsv-q3d-model-stage
-if PREPARED_MODEL is not None:
+if RESULT is not None:
+    display(RESULT.simulation_benchmark())
+elif PREPARED_MODEL is not None:
     display({"mode": PREPARED_MODEL.mode, "model_stage": PREPARED_MODEL.model_stage})
 ```
 
 ## Save and Release AEDT
 
-The public Prepare Only transaction saves and releases its own Desktop. Do
-not open a second client to release it. Keep `.aedt` and its required unsolved
-companions together; use a separate writable copy for Human edits rather than
-modifying the hash-bound returned producer project. Old Solid models and images
-remain historical, not outputs of this Thin Film notebook.
+The public native transaction saves and releases its own Desktop for either
+full solving or model-only inspection. Do not open a second client to release
+it. Keep `.aedt` and its required companions together; use a separate writable
+copy for Human edits, not the hash-bound returned producer. Old Solid models
+and images remain historical, not outputs of this Thin Film source candidate.

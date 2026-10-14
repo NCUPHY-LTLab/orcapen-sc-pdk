@@ -6,7 +6,7 @@ from statistics import median
 
 import pytest
 
-from orpen_sc_pdk.materials import (
+from orcapen_sc_pdk.materials import (
     get_interface_preset_records,
     get_material_alias_records,
     get_material_records,
@@ -14,7 +14,7 @@ from orpen_sc_pdk.materials import (
     validate_material_alias_records,
     validate_material_kind_records,
 )
-from orpen_sc_pdk.tech import (
+from orcapen_sc_pdk.tech import (
     interface_preset_records,
     material_alias_records,
     material_properties,
@@ -38,7 +38,7 @@ def test_public_material_records_are_copies() -> None:
 
 
 def test_public_import_surface_exposes_only_solver_neutral_material_records() -> None:
-    package = import_module("orpen_sc_pdk")
+    package = import_module("orcapen_sc_pdk")
 
     assert package.get_material_records()["vacuum"]["relative_permittivity"] == 1.0
     assert package.get_material_alias_records()["air"] == "vacuum"

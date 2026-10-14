@@ -9,18 +9,23 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Inspect curved conductor boundaries, holes and placement transforms through
 their authored geometry records. Read the
 [curves, holes and transforms requirements](../../../../simulation/tools/curves-holes-transforms.qmd).
-OrPen owns canonical curve laws and sampled source polygons; SCGSim owns
+OrcaPen owns canonical curve laws and sampled source polygons; SCGSim owns
 their source binding and any later native representation. This notebook owns
 concrete inputs and displays real records rather than a second normalizer.
 
-Authoring target: [SCGSim v2 RC1][scgsim-rc1], OrPen suite base `f4f5098`.
-An independently prepared exact-checkpoint environment is required; the
-ordinary environment/pin stays unchanged. Execution is disabled; bounded isolated
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Historical source-observation cohort: [SCGSim v2 RC1][scgsim-rc1], OrPen suite base `f4f5098`.
+Use the selected local shared-physical candidate runtime; the linked checkpoint is
+historical attribution. Ordinary environment pins stay unchanged. Execution is disabled; bounded isolated
 source construction was observed separately, without a notebook kernel run or
 saved output. Native conformity is
 UNOBSERVED, including OCC interpolation versus the authored Hermite law.
@@ -45,20 +50,20 @@ from scgsim.geometry import (
     summarize_geometry_input,
 )
 
-import orpen_sc_pdk
-from orpen_sc_pdk import get_material_records
-from orpen_sc_pdk.tech import get_single_die_layer_stack
+import orcapen_sc_pdk
+from orcapen_sc_pdk import get_material_records
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
 
 OBSERVATION_ID = f"geometry-curves-holes-{uuid4().hex}"
 display(
     {
         "observation_id": OBSERVATION_ID,
         "scgsim_version": importlib.metadata.version("scgsim"),
-        "scgsim_authoring_revision": "85d8bedb733b1e17737d935029618351b30ea5de",
+        "scgsim_authoring_source": "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED",
         "units": "XY and Z: um; rotations: degrees",
     }
 )
-orpen_sc_pdk.activate()
+orcapen_sc_pdk.activate()
 gf.clear_cache()
 ```
 
@@ -67,6 +72,10 @@ gf.clear_cache()
 The annulus's inner void belongs to `PAD_INNER`, not Ground. Ground has its
 own opening. Authored circular arcs and their hole roles are distinct from
 the polygon witness exported to GDS.
+
+The circular, strip and rigid-occurrence plans use the existing source-observation
+vacuum padding `(250, 250, 1000)` µm to supply declared conductor hosts. This
+source-only envelope is not a solver boundary or evidence of a native solve.
 
 ```{python}
 #| id: gch-circular-sources
@@ -97,6 +106,7 @@ for case_id, component in (("02-disk", disk), ("03-annulus", annulus)):
         coupon_padding_um=0.0,
     )
     plan.set_nets({"pad": ("chip/PAD",), "ground": ("chip/GROUND",)})
+    plan.set_vacuum_region(padding=(250.0, 250.0, 1000.0))
     snapshot = plan.prepare()
     circular_snapshots[case_id] = snapshot
     source_input = snapshot.geometry_input
@@ -166,6 +176,7 @@ for case_id, component in (("04A", strip_a), ("04B", strip_b), ("04C", strip_c))
         coupon_padding_um=0.0,
     )
     plan.set_nets({"trace": ("chip/TRACE",)})
+    plan.set_vacuum_region(padding=(250.0, 250.0, 1000.0))
     snapshot = plan.prepare()
     strip_snapshots[case_id] = snapshot
     display(
@@ -257,6 +268,7 @@ rigid_plan.register_instance("chip/MIRRORED", mirrored)
 rigid_plan.set_nets(
     {"rotated_trace": ("chip/ROTATED/TRACE",), "mirrored_trace": ("chip/MIRRORED/TRACE",)}
 )
+rigid_plan.set_vacuum_region(padding=(250.0, 250.0, 1000.0))
 rigid_snapshot = rigid_plan.prepare()
 display(
     {

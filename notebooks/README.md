@@ -1,12 +1,17 @@
 # Notebooks
 
+The current authoring sources import `orcapen_sc_pdk`. The rename was source-only:
+retained outputs were not rerun and remain attributed to their original OrPen
+package, inputs and run identities. Changed imports are not evidence of execution
+with the OrcaPen candidate.
+
 ## SCGSim examples
 
 `SCGSimExamples/` contains the component and cross-section examples maintained
-by OrPen for SCGSim use. Their single editable sources are under
+by OrcaPen for SCGSim use. Their single editable sources are under
 `src/SCGSimExamples/`; matching IPYNBs are generated execution/download files.
-The corresponding layouts live in `orpen_sc_pdk/cells/simulation/scgsim/` and
-remain available through the unified `orpen_sc_pdk.cells` entry point and PDK.
+The corresponding layouts live in `orcapen_sc_pdk/cells/simulation/scgsim/` and
+remain available through the unified `orcapen_sc_pdk.cells` entry point and PDK.
 
 Pages explain the physical problem, model and expected outputs. Notebooks own
 the concrete dimensions, settings and public API calls. Solver examples use a
@@ -38,7 +43,7 @@ notebooks/
 ```
 
 Source layout families do not define a solver matrix: one layout can serve
-several questions, and not every layout needs a solve. Keep OrPen's materials,
+several questions, and not every layout needs a solve. Keep OrcaPen's materials,
 physical layers, source occurrences, holes, contact intent and explicit Net
 meaning intact. SCGSim owns reusable lowering, meshes, handoff, execution,
 Resolve and Report; notebooks do not implement a second solver runtime.

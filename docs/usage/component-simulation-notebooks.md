@@ -1,6 +1,6 @@
 # Public Component Simulation notebook rules
 
-OrPen owns public example source and its layout/material semantics. Obtain
+OrcaPen owns public example source and its layout/material semantics. Obtain
 runtime signatures, backend requirements and failure contracts from the
 installed SCGSim knowledge bundle. Examples must consume that public runtime;
 they must not supply another parser, renderer, lowering implementation or
@@ -84,7 +84,7 @@ boundary can ground conductors without rewriting layout connectivity. Route
 choices and mesh controls are explicit consumer settings; examples do not
 authorize changing a physical stack or inventing a scientific tolerance.
 For Q2D's native cross-section inputs and all other backend-specific geometry
-contracts, use the installed SCGSim guide rather than an OrPen solver fixture.
+contracts, use the installed SCGSim guide rather than an OrcaPen solver fixture.
 
 Report trust and execution status before physics. Strict completed resolution
 and failed/partial inspection are distinct paths; preserve the actual receipt

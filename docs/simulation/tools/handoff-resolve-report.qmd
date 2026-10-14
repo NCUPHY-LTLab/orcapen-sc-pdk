@@ -5,7 +5,7 @@ sidebar: simulation
 ---
 
 The final product is a portable run/result package plus a readable Report,
-not only a live solver session. OrPen must be able to move the package, open a
+not only a live solver session. OrcaPen must be able to move the package, open a
 fresh analysis process and inspect the same attributed result.
 
 ## Backend workflows
@@ -37,7 +37,7 @@ fresh analysis process and inspect the same attributed result.
 The package must preserve input/output identity, relative paths and model
 dependencies after relocation. A preparation receipt is not a solve receipt.
 
-OrPen supplies the exact source/stack and chosen case settings, together with
+OrcaPen supplies the exact source/stack and chosen case settings, together with
 the preparation identity retained independently of the return. The handoff
 must carry these inputs into the real operation; the returned cohort must
 retain enough identity to read the same quantity after moving the package.

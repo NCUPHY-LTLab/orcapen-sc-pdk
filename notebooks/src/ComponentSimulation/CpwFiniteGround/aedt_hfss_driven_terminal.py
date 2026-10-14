@@ -18,7 +18,7 @@
 
 # %% [markdown]
 # Source-only SCGSim v2 alignment, CONVERGING / LOCAL CANDIDATE; not executed.
-# In a separate consumer environment with this OrPen checkout installed:
+# In a separate consumer environment with this OrcaPen checkout installed:
 # `python -m pip install "scgsim[aedt] @ git+https://github.com/OrPenStrike/scgsim.git@cc1424c84ffe9d295a57dbabb3c2ab6431110f6c"`
 # The ordinary project pin remains 2eed1eb; uv sync does not select this v2 cohort.
 # Historical native results retain their original run/runtime identities.
@@ -47,11 +47,11 @@ from scgsim.aedt import (
     resolve_results,
 )
 
-import orpen_sc_pdk
-from orpen_sc_pdk.materials import get_material_records
-from orpen_sc_pdk.tech import LAYER
+import orcapen_sc_pdk
+from orcapen_sc_pdk.materials import get_material_records
+from orcapen_sc_pdk.tech import LAYER
 
-orpen_sc_pdk.activate()
+orcapen_sc_pdk.activate()
 
 # %% [markdown]
 # ## Setup and Run Controls

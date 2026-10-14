@@ -8,7 +8,7 @@ A contact declaration must correspond to the modeled conductor connection.
 A non-contact crossing must retain its clearance. The final product must make
 both inspectable before its matrices or fields are interpreted.
 
-## Input supplied by OrPen
+## Input supplied by OrcaPen
 
 - Positive metal regions/holes and intended body-to-body contacts.
 - Physical levels, material, finite Z and opposing face orientation.

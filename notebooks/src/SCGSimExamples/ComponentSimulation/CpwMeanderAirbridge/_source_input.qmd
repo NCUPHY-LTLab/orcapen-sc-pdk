@@ -19,10 +19,7 @@ if WORKFLOW_ACTION != "analyze":
         "dielectric": "dielectric",
         "vacuum": "vacuum",
     }
-    entity_ids = {
-        e["qualified_entity_id"]: f"{e['source_occurrence_path']}/{e['local_semantic_id']}"
-        for e in source["entities"]
-    }
+    entity_ids = source["entity_aliases"]
     # This notebook explicitly adopts the producer's case grouping proposal.
     # It is not PDK-owned or a connectivity result from the native backend.
     final_nets = {
@@ -40,7 +37,8 @@ if WORKFLOW_ACTION != "analyze":
     )
     for e in source["entities"]:
         sid = entity_ids[e["qualified_entity_id"]]
-        level = source["source_levels"][e["source_level"]]
+        physical_binding = source["physical_layer_bindings"][e["qualified_entity_id"]]
+        level = source["source_levels"][physical_binding["source_level_id"]]
         material = source["material_records"][e["source_material"]]
         dielectric = material["material_kind"] == "dielectric"
         low, high = e["source_z_interval_um"]
@@ -51,9 +49,9 @@ if WORKFLOW_ACTION != "analyze":
             "source_occurrence_path": e["source_occurrence_path"],
             "source_local_entity_id": e["local_semantic_id"],
             "body_membership_id": e["body_membership_id"],
+            "physical_layer": level["info"]["physical_layer"],
+            "source_physical_layer_binding": physical_binding,
         }
-        if "aedt_modeling" in level["info"]:
-            metadata["aedt_modeling"] = level["info"]["aedt_modeling"]
         polygon_ids = []
         for p in e["placed_polygons"]:
             polygon_ids.append(p["polygon_id"])

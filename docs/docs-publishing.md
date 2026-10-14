@@ -5,7 +5,7 @@ orphan: true
 # Docs Publishing
 
 The public documentation is part of the PDK contract. It should be buildable
-locally and published through GitHub Pages for `OrPenStrike/orpen-sc-pdk`.
+locally and published through GitHub Pages for `OrPenStrike/orcapen-sc-pdk`.
 
 ## Tooling
 
@@ -18,7 +18,7 @@ The docs stack follows a static public PDK publication pattern:
 - `docs/docs.just` for docs helper commands.
 - GitHub Actions for pull request validation and Pages deployment.
 
-The docs intentionally use `orpen-sc-pdk` branding and content. Static assets
+The docs intentionally use `orcapen-sc-pdk` branding and content. Static assets
 should be added only when they are needed for this PDK.
 
 ## Local Build

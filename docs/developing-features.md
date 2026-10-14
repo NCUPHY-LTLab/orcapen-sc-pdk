@@ -2,7 +2,7 @@
 
 The active cross-repository boundary is intentionally small:
 
-- OrPen develops public components, layer-stack and material facts, semantic
+- OrcaPen develops public components, layer-stack and material facts, semantic
   annotations, and public notebook sources.
 - SCGSim develops the Semantic Geometry Builder Core plus Palace and AEDT
   execution, handoff, resolve, and report APIs.
