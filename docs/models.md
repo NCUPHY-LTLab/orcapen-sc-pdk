@@ -4,7 +4,7 @@ orphan: true
 
 # Models Namespace
 
-`orpen_sc_pdk.models` is reserved for future public PDK model facts. It is not
+`orcapen_sc_pdk.models` is reserved for future public PDK model facts. It is not
 an analytical-model or solver runtime surface.
 
 The public PDK owns material records, technology/layer-stack semantics, public

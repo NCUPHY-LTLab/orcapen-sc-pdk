@@ -2,17 +2,17 @@
 title: "Process: layers, stack and materials"
 ---
 
-Use OrPen's layer names for XY geometry and its stack records for physical Z
+Use OrcaPen's layer names for XY geometry and its stack records for physical Z
 and material identity. They are different parts of the same source model.
-The current [technology source](https://github.com/OrPenStrike/orpen-sc-pdk/blob/develop/orpen_sc_pdk/tech.py)
-and [material database](https://github.com/OrPenStrike/orpen-sc-pdk/blob/develop/orpen_sc_pdk/materials.json)
+The current [technology source](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/tech.py)
+and [material database](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/materials.json)
 are the authorities; the figures here do not redefine them.
 
 ## Pick the layer by purpose
 
 ```python
-from orpen_sc_pdk import LAYER, LAYER_VIEWS
-from orpen_sc_pdk.tech import get_single_die_layer_stack
+from orcapen_sc_pdk import LAYER, LAYER_VIEWS
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
 
 metal_xy = LAYER.D0_TOP_M1_DRAW
 stack = get_single_die_layer_stack()
@@ -48,7 +48,7 @@ excitation belong to the selected simulation problem.
 
 ## Select the physical stack
 
-Stack getters live in `orpen_sc_pdk.tech`:
+Stack getters live in `orcapen_sc_pdk.tech`:
 
 - `get_layer_stack()` returns the full die/face-aware public stack.
 - `get_two_die_flip_chip_layer_stack()` selects that two-die stack.
@@ -75,11 +75,11 @@ their original notebook-local stacks; they are not regenerated here.
 
 ## Material records and presets
 
-The copy-returning [material API](https://github.com/OrPenStrike/orpen-sc-pdk/blob/develop/orpen_sc_pdk/materials.py)
+The copy-returning [material API](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/materials.py)
 is available from the package root:
 
 ```python
-from orpen_sc_pdk import (
+from orcapen_sc_pdk import (
     get_material_records, get_material_alias_records,
     get_interface_preset_records,
 )

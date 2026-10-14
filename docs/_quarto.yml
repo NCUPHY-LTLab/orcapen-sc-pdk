@@ -57,13 +57,13 @@ project:
     - uv run --project .. --group docs quartodoc build
 
 website:
-  title: "OrPen SC PDK"
-  site-url: https://orpenstrike.github.io/orpen-sc-pdk/
-  favicon: assets/orpen-mark.svg
-  repo-url: https://github.com/OrPenStrike/orpen-sc-pdk
+  title: "OrcaPen SC PDK"
+  site-url: https://orpenstrike.github.io/orcapen-sc-pdk/
+  favicon: assets/orcapen-mark.svg
+  repo-url: https://github.com/OrPenStrike/orcapen-sc-pdk
   repo-actions: [edit, issue]
   navbar:
-    logo: assets/orpen-mark.svg
+    logo: assets/orcapen-mark.svg
     search: true
     left:
       - text: Overview
@@ -97,7 +97,7 @@ website:
       contents:
         - text: Overview
           href: notebooks.qmd
-        - section: Layer 1 · OrPen user requirements
+        - section: Layer 1 · OrcaPen user requirements
           contents:
             - simulation/requirements/electrostatic-capacitance.qmd
             - simulation/requirements/eigenmode.qmd
@@ -174,7 +174,7 @@ execute:
 quartodoc:
   style: pkgdown
   dir: reference
-  package: orpen_sc_pdk
+  package: orcapen_sc_pdk
   title: API Reference
   sections:
     - title: Package

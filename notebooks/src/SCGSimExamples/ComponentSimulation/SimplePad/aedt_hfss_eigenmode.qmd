@@ -9,6 +9,8 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Solve the square pad's inductively shunted eigenmode and inspect EPR. See the
@@ -18,18 +20,16 @@ The 200 µm pad, 20 µm gap and connected Ground use Al 100 nm on a
 to Ground, with L=10 nH and C=0; its source locator overlaps each terminal by
 one 0.001 µm DBU without changing the physical gap.
 
-Horizontal surface EPR uses OrPen LiteratureCentral assumptions, not measured
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Horizontal surface EPR uses OrcaPen LiteratureCentral assumptions, not measured
 loss; sidewalls are excluded by the selected runtime. Bulk/junction readout and
 offline typed reanalysis reuse resolved field integrals without another Analyze.
 HFSS retains its native outer boundary behavior; no explicit Region
 PerfectE, Radiation or PML is added.
 
-Use [SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
-in a separately selected consumer environment. The exact source revision is recorded
-in the controls below. Execution is disabled; no native solve or returned-result
-claim is made. The default `run` prepares and solves the case, then reads its results.
-`AUTHORING_ONLY` constructs non-solving inputs; `prepare_handoff` creates
-a portable package, and `analyze_handoff` reads an independent returned directory.
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
 ## Setup and Imports
 
@@ -60,15 +60,15 @@ from scgsim.aedt import (
     resolve_results,
     resolve_saved_solution,
 )
-from scgsim.geometry import GeometryPlan
+from scgsim.geometry import ApproximationProfile, GeometryPlan
 
-import orpen_sc_pdk
-from orpen_sc_pdk import (
+import orcapen_sc_pdk
+from orcapen_sc_pdk import (
     get_interface_preset_records,
     get_material_records,
     validate_interface_preset_records,
 )
-from orpen_sc_pdk.tech import get_single_die_layer_stack
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
 ```
 
 ## Setup and Run Controls
@@ -79,6 +79,7 @@ WORKFLOW_ACTION = "run"  # AUTHORING_ONLY | prepare_handoff | prepare_only | run
 # Additional actions: evaluate_saved_fields | reanalyze_saved_epr
 RUN_ID = f"simple_pad_aedt_hfss_eigenmode_{uuid4().hex}"
 MODELING = "solid"
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODELING, revision="v1", parameters={})
 OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SCGSimExamples" / "SimplePad"
 RUN_DIR = OUTPUT_ROOT / RUN_ID
 PAD_SIDE_UM = 200.0
@@ -88,7 +89,7 @@ JUNCTION_WIDTH_UM = 2.0
 VACUUM_PADDING_UM = (250.0, 250.0, 1000.0)
 AEDT_VERSION = "2024.2"  # Current SCGSim Eigenmode facade binds this runtime version.
 PYAEDT_VERSION = "1.3.0"
-SCGSIM_RUNTIME_REVISION = "c9270c7e76e0b2df187dddde462079e00d410dd0"
+SCGSIM_RUNTIME_SOURCE = "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED"
 SETUP_NAME = "Setup1"
 MAXIMUM_PASSES = 10
 CONVERGENCE_PERCENT = 1.0
@@ -125,7 +126,7 @@ if WORKFLOW_ACTION not in {
 ```{python}
 #| id: hem-component
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "prepare_only", "run"}:
-    orpen_sc_pdk.activate()
+    orcapen_sc_pdk.activate()
     gf.clear_cache()
     component = gf.get_component(
         "square_pad_capacitor",
@@ -161,7 +162,7 @@ display(
         "requested_pyaedt": PYAEDT_VERSION,
         "installed_pyaedt": importlib.metadata.version("pyaedt"),
         "installed_scgsim": importlib.metadata.version("scgsim"),
-        "runtime_source": SCGSIM_RUNTIME_REVISION,
+        "runtime_source": SCGSIM_RUNTIME_SOURCE,
         "run_id": RUN_ID,
     }
 )
@@ -188,7 +189,7 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "prepare_only", "run
     prepared = prepare_planar_geometry_input(
         snapshot.geometry_input,
         prepared_stack=snapshot.stack,
-        modeling=MODELING,
+        modeling=APPROXIMATION_PROFILE.name,
         junctions=(junction,),
     )
     catalogue = prepared.contribution_catalog
@@ -233,7 +234,7 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "prepare_only", "run
                 preset=preset_name,
             )
         )
-    sim = EigenmodeSim(modeling=MODELING)
+    sim = EigenmodeSim(modeling=APPROXIMATION_PROFILE.name)
     sim.set_plan(snapshot)
     sim.set_output_dir(RUN_DIR)
     sim.set_surface_epr(contributions=surface_specs)

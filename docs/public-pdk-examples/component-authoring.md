@@ -2,13 +2,13 @@
 title: "Build and compose components"
 ---
 
-Activate OrPen, select a registered factory and supply the dimensions you need.
+Activate OrcaPen, select a registered factory and supply the dimensions you need.
 Coordinates, lengths and port widths use micrometres.
 
 ```python
 import gdsfactory as gf
-from orpen_sc_pdk import activate, get_pdk
-from orpen_sc_pdk.cells import taper
+from orcapen_sc_pdk import activate, get_pdk
+from orcapen_sc_pdk.cells import taper
 
 activate()
 print(sorted(get_pdk().cells))
@@ -18,14 +18,14 @@ for port in transition.ports:
     print(port.name, port.center, port.orientation)
 ```
 
-The [public factories](https://github.com/OrPenStrike/orpen-sc-pdk/blob/develop/orpen_sc_pdk/cells/__init__.py)
+The [public factories](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/__init__.py)
 are also available by name through `gf.get_component`. Defaults are preview
 settings; use explicit parameters for your design.
 
 ## Place and connect real children
 
 ```python
-from orpen_sc_pdk.cells import straight
+from orcapen_sc_pdk.cells import straight
 
 assembly = gf.Component()
 a = assembly << transition
@@ -45,7 +45,7 @@ of magnifying instances.
 ## Draw on the intended layer
 
 ```python
-from orpen_sc_pdk import LAYER
+from orcapen_sc_pdk import LAYER
 
 island = gf.Component()
 island << gf.components.rectangle(

@@ -1,8 +1,14 @@
 ---
 title: "17-bridge CPW–meander · Driven Terminal / Lumped Ports"
-jupyter: python3
+jupyter:
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Excite the launcher variant through its two neutral nonmetal sheets. Read the
@@ -10,9 +16,10 @@ Excite the launcher variant through its two neutral nonmetal sheets. Read the
 for the system and expected output. The same source supports can receive
 [Eigenmode RLC treatments](aedt_hfss_eigenmode_rlc.ipynb) without redrawing them.
 
-Target: [SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0),
-PDK candidate, AEDT 2024.2 / PyAEDT 1.3.0 in a separate selected runtime.
-Source-only publication; no old native output is attributed to this notebook.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
 ## Action and identity
 
@@ -36,6 +43,7 @@ from scgsim.aedt import (
     resolve_results,
 )
 from scgsim.geometry import (
+    ApproximationProfile,
     GeometryBuildInput,
     LayoutPolygonSpec,
     LumpedSupport,
@@ -44,11 +52,10 @@ from scgsim.geometry import (
     apply_vacuum_region_to_stack,
 )
 
-import orpen_sc_pdk
-from orpen_sc_pdk.cells import cpw_meander_airbridge_lumped_coupon
-from orpen_sc_pdk.cells.simulation import get_cpw_meander_airbridge_source_records
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import cpw_meander_airbridge_lumped_coupon
+from orcapen_sc_pdk.cells.simulation import get_cpw_meander_airbridge_source_records
 
-orpen_sc_pdk.activate()
 WORKFLOW_ACTION = "run"  # author | prepare_handoff | prepare_only | run | analyze
 VARIANT = "lumped"
 RUN_ID = f"meander-terminal-lumped-{uuid4().hex[:12]}"
@@ -56,16 +63,17 @@ OUTPUT_ROOT = Path("notebooks/.artifacts/SCGSimExamples/ComponentSimulation/CpwM
 RUN_DIR = OUTPUT_ROOT / RUN_ID
 RETURNED_RUN_DIR = OUTPUT_ROOT / "returned-run"
 ANALYSIS_KIND = "strict"  # strict | receipt_only
-display({name: version(name) for name in ("scgsim", "gdsfactory", "orpen-sc-pdk")})
+display({name: version(name) for name in ("scgsim", "gdsfactory", "orcapen-sc-pdk")})
 ```
 
 ## Layout, stack and neutral sheets
 
-![Selected launcher source geometry; not native port readback.](https://raw.githubusercontent.com/OrPenStrike/orpen-sc-pdk/f4f509843c2c7177773798bf6a8a906f94c63a11/docs/_static/images/test-components/driven-terminal-lumped-resonator.png)
+![Selected launcher source geometry; not native port readback.](https://raw.githubusercontent.com/OrPenStrike/orcapen-sc-pdk/f4f509843c2c7177773798bf6a8a906f94c63a11/docs/_static/images/test-components/driven-terminal-lumped-resonator.png)
 
 ```{python}
 #| id: meander-terminal-lumped-layout
 if WORKFLOW_ACTION != "analyze":
+    orcapen_sc_pdk.activate()
     coupon = cpw_meander_airbridge_lumped_coupon()
     coupon.plot()
 ```
@@ -88,6 +96,7 @@ not Driven Modal ports.
 ```{python}
 #| id: meander-terminal-lumped-settings
 MODEL = "thin_film"
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODEL, revision="v1", parameters={})
 impedance_ohm = 50.0
 resources = AedtResources(cores=4, ram_limit_percent=20)
 geometry_workers = 1
@@ -133,10 +142,10 @@ if WORKFLOW_ACTION in {"prepare_handoff", "prepare_only", "run"}:
     geometry = prepare_planar_geometry_input(
         build_input,
         prepared_stack=stack,
-        modeling=MODEL,
+        modeling=APPROXIMATION_PROFILE.name,
     )
     HANDOFF = prepare_hfss_driven_from_geometry(
-        modeling=MODEL,
+        modeling=APPROXIMATION_PROFILE.name,
         geometry=geometry,
         project_name=RUN_ID,
         design_name="MeanderTerminalLumped",

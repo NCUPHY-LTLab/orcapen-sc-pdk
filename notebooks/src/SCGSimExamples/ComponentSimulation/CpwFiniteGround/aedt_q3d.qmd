@@ -9,6 +9,8 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Extract AC R/L and capacitance from the finite-ground CPW. See the
@@ -19,12 +21,10 @@ explicitly replacing the prior Nb 200 nm model. Source-free body-v3 records
 mirror the coupon rectangles; `geometry_source=None` is deliberate, not a
 helper-produced source binding.
 
-Use [SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
-in a separately selected consumer environment. The exact source revision is recorded
-in the controls below. Execution is disabled; no native solve or returned-result
-claim is made. The default `run` prepares and solves the case, then reads its results.
-`AUTHORING_ONLY` constructs non-solving inputs; `prepare_handoff` creates
-a portable package, and `analyze_handoff` reads an independent returned directory.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
 ## Setup and Imports
 
@@ -43,18 +43,22 @@ from scgsim.aedt import (
     AedtResources,
     MatrixRunControl,
     PdkMaterial,
-    PhysicalLayerSpec,
     Q3dBodySpec,
     Q3dNetSpec,
     Q3dSpec,
     prepare_handoff,
     resolve_results,
 )
+from scgsim.geometry import (
+    ApproximationProfile,
+    PhysicalLayerDeclaration,
+    interpret_physical_layers,
+)
 
-import orpen_sc_pdk
-from orpen_sc_pdk.cells import finite_ground_cpw_coupon
-from orpen_sc_pdk.materials import get_material_records
-from orpen_sc_pdk.tech import get_single_die_layer_stack
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import finite_ground_cpw_coupon
+from orcapen_sc_pdk.materials import get_material_records
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
 ```
 
 ## Setup and Run Controls
@@ -66,9 +70,10 @@ RUN_ID = f"cpw_q3d_{uuid4().hex}"
 OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SCGSimExamples" / "CpwFiniteGround"
 RUN_DIR = OUTPUT_ROOT / RUN_ID
 RETURNED_RUN_DIR = None  # Set independently to an immutable returned-run directory.
-SCGSIM_RUNTIME_REVISION = "c9270c7e76e0b2df187dddde462079e00d410dd0"
+SCGSIM_RUNTIME_SOURCE = "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED"
 RESOURCES = AedtResources(cores=4, ram_limit_percent=30)
 MODELING = "solid"
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODELING, revision="v1", parameters={})
 SOLVE_AC_RL = True
 # CPW trace length along X (um).
 trace_length_um = 500.0
@@ -97,7 +102,7 @@ maximum_passes = 3
 ```{python}
 #| id: q3d-2
 if WORKFLOW_ACTION != "analyze_handoff":
-    orpen_sc_pdk.activate()
+    orcapen_sc_pdk.activate()
     gf.clear_cache()
     coupon = finite_ground_cpw_coupon(
         trace_length_um=trace_length_um,
@@ -151,7 +156,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
             metal_level.material,
             "signal",
             "Signal",
-            physical_layer_id="D0_TOP_M1",
+            physical_layer_id=metal_level.info["physical_layer"]["physical_layer_id"],
         ),
         Q3dBodySpec(
             "GroundLeftBody",
@@ -162,7 +167,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
             metal_level.material,
             "ground",
             "GroundLeft",
-            physical_layer_id="D0_TOP_M1",
+            physical_layer_id=metal_level.info["physical_layer"]["physical_layer_id"],
         ),
         Q3dBodySpec(
             "GroundRightBody",
@@ -173,7 +178,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
             metal_level.material,
             "ground",
             "GroundRight",
-            physical_layer_id="D0_TOP_M1",
+            physical_layer_id=metal_level.info["physical_layer"]["physical_layer_id"],
         ),
         Q3dBodySpec(
             "SubstrateBody",
@@ -184,7 +189,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
             substrate_level.material,
             "substrate",
             None,
-            physical_layer_id="D0_SUBSTRATE",
+            physical_layer_id=substrate_level.info["physical_layer"]["physical_layer_id"],
         ),
     )
 ```
@@ -234,15 +239,15 @@ if WORKFLOW_ACTION != "analyze_handoff":
 ```{python}
 #| id: q3d-8
 if WORKFLOW_ACTION != "analyze_handoff":
+    physical_layers = tuple(
+        PhysicalLayerDeclaration.from_payload(level.info["physical_layer"])
+        for level in (metal_level, substrate_level)
+    )
     spec = Q3dSpec(
-        modeling=MODELING,
+        modeling=APPROXIMATION_PROFILE.name,
         project_name=project_name,
-        physical_layers=(
-            PhysicalLayerSpec("D0_TOP_M1", "stack_film", metal_zmin_um, metal_zmax_um, "lower"),
-            PhysicalLayerSpec(
-                "D0_SUBSTRATE", "retained_solid", substrate_zmin_um, substrate_zmax_um
-            ),
-        ),
+        physical_layers=physical_layers,
+        physical_representation=interpret_physical_layers(physical_layers, APPROXIMATION_PROFILE),
         design_name=design_name,
         materials=materials,
         vacuum_material_id="vacuum",

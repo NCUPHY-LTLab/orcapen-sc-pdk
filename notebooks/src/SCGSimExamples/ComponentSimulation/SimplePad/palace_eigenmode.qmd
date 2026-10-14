@@ -9,6 +9,8 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 This synthetic `square_pad_capacitor` linear LC model uses a 200 µm pad,
@@ -17,10 +19,10 @@ Its nonmetal east locator spans x=99.999–120.001, y=-1–1 µm and binds a
 linear 10 nH inductive branch, with no added capacitance. This is distinct
 from ordinary CPW, generic RLC and a measured device.
 
-Read the [eigenmode requirements](../../../../simulation/requirements/eigenmode.qmd)
-and [EPR/loss requirements](../../../../simulation/requirements/epr-loss.qmd).
-The authoring target is [SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
-in a separate consumer environment; ordinary project dependencies and pins remain unchanged.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
 The default `run` action builds, prepares and solves this case, then reads its returned
 results. Choose `AUTHORING_ONLY` for non-solving inputs or `prepare_handoff`
@@ -48,16 +50,16 @@ WORKFLOW_ACTION = "run"
 # AUTHORING_ONLY | prepare_handoff | run | analyze_handoff | save_from_returned | analyze_saved_epr
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     import gdsfactory as gf
-    from scgsim.geometry import GeometryPlan
+    from scgsim.geometry import ApproximationProfile, GeometryPlan
     from scgsim.palace import EigenmodeSim
 
-    import orpen_sc_pdk
-    from orpen_sc_pdk import (
+    import orcapen_sc_pdk
+    from orcapen_sc_pdk import (
         get_interface_preset_records,
         get_material_records,
         validate_interface_preset_records,
     )
-    from orpen_sc_pdk.tech import get_single_die_layer_stack
+    from orcapen_sc_pdk.tech import get_single_die_layer_stack
 
 if WORKFLOW_ACTION in {"run", "analyze_handoff", "save_from_returned"}:
     from scgsim.palace import inspect_run_trustworthiness, resolve_palace_result
@@ -86,7 +88,7 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     GAP_UM = 20.0
     DIE_SIDE_UM = 1000.0
     JUNCTION_WIDTH_UM = 2.0
-    orpen_sc_pdk.activate()
+    orcapen_sc_pdk.activate()
     gf.clear_cache()
     component = gf.get_component(
         "square_pad_capacitor",
@@ -115,7 +117,8 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
 ```{python}
 #| id: pem-problem
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
-    sim = EigenmodeSim()
+    APPROXIMATION_PROFILE = ApproximationProfile(name="route_b", revision="v1", parameters={})
+    sim = EigenmodeSim(approximation_profile=APPROXIMATION_PROFILE)
     sim.set_plan(snapshot)
     sim.set_output_dir(RUN_ROOT)
     ROUTE = "B"
@@ -123,6 +126,7 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     preset_names = {kind: f"LiteratureCentral_{kind}" for kind in ("MA", "MS", "SA")}
     interface_presets = {kind: records[name] for kind, name in preset_names.items()}
     sim.set_surface_epr(
+        approximation_profile=APPROXIMATION_PROFILE,
         representation=ROUTE,
         specs={
             kind: {

@@ -9,18 +9,23 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Inspect conductor contacts across film, post, deck and bump levels while
 retaining each material and physical Z interval. Read the
 [multilevel-contact requirements](../../../../simulation/tools/contacts-multilevel.qmd)
 and [material/stack/Z requirements](../../../../simulation/tools/materials-stack-z.qmd).
-OrPen supplies physical layers and coupon contact intent; callers assign Nets;
+OrcaPen supplies physical layers and coupon contact intent; callers assign Nets;
 SCGSim owns preparation and all native geometry/assignment/mesh mechanics.
 
-Authoring target: [SCGSim v2 RC1][scgsim-rc1], OrPen suite base `f4f5098`.
-Use an independently prepared exact-checkpoint environment. No environment,
-dependency or pin change is performed here. Execution is disabled; bounded
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Historical source-observation cohort: [SCGSim v2 RC1][scgsim-rc1], OrPen suite base `f4f5098`.
+Use the selected local shared-physical candidate runtime; the linked checkpoint is
+historical attribution. No environment, dependency or pin change is performed here. Execution is disabled; bounded
 isolated source construction was observed separately, without a notebook kernel
 run or saved output. Native contacts remain UNOBSERVED.
 
@@ -34,23 +39,23 @@ from uuid import uuid4
 import gdsfactory as gf
 from IPython.display import display
 from scgsim.aedt import prepare_planar_geometry_input
-from scgsim.geometry import GeometryPlan, summarize_geometry_input
+from scgsim.geometry import ApproximationProfile, GeometryPlan, summarize_geometry_input
 
-import orpen_sc_pdk
-from orpen_sc_pdk import get_material_records
-from orpen_sc_pdk.tech import get_single_die_layer_stack, get_two_die_flip_chip_layer_stack
+import orcapen_sc_pdk
+from orcapen_sc_pdk import get_material_records
+from orcapen_sc_pdk.tech import get_single_die_layer_stack, get_two_die_flip_chip_layer_stack
 
 OBSERVATION_ID = f"geometry-multilevel-{uuid4().hex}"
 display(
     {
         "observation_id": OBSERVATION_ID,
         "scgsim_version": importlib.metadata.version("scgsim"),
-        "scgsim_authoring_revision": "85d8bedb733b1e17737d935029618351b30ea5de",
+        "scgsim_authoring_source": "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED",
         "units": "XY, Z intervals and physical thickness: um",
         "evidence_stage": "source and detached preparation records",
     }
 )
-orpen_sc_pdk.activate()
+orcapen_sc_pdk.activate()
 gf.clear_cache()
 ```
 
@@ -191,7 +196,7 @@ mean no excitation or Surface-EPR study is selected here.
 The earlier isolated source observation completed both airbridge maps and
 flip-chip Solid preparation. In that historical source cohort, flip-chip Thin
 Film stopped because the PDK bump level lacked an `aedt_modeling` declaration.
-The current PDK declares `D0_D1_INDIUM_BUMP` as `retained_solid`, preserving its
+The current neutral declaration classifies `D0_D1_INDIUM_BUMP` as `finite_volume`, preserving its
 finite physical height in either representation. The historical error does not
 describe the current source, and the revised declaration has not been executed
 here. The editable selection below starts with the airbridge maps; select
@@ -208,10 +213,11 @@ component, snapshot = {
     "07-airbridge": (bridge, bridge_snapshot),
 }[MODELING_CASE]
 for modeling in MODELING_CHOICES:
+    approximation_profile = ApproximationProfile(name=modeling, revision="v1", parameters={})
     prepared = prepare_planar_geometry_input(
         snapshot.geometry_input,
         prepared_stack=snapshot.stack,
-        modeling=modeling,
+        modeling=approximation_profile.name,
         source_dbu_um=component.kcl.dbu,
     )
     prepared_cases[(MODELING_CASE, modeling)] = prepared

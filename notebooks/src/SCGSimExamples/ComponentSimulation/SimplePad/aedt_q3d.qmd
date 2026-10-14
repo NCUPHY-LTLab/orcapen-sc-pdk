@@ -9,6 +9,8 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Extract the square pad's capacitance and conductance at 5 GHz. See the
@@ -18,12 +20,10 @@ The 200 µm pad, 20 µm gap and connected surrounding Ground occupy one
 Signal source −Z / sink +Z, native Ground, an open Region, and `solve_ac_rl=False`.
 It is a PEC extraction model, not a finite-conductivity loss measurement.
 
-Use [SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
-in a separately selected consumer environment. The exact source revision is recorded
-in the controls below. Execution is disabled; no native solve or returned-result
-claim is made. The default `run` prepares and solves the case, then reads its results.
-`AUTHORING_ONLY` constructs non-solving inputs; `prepare_handoff` creates
-a portable package, and `analyze_handoff` reads an independent returned directory.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
 ## Setup and Imports
 
@@ -42,17 +42,21 @@ from scgsim.aedt import (
     AedtResources,
     MatrixRunControl,
     PdkMaterial,
-    PhysicalLayerSpec,
     Q3dBodySpec,
     Q3dNetSpec,
     Q3dSpec,
     prepare_handoff,
     resolve_results,
 )
+from scgsim.geometry import (
+    ApproximationProfile,
+    PhysicalLayerDeclaration,
+    interpret_physical_layers,
+)
 
-import orpen_sc_pdk
-from orpen_sc_pdk import get_material_records
-from orpen_sc_pdk.tech import LAYER, get_single_die_layer_stack
+import orcapen_sc_pdk
+from orcapen_sc_pdk import get_material_records
+from orcapen_sc_pdk.tech import LAYER, get_single_die_layer_stack
 ```
 
 ## Setup and Run Controls
@@ -62,6 +66,7 @@ from orpen_sc_pdk.tech import LAYER, get_single_die_layer_stack
 WORKFLOW_ACTION = "run"  # AUTHORING_ONLY | prepare_handoff | prepare_only | run | analyze_handoff
 RUN_ID = f"simple_pad_aedt_q3d_{uuid4().hex}"
 MODELING = "solid"
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODELING, revision="v1", parameters={})
 OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SCGSimExamples" / "SimplePad"
 RUN_DIR = OUTPUT_ROOT / RUN_ID
 PAD_SIDE_UM = 200.0
@@ -71,7 +76,7 @@ JUNCTION_WIDTH_UM = 2.0
 VACUUM_PADDING_UM = (250.0, 250.0, 1000.0)
 AEDT_VERSION = "2024.2"
 PYAEDT_VERSION = "1.3.0"
-SCGSIM_RUNTIME_REVISION = "c9270c7e76e0b2df187dddde462079e00d410dd0"
+SCGSIM_RUNTIME_SOURCE = "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED"
 SETUP_NAME = "Setup1"
 MAXIMUM_PASSES = 10
 CONVERGENCE_PERCENT = 1.0
@@ -98,7 +103,7 @@ if WORKFLOW_ACTION not in {
 ```{python}
 #| id: q3d-component
 if WORKFLOW_ACTION != "analyze_handoff":
-    orpen_sc_pdk.activate()
+    orcapen_sc_pdk.activate()
     gf.clear_cache()
     component = gf.get_component(
         "square_pad_capacitor",
@@ -125,7 +130,7 @@ display(
         "requested_pyaedt": PYAEDT_VERSION,
         "installed_pyaedt": importlib.metadata.version("pyaedt"),
         "installed_scgsim": importlib.metadata.version("scgsim"),
-        "runtime_source": SCGSIM_RUNTIME_REVISION,
+        "runtime_source": SCGSIM_RUNTIME_SOURCE,
         "run_id": RUN_ID,
     }
 )
@@ -200,7 +205,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
             "Al",
             "signal",
             "pad",
-            physical_layer_id="D0_TOP_M1",
+            physical_layer_id=metal_level.info["physical_layer"]["physical_layer_id"],
         ),
         Q3dBodySpec(
             "ground_body",
@@ -211,7 +216,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
             "Al",
             "ground",
             "ground",
-            physical_layer_id="D0_TOP_M1",
+            physical_layer_id=metal_level.info["physical_layer"]["physical_layer_id"],
         ),
         Q3dBodySpec(
             "substrate_body",
@@ -222,7 +227,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
             "Si",
             "substrate",
             None,
-            physical_layer_id="D0_SUBSTRATE",
+            physical_layer_id=substrate_level.info["physical_layer"]["physical_layer_id"],
         ),
     )
 ```
@@ -286,25 +291,16 @@ if WORKFLOW_ACTION != "analyze_handoff":
 #| id: q3d-spec
 if WORKFLOW_ACTION != "analyze_handoff":
     px, py, pz = VACUUM_PADDING_UM
+    physical_layers = tuple(
+        PhysicalLayerDeclaration.from_payload(level.info["physical_layer"])
+        for level in (metal_level, substrate_level)
+    )
     spec = Q3dSpec(
-        modeling=MODELING,
+        modeling=APPROXIMATION_PROFILE.name,
         project_name=RUN_ID,
         design_name="SimplePadQ3d",
-        physical_layers=(
-            PhysicalLayerSpec(
-                "D0_TOP_M1",
-                "stack_film",
-                metal_level.zmin,
-                metal_level.zmin + metal_level.thickness,
-                "lower",
-            ),
-            PhysicalLayerSpec(
-                "D0_SUBSTRATE",
-                "retained_solid",
-                substrate_level.zmin,
-                substrate_level.zmin + substrate_level.thickness,
-            ),
-        ),
+        physical_layers=physical_layers,
+        physical_representation=interpret_physical_layers(physical_layers, APPROXIMATION_PROFILE),
         materials=materials,
         vacuum_material_id="vacuum",
         bodies=bodies,

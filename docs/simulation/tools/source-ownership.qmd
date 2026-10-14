@@ -4,12 +4,12 @@ description: "Keep source geometry, placed occurrences and electrical ownership 
 sidebar: simulation
 ---
 
-OrPen supplies the Layout, process records and model intent. SCGSim must carry
+OrcaPen supplies the Layout, process records and model intent. SCGSim must carry
 that meaning into the solver model and back into user-readable results.
 The user must be able to tell which source conductor a native object or
 matrix label represents.
 
-## Input supplied by OrPen
+## Input supplied by OrcaPen
 
 - Component/source identity, selected layers and units.
 - Local conductor regions, outer rings and holes, ports/supports and material/level associations.

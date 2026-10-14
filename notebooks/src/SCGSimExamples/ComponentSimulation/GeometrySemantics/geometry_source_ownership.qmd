@@ -9,17 +9,22 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 Inspect conductor ownership, final Nets and the physical stack in detached
-geometry snapshots. OrPen supplies the components and physical source facts;
+geometry snapshots. OrcaPen supplies the components and physical source facts;
 the caller assigns final Nets, and SCGSim prepares the geometry.
 Read the [source-ownership tool requirements](../../../../simulation/tools/source-ownership.qmd).
 This notebook owns the concrete case settings, not a second semantic schema.
 
-Authoring target: [SCGSim v2 RC1][scgsim-rc1], OrPen suite base `f4f5098`.
-The ordinary OrPen environment/pin is unchanged. Use an independently prepared
-environment for that exact SCGSim checkpoint; no installation happens here.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Historical source-observation cohort: [SCGSim v2 RC1][scgsim-rc1], OrPen suite base `f4f5098`.
+Use the selected local shared-physical candidate runtime; the linked checkpoint
+attributes historical observations only. Ordinary environment pins are unchanged.
 Execution is disabled; no notebook kernel run or saved output is attached.
 Bounded isolated source construction was observed separately. Historical output
 is not evidence for these cells.
@@ -35,22 +40,22 @@ import gdsfactory as gf
 from IPython.display import display
 from scgsim.geometry import GeometryPlan, summarize_geometry_input
 
-import orpen_sc_pdk
-from orpen_sc_pdk import LAYER_STACK, get_material_records
-from orpen_sc_pdk.helpers.assembly import place_flip_chip_ground_short_bumps
-from orpen_sc_pdk.tech import get_single_die_layer_stack
+import orcapen_sc_pdk
+from orcapen_sc_pdk import LAYER_STACK, get_material_records
+from orcapen_sc_pdk.helpers.assembly import place_flip_chip_ground_short_bumps
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
 
 OBSERVATION_ID = f"geometry-source-ownership-{uuid4().hex}"
 display(
     {
         "observation_id": OBSERVATION_ID,
         "scgsim_version": importlib.metadata.version("scgsim"),
-        "scgsim_authoring_revision": "85d8bedb733b1e17737d935029618351b30ea5de",
+        "scgsim_authoring_source": "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED",
         "units": "XY and Z: um; port orientation: degrees",
         "evidence_stage": "source records only; no native model",
     }
 )
-orpen_sc_pdk.activate()
+orcapen_sc_pdk.activate()
 gf.clear_cache()
 ```
 
@@ -114,7 +119,7 @@ for case_id, component in (("01-square", square), ("02-circle", circle)):
 ## Actual named children of the public Xmon coupon
 
 Reuse the existing Xmon coupon producer and its `named_instances`. These are
-real references returned by OrPen, including the device and authored shorts.
+real references returned by OrcaPen, including the device and authored shorts.
 The caller assigns the same public terminal/Ground grouping as the existing
 Xmon electrostatic example; names are not recovered from polygon residue.
 

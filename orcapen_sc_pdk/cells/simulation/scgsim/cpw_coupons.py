@@ -1,0 +1,414 @@
+"""Public finite CPW and the selected 17-bridge port-comparison source pair.
+
+Geometry is in micrometres. These source factories do not assign final Nets,
+native terminals, solver settings, or scientific acceptance. The meander pair
+retains the selected assembly's full film coverage and landings. Its short,
+connector and positive Ground have disjoint M1 interiors, with shared faces
+at the authored contacts; original overlapping source records are historical.
+"""
+
+import json
+from copy import deepcopy
+from importlib.resources import files
+from typing import Any, Literal
+
+import gdsfactory as gf
+
+from orcapen_sc_pdk import tech
+from orcapen_sc_pdk.cells.layout.airbridge import airbridge
+from orcapen_sc_pdk.cells.layout.cpw import launcher, n_trace_mtl_section
+from orcapen_sc_pdk.cells.layout.primitives import straight
+from orcapen_sc_pdk.cells.layout.resonator_meander import resonator_meander
+from orcapen_sc_pdk.materials import get_material_records
+
+_XS = "cpw_6_7_6"
+_BRIDGE_X = (-1600, -1400, -1200, -1000, -800, -600, 800, 1000, 1200, 1400, 1600)
+_DOMAIN = (-2235.0, -560.0, 2235.0, 1531.5)
+
+
+@gf.cell(tags=["simulation", "cpw", "finite_ground"])
+def finite_ground_cpw_coupon(
+    *,
+    trace_length_um: float = 500.0,
+    signal_width_um: float = 10.0,
+    gap_um: float = 6.0,
+    ground_width_um: float = 80.0,
+) -> gf.Component:
+    """Four-rectangle source coupon with editable dimensions in micrometres.
+
+    Defaults retain the L500/W10/gap6/ground80 notebook geometry. OrcaPen owns
+    these source polygons and selectors; callers own final Nets and solver
+    settings. No native geometry or simulation result is implied.
+    """
+    ground_center_y = signal_width_um / 2 + gap_um + ground_width_um / 2
+    substrate_width_um = signal_width_um + 2 * gap_um + 2 * ground_width_um
+    c = gf.Component()
+    signal = c << gf.components.rectangle(
+        size=(trace_length_um, signal_width_um), centered=True, layer=tech.LAYER.D0_TOP_M1_DRAW
+    )
+    signal.name = "SIGNAL"
+    for y, name in ((ground_center_y, "GROUND_PLUS"), (-ground_center_y, "GROUND_MINUS")):
+        ground = c << gf.components.rectangle(
+            size=(trace_length_um, ground_width_um), centered=True, layer=tech.LAYER.D0_TOP_M1_DRAW
+        )
+        ground.name = name
+        ground.movey(y)
+    substrate = c << gf.components.rectangle(
+        size=(trace_length_um, substrate_width_um),
+        centered=True,
+        layer=tech.LAYER.D0_SUBSTRATE_AREA,
+    )
+    substrate.name = "SUBSTRATE"
+    c.info["component_semantics"] = {
+        "schema_version": 2,
+        "conductor_regions": [
+            {
+                "semantic_id": name,
+                "level": "D0_TOP_M1",
+                "gds_layer": tuple(tech.LAYER.D0_TOP_M1_DRAW),
+                "geometry": {"geometry_source": "gds_polygon", "selector_point_um": point},
+            }
+            for name, point in (
+                ("SIGNAL", (0.0, 0.0)),
+                ("GROUND_PLUS", (0.0, ground_center_y)),
+                ("GROUND_MINUS", (0.0, -ground_center_y)),
+            )
+        ],
+    }
+    return c
+
+
+def _shared_core() -> tuple[gf.Component, gf.Component]:
+    body = gf.Component()
+    mtl_xs = gf.get_cross_section("coupled_cpw_w7_s6_d3", trace_names=("p", "r"))
+    hook = body << n_trace_mtl_section(length=500, cross_section=mtl_xs)
+    hook.move((-250, 11))
+    r_lead = body << straight(length=100, cross_section=_XS)
+    r_lead.connect("o1", hook.ports["r_o2"])
+    meander = body << resonator_meander(
+        length=4000, meanders=6, cpw_xs=_XS, cpw_radius=100, open_end=True
+    )
+    meander.mirror()
+    meander.connect("o1", r_lead.ports["o2"])
+    short_source = gf.Component()
+    short_lead = short_source << straight(length=100, cross_section=_XS)
+    short_lead.connect("o1", hook.ports["r_o1"])
+    for side, terminal in (("left", "p_o1"), ("right", "p_o2")):
+        lead = body << straight(length=1500, cross_section=_XS)
+        lead.connect("o1", hook.ports[terminal])
+        body.add_port(side, port=lead.ports["o2"])
+    body.add_port("r_short_anchor", port=short_lead.ports["o2"])
+    body.add_port("r_open_placement", port=meander.ports["o2"])
+    short = gf.Component()
+    bar = short << gf.components.rectangle(
+        size=(6, 21), centered=True, layer=tech.LAYER.D0_TOP_M1_DRAW
+    )
+    bar.move(body.ports["r_short_anchor"].center)
+    # The termination owns its full bar; the lead ends at that bar's face.
+    # Keep the original mask and anchor, rather than moving the CPW or adding
+    # a clearance. These are distinct source bodies of the same M1 film.
+    connector = gf.boolean(
+        A=short_source,
+        B=short,
+        operation="not",
+        layer=tech.LAYER.D0_TOP_M1_DRAW,
+        layer1=tech.LAYER.D0_TOP_M1_DRAW,
+        layer2=tech.LAYER.D0_TOP_M1_DRAW,
+    )
+    for layer, polygons in short_source.get_polygons_points(by="tuple").items():
+        if layer != tuple(tech.LAYER.D0_TOP_M1_DRAW):
+            for polygon in polygons:
+                connector.add_polygon(polygon, layer=layer)
+    connector.add_ports(short_lead.ports)
+    body << connector
+    common = gf.Component()
+    common << body
+    common << short
+    canonical_bridge = airbridge()
+    landings = gf.Component()
+    for y in (-42, 42):
+        landing = landings << gf.components.rectangle(
+            size=(14, 14), centered=True, layer=tech.LAYER.D0_TOP_AB_DRAW
+        )
+        landing.move((0, y))
+    full_deck = gf.boolean(
+        A=canonical_bridge,
+        B=landings,
+        operation="or",
+        layer=tech.LAYER.D0_TOP_AB_DRAW,
+        layer1=tech.LAYER.D0_TOP_AB_DRAW,
+        layer2=tech.LAYER.D0_TOP_AB_DRAW,
+    )
+    full_bridge = gf.Component()
+    full_bridge << full_deck
+    for polygon in canonical_bridge.get_polygons_points(by="tuple")[(10, 1)]:
+        full_bridge.add_polygon(polygon, layer=tech.LAYER.D0_TOP_AB_VIA)
+    bridge = gf.Component()
+    for x in _BRIDGE_X:
+        ref = bridge << full_bridge
+        ref.move((x, 0))
+    canonical_meander = resonator_meander(
+        length=4000, meanders=6, cpw_xs=_XS, cpw_radius=100, open_end=True
+    )
+    # The lowest row is intentionally omitted: its deck also crosses the TL.
+    for i in range(1, len(canonical_meander.info["straight_lengths"])):
+        ref = bridge << full_bridge
+        ref.move(meander.ports[f"o_mesh_meander_straight_{i}"].center)
+    common << bridge
+    common.add_ports(body.ports)
+    return common, short
+
+
+def _meander_coupon(mode: Literal["lumped", "wave"]) -> gf.Component:
+    common, _short = _shared_core()
+    structure = gf.Component()
+    structure << common
+    for side in ("left", "right"):
+        anchor = common.ports[side]
+        if mode == "lumped":
+            endpoint = structure << launcher(cpw_xs=_XS)
+            endpoint.connect("o_neck", anchor)
+            structure.add_port(f"{side}_signal", port=endpoint.ports["o_pad"])
+            structure.add_port(f"{side}_source_locator", port=endpoint.ports["o_lumped"])
+        else:
+            x = _DOMAIN[0] if side == "left" else _DOMAIN[2]
+            endpoint = structure << straight(length=abs(x - anchor.center[0]), cross_section=_XS)
+            endpoint.connect("o1", anchor)
+            structure.add_port(f"{side}_wave_cut", port=endpoint.ports["o2"])
+    domain = gf.Component()
+    x0, y0, x1, y1 = _DOMAIN
+    ref = domain << gf.components.rectangle(
+        size=(x1 - x0, y1 - y0), layer=tech.LAYER.D0_SUBSTRATE_AREA
+    )
+    ref.move((x0, y0))
+    # Positive Ground excludes all actual conductor DRAW, including the short.
+    # This authors disjoint source regions, not a backend allocation policy.
+    etch_void = gf.boolean(
+        A=domain,
+        B=structure,
+        operation="not",
+        layer=tech.LAYER.D0_TOP_M1_DRAW,
+        layer1=tech.LAYER.D0_SUBSTRATE_AREA,
+        layer2=tech.LAYER.D0_TOP_M1_ETCH,
+    )
+    ground = gf.boolean(
+        A=etch_void,
+        B=structure,
+        operation="not",
+        layer=tech.LAYER.D0_TOP_M1_DRAW,
+        layer1=tech.LAYER.D0_TOP_M1_DRAW,
+        layer2=tech.LAYER.D0_TOP_M1_DRAW,
+    )
+    c = gf.Component()
+    c << structure
+    c << ground
+    c << domain
+    c.add_ports(structure.ports)
+    c.info["source_record_variant"] = mode
+    c.info["source_record_getter"] = "get_cpw_meander_airbridge_source_records"
+    c.info["positive_ground_recipe"] = "DOMAIN - actual ETCH - all actual DRAW including short bar"
+    c.info["source_authoring_revision"] = "pair17-m1-disjoint-20261011"
+    c.info["stack_selection"] = "get_single_die_layer_stack(include_airbridges=True)"
+    return c
+
+
+@gf.cell(tags=["simulation", "cpw", "meander", "airbridge", "lumped"])
+def cpw_meander_airbridge_lumped_coupon() -> gf.Component:
+    """Selected 17-bridge source with both launchers and actual 202/1 sheets."""
+    return _meander_coupon("lumped")
+
+
+@gf.cell(tags=["simulation", "cpw", "meander", "airbridge", "wave"])
+def cpw_meander_airbridge_wave_coupon() -> gf.Component:
+    """Same selected core without launchers; through cuts at x = +/-2235 um."""
+    return _meander_coupon("wave")
+
+
+def _pair17_physical_graph(record: dict[str, Any]) -> dict[str, Any]:
+    """Author selected source incidence from exact producer keys, without solving."""
+    variant = record["variant"]
+    entities = {
+        (entity["source_occurrence_path"], entity["local_semantic_id"]): entity
+        for entity in record["entities"]
+    }
+    aliases = {
+        entity["qualified_entity_id"]: (
+            f"{entity['source_occurrence_path']}/{entity['local_semantic_id']}"
+        )
+        for entity in record["entities"]
+    }
+    substrate = entities[(f"{variant}/finite-source-domain", "SUBSTRATE")]
+    ground = entities[(f"{variant}/positive-ground", "GROUND")]
+    endpoints = "launcher" if variant == "lumped" else "endpoint"
+    # This manifest names the selected source's authored keys, not a generic
+    # recognizer or grouping policy based on Z, Nets or spatial proximity.
+    m1_keys = (
+        ("common/mtl", "THROUGH_P"),
+        ("common/mtl", "RESONATOR_R"),
+        ("common/resonator-right-connector", "RESONATOR_DRAW"),
+        ("common/meander", "RESONATOR_DRAW"),
+        ("common/resonator-short-connector", "RESONATOR_DRAW"),
+        ("common/through-left-straight", "SIGNAL"),
+        ("common/through-right-straight", "SIGNAL"),
+        ("positive-ground", "GROUND"),
+        ("authored-ground-short", "SHORT"),
+        (f"{endpoints}-left", "SIGNAL"),
+        (f"{endpoints}-right", "SIGNAL"),
+    )
+    incidence = []
+
+    def relation(first: dict, second: dict, first_face: str, second_face: str, z: float):
+        incidence.append(
+            {
+                "classification": "source_owner_intent_not_native_or_field_side_proof",
+                "first_record_id": first["qualified_entity_id"],
+                "first_entity_id": aliases[first["qualified_entity_id"]],
+                "first_body_id": first["body_membership_id"],
+                "first_face": first_face,
+                "first_polygon_ids": [
+                    polygon["polygon_id"] for polygon in first["placed_polygons"]
+                ],
+                "second_record_id": second["qualified_entity_id"],
+                "second_entity_id": aliases[second["qualified_entity_id"]],
+                "second_body_id": second["body_membership_id"],
+                "second_face": second_face,
+                "second_polygon_ids": [
+                    polygon["polygon_id"] for polygon in second["placed_polygons"]
+                ],
+                "source_plane_um": z,
+                "source_footprint_polygon_ids": [
+                    polygon["polygon_id"] for polygon in first["placed_polygons"]
+                ],
+                "host_void_entity_id": "VACUUM_REGION",
+            }
+        )
+
+    for path, local in m1_keys:
+        relation(entities[(f"{variant}/{path}", local)], substrate, "lower", "upper", 0.0)
+    bridge_paths = (
+        *(f"common/placed-full-landing-bridges/through-{index:02d}" for index in range(11)),
+        *(f"common/placed-full-landing-bridges/meander-{index:02d}" for index in range(1, 7)),
+    )
+    for path in bridge_paths:
+        occurrence = f"{variant}/{path}"
+        deck = entities[(occurrence, "DECK")]
+        for local in ("PIER_MINUS", "PIER_PLUS"):
+            post = entities[(occurrence, local)]
+            relation(post, deck, "upper", "lower", 3.1)
+            relation(post, ground, "lower", "upper", 0.1)
+    return {
+        "classification": "source_owner_intent_in_one_selected_LayerStack_frame",
+        "entity_aliases": aliases,
+        # The original Pair17 record has supports, not a metal contact graph.
+        # Newly authored incidence stays explicitly separate from original facts.
+        "source_contacts": [],
+        "source_supports": {
+            "placed": deepcopy(record["supports"]),
+            "local": deepcopy(record["local_supports"]),
+        },
+        "source_owner_incidence": incidence,
+    }
+
+
+def get_cpw_meander_airbridge_source_records(
+    mode: Literal["lumped", "wave"],
+) -> dict[str, Any]:
+    """Return detached corrected source rings/bodies and unchanged V6 supports.
+
+    The record retains complete placed and local geometry, producer occurrence
+    identities and caller-only Net proposals. ``local_supports`` carries full
+    local sheets, local contact endpoints and normals; the corresponding Entity
+    supplies the once-only local-to-assembly affine. These are producer-local
+    source IDs, not GF-generated cell names or native IDs.
+    Callers construct SCGSim public inputs and own final Nets; this is source
+    data, not a second runtime adapter. No transform applies to placed rings.
+    The pair17-m1-disjoint-20261011 records retain V5 identities, but replace
+    its overlapping connector/Ground contours; they are not the original V5
+    geometry or execution evidence. The source short retains its full bar.
+
+    ``source_levels`` and ``material_records`` are detached current PDK facts.
+    The selected source preview envelope (-500 to +100 um) is not a generated
+    native vacuum region or a solver default. Wave references name the one
+    Ground Entity and its two disconnected source polygons, not native objects.
+    """
+    resources = files(__package__)
+    record = json.loads(resources.joinpath("cpw_meander_source.json").read_text())[mode]
+    for support in record["local_supports"]:
+        owner = next(
+            entity
+            for entity in record["entities"]
+            if entity["source_occurrence_path"] == support["source_occurrence_path"]
+        )
+        affine = owner["affine_local_to_assembly"]
+        support["source_transform"] = [
+            affine[0][0],
+            affine[0][1],
+            affine[1][0],
+            affine[1][1],
+            affine[0][2],
+            affine[1][2],
+        ]
+    stack = tech.get_single_die_layer_stack(include_airbridges=True)
+    contact_graph = _pair17_physical_graph(record)
+    for name in ("D0_SUBSTRATE", "D0_TOP_M1", "D0_TOP_AIRBRIDGE_VIA", "D0_TOP_AIRBRIDGE"):
+        stack.layers[name].info["physical_layer"]["actual_entity_contact_graph"] = deepcopy(
+            contact_graph
+        )
+    record["source_levels"] = {
+        name: {
+            "zmin": level.zmin,
+            "thickness": level.thickness,
+            "material": level.material,
+            "mesh_order": level.mesh_order,
+            "info": deepcopy(level.info),
+        }
+        for name, level in stack.layers.items()
+    }
+    record["entity_aliases"] = deepcopy(contact_graph["entity_aliases"])
+    record["physical_layer_bindings"] = {
+        entity["qualified_entity_id"]: {
+            "source_level_id": entity["source_level"],
+            "physical_layer_id": stack.layers[entity["source_level"]].info["physical_layer"][
+                "physical_layer_id"
+            ],
+            "source_occurrence_path": entity["source_occurrence_path"],
+            "source_local_entity_id": entity["local_semantic_id"],
+            "entity_selector": record["entity_aliases"][entity["qualified_entity_id"]],
+        }
+        for entity in record["entities"]
+    }
+    materials = get_material_records()
+    record["material_records"] = {name: materials[name] for name in ("Al", "Si", "vacuum")}
+    record["source_dbu_um"] = gf.kcl.dbu
+    # Selected assembly's Si bottom and proposed YZ source-sheet air top;
+    # neither value grants native air-domain or scientific Gate authority.
+    record["source_envelope"] = {
+        "bounds_xy_um": list(_DOMAIN),
+        "z_interval_um": [-500.0, 100.0],
+        "state": "source_preview_selection_not_native_air_region",
+    }
+    record["wave_sources"] = []
+    if mode == "wave":
+        entities = {entity["qualified_entity_id"]: entity for entity in record["entities"]}
+        ground = entities["wave/positive-ground::GROUND"]
+        for proposal in record["source_domain"]["wave_exterior_source_proposals"]:
+            signal = entities[f"wave/endpoint-{proposal['side']}::SIGNAL"]
+            record["wave_sources"].append(
+                {
+                    "side": proposal["side"],
+                    "cut_x_um": proposal["cut_x_um"],
+                    "normal": list(proposal["normal"]),
+                    "corners_um": deepcopy(proposal["proposed_yz_corners_um"]),
+                    "signal_entity_id": (
+                        f"{signal['source_occurrence_path']}/{signal['local_semantic_id']}"
+                    ),
+                    "reference_entity_ids": [
+                        f"{ground['source_occurrence_path']}/{ground['local_semantic_id']}"
+                    ],
+                    "reference_polygon_ids": [
+                        polygon["polygon_id"] for polygon in ground["placed_polygons"]
+                    ],
+                    "state": "source_declaration_not_native_terminal_or_solved_mode",
+                }
+            )
+    return record

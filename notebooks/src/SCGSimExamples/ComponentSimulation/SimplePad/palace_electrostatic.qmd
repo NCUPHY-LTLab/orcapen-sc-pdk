@@ -9,6 +9,8 @@ jupyter:
     kind: single
 execute:
   enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
 ---
 
 This synthetic `square_pad_capacitor` extracts terminal capacitance from
@@ -17,10 +19,10 @@ die. The current PDK supplies 100 nm Al above 500 µm Si. The authored
 20.002 × 2 µm east locator is nonmetal and adds no L/C branch here.
 The exterior remains natural, not grounded.
 
-Read the [electrostatic requirements](../../../../simulation/requirements/electrostatic-capacitance.qmd)
-and [EPR/loss requirements](../../../../simulation/requirements/epr-loss.qmd).
-The authoring target is [SCGSim checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
-in a separate consumer environment; ordinary project dependencies and pins remain unchanged.
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
 The default `run` action builds, prepares and solves this case, then reads its returned
 results. Choose `AUTHORING_ONLY` for non-solving inputs or `prepare_handoff`
@@ -42,16 +44,16 @@ from uuid import uuid4
 
 import gdsfactory as gf
 from IPython.display import display
-from scgsim.geometry import GeometryPlan
+from scgsim.geometry import ApproximationProfile, GeometryPlan
 from scgsim.palace import ElectrostaticSim, inspect_run_trustworthiness, resolve_palace_result
 
-import orpen_sc_pdk
-from orpen_sc_pdk import (
+import orcapen_sc_pdk
+from orcapen_sc_pdk import (
     get_interface_preset_records,
     get_material_records,
     validate_interface_preset_records,
 )
-from orpen_sc_pdk.tech import get_single_die_layer_stack
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
 
 WORKFLOW_ACTION = "run"  # AUTHORING_ONLY | prepare_handoff | run | analyze_handoff
 RUN_ID = f"simple_pad_palace_electrostatic_v2_{uuid4().hex}"
@@ -71,7 +73,7 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     GAP_UM = 20.0
     DIE_SIDE_UM = 1000.0
     JUNCTION_WIDTH_UM = 2.0
-    orpen_sc_pdk.activate()
+    orcapen_sc_pdk.activate()
     gf.clear_cache()
     component = gf.get_component(
         "square_pad_capacitor",
@@ -100,7 +102,8 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
 ```{python}
 #| id: pes-problem
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
-    sim = ElectrostaticSim()
+    APPROXIMATION_PROFILE = ApproximationProfile(name="route_b", revision="v1", parameters={})
+    sim = ElectrostaticSim(approximation_profile=APPROXIMATION_PROFILE)
     sim.set_plan(snapshot)
     sim.set_output_dir(RUN_ROOT)
     ROUTE = "B"
@@ -108,6 +111,7 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     preset_names = {kind: f"LiteratureCentral_{kind}" for kind in ("MA", "MS", "SA")}
     interface_presets = {kind: records[name] for kind, name in preset_names.items()}
     sim.set_surface_epr(
+        approximation_profile=APPROXIMATION_PROFILE,
         representation=ROUTE,
         specs={
             kind: {

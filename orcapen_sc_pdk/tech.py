@@ -1,0 +1,1169 @@
+"""Public technology definitions for the OrcaPen superconducting PDK."""
+
+from collections.abc import Callable
+from functools import cache, partial, wraps
+from math import isfinite
+from typing import Any
+
+import gdsfactory as gf
+from doroutes.bundles import add_bundle_astar
+from gdsfactory.cross_section import CrossSection
+from gdsfactory.technology import DerivedLayer, LayerLevel, LayerMap, LayerStack, LayerViews
+from gdsfactory.technology.layer_stack import LogicalLayer
+from gdsfactory.typings import ConnectivitySpec, Layer, LayerSpec
+
+from orcapen_sc_pdk.config import PATH
+from orcapen_sc_pdk.materials import (
+    get_material_alias_records,
+    get_material_records,
+)
+
+nm = 1e-3
+
+
+class LayerMapOrpenSCPDK(LayerMap):
+    """Die and face aware public layer map.
+
+    Layer names intentionally describe process semantics only. Real private
+    qubit, resonator, and chip assemblies should live in layout packs.
+    """
+
+    D0_BOTTOM_M1_DRAW: Layer = (3, 0)
+    D0_BOTTOM_M1_ETCH: Layer = (3, 1)
+    D0_TOP_M1_DRAW: Layer = (1, 0)
+    D0_TOP_M1_ETCH: Layer = (1, 1)
+    D1_BOTTOM_M1_DRAW: Layer = (2, 0)
+    D1_BOTTOM_M1_ETCH: Layer = (2, 1)
+    D1_TOP_M1_DRAW: Layer = (4, 0)
+    D1_TOP_M1_ETCH: Layer = (4, 1)
+
+    D0_D1_INDIUM_BUMP: Layer = (40, 0)
+    D0_D1_UNDER_BUMP: Layer = (40, 1)
+    D1_D2_INDIUM_BUMP: Layer = (41, 0)
+    D1_D2_UNDER_BUMP: Layer = (41, 1)
+
+    DEVICE_KEEPOUT: Layer = (120, 0)
+    ROUTING_KEEPOUT: Layer = (120, 1)
+    D0_D1_INDIUM_GROUND_KEEPOUT: Layer = (120, 2)
+
+    D0_BOTTOM_AB_DRAW: Layer = (12, 0)
+    D0_BOTTOM_AB_VIA: Layer = (12, 1)
+    D0_TOP_AB_DRAW: Layer = (10, 0)
+    D0_TOP_AB_VIA: Layer = (10, 1)
+    D1_BOTTOM_AB_DRAW: Layer = (11, 0)
+    D1_BOTTOM_AB_VIA: Layer = (11, 1)
+    D1_TOP_AB_DRAW: Layer = (13, 0)
+    D1_TOP_AB_VIA: Layer = (13, 1)
+
+    D0_BOTTOM_JJ_DRAW: Layer = (20, 0)
+    D0_TOP_JJ_DRAW: Layer = (21, 0)
+    D1_BOTTOM_JJ_DRAW: Layer = (22, 0)
+    D1_TOP_JJ_DRAW: Layer = (23, 0)
+
+    D0_TOP_TSV: Layer = (31, 0)
+    D1_BOTTOM_TSV: Layer = (31, 1)
+    DICE: Layer = (70, 0)
+
+    D0_BOTTOM_ALN: Layer = (81, 0)
+    D0_TOP_ALN: Layer = (80, 0)
+    D1_BOTTOM_ALN: Layer = (83, 0)
+    D1_TOP_ALN: Layer = (82, 0)
+
+    D0_BOTTOM_GROUND_MASK: Layer = (111, 0)
+    D0_TOP_GROUND_MASK: Layer = (110, 0)
+    D1_BOTTOM_GROUND_MASK: Layer = (110, 1)
+    D1_TOP_GROUND_MASK: Layer = (111, 1)
+
+    TEXT: Layer = (90, 0)
+    LABEL_SETTINGS: Layer = (100, 0)
+    LABEL_INSTANCE: Layer = (101, 0)
+    WG: Layer = (102, 0)
+    ERROR_PATH: Layer = (1000, 0)
+
+    D0_BOTTOM_M1_DOMAIN: Layer = (200, 0)
+    D0_TOP_M1_DOMAIN: Layer = (200, 1)
+    D1_BOTTOM_M1_DOMAIN: Layer = (200, 2)
+    D1_TOP_M1_DOMAIN: Layer = (200, 3)
+    D0_SUBSTRATE_AREA: Layer = (201, 0)
+    D0_TO_D1_GAP_AREA: Layer = (201, 1)
+    D1_SUBSTRATE_AREA: Layer = (201, 2)
+    OUTER_VACUUM_AREA: Layer = (201, 3)
+    D0_BOTTOM_SIM_BOUNDARY: Layer = (202, 0)
+    D0_TOP_SIM_BOUNDARY: Layer = (202, 1)
+    D1_BOTTOM_SIM_BOUNDARY: Layer = (202, 2)
+    D1_TOP_SIM_BOUNDARY: Layer = (202, 3)
+
+
+L = LAYER = LayerMapOrpenSCPDK
+
+material_properties = get_material_records()
+material_alias_records = get_material_alias_records()
+interface_preset_records = {}
+
+SUBSTRATE_THICKNESS_UM = 500.0
+METAL_THICKNESS_UM = 100 * nm
+# Nominal rectangular-prism model: pier height equals the gap above base metal.
+AIRBRIDGE_VIA_THICKNESS_UM = 3.0
+AIRBRIDGE_THICKNESS_UM = 300 * nm
+# Nominal public metal-to-metal spacing; compressed process heights may be lower.
+D0_D1_METAL_FACE_GAP_UM = 8.0
+D0_D1_SUBSTRATE_FACE_GAP_UM = D0_D1_METAL_FACE_GAP_UM + 2 * METAL_THICKNESS_UM
+OUTER_VACUUM_THICKNESS_UM = 1000.0
+INDIUM_BUMP_SIZE_UM = 20.0
+UNDER_BUMP_SIZE_UM = 40.0
+
+
+def _centered_square(size_um: float) -> tuple[tuple[float, float], ...]:
+    half = size_um / 2
+    return ((-half, -half), (half, -half), (half, half), (-half, half))
+
+
+def _ground_bump_fill_spec() -> dict[str, Any]:
+    """Return PDK-owned bump geometry, lattice origin, and keepout classes."""
+
+    return {
+        "schema_version": 1,
+        "body_layer": tuple(L.D0_D1_INDIUM_BUMP),
+        "body_polygon_um": _centered_square(INDIUM_BUMP_SIZE_UM),
+        "contact_layer": tuple(L.D0_D1_UNDER_BUMP),
+        "contact_polygon_um": _centered_square(UNDER_BUMP_SIZE_UM),
+        "lattice_origin_um": (0.0, 0.0),
+        "keepout_records": (
+            {
+                "name": "DEVICE_KEEPOUT",
+                "layer": tuple(L.DEVICE_KEEPOUT),
+                "consumers": ("routing", "indium_ground_bump"),
+            },
+            {
+                "name": "ROUTING_KEEPOUT",
+                "layer": tuple(L.ROUTING_KEEPOUT),
+                "consumers": ("routing",),
+            },
+            {
+                "name": "D0_D1_INDIUM_GROUND_KEEPOUT",
+                "layer": tuple(L.D0_D1_INDIUM_GROUND_KEEPOUT),
+                "consumers": ("indium_ground_bump",),
+            },
+        ),
+    }
+
+
+def _zmin_from_face(*, face_z: float, outward: int, offset: float, thickness: float) -> float:
+    if outward not in {-1, 1}:
+        raise ValueError(f"outward must be -1 or +1, got {outward!r}.")
+    if outward > 0:
+        return face_z + offset
+    return face_z - offset - thickness
+
+
+def _derived_m1_layer(
+    *,
+    domain_layer: Layer,
+    etch_layer: Layer,
+    draw_layer: Layer,
+) -> DerivedLayer:
+    return DerivedLayer(
+        layer1=LogicalLayer(layer=domain_layer),
+        layer2=DerivedLayer(
+            layer1=LogicalLayer(layer=etch_layer),
+            layer2=LogicalLayer(layer=draw_layer),
+            operation="not",
+        ),
+        operation="not",
+    )
+
+
+def _with_physical_layer(
+    level: LayerLevel,
+    *,
+    physical_layer_id: str,
+    gds_pair: Layer,
+    feature_kind: str,
+    attachment_face: str | None = None,
+) -> LayerLevel:
+    """Attach source-owned plain physical facts without importing a runtime."""
+    film = feature_kind in {"stack_film", "local_film"}
+    dimensions = (
+        {"normal_thickness_um": level.thickness, "axis_in_layer_stack_frame": [0, 0, 1]}
+        if film
+        else {"axial_span_um": level.thickness}
+    )
+    contact_facts: dict[str, Any] = {"layer_attachment_face": attachment_face}
+    if attachment_face is not None:
+        contact_facts.update(
+            geometric_face_normal_in_layer_stack_frame=(
+                [0, 0, -1] if attachment_face == "lower" else [0, 0, 1]
+            ),
+            plane_endpoint=(
+                "source_interval_um[0]" if attachment_face == "lower" else "source_interval_um[1]"
+            ),
+        )
+    level.info["physical_layer"] = {
+        "physical_layer_id": physical_layer_id,
+        "source_level_id": level.name,
+        "source_level_and_gds_pair": {"positive_or_logical_output_pair": list(gds_pair)},
+        "source_interval_um": [level.zmin, level.zmin + level.thickness],
+        "material_id": level.material,
+        "feature_kind": feature_kind,
+        "physical_dimensions": dimensions,
+        "source_contact_facts": contact_facts,
+        "actual_entity_contact_graph": None,
+    }
+    return level
+
+
+def _m1_layer_level(
+    *,
+    name: str,
+    domain_layer: Layer,
+    etch_layer: Layer,
+    draw_layer: Layer,
+    face_z: float,
+    outward: int,
+    mesh_order: int,
+    info: dict[str, Any] | None = None,
+) -> LayerLevel:
+    # Source-owned physical identity; interval remains the authored zmin/thickness.
+    layer_info = dict(info) if info is not None else {}
+    level = LayerLevel(
+        name=name,
+        layer=_derived_m1_layer(
+            domain_layer=domain_layer,
+            etch_layer=etch_layer,
+            draw_layer=draw_layer,
+        ),
+        derived_layer=LogicalLayer(layer=draw_layer),
+        thickness=METAL_THICKNESS_UM,
+        zmin=_zmin_from_face(
+            face_z=face_z,
+            outward=outward,
+            offset=0.0,
+            thickness=METAL_THICKNESS_UM,
+        ),
+        material="Al",
+        mesh_order=mesh_order,
+        info=layer_info,
+    )
+    return _with_physical_layer(
+        level,
+        physical_layer_id=f"orcapen_sc_pdk:{name}",
+        gds_pair=draw_layer,
+        feature_kind="stack_film",
+        attachment_face="lower" if outward == 1 else "upper",
+    )
+
+
+def _face_layer_level(
+    *,
+    name: str,
+    layer: Layer,
+    face_z: float,
+    outward: int,
+    offset: float,
+    thickness: float,
+    material: str,
+    physical_layer_id: str,
+    feature_kind: str,
+    attachment_face: str | None,
+    mesh_order: int | None = None,
+    info: dict[str, Any] | None = None,
+) -> LayerLevel:
+    kwargs: dict[str, Any] = {}
+    if mesh_order is not None:
+        kwargs["mesh_order"] = mesh_order
+    if info is not None:
+        kwargs["info"] = info
+
+    level = LayerLevel(
+        name=name,
+        layer=layer,
+        thickness=thickness,
+        zmin=_zmin_from_face(
+            face_z=face_z,
+            outward=outward,
+            offset=offset,
+            thickness=thickness,
+        ),
+        material=material,
+        **kwargs,
+    )
+    return _with_physical_layer(
+        level,
+        physical_layer_id=physical_layer_id,
+        gds_pair=layer,
+        feature_kind=feature_kind,
+        attachment_face=attachment_face,
+    )
+
+
+def _face_port_sheet_layer_level(
+    *,
+    name: str,
+    layer: Layer,
+    face_z: float,
+    outward: int,
+    mesh_order: int = 15,
+) -> LayerLevel:
+    return LayerLevel(
+        name=name,
+        layer=layer,
+        thickness=0.0,
+        zmin=face_z + outward * METAL_THICKNESS_UM / 2,
+        material="vacuum",
+        mesh_order=mesh_order,
+    )
+
+
+def _face_layer_levels(
+    *,
+    die: str,
+    face: str,
+    face_z: float,
+    outward: int,
+    m1_domain_layer: Layer,
+    m1_draw_layer: Layer,
+    m1_etch_layer: Layer,
+    airbridge_draw_layer: Layer,
+    airbridge_via_layer: Layer,
+    sim_boundary_layer: Layer,
+    mesh_order: int,
+    m1_info: dict[str, Any] | None = None,
+) -> dict[str, LayerLevel]:
+    prefix = f"{die}_{face}"
+    airbridge_process = {
+        "model": "nominal_rectangular_prisms",
+        "gap_above_base_metal_um": AIRBRIDGE_VIA_THICKNESS_UM,
+        "deck_thickness_um": AIRBRIDGE_THICKNESS_UM,
+        "base_metal_thickness_um": METAL_THICKNESS_UM,
+        "material_id": "Al",
+        "die": die,
+        "face": face,
+        "outward": outward,
+        "placement_authority": "human_selected_nominal_gap_above_base_metal",
+        "source_doi": "10.1063/1.4863745",
+        "source_url": "https://clelandlab.uchicago.edu/pdf/chen%20airbridges%20apl%202014.pdf",
+        "supplement_url": "https://web.physics.ucsb.edu/~martinisgroup/papers/Chen2013supp.pdf",
+        "source_scope": "3 um scaffold/separation and 300 nm Al; not footprint or arch geometry",
+    }
+    return {
+        f"{prefix}_M1": _m1_layer_level(
+            name=f"{prefix}_M1",
+            domain_layer=m1_domain_layer,
+            etch_layer=m1_etch_layer,
+            draw_layer=m1_draw_layer,
+            face_z=face_z,
+            outward=outward,
+            mesh_order=mesh_order,
+            info=m1_info,
+        ),
+        f"{prefix}_AIRBRIDGE_VIA": _face_layer_level(
+            name=f"{prefix}_AIRBRIDGE_VIA",
+            layer=airbridge_via_layer,
+            face_z=face_z,
+            outward=outward,
+            offset=METAL_THICKNESS_UM,
+            thickness=AIRBRIDGE_VIA_THICKNESS_UM,
+            material="Al",
+            physical_layer_id=f"orcapen_sc_pdk:{prefix}_AIRBRIDGE_VIA",
+            feature_kind="finite_volume",
+            attachment_face=None,
+            info={
+                "simulation_role": "conductor",
+                "layer_type": "via",
+                "part_role": "airbridge_post",
+                "airbridge_part": "pier",
+                "geometry": {"geometry_source": "gds_polygon"},
+                "airbridge_process": airbridge_process,
+            },
+        ),
+        f"{prefix}_AIRBRIDGE": _face_layer_level(
+            name=f"{prefix}_AIRBRIDGE",
+            layer=airbridge_draw_layer,
+            face_z=face_z,
+            outward=outward,
+            offset=METAL_THICKNESS_UM + AIRBRIDGE_VIA_THICKNESS_UM,
+            thickness=AIRBRIDGE_THICKNESS_UM,
+            material="Al",
+            physical_layer_id=f"orcapen_sc_pdk:{prefix}_AIRBRIDGE",
+            feature_kind="local_film",
+            attachment_face="lower" if face == "TOP" else "upper",
+            info={
+                "simulation_role": "conductor",
+                "layer_type": "conductor",
+                "part_role": "airbridge_deck",
+                "airbridge_part": "deck",
+                "geometry": {"geometry_source": "gds_polygon"},
+                "airbridge_process": airbridge_process,
+            },
+        ),
+        f"{prefix}_SIM_BOUNDARY": _face_port_sheet_layer_level(
+            name=f"{prefix}_SIM_BOUNDARY",
+            layer=sim_boundary_layer,
+            face_z=face_z,
+            outward=outward,
+        ),
+    }
+
+
+@cache
+def get_layer_stack() -> LayerStack:
+    """Return the public die and face aware layer stack."""
+
+    d0_top_face_z = 0.0
+    d0_bottom_face_z = -SUBSTRATE_THICKNESS_UM
+    d1_bottom_face_z = D0_D1_SUBSTRATE_FACE_GAP_UM
+    d1_substrate_zmin = d1_bottom_face_z
+    d1_top_face_z = d1_substrate_zmin + SUBSTRATE_THICKNESS_UM
+
+    stack = LayerStack(
+        layers={
+            "D0_SUBSTRATE": LayerLevel(
+                name="D0_SUBSTRATE",
+                layer=L.D0_SUBSTRATE_AREA,
+                thickness=SUBSTRATE_THICKNESS_UM,
+                zmin=-SUBSTRATE_THICKNESS_UM,
+                material="Si",
+                mesh_order=20,
+                info={
+                    "simulation_role": "solution_region",
+                    "include_in_component_simulation": True,
+                },
+            ),
+            "D1_SUBSTRATE": LayerLevel(
+                name="D1_SUBSTRATE",
+                layer=L.D1_SUBSTRATE_AREA,
+                thickness=SUBSTRATE_THICKNESS_UM,
+                zmin=d1_substrate_zmin,
+                material="Si",
+                mesh_order=21,
+                info={
+                    "simulation_role": "solution_region",
+                    "include_in_component_simulation": True,
+                },
+            ),
+            "D0_TO_D1_GAP": LayerLevel(
+                name="D0_TO_D1_GAP",
+                layer=L.D0_TO_D1_GAP_AREA,
+                thickness=D0_D1_SUBSTRATE_FACE_GAP_UM,
+                zmin=0.0,
+                material="vacuum",
+                mesh_order=98,
+                info={
+                    "simulation_role": "solution_region",
+                    "include_in_component_simulation": True,
+                },
+            ),
+            "OUTER_VACUUM": LayerLevel(
+                name="OUTER_VACUUM",
+                layer=L.OUTER_VACUUM_AREA,
+                thickness=OUTER_VACUUM_THICKNESS_UM,
+                zmin=d1_top_face_z,
+                material="vacuum",
+                mesh_order=99,
+                info={
+                    "simulation_role": "solution_region",
+                    "include_in_component_simulation": False,
+                    "is_airbox": True,
+                },
+            ),
+            **_face_layer_levels(
+                die="D0",
+                face="BOTTOM",
+                face_z=d0_bottom_face_z,
+                outward=-1,
+                m1_domain_layer=L.D0_BOTTOM_M1_DOMAIN,
+                m1_draw_layer=L.D0_BOTTOM_M1_DRAW,
+                m1_etch_layer=L.D0_BOTTOM_M1_ETCH,
+                airbridge_draw_layer=L.D0_BOTTOM_AB_DRAW,
+                airbridge_via_layer=L.D0_BOTTOM_AB_VIA,
+                sim_boundary_layer=L.D0_BOTTOM_SIM_BOUNDARY,
+                mesh_order=11,
+            ),
+            **_face_layer_levels(
+                die="D0",
+                face="TOP",
+                face_z=d0_top_face_z,
+                outward=1,
+                # SCGSim consumes typed LayerLevel.info; names are display-only.
+                # Face M1 is zero-thickness PEC sheet in Route A and finite
+                # PEC shell in Route B.
+                # Ground is residual identity; terminal selectors override it.
+                m1_domain_layer=L.D0_TOP_M1_DOMAIN,
+                m1_draw_layer=L.D0_TOP_M1_DRAW,
+                m1_etch_layer=L.D0_TOP_M1_ETCH,
+                airbridge_draw_layer=L.D0_TOP_AB_DRAW,
+                airbridge_via_layer=L.D0_TOP_AB_VIA,
+                sim_boundary_layer=L.D0_TOP_SIM_BOUNDARY,
+                mesh_order=10,
+                m1_info={
+                    "simulation_role": "conductor",
+                    "layer_type": "conductor",
+                    "part_role": "face_metal",
+                    "host_void_semantic_id": "D0_TO_D1_GAP",
+                    "geometry": {
+                        "geometry_source": "die_face_minus_ground_mask",
+                        "plane_bounds_ref": "D0_SUBSTRATE",
+                    },
+                },
+            ),
+            **_face_layer_levels(
+                die="D1",
+                face="BOTTOM",
+                face_z=d1_bottom_face_z,
+                outward=-1,
+                # SCGSim consumes typed LayerLevel.info; names are display-only.
+                # Face M1 is zero-thickness PEC sheet in Route A and finite
+                # PEC shell in Route B.
+                # Ground is residual identity; terminal selectors override it.
+                m1_domain_layer=L.D1_BOTTOM_M1_DOMAIN,
+                m1_draw_layer=L.D1_BOTTOM_M1_DRAW,
+                m1_etch_layer=L.D1_BOTTOM_M1_ETCH,
+                airbridge_draw_layer=L.D1_BOTTOM_AB_DRAW,
+                airbridge_via_layer=L.D1_BOTTOM_AB_VIA,
+                sim_boundary_layer=L.D1_BOTTOM_SIM_BOUNDARY,
+                mesh_order=12,
+                m1_info={
+                    "simulation_role": "conductor",
+                    "layer_type": "conductor",
+                    "part_role": "face_metal",
+                    "host_void_semantic_id": "D0_TO_D1_GAP",
+                    "geometry": {
+                        "geometry_source": "die_face_minus_ground_mask",
+                        "plane_bounds_ref": "D1_SUBSTRATE",
+                    },
+                },
+            ),
+            **_face_layer_levels(
+                die="D1",
+                face="TOP",
+                face_z=d1_top_face_z,
+                outward=1,
+                m1_domain_layer=L.D1_TOP_M1_DOMAIN,
+                m1_draw_layer=L.D1_TOP_M1_DRAW,
+                m1_etch_layer=L.D1_TOP_M1_ETCH,
+                airbridge_draw_layer=L.D1_TOP_AB_DRAW,
+                airbridge_via_layer=L.D1_TOP_AB_VIA,
+                sim_boundary_layer=L.D1_TOP_SIM_BOUNDARY,
+                mesh_order=13,
+            ),
+            "D0_TOP_TSV": LayerLevel(
+                name="D0_TOP_TSV",
+                layer=L.D0_TOP_TSV,
+                thickness=SUBSTRATE_THICKNESS_UM,
+                zmin=-SUBSTRATE_THICKNESS_UM,
+                material="TiN",
+                mesh_order=3,
+                info={
+                    "simulation_role": "conductor",
+                    "layer_type": "via",
+                    "die": "D0",
+                    "substrate_level_id": "D0_SUBSTRATE",
+                    "contact_level_ids": ["D0_BOTTOM_M1", "D0_TOP_M1"],
+                    "physical_model": "finite_through_substrate_solid",
+                },
+            ),
+            "D1_BOTTOM_TSV": LayerLevel(
+                name="D1_BOTTOM_TSV",
+                layer=L.D1_BOTTOM_TSV,
+                thickness=SUBSTRATE_THICKNESS_UM,
+                zmin=d1_substrate_zmin,
+                material="TiN",
+                mesh_order=3,
+                info={
+                    "simulation_role": "conductor",
+                    "layer_type": "via",
+                    "die": "D1",
+                    "substrate_level_id": "D1_SUBSTRATE",
+                    "contact_level_ids": ["D1_BOTTOM_M1", "D1_TOP_M1"],
+                    "physical_model": "finite_through_substrate_solid",
+                },
+            ),
+            "D0_D1_INDIUM_BUMP": LayerLevel(
+                name="D0_D1_INDIUM_BUMP",
+                layer=L.D0_D1_INDIUM_BUMP,
+                thickness=D0_D1_METAL_FACE_GAP_UM,
+                zmin=METAL_THICKNESS_UM,
+                material="In",
+                mesh_order=3,
+                info={
+                    "simulation_role": "conductor",
+                    "layer_type": "via",
+                    "part_role": "bump_body",
+                    "host_void_semantic_id": "D0_TO_D1_GAP",
+                    "geometry": {
+                        "geometry_source": "gds_polygon",
+                        "split_polygons_as_entities": True,
+                    },
+                    "ground_bump_fill_spec": _ground_bump_fill_spec(),
+                },
+            ),
+            # Typed bump stays finite shell in Route A/B.
+            # UBM is explicitly excluded and emits no SGB entity.
+            "D0_D1_UNDER_BUMP": LayerLevel(
+                name="D0_D1_UNDER_BUMP",
+                layer=L.D0_D1_UNDER_BUMP,
+                thickness=METAL_THICKNESS_UM,
+                zmin=0.0,
+                material="In",
+                mesh_order=3,
+                info={
+                    "exclude_from_simulation": True,
+                },
+            ),
+        }
+    )
+    # Explicit catalogue bindings, not role/name/Z-derived classification.
+    for name, identity, pair in (
+        ("D0_SUBSTRATE", "orcapen_sc_pdk:D0_SUBSTRATE", L.D0_SUBSTRATE_AREA),
+        ("D1_SUBSTRATE", "orcapen_sc_pdk:D1_SUBSTRATE", L.D1_SUBSTRATE_AREA),
+        ("D0_TO_D1_GAP", "orcapen_sc_pdk:D0_TO_D1_GAP", L.D0_TO_D1_GAP_AREA),
+        ("OUTER_VACUUM", "orcapen_sc_pdk:OUTER_VACUUM", L.OUTER_VACUUM_AREA),
+        ("D0_TOP_TSV", "orcapen_sc_pdk:D0_TOP_TSV", L.D0_TOP_TSV),
+        ("D1_BOTTOM_TSV", "orcapen_sc_pdk:D1_BOTTOM_TSV", L.D1_BOTTOM_TSV),
+        ("D0_D1_INDIUM_BUMP", "orcapen_sc_pdk:D0_D1_INDIUM_BUMP", L.D0_D1_INDIUM_BUMP),
+    ):
+        _with_physical_layer(
+            stack.layers[name],
+            physical_layer_id=identity,
+            gds_pair=pair,
+            feature_kind="finite_volume",
+        )
+    return stack
+
+
+def get_layer_views() -> LayerViews:
+    """Return package layer views from the YAML layer-display source."""
+
+    return LayerViews(PATH.lyp_yaml)
+
+
+LAYER_STACK = get_layer_stack()
+LAYER_VIEWS = get_layer_views()
+LAYER_CONNECTIVITY: list[ConnectivitySpec] = [
+    ("D0_BOTTOM_M1_DRAW", "D0_TOP_TSV", "D0_TOP_M1_DRAW"),
+    ("D1_BOTTOM_M1_DRAW", "D1_BOTTOM_TSV", "D1_TOP_M1_DRAW"),
+    ("D0_TOP_M1_DRAW", "D0_D1_INDIUM_BUMP", "D1_BOTTOM_M1_DRAW"),
+    ("D0_TOP_M1_DRAW", "D0_TOP_AB_DRAW", "D0_TOP_M1_DRAW"),
+    ("D1_BOTTOM_M1_DRAW", "D1_BOTTOM_AB_DRAW", "D1_BOTTOM_M1_DRAW"),
+]
+
+
+def get_two_die_flip_chip_layer_stack() -> LayerStack:
+    """Return the explicit two-die flip-chip stack."""
+
+    return LAYER_STACK
+
+
+def get_single_die_layer_stack(*, include_airbridges: bool = False) -> LayerStack:
+    """Select the public D0 substrate, top metal and locator sheet for one die.
+
+    Physical dimensions and materials remain the PDK facts. There is no upper
+    die or interdie cavity: SCGSim owns the surrounding vacuum envelope.
+    Opt in to the nominal D0 top airbridge pier and deck levels. The default
+    retains the existing three-level stack; returned levels are detached copies.
+    """
+    levels = {
+        name: LAYER_STACK.layers[name].model_copy(deep=True)
+        for name in ("D0_SUBSTRATE", "D0_TOP_M1", "D0_TOP_SIM_BOUNDARY")
+    }
+    levels["D0_TOP_M1"].info.pop("host_void_semantic_id", None)
+    if include_airbridges:
+        for name in ("D0_TOP_AIRBRIDGE_VIA", "D0_TOP_AIRBRIDGE"):
+            levels[name] = LAYER_STACK.layers[name].model_copy(deep=True)
+    return LayerStack(layers=levels)
+
+
+LAYER_STACK_FLIP_CHIP = get_two_die_flip_chip_layer_stack()
+
+cross_sections: dict[str, Callable[..., CrossSection]] = {}
+_cross_section_default_names: dict[str, str] = {}
+
+
+def xsection(func: Callable[..., CrossSection]) -> Callable[..., CrossSection]:
+    """Register a public cross-section with stable default naming."""
+
+    default_cross_section = func()
+    _cross_section_default_names[default_cross_section.name] = func.__name__
+
+    @wraps(func)
+    def decorated_cross_section(**kwargs: Any) -> CrossSection:
+        cross_section = func(**kwargs)
+        if cross_section.name in _cross_section_default_names:
+            cross_section._name = _cross_section_default_names[cross_section.name]
+        return cross_section
+
+    cross_sections[func.__name__] = decorated_cross_section
+    return decorated_cross_section
+
+
+CPW_ETCH_NEG = "cpw_etch_neg"
+CPW_DRAW = "cpw_draw"
+CPW_ETCH_POS = "cpw_etch_pos"
+CPW_GROUND_MASK = "cpw_ground_mask"
+
+
+@xsection
+def coplanar_waveguide(
+    width: float = 10.0,
+    gap: float = 6.0,
+    draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
+    etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
+    ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
+    radius: float | None = 100.0,
+) -> CrossSection:
+    """Return the public CPW cross-section with named DRAW/ETCH/MASK sections."""
+
+    if width <= 0:
+        raise ValueError(f"width must be positive, got {width!r}.")
+    if gap <= 0:
+        raise ValueError(f"gap must be positive, got {gap!r}.")
+
+    etch_offset = width / 2 + gap / 2
+    ground_mask_width = width + 2 * gap
+
+    etch_neg = gf.Section(
+        width=gap,
+        offset=-etch_offset,
+        layer=etch_layer,
+        name=CPW_ETCH_NEG,
+    )
+    etch_pos = gf.Section(
+        width=gap,
+        offset=etch_offset,
+        layer=etch_layer,
+        name=CPW_ETCH_POS,
+    )
+    ground_mask = gf.Section(
+        width=ground_mask_width,
+        offset=0.0,
+        layer=ground_mask_layer,
+        name=CPW_GROUND_MASK,
+    )
+
+    return gf.cross_section.cross_section(
+        width=width,
+        layer=draw_layer,
+        main_section_name=CPW_DRAW,
+        sections=(etch_neg, etch_pos, ground_mask),
+        radius=radius,
+    )
+
+
+def n_trace_coplanar_waveguide(
+    trace_widths: tuple[float, ...] = (7.0, 7.0),
+    trace_gaps: tuple[float, ...] = (6.0, 6.0),
+    inter_trace_ground_widths: tuple[float, ...] = (3.0,),
+    *,
+    trace_names: tuple[str, ...] | None = None,
+    draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
+    etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
+    ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
+    radius: float | None = 100.0,
+) -> CrossSection:
+    """Return a multi-trace coplanar-waveguide cross-section with named traces."""
+
+    n_traces = len(trace_widths)
+    if n_traces < 2:
+        raise ValueError(
+            f"n_trace_coplanar_waveguide requires at least two traces, got {n_traces!r}."
+        )
+    if len(trace_gaps) != n_traces:
+        raise ValueError(
+            "trace_widths and trace_gaps must have the same length, "
+            f"got {n_traces!r} and {len(trace_gaps)!r}."
+        )
+    if len(inter_trace_ground_widths) != n_traces - 1:
+        raise ValueError(
+            "inter_trace_ground_widths must contain exactly one value between traces, "
+            f"got {len(inter_trace_ground_widths)!r} for {n_traces!r} traces."
+        )
+
+    trace_widths_f = tuple(float(value) for value in trace_widths)
+    trace_gaps_f = tuple(float(value) for value in trace_gaps)
+    inter_trace_ground_widths_f = tuple(float(value) for value in inter_trace_ground_widths)
+    for label, values in (
+        ("trace_widths", trace_widths_f),
+        ("trace_gaps", trace_gaps_f),
+        ("inter_trace_ground_widths", inter_trace_ground_widths_f),
+    ):
+        for index, value in enumerate(values):
+            if not isfinite(value) or value <= 0:
+                raise ValueError(
+                    f"{label}[{index}] must be finite and greater than 0, got {value!r}."
+                )
+    if radius is not None and (not isfinite(radius) or radius <= 0):
+        raise ValueError(f"radius must be finite and greater than 0, got {radius!r}.")
+
+    if trace_names is None:
+        trace_names = tuple(f"t{i + 1}" for i in range(n_traces))
+    else:
+        trace_names = tuple(trace_names)
+    if len(trace_names) != n_traces:
+        raise ValueError(
+            f"trace_names must contain exactly {n_traces} names, got {len(trace_names)!r}."
+        )
+    for trace_name in trace_names:
+        if not isinstance(trace_name, str) or not trace_name.strip():
+            raise ValueError("trace_names must be non-empty strings.")
+    if len(set(trace_names)) != n_traces:
+        raise ValueError("trace_names must be unique.")
+
+    total_footprint_width = (
+        2 * sum(trace_gaps_f) + sum(trace_widths_f) + sum(inter_trace_ground_widths_f)
+    )
+    section_centers = -total_footprint_width / 2
+
+    first_trace_name = trace_names[0]
+    first_left_gap = trace_gaps_f[0]
+    first_trace_width = trace_widths_f[0]
+    sections: list[gf.Section] = [
+        gf.Section(
+            width=first_left_gap,
+            offset=-(section_centers + first_left_gap / 2),
+            layer=etch_layer,
+            name=f"{first_trace_name}_s_neg",
+        )
+    ]
+    section_centers += first_left_gap
+    first_trace_offset = -(section_centers + first_trace_width / 2)
+    section_centers += first_trace_width
+    sections.append(
+        gf.Section(
+            width=first_trace_width + 2 * first_left_gap,
+            offset=first_trace_offset,
+            layer=ground_mask_layer,
+            name=CPW_GROUND_MASK,
+        )
+    )
+    sections.append(
+        gf.Section(
+            width=first_left_gap,
+            offset=-(section_centers + first_left_gap / 2),
+            layer=etch_layer,
+            name=f"{first_trace_name}_s_pos",
+        )
+    )
+    section_centers += first_left_gap
+    if n_traces > 1:
+        section_centers += inter_trace_ground_widths_f[0]
+
+    for trace_index in range(1, n_traces):
+        left_gap = trace_gaps_f[trace_index]
+        trace_width = trace_widths_f[trace_index]
+        trace_name = trace_names[trace_index]
+        sections.append(
+            gf.Section(
+                width=left_gap,
+                offset=-(section_centers + left_gap / 2),
+                layer=etch_layer,
+                name=f"{trace_name}_s_neg",
+            )
+        )
+        section_centers += left_gap
+        sections.append(
+            gf.Section(
+                width=trace_width,
+                offset=-(section_centers + trace_width / 2),
+                layer=draw_layer,
+                name=trace_name,
+                port_names=(f"{trace_name}_o1", f"{trace_name}_o2"),
+            )
+        )
+        trace_offset = -(section_centers + trace_width / 2)
+        sections.append(
+            gf.Section(
+                width=trace_width + 2 * left_gap,
+                offset=trace_offset,
+                layer=ground_mask_layer,
+                name=f"{trace_name}_ground_mask",
+            )
+        )
+        section_centers += trace_width
+        sections.append(
+            gf.Section(
+                width=left_gap,
+                offset=-(section_centers + left_gap / 2),
+                layer=etch_layer,
+                name=f"{trace_name}_s_pos",
+            )
+        )
+        section_centers += left_gap
+        if trace_index < n_traces - 1:
+            inter_ground = inter_trace_ground_widths_f[trace_index]
+            section_centers += inter_ground
+    return gf.cross_section.cross_section(
+        width=trace_widths_f[0],
+        layer=draw_layer,
+        offset=first_trace_offset,
+        main_section_name=trace_names[0],
+        port_names=(f"{trace_names[0]}_o1", f"{trace_names[0]}_o2"),
+        sections=tuple(sections),
+        radius=radius,
+    )
+
+
+cross_sections["n_trace_coplanar_waveguide"] = n_trace_coplanar_waveguide
+
+cpw = coplanar_waveguide
+etch = etch_only = partial(
+    coplanar_waveguide,
+    draw_layer=LAYER.D0_TOP_M1_ETCH,
+    etch_layer=LAYER.D0_TOP_M1_ETCH,
+    ground_mask_layer=LAYER.D0_TOP_M1_ETCH,
+)
+
+
+@xsection
+def cpw_2dot7_4_2dot7(
+    width: float = 4.0,
+    draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
+    etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
+    ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
+    radius: float | None = 100.0,
+) -> CrossSection:
+    """Return a symmetric CPW cross-section with 2.7-4-2.7 widths."""
+
+    return coplanar_waveguide(
+        width=width,
+        gap=2.7,
+        draw_layer=draw_layer,
+        etch_layer=etch_layer,
+        ground_mask_layer=ground_mask_layer,
+        radius=radius,
+    )
+
+
+@xsection
+def cpw_6_10_6(
+    width: float = 10.0,
+    draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
+    etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
+    ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
+    radius: float | None = 100.0,
+) -> CrossSection:
+    """Return a symmetric CPW cross-section with 6-10-6 widths."""
+
+    return coplanar_waveguide(
+        width=width,
+        gap=6.0,
+        draw_layer=draw_layer,
+        etch_layer=etch_layer,
+        ground_mask_layer=ground_mask_layer,
+        radius=radius,
+    )
+
+
+@xsection
+def cpw_6_7_6(
+    width: float = 7.0,
+    draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
+    etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
+    ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
+    radius: float | None = 100.0,
+) -> CrossSection:
+    """Return a symmetric CPW cross-section with 6-7-6 widths."""
+
+    return coplanar_waveguide(
+        width=width,
+        gap=6.0,
+        draw_layer=draw_layer,
+        etch_layer=etch_layer,
+        ground_mask_layer=ground_mask_layer,
+        radius=radius,
+    )
+
+
+@xsection
+def coupled_cpw_w7_s6_d3(
+    *,
+    trace_names: tuple[str, ...] | None = None,
+    draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
+    etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
+    ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
+    radius: float | None = 100.0,
+) -> CrossSection:
+    """Return a thin two-trace coupled-coplanar-waveguide cross-section."""
+
+    return n_trace_coplanar_waveguide(
+        trace_widths=(7.0, 7.0),
+        trace_gaps=(6.0, 6.0),
+        inter_trace_ground_widths=(3.0,),
+        trace_names=trace_names,
+        draw_layer=draw_layer,
+        etch_layer=etch_layer,
+        ground_mask_layer=ground_mask_layer,
+        radius=radius,
+    )
+
+
+@xsection
+def cpw_15_5_15(
+    width: float = 5.0,
+    gap: float = 15.0,
+    draw_layer: LayerSpec = LAYER.D1_BOTTOM_M1_DRAW,
+    etch_layer: LayerSpec = LAYER.D1_BOTTOM_M1_ETCH,
+    ground_mask_layer: LayerSpec = LAYER.D1_BOTTOM_GROUND_MASK,
+    radius: float | None = 100.0,
+) -> CrossSection:
+    """Return the floating-coupler CPW cross-section with 15-5-15 widths."""
+
+    return coplanar_waveguide(
+        width=width,
+        gap=gap,
+        draw_layer=draw_layer,
+        etch_layer=etch_layer,
+        ground_mask_layer=ground_mask_layer,
+        radius=radius,
+    )
+
+
+@xsection
+def launcher_cross_section_big() -> CrossSection:
+    """Return a large CPW cross-section for launcher geometry."""
+
+    return coplanar_waveguide(
+        width=200.0,
+        gap=110.0,
+        etch_layer=LAYER.D0_TOP_M1_ETCH,
+    )
+
+
+@xsection
+def josephson_junction_cross_section_wide() -> CrossSection:
+    """Return the wide Josephson junction wire cross-section."""
+
+    return gf.cross_section.cross_section(
+        width=0.2,
+        layer=LAYER.D0_TOP_JJ_DRAW,
+    )
+
+
+@xsection
+def josephson_junction_cross_section_narrow() -> CrossSection:
+    """Return the narrow Josephson junction wire cross-section."""
+
+    return gf.cross_section.cross_section(
+        width=0.09,
+        layer=LAYER.D0_TOP_JJ_DRAW,
+    )
+
+
+@xsection
+def microstrip(
+    width: float = 10.0,
+    layer: LayerSpec = "D0_TOP_M1_DRAW",
+) -> CrossSection:
+    """Return an additive metal cross-section."""
+
+    return gf.cross_section.cross_section(
+        width=width,
+        layer=layer,
+    )
+
+
+strip = strip_metal = microstrip
+
+route_single = route_single_cpw = partial(
+    gf.routing.route_single,
+    cross_section=cpw,
+    bend="bend_circular",
+)
+route_bundle = route_bundle_cpw = partial(
+    gf.routing.route_bundle,
+    cross_section=cpw,
+    bend="bend_circular",
+)
+route_single_sbend = route_single_sbend_cpw = partial(
+    gf.routing.route_single_sbend,
+    cross_section=cpw,
+    bend_s="bend_s",
+)
+route_bundle_all_angle = route_bundle_all_angle_cpw = partial(
+    gf.routing.route_bundle_all_angle,
+    cross_section=cpw,
+    separation=3,
+    bend="bend_circular_all_angle",
+    straight="straight_all_angle",
+)
+route_bundle_sbend = route_bundle_sbend_cpw = partial(
+    gf.routing.route_bundle_sbend,
+    cross_section=cpw,
+    bend_s="bend_s",
+)
+route_astar = route_astar_cpw = partial(
+    add_bundle_astar,
+    layers=["D0_TOP_M1_ETCH"],
+    bend="bend_circular",
+    straight="straight",
+    grid_unit=500,
+    spacing=3,
+)
+routing_strategies: dict[str, Callable[..., object]] = {
+    "route_single": route_single,
+    "route_single_cpw": route_single_cpw,
+    "route_single_sbend": route_single_sbend,
+    "route_bundle": route_bundle,
+    "route_bundle_cpw": route_bundle_cpw,
+    "route_bundle_all_angle": route_bundle_all_angle,
+    "route_bundle_all_angle_cpw": route_bundle_all_angle_cpw,
+    "route_bundle_sbend": route_bundle_sbend,
+    "route_bundle_sbend_cpw": route_bundle_sbend_cpw,
+    "route_astar": route_astar,
+    "route_astar_cpw": route_astar_cpw,
+}
+
+gf.CONF.layer_error_path = L.ERROR_PATH
+
+__all__ = [
+    "CPW_DRAW",
+    "CPW_ETCH_NEG",
+    "CPW_ETCH_POS",
+    "CPW_GROUND_MASK",
+    "L",
+    "LAYER",
+    "LAYER_CONNECTIVITY",
+    "LAYER_STACK",
+    "LAYER_STACK_FLIP_CHIP",
+    "LAYER_VIEWS",
+    "Layer",
+    "LayerMapOrpenSCPDK",
+    "LayerSpec",
+    "coplanar_waveguide",
+    "n_trace_coplanar_waveguide",
+    "coupled_cpw_w7_s6_d3",
+    "cpw_15_5_15",
+    "cpw_2dot7_4_2dot7",
+    "cpw_6_10_6",
+    "cpw_6_7_6",
+    "cpw",
+    "cross_sections",
+    "etch",
+    "etch_only",
+    "get_layer_stack",
+    "get_layer_views",
+    "get_two_die_flip_chip_layer_stack",
+    "get_single_die_layer_stack",
+    "josephson_junction_cross_section_narrow",
+    "josephson_junction_cross_section_wide",
+    "launcher_cross_section_big",
+    "interface_preset_records",
+    "material_alias_records",
+    "material_properties",
+    "microstrip",
+    "route_astar",
+    "route_astar_cpw",
+    "route_bundle",
+    "route_bundle_all_angle",
+    "route_bundle_all_angle_cpw",
+    "route_bundle_cpw",
+    "route_bundle_sbend",
+    "route_bundle_sbend_cpw",
+    "route_single",
+    "route_single_cpw",
+    "route_single_sbend",
+    "route_single_sbend_cpw",
+    "routing_strategies",
+    "strip",
+    "strip_metal",
+    "xsection",
+]

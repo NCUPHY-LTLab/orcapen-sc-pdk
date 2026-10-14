@@ -1,5 +1,5 @@
 ---
-title: Public OrPen Xmon — Q3D Electrostatic Boundary Alignment
+title: Public OrcaPen Xmon — Q3D Electrostatic Boundary Alignment
 jupyter:
   kernelspec:
     display_name: Python 3 (ipykernel)
@@ -50,9 +50,9 @@ from scgsim.aedt import (
 )
 from scgsim.sgb import GeometryPlan
 
-import orpen_sc_pdk
-from orpen_sc_pdk import LAYER, LAYER_STACK, get_material_records
-from orpen_sc_pdk.helpers.assembly import place_flip_chip_ground_short_bumps
+import orcapen_sc_pdk
+from orcapen_sc_pdk import LAYER, LAYER_STACK, get_material_records
+from orcapen_sc_pdk.helpers.assembly import place_flip_chip_ground_short_bumps
 ```
 
 ## Setup and Run Controls
@@ -104,7 +104,7 @@ if WORKFLOW_ACTION not in {"prepare_handoff", "run", "analyze_handoff"}:
 ```{python}
 #| id: d8f493de
 if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
-    orpen_sc_pdk.activate()
+    orcapen_sc_pdk.activate()
     gf.clear_cache()
     device = gf.get_component(COMPONENT_NAME, **COMPONENT_PARAMETERS)
     coupon = place_flip_chip_ground_short_bumps(

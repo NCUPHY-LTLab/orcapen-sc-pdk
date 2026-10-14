@@ -28,7 +28,7 @@ Useful provenance fields for reviewing a source include:
   oxide, temperature, and frequency range when available;
 - default-selection scope: whether the source supports public defaults or only
   a caller-selected preset;
-- reusable handoff: whether the record belongs in `orpen-sc-pdk`, SCGSim, or
+- reusable handoff: whether the record belongs in `orcapen-sc-pdk`, SCGSim, or
   only in downstream private workflows.
 
 ## Candidate Sources
@@ -36,7 +36,7 @@ Useful provenance fields for reviewing a source include:
 | Source | Candidate use | Review status |
 |---|---|---|
 | Wenner et al., "Surface loss simulations of superconducting coplanar waveguide resonators," Applied Physics Letters 99, 113513 (2011), [doi:10.1063/1.3637047](https://doi.org/10.1063/1.3637047) | Defines the CPW `MA`/`MS`/`SA` interface taxonomy used by many surface-loss workflows and is suitable for validating role naming, scaling checks, and report interpretation. | Keep as taxonomy/reference first; do not turn its example assumptions into public defaults without an explicit process match. |
-| Woods et al., "Determining Interface Dielectric Losses in Superconducting Coplanar-Waveguide Resonators," Physical Review Applied 12, 014012 (2019), [doi:10.1103/PhysRevApplied.12.014012](https://doi.org/10.1103/PhysRevApplied.12.014012) | Source for interpreting `MA`, `MS`, `SA`, and substrate-loss values in CPW resonators with their material/process assumptions. | Existing Woods2019 public records are caller-selected conventions, not proof of an OrPen process match. |
+| Woods et al., "Determining Interface Dielectric Losses in Superconducting Coplanar-Waveguide Resonators," Physical Review Applied 12, 014012 (2019), [doi:10.1103/PhysRevApplied.12.014012](https://doi.org/10.1103/PhysRevApplied.12.014012) | Source for interpreting `MA`, `MS`, `SA`, and substrate-loss values in CPW resonators with their material/process assumptions. | Existing Woods2019 public records are caller-selected conventions, not proof of an OrcaPen process match. |
 | Wang et al., "Surface participation and dielectric loss in superconducting qubits," Applied Physics Letters 107, 162601 (2015), [doi:10.1063/1.4934486](https://doi.org/10.1063/1.4934486) | Useful for transmon surface-participation validation and geometry-dependent report checks. | Candidate validation target, not a direct CPW preset default. |
 | Lahtinen and Mottonen, "Effects of device geometry and material properties on dielectric losses in superconducting coplanar-waveguide resonators," Journal of Physics: Condensed Matter 32, 405702 (2020), [doi:10.1088/1361-648X/ab98c8](https://doi.org/10.1088/1361-648X/ab98c8) | Useful for uncertainty-aware CPW resonator material/loss interpretation and inverse-problem style validation. | Candidate for provenance and uncertainty schema design, not a default preset. |
 
@@ -59,7 +59,7 @@ distinct from the existing database records and their exact identifiers.
 Open review decisions:
 
 - decide whether `Woods2019_CPW_Si_*_candidate` rows are public PDK defaults
-  for any OrPen process scope or remain caller-selected presets;
+  for any OrcaPen process scope or remain caller-selected presets;
 - decide whether `Wenner2011_CPW_assumed_*_candidate` rows should stay
   documentation-only scaling checks rather than accepted PDK records;
 - any future automated tests require a separate explicit assignment against
@@ -70,5 +70,5 @@ Open review decisions:
 Provenance, explicit interface roles and material assumptions support review;
 they are not an automatically activated eligibility or acceptance rule.
 Caller-selected records do not imply an automatic default-selection policy.
-OrPen owns the public records, while SCGSim owns simulation interpretation and
+OrcaPen owns the public records, while SCGSim owns simulation interpretation and
 execution; a source queue does not create a PDK-owned solver implementation.

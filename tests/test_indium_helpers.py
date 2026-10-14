@@ -2,7 +2,7 @@
 
 import pytest
 
-from orpen_sc_pdk.helpers.layout import indium_bump_centers_around_polygon
+from orcapen_sc_pdk.helpers.layout import indium_bump_centers_around_polygon
 
 POLYGON = ((-50.0, -25.0), (50.0, -25.0), (50.0, 25.0), (-50.0, 25.0))
 

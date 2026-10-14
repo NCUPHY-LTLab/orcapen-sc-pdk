@@ -25,8 +25,8 @@ is attributed to this page.
 
 ## Current authoring limitation
 
-[SCGSim 2.0.0rc1](https://github.com/OrPenStrike/scgsim/tree/85d8bedb733b1e17737d935029618351b30ea5de)
-has no body-first Driven Modal interface. The prior import workflow relied on
-unobserved native object-name bindings. It is not reproduced as executable
-code, and Driven Terminal is not substituted for Modal. A current usable
-Modal notebook remains incomplete.
+The local shared-physical candidate retains a real GDS Driven Modal route, but this
+case has no observed native source/object bindings. The [earlier published
+baseline](https://github.com/OrPenStrike/scgsim/tree/85d8bedb733b1e17737d935029618351b30ea5de)
+and original settings remain historical. No executable Modal workflow is
+invented from unobserved bindings, and Driven Terminal is not substituted.
