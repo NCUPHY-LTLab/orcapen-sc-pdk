@@ -7,6 +7,10 @@ It does not infer connectivity or register invented children.
 This cell constructs source input; actual native import/build belongs to the
 later CLI transaction, not this source observation.
 
+The background recipe records the existing `px`, `py`, `pz` margins as the
+surrounding vacuum complement. Its bounds are already padded; the recipe does
+not add those margins to the background a second time.
+
 ```{python}
 #| id: tsv-owner-source-input
 if WORKFLOW_ACTION not in {"analyze_handoff", "inspect_model"}:
@@ -32,7 +36,18 @@ if WORKFLOW_ACTION not in {"analyze_handoff", "inspect_model"}:
             "z_min_um": source_bottom - pz,
             "z_max_um": source_top + pz,
         },
-        "metadata": {"meaning": "computational background complement"},
+        "metadata": {
+            "meaning": "computational background complement",
+            "is_auto_vacuum_region": True,
+            "vacuum_region_padding_um": {
+                "x_minus_um": px,
+                "x_plus_um": px,
+                "y_minus_um": py,
+                "y_plus_um": py,
+                "z_minus_um": pz,
+                "z_plus_um": pz,
+            },
+        },
     }
     source = get_tsv_source_records(coupon, host_solution_region=background)
     caller_nets = {

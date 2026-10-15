@@ -10,8 +10,10 @@ jupyter:
 execute:
   enabled: false
 scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
-scgsim_source_archive_sha256: "abbce98ed2e9484f5e3af1502e16955c138ef29b9157104909bbb9c9e14875c7"
+scgsim_source_archive_sha256: "4126a6f162f30d5fdaf4242b69cda2c17531bbaf0315f60ba09f7acb5e63c10d"
 ---
+
+![Authored Q2D cross section: 10 µm signal and gaps, 40 µm grounds and 0.2 µm metal.](../../_images/q2d-cross-section.png)
 
 Extract per-unit-length matrices from an independently authored CPW cross
 section. See the [Q2D requirements](../../../../simulation/requirements/q2d-cross-section.html).
@@ -169,7 +171,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
 #| id: q2d-7
 if WORKFLOW_ACTION != "analyze_handoff":
     conductors = (
-        # Each row gives conductor name, net name, rectangle members, and thickness (um).
+        # Each row gives conductor name, conductor type, rectangle members, and thickness (um).
         Q2dConductorSpec("Signal", "SignalLine", ("Signal",), metal_thickness_um),
         Q2dConductorSpec(
             "Ground", "ReferenceGround", ("GroundLeft", "GroundRight"), metal_thickness_um

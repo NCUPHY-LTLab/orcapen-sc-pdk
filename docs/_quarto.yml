@@ -41,8 +41,11 @@ project:
     - "reference/*.qmd"
     - "!notebooks/src/"
   resources:
+    - askr-versions.json
     - _static/images/components/*.svg
     - _static/images/test-components/*
+    - _static/images/scgsim-examples/*
+    - "notebooks/src/SCGSimExamples/_images/*"
     - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/*.ipynb"
     - "notebooks/SCGSimExamples/ComponentSimulation/CircularPad/*.ipynb"
     - "notebooks/ComponentSimulation/CpwFiniteGround/*.ipynb"

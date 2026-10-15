@@ -4,6 +4,8 @@ execute:
   enabled: false
 ---
 
+![Finite-ground CPW: 500 µm length, 10 µm signal, 6 µm gaps and 80 µm grounds.](../../_images/finite-cpw.png)
+
 Historical authoring reference, **not a current usable notebook**. See the
 [Driven Modal requirements](../../../../simulation/requirements/driven-modal.html).
 The original source is preserved in task-private history; no native evidence
