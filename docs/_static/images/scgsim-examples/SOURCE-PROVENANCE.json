@@ -1,0 +1,1306 @@
+{
+  "classification": "PUBLIC_DOCUMENTATION_SOURCE_IMAGES",
+  "units": "micrometres",
+  "method": "Existing real GF public get_polygons_points(by=tuple) / dbbox; no GDS/native/preparation; Q2D exact authored input rectangles",
+  "factory_sources": [
+    {
+      "path": "orcapen_sc_pdk/cells/simulation/scgsim/cpw_coupons.py",
+      "sha256": "ed1d30a6a47fb59d9f891b756cfcbc3acda32fef79d48d40df6ebab289cee32c"
+    },
+    {
+      "path": "orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py",
+      "sha256": "47f9d7dede683f69251922d7f54c775df62c3df06233ac900563362bef8e9888"
+    },
+    {
+      "path": "orcapen_sc_pdk/cells/simulation/scgsim/spline_strip.py",
+      "sha256": "f68ffbb20864b7efea2a0745f10007bdc92faaf2f52e339046ece26f23968663"
+    },
+    {
+      "path": "orcapen_sc_pdk/cells/simulation/scgsim/test_components.py",
+      "sha256": "67bc15a1c15126217237bfc5654ab8dc497b6fffdcda74d9c8e845da572b1c8d"
+    },
+    {
+      "path": "orcapen_sc_pdk/cells/simulation/scgsim/tsv.py",
+      "sha256": "88ca6b6ee5cb228ffeb86a506ba061424a421110a6b9d0264d09aecdab79566d"
+    },
+    {
+      "path": "orcapen_sc_pdk/cells/layout/qubit.py",
+      "sha256": "209d5409a12c0cd18d0025f0869cd497913356eaece24afe5c74306c16356cff"
+    },
+    {
+      "path": "orcapen_sc_pdk/helpers/assembly/ground_shorts.py",
+      "sha256": "20e9dc520ff3ad642b07a3256a80681547d8c2d63f6e7e72256b30e0a2e65e7f"
+    },
+    {
+      "path": "orcapen_sc_pdk/cells/simulation/scgsim/cpw_meander_source.json",
+      "sha256": "5fef6e2a947cb987f171ec2a34c495f137b8787f5cc522cd59f1df9c9139a42d"
+    }
+  ],
+  "images": [
+    {
+      "filename": "square-pad.png",
+      "sha256": "bc2b2e297c39daf4a8da6a17bb9b386ea3769d23d7896959b4d14ae64e835ce2",
+      "source_binding": {
+        "factory": "square_pad_capacitor",
+        "settings": {
+          "pad_side_um": 200.0,
+          "gap_um": 20.0,
+          "die_side_um": 1000.0,
+          "junction_width_um": 2.0
+        }
+      },
+      "panels": [
+        {
+          "title": "200 \u00b5m square pad \u00b7 20 \u00b5m gap",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 5,
+            "(202, 1)": 1
+          }
+        },
+        {
+          "title": "Pad, opening and locator detail",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -135,
+            -135,
+            135,
+            135
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 5,
+            "(202, 1)": 1
+          }
+        }
+      ]
+    },
+    {
+      "filename": "circular-pad.png",
+      "sha256": "ed329b58c943c4ffd8e56c762fdaed96e201f0dd36073fc9e2fe8f389cf4cf6f",
+      "source_binding": {
+        "factory": "circular_pad_capacitor",
+        "settings": {
+          "outer_radius_um": 100.0,
+          "inner_radius_um": 0.0,
+          "gap_um": 20.0,
+          "die_side_um": 1000.0,
+          "junction_width_um": 2.0
+        }
+      },
+      "panels": [
+        {
+          "title": "100 \u00b5m-radius disk \u00b7 20 \u00b5m gap",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 2,
+            "(202, 1)": 1
+          }
+        },
+        {
+          "title": "Disk, opening and locator detail",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -135,
+            -135,
+            135,
+            135
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 2,
+            "(202, 1)": 1
+          }
+        }
+      ]
+    },
+    {
+      "filename": "finite-cpw.png",
+      "sha256": "e30004e6f06c7cd1e52f5a02c42e350e71f62d593139739978f2a868f1c13999",
+      "source_binding": {
+        "factory": "finite_ground_cpw_coupon",
+        "settings": {
+          "trace_length_um": 500.0,
+          "signal_width_um": 10.0,
+          "gap_um": 6.0,
+          "ground_width_um": 80.0
+        }
+      },
+      "panels": [
+        {
+          "title": "Finite CPW \u00b7 500 / 10 / 6 / 80 \u00b5m",
+          "bbox_um": [
+            -250.0,
+            -91.0,
+            250.0,
+            91.0
+          ],
+          "view_bounds_um": [
+            -250.0,
+            -91.0,
+            250.0,
+            91.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 3,
+            "(202, 1)": 0
+          }
+        }
+      ]
+    },
+    {
+      "filename": "meander-lumped.png",
+      "sha256": "6e21968d663b7bb8772ff6b895bc5c64fb0e2c16f0c2278e3da1a981ea0825ae",
+      "source_binding": {
+        "factory": "cpw_meander_airbridge_lumped_coupon",
+        "settings": {},
+        "source_json_sha256": "5fef6e2a947cb987f171ec2a34c495f137b8787f5cc522cd59f1df9c9139a42d"
+      },
+      "panels": [
+        {
+          "title": "17-bridge meander \u00b7 lumped",
+          "bbox_um": [
+            -2235.0,
+            -560.0,
+            2235.0,
+            1531.5
+          ],
+          "view_bounds_um": [
+            -2235.0,
+            -560.0,
+            2235.0,
+            1531.5
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              10,
+              1
+            ],
+            [
+              10,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 23,
+            "(10, 1)": 34,
+            "(10, 0)": 17,
+            "(202, 1)": 2
+          }
+        },
+        {
+          "title": "Coupling and authored short detail",
+          "bbox_um": [
+            -2235.0,
+            -560.0,
+            2235.0,
+            1531.5
+          ],
+          "view_bounds_um": [
+            -400,
+            -35,
+            290,
+            65
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              10,
+              1
+            ],
+            [
+              10,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 23,
+            "(10, 1)": 34,
+            "(10, 0)": 17,
+            "(202, 1)": 2
+          }
+        }
+      ]
+    },
+    {
+      "filename": "meander-wave.png",
+      "sha256": "6463077ecf32581ad8a79906b30ce7c9588d4e7dae5784810f4ce77cd04c0998",
+      "source_binding": {
+        "factory": "cpw_meander_airbridge_wave_coupon",
+        "settings": {},
+        "source_json_sha256": "5fef6e2a947cb987f171ec2a34c495f137b8787f5cc522cd59f1df9c9139a42d"
+      },
+      "panels": [
+        {
+          "title": "17-bridge meander \u00b7 wave",
+          "bbox_um": [
+            -2235.0,
+            -560.0,
+            2235.0,
+            1531.5
+          ],
+          "view_bounds_um": [
+            -2235.0,
+            -560.0,
+            2235.0,
+            1531.5
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              10,
+              1
+            ],
+            [
+              10,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 24,
+            "(10, 1)": 34,
+            "(10, 0)": 17,
+            "(202, 1)": 0
+          }
+        },
+        {
+          "title": "Coupling and authored short detail",
+          "bbox_um": [
+            -2235.0,
+            -560.0,
+            2235.0,
+            1531.5
+          ],
+          "view_bounds_um": [
+            -400,
+            -35,
+            290,
+            65
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              10,
+              1
+            ],
+            [
+              10,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 24,
+            "(10, 1)": 34,
+            "(10, 0)": 17,
+            "(202, 1)": 0
+          }
+        }
+      ]
+    },
+    {
+      "filename": "tsv-concentric.png",
+      "sha256": "f92faf8605d706bd7aae91f00cd2b85c23a5cea6689036626b52ecd8b9ed0974",
+      "source_binding": {
+        "factory": "tsv_concentric_signal_coupon",
+        "settings": {
+          "die": "D0",
+          "die_side_um": 1000.0,
+          "bore_diameter_um": 60.0,
+          "wall_thickness_um": 0.2,
+          "signal_outer_radius_um": 100.0,
+          "gap_um": 20.0,
+          "ground_tsv_offset_um": 300.0
+        }
+      },
+      "panels": [
+        {
+          "title": "D0 top face \u00b7 bores and landings",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              31,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 2,
+            "(31, 0)": 5
+          }
+        },
+        {
+          "title": "D0 bottom face \u00b7 same TSV sites",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              31,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(3, 0)": 2,
+            "(31, 0)": 5
+          }
+        },
+        {
+          "title": "60 \u00b5m bore \u00b7 0.2 \u00b5m radial wall",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -31.5,
+            -31.5,
+            31.5,
+            31.5
+          ],
+          "selectors": [
+            [
+              31,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(31, 0)": 5
+          }
+        }
+      ]
+    },
+    {
+      "filename": "tsv-stitched-cpw.png",
+      "sha256": "54531ea8d128cbddf9d14bc2199daf3af426726cd4a521ce3d37ab7bdd538bcd",
+      "source_binding": {
+        "factory": "tsv_ground_stitched_cpw",
+        "settings": {
+          "die": "D0",
+          "width_um": 10.0,
+          "gap_um": 6.0,
+          "die_side_um": 1000.0,
+          "bore_diameter_um": 60.0,
+          "wall_thickness_um": 0.2,
+          "tsv_row_y_um": 100.0,
+          "tsv_x_um": [
+            -300.0,
+            -100.0,
+            100.0,
+            300.0
+          ]
+        }
+      },
+      "panels": [
+        {
+          "title": "D0 top face \u00b7 bores and landings",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              31,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 3,
+            "(31, 0)": 8
+          }
+        },
+        {
+          "title": "D0 bottom face \u00b7 same TSV sites",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              31,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(3, 0)": 1,
+            "(31, 0)": 8
+          }
+        },
+        {
+          "title": "60 \u00b5m bore \u00b7 0.2 \u00b5m radial wall",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -331.5,
+            68.5,
+            -268.5,
+            131.5
+          ],
+          "selectors": [
+            [
+              31,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(31, 0)": 8
+          }
+        }
+      ]
+    },
+    {
+      "filename": "multilevel-coupons.png",
+      "sha256": "769699642ff0bb98458370711c90bb4aa0f9d3df0225e2083c32fc57092e1299",
+      "source_binding": {
+        "factories": [
+          "flip_chip_pad_coupon",
+          "cpw_airbridge_coupon"
+        ],
+        "settings": {}
+      },
+      "panels": [
+        {
+          "title": "Flip-chip lower face and four bumps",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ],
+            [
+              40,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 5,
+            "(202, 1)": 1,
+            "(40, 0)": 4
+          }
+        },
+        {
+          "title": "Upper die bottom face",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              40,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 2)": 1,
+            "(2, 0)": 1,
+            "(40, 0)": 4
+          }
+        },
+        {
+          "title": "Stock airbridge \u00b7 posts and deck",
+          "bbox_um": [
+            -250.0,
+            -91.0,
+            250.0,
+            91.0
+          ],
+          "view_bounds_um": [
+            -250.0,
+            -91.0,
+            250.0,
+            91.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ],
+            [
+              10,
+              1
+            ],
+            [
+              10,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 3,
+            "(202, 1)": 0,
+            "(10, 1)": 2,
+            "(10, 0)": 1
+          }
+        }
+      ]
+    },
+    {
+      "filename": "source-ownership.png",
+      "sha256": "f35f09e08172321e752f30fc833eca04c252114d88b1dbfc840342a291410c9c",
+      "source_binding": {
+        "factories": [
+          "square_pad_capacitor",
+          "circular_pad_capacitor",
+          "kosen2024_flip_chip_xmon_qubit",
+          "place_flip_chip_ground_short_bumps"
+        ],
+        "square_settings": {
+          "pad_side_um": 200.0,
+          "gap_um": 20.0,
+          "die_side_um": 1000.0,
+          "junction_width_um": 2.0
+        },
+        "circle_settings": {
+          "outer_radius_um": 100.0,
+          "inner_radius_um": 0.0,
+          "gap_um": 20.0,
+          "die_side_um": 1000.0,
+          "junction_width_um": 2.0
+        },
+        "xmon_settings": {
+          "bump_ring_count_per_side": 0,
+          "qubit_pad_length": 309.5,
+          "qubit_pad_width": 24.65,
+          "qubit_gap": 20.0
+        },
+        "placement": {
+          "coupon_padding_um": 75.0,
+          "clearance_um": 30.0,
+          "placement_mode": "corner_anchors"
+        }
+      },
+      "panels": [
+        {
+          "title": "Root square pad",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -150,
+            -150,
+            150,
+            150
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 5,
+            "(202, 1)": 1
+          }
+        },
+        {
+          "title": "Root circular pad",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -150,
+            -150,
+            150,
+            150
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 2,
+            "(202, 1)": 1
+          }
+        },
+        {
+          "title": "Xmon DRAW, masks and short-bump sites",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              110,
+              0
+            ],
+            [
+              110,
+              1
+            ],
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              40,
+              0
+            ]
+          ],
+          "polygon_counts": {
+            "(110, 0)": 1,
+            "(110, 1)": 18,
+            "(201, 0)": 0,
+            "(1, 0)": 0,
+            "(202, 1)": 0,
+            "(2, 0)": 22,
+            "(40, 0)": 8
+          }
+        }
+      ]
+    },
+    {
+      "filename": "curves-pads.png",
+      "sha256": "c86c36f7e7ab47406718c252a177c866c4a214c4fdd6865e5ec48206f2e5f2c8",
+      "source_binding": {
+        "factory": "circular_pad_capacitor",
+        "disk_settings": {
+          "outer_radius_um": 100.0,
+          "inner_radius_um": 0.0,
+          "gap_um": 20.0,
+          "die_side_um": 1000.0,
+          "junction_width_um": 2.0
+        },
+        "annulus_settings": {
+          "outer_radius_um": 100.0,
+          "inner_radius_um": 80.0,
+          "gap_um": 20.0,
+          "die_side_um": 1000.0,
+          "junction_width_um": 2.0
+        }
+      },
+      "panels": [
+        {
+          "title": "Disk \u00b7 radius 100 \u00b5m",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -135,
+            -135,
+            135,
+            135
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 2,
+            "(202, 1)": 1
+          }
+        },
+        {
+          "title": "Annulus \u00b7 radii 80 / 100 \u00b5m",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -135,
+            -135,
+            135,
+            135
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 2,
+            "(202, 1)": 1
+          }
+        }
+      ]
+    },
+    {
+      "filename": "curves-strips.png",
+      "sha256": "f7801bc13eddd236e0dee88400de22b993b6ebb5fd3828b15cbc94ade5777067",
+      "source_binding": {
+        "canonical_parameter_authority": "notebooks/src/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.qmd#gch-strip-sources",
+        "arc_settings": {
+          "straight_length_um": 100.0,
+          "bend_radius_um": 100.0,
+          "strip_width_um": 10.0,
+          "die_side_um": 1000.0
+        }
+      },
+      "panels": [
+        {
+          "title": "04A \u00b7 circular-arc strip",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -15,
+            -15,
+            220,
+            220
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 1,
+            "(202, 1)": 0
+          }
+        },
+        {
+          "title": "04B \u00b7 interpolating Hermite",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -215,
+            -70,
+            215,
+            100
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 1,
+            "(202, 1)": 0
+          }
+        },
+        {
+          "title": "04C \u00b7 rational B-spline",
+          "bbox_um": [
+            -500.0,
+            -500.0,
+            500.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -215,
+            -70,
+            215,
+            100
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 1,
+            "(1, 0)": 1,
+            "(202, 1)": 0
+          }
+        }
+      ]
+    },
+    {
+      "filename": "curves-occurrences.png",
+      "sha256": "694cf7eec098c56eab9f8b5f11ff629b44c1b62d64fd8f1fce6901b575744dcc",
+      "source_binding": {
+        "child": "straight_to_circular_strip",
+        "settings": {
+          "straight_length_um": 100.0,
+          "bend_radius_um": 100.0,
+          "strip_width_um": 10.0,
+          "die_side_um": 1000.0
+        },
+        "transforms": [
+          {
+            "name": "ROTATED",
+            "rotation_deg": 90.0,
+            "move_um": [
+              -600.0,
+              0.0
+            ]
+          },
+          {
+            "name": "MIRRORED",
+            "mirror_x": true,
+            "move_um": [
+              600.0,
+              0.0
+            ]
+          }
+        ]
+      },
+      "panels": [
+        {
+          "title": "Actual rotated and mirrored arc occurrences",
+          "bbox_um": [
+            -1100.0,
+            -500.0,
+            1100.0,
+            500.0
+          ],
+          "view_bounds_um": [
+            -1100.0,
+            -500.0,
+            1100.0,
+            500.0
+          ],
+          "selectors": [
+            [
+              201,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              202,
+              1
+            ]
+          ],
+          "polygon_counts": {
+            "(201, 0)": 2,
+            "(1, 0)": 2,
+            "(202, 1)": 0
+          }
+        }
+      ]
+    },
+    {
+      "filename": "q2d-cross-section.png",
+      "sha256": "49364cce9778f06fa77e28dbce1a9d085a91098aecaecbd53746d748343b9698",
+      "source_binding": {
+        "canonical": "notebooks/src/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.qmd#q2d-4",
+        "rectangles": [
+          {
+            "name": "Substrate",
+            "origin_um": [
+              -100.0,
+              -500.0
+            ],
+            "size_um": [
+              200.0,
+              500.0
+            ],
+            "material": "Si"
+          },
+          {
+            "name": "Signal",
+            "origin_um": [
+              -5.0,
+              0.0
+            ],
+            "size_um": [
+              10.0,
+              0.2
+            ],
+            "material": "Nb"
+          },
+          {
+            "name": "GroundLeft",
+            "origin_um": [
+              -55.0,
+              0.0
+            ],
+            "size_um": [
+              40.0,
+              0.2
+            ],
+            "material": "Nb"
+          },
+          {
+            "name": "GroundRight",
+            "origin_um": [
+              15.0,
+              0.0
+            ],
+            "size_um": [
+              40.0,
+              0.2
+            ],
+            "material": "Nb"
+          }
+        ]
+      },
+      "representation": "Actual authored input rectangles, equal-axis whole and detail; no native model"
+    }
+  ],
+  "geometry_authority": "Existing public factories/canonical parameters, unchanged",
+  "generator": "Task-private rendering script, not a shipped component implementation"
+}
