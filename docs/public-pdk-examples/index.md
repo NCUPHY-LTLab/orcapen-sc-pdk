@@ -67,6 +67,20 @@ builds a CPW resonator from hanger and meander sections.
 [Factory source: `interdigital_capacitor`](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/layout/capacitor.py)
 provides the reusable interdigital capacitor layout.
 
+`corner_radius_um=0.0` preserves the sharp default. Set a positive radius (for
+example `corner_radius_um=1.0`) to round the merged electrode finger tips,
+roots and taper transitions, and the ground-mask contour. Both outer CPW cut
+planes stay flat, with unchanged ports and nominal straight finger/end gaps.
+Real outer and hole boundaries are rounded separately; hole-serialization
+bridges are not physical corners.
+The existing `half` option is unchanged. Negative/nonfinite radii and tangent
+arcs that cannot fit adjacent contour segments raise `ValueError`; the radius
+is never silently reduced. Circular arcs are sampled at at most 5 degrees per
+chord, including tangent endpoints, then quantized to the existing PDK grid.
+Corner-local clearances can differ from nominal straight gaps. This geometry
+option is not fabrication, DRC or solver certification; the preview below shows
+the sharp default.
+
 ![Default interdigital capacitor: actual DRAW and ETCH.](../_static/images/components/interdigital_capacitor.svg){#fig-layout-idc}
 
 {{< askr-image-view target="fig-layout-idc" mode="inline" >}}
