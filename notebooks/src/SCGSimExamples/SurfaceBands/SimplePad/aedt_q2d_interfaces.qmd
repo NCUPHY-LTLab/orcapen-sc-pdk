@@ -1,0 +1,313 @@
+---
+title: "SimplePad local interfaces — Q2D fields and factors"
+jupyter:
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+  simulation_notebook:
+    kind: single
+execute:
+  enabled: false
+---
+
+Prepare a Q2D model of the SimplePad's facing straight edges, then save the returned MA/MS/SA field factors for the [Palace band example](palace_eigenmode_bands.qmd). Edit geometry and numeric controls only in [the companion model](simplepad_interface_model.json); ordinary `json.load` supplies values to the typed constructors below.
+
+Use a separately provisioned CPython 3.12.14 / GDSFactory 9.48.0 environment with an ordinary OrcaPen wheel built from pinned public source `c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c` and the selected SCGSim candidate.
+
+| Scope | Status |
+| --- | --- |
+| Recorded execution of the same Q2D request | ✅ AEDT 2024.2 native project saved and released; six areas, 20 component integrals, and three typed factors strictly resolved. |
+| This document | ⏳ Not executed; its Q2D executable cells match the recorded request. |
+
+This first runnable illustration leaves local-length mesh assignments unassigned and uses native default exterior behavior, still unobserved. The finite Region padding and adaptive controls are explicit. Finite truncation and applying straight-edge factors to corners or outer edges remain illustrative modeling choices.
+
+## Setup and Imports
+
+```{python}
+#| id: local-q2d-imports
+import importlib.metadata
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+from uuid import uuid4
+
+from IPython.display import display
+from scgsim.aedt import AedtResources, prepare_handoff, resolve_results
+from scgsim.aedt.specs.common import MatrixRunControl, PdkMaterial
+from scgsim.aedt.specs.q2d import Q2dConductorSpec, Q2dRectangleSpec, Q2dSpec
+from scgsim.aedt.specs.q2d_fields import (
+    Q2dCGSourceSpec,
+    Q2dFieldAreaSpec,
+    Q2dFieldRatioSpec,
+    Q2dFieldRequest,
+    Q2dMaterialProperties,
+)
+from orcapen_sc_pdk import get_interface_preset_records, get_material_records
+```
+
+## Setup and Run Controls
+
+Choose `AUTHORING_ONLY`, `prepare_handoff`, `run`, or `analyze_handoff`. Preparation writes a portable request; only `run` invokes the generated native script. For returned analysis, set `SIMPLEPAD_Q2D_RETURNED_RUN_DIR` to the actual immutable returned directory and `SIMPLEPAD_MODEL_INPUT_PATH` to its retained source `model-input.json`. Retain that returned directory independently for the Palace example.
+
+```{python}
+#| id: local-q2d-controls
+WORKFLOW_ACTION = "prepare_handoff"
+RUN_ID = f"simplepad_local_q2d_{uuid4().hex}"
+OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SimplePadLocalInterfaces"
+RUN_DIR = OUTPUT_ROOT / RUN_ID / "handoff"
+SOURCE_OUTPUT_DIR = OUTPUT_ROOT / RUN_ID / "source-inputs"
+FACTOR_OUTPUT_DIR = OUTPUT_ROOT / RUN_ID / "returned-factors"
+if WORKFLOW_ACTION not in {"AUTHORING_ONLY", "prepare_handoff", "run", "analyze_handoff"}:
+    raise ValueError("Unknown WORKFLOW_ACTION")
+MODEL_PATH = (
+    Path(os.environ["SIMPLEPAD_MODEL_INPUT_PATH"])
+    if WORKFLOW_ACTION == "analyze_handoff"
+    else Path("simplepad_interface_model.json")
+)
+with MODEL_PATH.open(encoding="utf-8") as stream:
+    model = json.load(stream)
+if WORKFLOW_ACTION != "analyze_handoff":
+    requested_resources = model["resources_proposed"]
+    RESOURCES = AedtResources(
+        cores=requested_resources["cores"],
+        ram_limit_percent=requested_resources["ram_limit_percent"],
+    )
+display({
+    "python": sys.version,
+    "gdsfactory": importlib.metadata.version("gdsfactory"),
+    "orcapen-sc-pdk": importlib.metadata.version("orcapen-sc-pdk"),
+    "scgsim": importlib.metadata.version("scgsim"),
+    "run_id": RUN_ID,
+})
+```
+
+Check: use the requested isolated environment and obtain resource admission before choosing `run`; the resource values in the model are proposals.
+
+## Create Simulation Component / Coupon
+
+The companion records all 22 rectangles. Local X is translated layout X; local Y is stack Z, with the omitted axis along the source edge. Artificial metal ends have no added MA film. No GDSFactory component or GDS import is used for this independent cross-section.
+
+## Initialize AEDT Project / App
+
+The generated SCGSim runner owns the AEDT session. These authoring cells create typed requests, not an interactive Desktop session.
+
+## Build Native Q2D Geometry and Conductors
+
+```{python}
+#| id: local-q2d-rectangles
+if WORKFLOW_ACTION != "analyze_handoff":
+    rectangles = tuple(
+        Q2dRectangleSpec(
+            name=row["name"],
+            origin_um=(row["x"][0], row["y"][0]),
+            size_um=(row["x"][1] - row["x"][0], row["y"][1] - row["y"][0]),
+            material_id=row["material"],
+        )
+        for row in model["rectangles"]
+    )
+```
+
+## Geometry Verification
+
+```{python}
+#| id: local-q2d-geometry-inputs
+if WORKFLOW_ACTION != "analyze_handoff":
+    display([rectangle.to_payload() for rectangle in rectangles])
+```
+
+Check: inspect the named extents against the companion model. Native geometry readback belongs to the returned run.
+
+## Materials and Boundaries
+
+Use Al as the selected superconducting PEC approximation. Si and vacuum retain their PDK identities; local interfaces get explicit project-local library names and numeric properties. Preserve raw LiteratureCentral records separately, because `PdkMaterial` carries identity rather than source descriptions.
+
+```{python}
+#| id: local-q2d-materials
+if WORKFLOW_ACTION != "analyze_handoff":
+    material_records = get_material_records()
+    raw_presets = get_interface_preset_records()
+    interface_source_records = {
+        kind: raw_presets[selection["preset"]]
+        for kind, selection in model["interfaces"].items()
+    }
+    materials = {
+        key: PdkMaterial(
+            material_id=key,
+            kind=material_records[key]["material_kind"],
+            is_superconducting=material_records[key]["is_superconducting"],
+            library_name=material_records[key]["aedt_library_name"],
+        )
+        for key in ("Al", "Si", "vacuum")
+    }
+    materials.update({
+        kind: PdkMaterial(**model["materials"][kind])
+        for kind in model["interfaces"]
+    })
+    material_properties = {
+        key: Q2dMaterialProperties(
+            permittivity=row["permittivity"],
+            dielectric_loss_tangent=row["dielectric_loss_tangent"],
+            permeability=row["permeability"],
+        )
+        for key, row in model["material_properties"].items()
+    }
+    region_padding_um = tuple(model["region_padding_um"])
+    display(interface_source_records)
+```
+
+## Ports / Nets / Excitations
+
+The ordered conductors are Signal then Ground. Only Signal appears in the capacitance/conductance (CG) source list; Ground remains the reference group. Every field query uses that same CG basis and raw unsmoothed `Re(E dot Conj(E))` area integrals.
+
+```{python}
+#| id: local-q2d-excitation
+if WORKFLOW_ACTION != "analyze_handoff":
+    conductors = tuple(
+        Q2dConductorSpec(
+            name=row["name"],
+            conductor_type=row["conductor_type"],
+            object_names=tuple(row["object_names"]),
+            thickness_um=row["thickness_um"],
+        )
+        for row in model["conductors"]
+    )
+    field_request = Q2dFieldRequest(
+        sources=tuple(Q2dCGSourceSpec(**row) for row in model["sources"]),
+        areas=tuple(
+            Q2dFieldAreaSpec(
+                name=row["name"],
+                object_names=tuple(row["object_names"]),
+                material_id=row["material_id"],
+                quantity=row["quantity"],
+            )
+            for row in model["areas"]
+        ),
+        ratios=tuple(
+            Q2dFieldRatioSpec(
+                name=row["name"],
+                numerator=tuple(row["numerator"]),
+                denominator=tuple(row["denominator"]),
+            )
+            for row in model["ratios"]
+        ),
+    )
+```
+
+## Simulation Setup
+
+Each numerator is its explicit near-plus-middle union; each denominator is middle only. MA includes both entire inner sidewalls in near. Far rectangles remain in the physical model and outside these integrals. The field request enables field saving through SCGSim.
+
+```{python}
+#| id: local-q2d-setup
+if WORKFLOW_ACTION != "analyze_handoff":
+    controls = model["matrix_run_control"]
+    run_control = MatrixRunControl(
+        setup_name=controls["setup_name"],
+        frequency_ghz=controls["frequency_ghz"],
+        maximum_passes=controls["maximum_passes"],
+        convergence_percent=controls["convergence_percent"],
+        minimum_passes=controls["minimum_passes"],
+        minimum_converged_passes=controls["minimum_converged_passes"],
+        percent_refinement=controls["percent_refinement"],
+    )
+    spec = Q2dSpec(
+        project_name=RUN_ID,
+        design_name="SimplePadLocalInterfaces",
+        materials=materials,
+        vacuum_material_id="vacuum",
+        rectangles=rectangles,
+        conductors=conductors,
+        run_control=run_control,
+        region_padding_um=region_padding_um,
+        aedt_version=model["aedt_version"],
+        material_properties=material_properties,
+        field_request=field_request,
+    )
+```
+
+## Simulation Configuration
+
+```{python}
+#| id: local-q2d-request-display
+if WORKFLOW_ACTION != "analyze_handoff":
+    display(spec.to_payload())
+```
+
+## Solve and Export
+
+```{python}
+#| id: local-q2d-handoff
+if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
+    SOURCE_OUTPUT_DIR.mkdir(parents=True, exist_ok=False)
+    with (SOURCE_OUTPUT_DIR / "model-input.json").open("x", encoding="utf-8") as stream:
+        json.dump(model, stream, indent=2, allow_nan=False)
+    with (SOURCE_OUTPUT_DIR / "interface-source-records.json").open("x", encoding="utf-8") as stream:
+        json.dump(interface_source_records, stream, indent=2, allow_nan=False)
+    HANDOFF = prepare_handoff(spec=spec, output_dir=RUN_DIR, resources=RESOURCES)
+    display(HANDOFF)
+    if WORKFLOW_ACTION == "run":
+        subprocess.run([str(HANDOFF.script_path)], cwd=HANDOFF.run_dir, check=True)
+```
+
+Check: retain the handoff and source-input files. Changing to `run` is a separate native action.
+
+## Adaptive-Pass Convergence / Solver Diagnostics
+
+```{python}
+#| id: local-q2d-returned
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    RETURNED_RUN_DIR = (
+        HANDOFF.run_dir if WORKFLOW_ACTION == "run"
+        else Path(os.environ["SIMPLEPAD_Q2D_RETURNED_RUN_DIR"])
+    )
+    result = resolve_results(RETURNED_RUN_DIR)
+    result.show_all_results(show_details=True)
+```
+
+## Results: Plots and Readable Tables
+
+### Physics Analysis Results
+
+```{python}
+#| id: local-q2d-factors
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    fields = result.q2d_fields()
+    factors = {
+        row["name"]: fields.correction_factor(row["name"])
+        for row in model["ratios"]
+    }
+    display(fields.to_payload())
+    display({name: factor.to_payload() for name, factor in factors.items()})
+    FACTOR_OUTPUT_DIR.mkdir(parents=True, exist_ok=False)
+    for name, factor in factors.items():
+        with (FACTOR_OUTPUT_DIR / f"{name}.json").open("x", encoding="utf-8") as stream:
+            json.dump(factor.to_payload(), stream, indent=2, allow_nan=False)
+    display(FACTOR_OUTPUT_DIR)
+```
+
+Check: factors come from the resolved native exports and carry their artifact and basis provenance. Missing exports and zero denominators propagate the typed result's errors.
+
+### Simulation Performance / Benchmarks
+
+```{python}
+#| id: local-q2d-benchmark
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    display(result.simulation_benchmark())
+```
+
+## Save and Release AEDT
+
+The generated runner owns session release. Retain its project and receipt with the exported factors.
+
+```{python}
+#| id: local-q2d-retained
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    display({"project": result.project_path, "receipt": result.receipt_path})
+elif WORKFLOW_ACTION == "prepare_handoff":
+    display(HANDOFF.archive_path)
+```
+
+The source material records are pinned in [public OrcaPen](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c/orcapen_sc_pdk/materials.json). Continue with [the Palace band example](palace_eigenmode_bands.qmd) using the actual returned directory.
