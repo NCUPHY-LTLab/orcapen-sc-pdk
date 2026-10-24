@@ -5,6 +5,7 @@ project:
     - "*.qmd"
     - "*.md"
     - "home/*.md"
+    - "start/*.qmd"
     - "features/scgsim-integration.md"
     - "features/docs-theme.md"
     - "public-pdk-examples/*.md"
@@ -74,105 +75,63 @@ website:
     logo: assets/orcapen-mark.svg
     search: true
     left:
-      - text: Overview
-        href: index.qmd
       - text: Get Started
         href: getting-started.md
-      - text: Cells
-        href: public-pdk-examples/index.md
-      - text: Process
-        href: materials-and-technology.md
       - text: Simulation
         href: notebooks.qmd
       - text: API
-        href: reference/index.qmd
+        href: api.qmd
+      - text: Research
+        href: paper-review.md
+      - text: Development
+        href: developing-features.md
   sidebar:
-    - id: cells
-      title: Cells
-      collapse-level: 1
+    - id: get-started
+      title: Get Started
       contents:
+        - getting-started.md
         - public-pdk-examples/index.md
-        - public-pdk-examples/test-components.md
-        - public-pdk-examples/component-authoring.md
-        - notebooks/Public_Docs/component_gallery.ipynb
-    - id: process
-      title: Process
-      contents:
-        - materials-and-technology.md
-        - home/pdk-responsibilities.md
+        - start/layers.qmd
+        - start/materials.qmd
+        - start/cross-sections-ports.qmd
     - id: simulation
       title: Simulation
       contents:
-        - text: Overview
-          href: notebooks.qmd
-        - section: Layer 1 · OrcaPen user requirements
-          contents:
-            - simulation/requirements/electrostatic-capacitance.qmd
-            - simulation/requirements/eigenmode.qmd
-            - simulation/requirements/lumped-rlc-eigenmode.qmd
-            - simulation/requirements/epr-loss.qmd
-            - simulation/requirements/driven-terminal.qmd
-            - simulation/requirements/driven-modal.qmd
-            - simulation/requirements/q3d-acrl.qmd
-            - simulation/requirements/q2d-cross-section.qmd
-        - section: Layer 2 · SCGSim tool requirements
-          contents:
-            - simulation/tools/source-ownership.qmd
-            - simulation/tools/curves-holes-transforms.qmd
-            - simulation/tools/materials-stack-z.qmd
-            - simulation/tools/contacts-multilevel.qmd
-            - simulation/tools/mesh-fem-amr.qmd
-            - simulation/tools/handoff-resolve-report.qmd
-        - section: SCGSim examples
-          contents:
-            - simulation/notebooks.qmd
-            - features/scgsim-integration.md
-            - section: Pad examples
-              contents:
-                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb
-            - section: SimplePad surface bands
-              contents:
-                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd
-                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd
-            - section: Xmon examples and historical evidence
-              contents:
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/aedt_q3d.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_eigenmode.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.ipynb
-            - section: CPW examples
-              contents:
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb
-                - notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb
-            - section: Launcher / exterior-cut pair
-              contents:
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb
-            - section: Source geometry observations
-              contents:
-                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb
-            - section: TSV examples
-              contents:
-                - simulation/tsv-model-inspection.qmd
-                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb
+        - notebooks.qmd
+        - simulation/requirements/electrostatic-capacitance.qmd
+        - simulation/requirements/eigenmode.qmd
+        - simulation/requirements/driven-terminal.qmd
+        - simulation/requirements/q2d-cross-section.qmd
+        - simulation/requirements/epr-loss.qmd
+        - public-pdk-examples/test-components.md
     - id: api
       title: API
       contents:
-        - auto: reference
+        - text: PDK & Technology
+          href: api.qmd#pdk-technology
+        - text: Cells & Primitives
+          href: api.qmd#cells-primitives
+        - text: Cross-sections & Ports
+          href: api.qmd#cross-sections-ports
+        - text: Materials & Interfaces
+          href: api.qmd#materials-interfaces
+        - section: Generated function reference
+          contents:
+            - auto: reference
+    - id: research
+      title: Research
+      contents:
+        - paper-review.md
+        - papers/transmon-reference-designs.md
+        - papers/cpw-resonator-references.md
+        - papers/flip-chip-3d-integration.md
+        - papers/surface-loss-participation.md
+    - id: development
+      title: Development
+      contents:
+        - developing-features.md
+        - home/ecosystem-workspace.md
+        - docs-publishing.md
 
 format:
   askr-html:

@@ -1,4 +1,7 @@
-# Documentation theme and toolchain
+---
+title: "Theme and toolchain"
+sidebar: development
+---
 
 This site uses the public `askr-html` format from
 [Askr v0.8.0 released source](https://github.com/arfiligol/askr/tree/v0.8.0).
@@ -32,8 +35,5 @@ tokens. The [Cells gallery](../public-pdk-examples/index.md#components-layout)
 uses the stock inline Image Viewer; the previous custom iframe viewer is retired.
 See the [released viewer usage](https://github.com/arfiligol/askr/blob/v0.8.0/usage/image-viewer.qmd).
 
-Documentation rendering has `execute.enabled: false`: it publishes saved
-notebook content, not fresh simulations. The normal documentation prerequisites
-and existing Python docs dependency cohort remain unchanged. Theme/render
-success is not source-layout validation, native mesh/contact/solver evidence,
-or acceptance of scientific results.
+Documentation rendering keeps `execute.enabled: false`. For build commands,
+notebook pairing, and Pages deployment, use [Documentation & Website](../docs-publishing.md).

@@ -1,0 +1,33 @@
+---
+title: "API"
+sidebar: api
+---
+
+Use the generated function references for exact signatures and parameters.
+Technology and port definitions link to the public source where they are
+not part of the generated function index.
+
+## PDK & Technology {#pdk-technology}
+
+- [activate](reference/activate.qmd#orcapen_sc_pdk.activate) and
+  [get_pdk](reference/get_pdk.qmd#orcapen_sc_pdk.get_pdk).
+- [Generated package reference](reference/index.qmd#package).
+- [Layer maps, stack getters, and technology definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py).
+
+## Cells & Primitives {#cells-primitives}
+
+- [Generated cell reference](reference/index.qmd#cells).
+- [Choose a cell](public-pdk-examples/index.md) or read
+  [primitive roles](public-pdk-examples/shared-primitives.md).
+
+## Cross-sections & Ports {#cross-sections-ports}
+
+- [PDK registry](reference/get_pdk.qmd#orcapen_sc_pdk.get_pdk).
+- [Cross-section definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py)
+  and [port types](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/ports.py).
+- [Cross-sections & Ports guide](start/cross-sections-ports.qmd).
+
+## Materials & Interfaces {#materials-interfaces}
+
+- [Generated material and interface functions](reference/index.qmd#materials).
+- [Materials & Interfaces guide](start/materials.qmd).

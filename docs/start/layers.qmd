@@ -1,0 +1,78 @@
+---
+title: "Layers & Stack"
+sidebar: get-started
+---
+
+Use named layers for XY geometry and stack levels for physical Z and material.
+Select both before choosing a simulation model. The
+[technology definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py)
+provide the exact source values.
+
+## Pick the layer by purpose
+
+```python
+from orcapen_sc_pdk import LAYER, LAYER_VIEWS
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
+
+metal_xy = LAYER.D0_TOP_M1_DRAW
+stack = get_single_die_layer_stack()
+for name, level in stack.layers.items():
+    print(name, level.zmin, level.thickness, level.material)
+```
+
+`D0`/`D1` identify dies; `TOP`/`BOTTOM` identify faces. A layer pair is
+`(layer, datatype)`, not a height or a material. `LAYER_VIEWS` controls display
+colors and visibility, not fabrication or solver physics.
+
+| Source purpose | Common layers | Meaning |
+|---|---|---|
+| Positive conductor polygons | D0 top DRAW `1/0`, D1 bottom DRAW `2/0` | Source metal islands, traces and explicit ground strips |
+| Clearance/removal | D0 top ETCH `1/1`, GROUND_MASK `110/0` | Removal/domain recipes, not additional metal |
+| Die footprint | D0 substrate `201/0`, D1 substrate `201/2` | XY substrate extent |
+| Bump body / UBM | `40/0` / `40/1` | Separate indium and under-bump source footprints |
+| Airbridge deck / piers | `10/0` / `10/1` | Separate elevated Al parts |
+| Nonmetal locator | D0 top SIM_BOUNDARY `202/1` | Zero-thickness vacuum sheet locating an interface, not a conductor |
+
+### DRAW, masks and holes
+
+Positive DRAW polygons explicitly carry source metal. The stack's derived M1
+recipe is `DOMAIN - (ETCH - DRAW)`. Component simulation also has explicit
+face/ground-mask geometry metadata, so carry the full selected stack and the
+component's annotations instead of treating every GDS layer as a conductor.
+
+Square/circular pad coupons contain positive PAD and GROUND geometry plus an
+opening mask. A ring's inner hole remains nonmetal, not another Ground entity.
+The small east-edge locator across the pad gap is a nonmetal sheet, even where
+its source footprint lands on conductors. Its optional circuit element and
+excitation belong to the selected simulation problem.
+
+## Select the physical stack
+
+Stack getters live in `orcapen_sc_pdk.tech`:
+
+- `get_layer_stack()` returns the full die/face-aware public stack.
+- `get_two_die_flip_chip_layer_stack()` selects that two-die stack.
+- `get_single_die_layer_stack()` returns detached D0 substrate, top M1 and
+  locator levels, without an upper die/interdie cavity.
+- `get_single_die_layer_stack(include_airbridges=True)` adds D0 top piers/deck.
+
+| Current source level | Z range (µm) | Material |
+|---|---|---|
+| D0 substrate | −500..0 | Si |
+| D0 top base M1 | 0..0.1 | Al (100 nm film) |
+| D0 top locator | z = 0.05, thickness 0 | vacuum |
+| Flip-chip bump body | 0.1..8.1 | In |
+| D1 bottom M1 | 8.1..8.2, outward −Z | Al |
+| D1 substrate | 8.2..508.2 | Si |
+| D0 airbridge piers | 0.1..3.1 | Al |
+| D0 airbridge deck | 3.1..3.4 | Al (300 nm film) |
+
+The 8 µm metal-to-metal bump gap and 3 µm gap above base metal are separately
+declared dimensions, not 100 nm films. UBM `40/1` remains source process detail
+with `exclude_from_simulation=True`. The nominal airbridge is a rectangular
+deck/post model, not a measured reflow arch. Use the stack selected by your notebook when comparing its results.
+
+
+
+Continue with [Materials & Interfaces](materials.qmd) or
+[Cross-sections & Ports](cross-sections-ports.qmd).

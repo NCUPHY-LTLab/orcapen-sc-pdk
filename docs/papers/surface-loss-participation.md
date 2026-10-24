@@ -1,74 +1,31 @@
-# Surface Loss And Participation Studies
+---
+title: "Surface Loss and Participation Studies"
+sidebar: research
+---
 
-**Design family:** analysis method
+Read these references when selecting surface-interface assumptions or
+interpreting participation calculations. Match the paper's geometry,
+materials, and extraction method to your model.
 
-**Status:** source selection
+| Reference | Reading focus |
+| --- | --- |
+| Wenner et al., “Surface loss simulations of superconducting coplanar waveguide resonators,” APL 99, 113513 (2011), [DOI](https://doi.org/10.1063/1.3637047) | MA/MS/SA interface taxonomy and surface-loss scaling |
+| Woods et al., “Determining Interface Dielectric Losses in Superconducting Coplanar-Waveguide Resonators,” PRApplied 12, 014012 (2019), [DOI](https://doi.org/10.1103/PhysRevApplied.12.014012) | Interface-loss extraction and material/process assumptions |
+| Wang et al., “Surface participation and dielectric loss in superconducting qubits,” APL 107, 162601 (2015), [DOI](https://doi.org/10.1063/1.4934486) | Transmon surface participation and geometry dependence |
+| Lahtinen and Möttönen, “Effects of device geometry and material properties on dielectric losses in superconducting coplanar-waveguide resonators,” JPCM 32, 405702 (2020), [DOI](https://doi.org/10.1088/1361-648X/ab98c8) | Geometry, material-property uncertainty, and inverse interpretation |
 
-Collect public studies that define useful targets for surface participation,
-surface-Q mapping, dielectric loss attribution, and report validation.
+## Select assumptions for a calculation
 
-No private NCUAS preset names, private material values, unpublished fitting
-results, or private run evidence belong on this page. This page is the public
-source queue for interpreting MA/MS/SA presets and possible future revisions.
-The current six public records live in `materials.json` and are returned by
-`materials.get_interface_preset_records()`; the empty technology-level dictionary
-is not their source of truth. Availability does not establish process suitability
-or automatic acceptance of a candidate.
+Record the interface role, thickness, permittivity, and loss tangent together
+with whether each value was measured, fitted, or assumed in the source.
+Include the metal, substrate, surface treatment, temperature, and frequency
+when comparing processes.
 
-## Preset Review Fields
+The current public records are in
+[materials.json](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/materials.json)
+and returned by `get_interface_preset_records()`.
+Use [Materials & Interfaces](../start/materials.qmd) to select records;
+literature conventions are not automatic defaults for an unmatched process.
 
-Useful provenance fields for reviewing a source include:
-
-- interface role: `MA`, `MS`, `SA`, bulk substrate, or another explicit role;
-- geometry family: CPW resonator, transmon, flip-chip package, or other;
-- extracted fields: thickness, dielectric constant or material record,
-  loss tangent, and whether each field is measured, fitted, assumed, or
-  scaled;
-- material/process assumptions: metal, substrate, surface treatment, trenching,
-  oxide, temperature, and frequency range when available;
-- default-selection scope: whether the source supports public defaults or only
-  a caller-selected preset;
-- reusable handoff: whether the record belongs in `orcapen-sc-pdk`, SCGSim, or
-  only in downstream private workflows.
-
-## Candidate Sources
-
-| Source | Candidate use | Review status |
-|---|---|---|
-| Wenner et al., "Surface loss simulations of superconducting coplanar waveguide resonators," Applied Physics Letters 99, 113513 (2011), [doi:10.1063/1.3637047](https://doi.org/10.1063/1.3637047) | Defines the CPW `MA`/`MS`/`SA` interface taxonomy used by many surface-loss workflows and is suitable for validating role naming, scaling checks, and report interpretation. | Keep as taxonomy/reference first; do not turn its example assumptions into public defaults without an explicit process match. |
-| Woods et al., "Determining Interface Dielectric Losses in Superconducting Coplanar-Waveguide Resonators," Physical Review Applied 12, 014012 (2019), [doi:10.1103/PhysRevApplied.12.014012](https://doi.org/10.1103/PhysRevApplied.12.014012) | Source for interpreting `MA`, `MS`, `SA`, and substrate-loss values in CPW resonators with their material/process assumptions. | Existing Woods2019 public records are caller-selected conventions, not proof of an OrcaPen process match. |
-| Wang et al., "Surface participation and dielectric loss in superconducting qubits," Applied Physics Letters 107, 162601 (2015), [doi:10.1063/1.4934486](https://doi.org/10.1063/1.4934486) | Useful for transmon surface-participation validation and geometry-dependent report checks. | Candidate validation target, not a direct CPW preset default. |
-| Lahtinen and Mottonen, "Effects of device geometry and material properties on dielectric losses in superconducting coplanar-waveguide resonators," Journal of Physics: Condensed Matter 32, 405702 (2020), [doi:10.1088/1361-648X/ab98c8](https://doi.org/10.1088/1361-648X/ab98c8) | Useful for uncertainty-aware CPW resonator material/loss interpretation and inverse-problem style validation. | Candidate for provenance and uncertainty schema design, not a default preset. |
-
-## Candidate Value Extraction
-
-These rows are review candidates only. They are not public defaults, and they
-do not themselves change the public database or establish acceptance. They are
-distinct from the existing database records and their exact identifiers.
-
-| Candidate record | Role | Thickness (um) | Relative permittivity | Loss tangent | Source basis | Status |
-|---|---:|---:|---:|---:|---|---|
-| `Wenner2011_CPW_assumed_MA_candidate` | `MA` | 0.003 | 10.0 | 0.002 | Rough interface-loss estimate for surface dielectrics in CPW resonators; the paper and supplement use 3 nm, relative permittivity 10, and loss tangent 0.002 for scaling and participation/loss examples. | Taxonomy/scaling candidate only. |
-| `Wenner2011_CPW_assumed_MS_candidate` | `MS` | 0.003 | 10.0 | 0.002 | Same source assumption as `Wenner2011_CPW_assumed_MA_candidate`; useful for checking `MA`/`MS`/`SA` role naming and participation scaling. | Taxonomy/scaling candidate only. |
-| `Wenner2011_CPW_assumed_SA_candidate` | `SA` | 0.003 | 10.0 | 0.002 | Same source assumption as `Wenner2011_CPW_assumed_MA_candidate`; useful for checking substrate-air role mapping and participation scaling. | Taxonomy/scaling candidate only. |
-| `Woods2019_CPW_Si_MS_candidate` | `MS` | 0.002 | 11.4 | 4.8e-4 | Main text uses 2 nm and relative permittivity 11.4 for the MS defect layer when converting fitted loss factors into loss tangents. | Primary CPW extraction candidate; caller-selected until accepted. |
-| `Woods2019_CPW_Si_SA_candidate` | `SA` | 0.002 | 4.0 | 1.7e-3 | Main text uses 2 nm and relative permittivity 4.0 for the SA defect layer when converting fitted loss factors into loss tangents. | Primary CPW extraction candidate; caller-selected until accepted. |
-| `Woods2019_CPW_Si_MA_candidate` | `MA` | 0.002 | 10.0 | 3.3e-3 | Main text uses 2 nm and relative permittivity 10.0 for the MA defect layer when converting fitted loss factors into loss tangents. | Primary CPW extraction candidate; caller-selected until accepted. |
-| `Woods2019_CPW_Si_bulk_candidate` | bulk substrate | n/a | silicon | 2.6e-7 | Main text reports a silicon substrate loss tangent with the same fitted CPW loss model. | Bulk-material review candidate, not an interface preset. |
-
-Open review decisions:
-
-- decide whether `Woods2019_CPW_Si_*_candidate` rows are public PDK defaults
-  for any OrcaPen process scope or remain caller-selected presets;
-- decide whether `Wenner2011_CPW_assumed_*_candidate` rows should stay
-  documentation-only scaling checks rather than accepted PDK records;
-- any future automated tests require a separate explicit assignment against
-  accepted record semantics.
-
-## Interpretation boundary
-
-Provenance, explicit interface roles and material assumptions support review;
-they are not an automatically activated eligibility or acceptance rule.
-Caller-selected records do not imply an automatic default-selection policy.
-OrcaPen owns the public records, while SCGSim owns simulation interpretation and
-execution; a source queue does not create a PDK-owned solver implementation.
+Continue with [Participation & Surface Loss](../simulation/requirements/epr-loss.qmd)
+for available tutorials.

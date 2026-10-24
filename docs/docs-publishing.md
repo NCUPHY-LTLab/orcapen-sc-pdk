@@ -1,73 +1,56 @@
 ---
-orphan: true
+title: "Documentation & Website"
+sidebar: development
 ---
 
-# Docs Publishing
+Edit the reader pages in `docs/` and the canonical tutorial sources in
+`notebooks/src/`. Build with Quarto 1.10.19; the site keeps notebook execution disabled.
 
-The public documentation is part of the PDK contract. It should be buildable
-locally and published through GitHub Pages for `OrPenStrike/orcapen-sc-pdk`.
-
-## Tooling
-
-The docs stack follows a static public PDK publication pattern:
-
-- Quarto for the searchable documentation site and notebook pages.
-- Canonical Quarto QMD notebooks for the migrated Kosen2024 family, stored
-  recursively in `notebooks/src/`.
-- Derived IPYNB publication artifacts stored at matching paths under `notebooks/`.
-- `docs/docs.just` for docs helper commands.
-- GitHub Actions for pull request validation and Pages deployment.
-
-The docs intentionally use `orcapen-sc-pdk` branding and content. Static assets
-should be added only when they are needed for this PDK.
-
-## Local Build
-
-Run:
+## Build locally
 
 ```bash
-uv sync -p 3.12 --group docs --extra dev
+uv sync -p 3.12 --locked --group docs --extra dev
 just docs
 ```
 
-`just docs` first verifies that every derived IPYNB has the same Markdown,
-code, order, metadata, and stable cell identities as its canonical QMD, then
-builds the static site into `docs/_site`. It never executes notebooks or
-overwrites saved outputs. Run `just convert-notebooks` explicitly after editing
-a QMD to regenerate its clean derived publication artifact. `just serve-docs`
-starts the Quarto preview server for local editing.
+Check: generated notebook inputs match their QMD sources, and the site appears
+in `docs/_site/`. The pre-render step generates the API reference with quartodoc.
 
-The generated Just command reference is included below when the docs are built:
+For a local preview:
 
-```text
-just docs
+```bash
 just serve-docs
-just clean-docs
 ```
 
-## CI Contract
+Check: open `http://127.0.0.1:8000`. Inspect the desktop navigation and the
+collapsed menu at narrow widths.
 
-The GitHub Pages workflow should:
+## Edit notebooks without changing their results
 
-- build the Quarto HTML site on pull requests and pushes;
-- upload the static site artifact for review;
-- deploy Pages only from `main`;
-- preserve notebook code and saved output in static HTML;
-- verify QMD/IPYNB input parity without executing or rewriting notebooks;
-- copy the browser-only layout viewer and its public SVG resources.
+QMD files own the tutorial text, executable cells, settings, and stable code-cell IDs.
+Their IPYNB counterparts are generated downloads. After editing a QMD, regenerate
+the corresponding notebook with the existing pairing tool; use
+`just convert-notebooks` for the repository-wide conversion.
 
-Pull requests validate that architecture pages, notebook pages, and API pages
-render without requiring private layout repositories.
+`just check-notebooks` compares source structure without running cells.
+Keep simulation execution separate from site generation.
 
-## Content Checks
+## Pages and downloads
 
-Before publishing an architecture change, verify:
+Pull requests build the site for review. A successful build on `main`
+deploys to [GitHub Pages](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/).
 
-```bash
-rg -n "/[U]sers/|private[ ]GDS|private[ ]benchmark|run[ ]folders|NCUAS_SC_Qubit_Design" docs README.md
-```
+The SurfaceBands examples render from their canonical QMD paths so sibling
+HTML links and the model JSON stay together. Their IPYNBs remain separate
+downloads. The existing post-render helper copies the two raw QMD sources
+byte-for-byte into site output; raw download anchors use `data-noresolveinput`.
 
-Any matches should be intentional. `NCUAS_SC_Qubit_Design` may appear only as
-an explicit local workspace example or first-consumer context. Absolute local
-paths, GDS inputs from private designs, benchmark values from private layouts,
-and private run directories do not belong in public docs or public examples.
+## Theme and site structure
+
+The site uses the unchanged Askr extension and native Quarto navigation.
+See [theme and toolchain](features/docs-theme.md) for its selected versions.
+Place pages in one of Get Started, Simulation, API, Research, or Development;
+the logo returns to the home page.
+
+Use [public package source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk) for API
+definitions and [Research](paper-review.md) for literature notes.

@@ -1,10 +1,14 @@
-# CPW Resonator References
+---
+title: "CPW Resonator References"
+sidebar: research
+---
 
-**Design family:** resonator
+Use this topic to select public CPW resonator designs for layout reproduction
+and electromagnetic comparison.
 
-**Status:** source selection
+⏳ Reference selection is in progress. Look for an explicit geometry,
+material stack, boundary treatment, and frequency or field result before
+choosing a reproduction target.
 
-Collect public resonator papers suitable for reproducing a clean CPW layout,
-Palace electrostatic/EPR setup, benchmark record, and reduced circuit model.
-
-No private NCUAS geometry or unpublished run evidence belongs on this page.
+For existing layouts, see [Cells](../public-pdk-examples/index.md#resonator).
+For calculations, see [Resonance & Eigenmodes](../simulation/requirements/eigenmode.qmd).

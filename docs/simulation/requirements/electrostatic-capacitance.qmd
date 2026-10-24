@@ -1,60 +1,36 @@
 ---
-title: "Electrostatic capacitance"
-description: "Calculate a pad's capacitance from an explicitly defined conductor and dielectric environment."
+title: "Capacitance"
 sidebar: simulation
 ---
 
-## Purpose and selected system
+Calculate a pad island's capacitance relative to surrounding ground.
+Start with SimplePad when you need an explicit conductor/reference arrangement
+rather than a full-wave transmission model.
 
-Calculate the capacitance of the SimplePad island relative to its surrounding
-Ground. The selected layout is the public square-pad capacitor: a finite
-island, an opening and connected surrounding metal above a single substrate.
-This static problem does not determine resonant frequency or transmission.
+## Model and prerequisites
 
-## Model and boundary choices
+Preserve the island, nonmetal opening, ground, dielectric substrate, and
+surrounding region from the selected tutorial. Choose the potential reference
+and exterior treatment before comparing matrix values.
 
-Use the notebook's exact layout settings, stack and material records. Preserve
-the island and Ground as distinct conductors, the opening as nonmetal and the
-substrate as a dielectric volume. Metal representation, physical thickness
-and the surrounding vacuum region belong to the selected model.
+Use the tutorial's SCGSim environment and either Palace or AEDT Q3D.
+[Layers & Stack](../../start/layers.qmd) and
+[Materials & Interfaces](../../start/materials.qmd) explain the process inputs.
 
-Specify the potential/reference assignment and the exterior treatment. A
-finite grounded enclosure and an open exterior describe different problems.
-Mesh and solver settings govern the numerical calculation; they do not change
-which conductor the reported capacitance refers to. Concrete values and
-convergence controls live in the notebook, not in a second settings table here.
+## Choose a tutorial
 
-::: {.callout-note}
-A source image explains the layout. Native conductor, material and boundary
-readback establishes the model actually used for extraction.
-:::
+| Backend | Tutorial | What to inspect |
+| --- | --- | --- |
+| Palace | [SimplePad electrostatic](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.qmd" data-noresolveinput download>QMD</a> | Potential reference, boundaries, mesh, and returned capacitance |
+| AEDT Q3D | [SimplePad extraction](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.qmd" data-noresolveinput download>QMD</a> | Native material/Net assignments and ordered matrix entries |
+| AEDT Q3D | [Finite CPW extraction](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.qmd" data-noresolveinput download>QMD</a> | Finite conductor arrangement and the tutorial's enabled matrix families |
 
-## Workflow
 
-::: {.panel-tabset}
+## Read the result
 
-### Palace
+Read capacitance with units, conductor order, reference, and any matrix
+reduction. Inspect the requested setup and adaptive history beside the quantity.
+Different exterior or conductor conventions require separate interpretation.
 
-Use [SimplePad electrostatic](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb).
-Follow its source construction, model/mesh preparation and solver handoff.
-Analyze the returned run separately, preserving conductor ordering and units.
-
-### AEDT
-
-Use [SimplePad Q3D](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb).
-Construct the same intended conductor arrangement, inspect native material and
-Net assignments, and extract the requested capacitance matrix. The Q3D
-boundary and matrix convention must be stated before comparing with Palace.
-
-:::
-
-## Expected outputs
-
-Retain the native model readback, applied setup, mesh/adaptive history and
-returned capacitance entries with conductor names and units. Report the
-chosen reference and any matrix reduction. Agreement between backend values
-is an observation, not automatic equivalence of their physical models.
-
-Continue with [materials and stack](../tools/materials-stack-z.qmd),
-[mesh and numerical controls](../tools/mesh-fem-amr.qmd) and
-[handoff, resolution and reporting](../tools/handoff-resolve-report.qmd).
+For natural modes, continue with [Resonance & Eigenmodes](eigenmode.qmd);
+for a uniform line, use [Cross-section Simulation](q2d-cross-section.qmd).

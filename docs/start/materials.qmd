@@ -1,0 +1,37 @@
+---
+title: "Materials & Interfaces"
+sidebar: get-started
+---
+
+Select a material record for each physical body and an interface preset only
+when your model needs one. Keep the selected IDs with your simulation inputs.
+
+## Material records
+
+`get_material_records()`, `get_material_alias_records()`, and
+`get_interface_preset_records()` return detached records from OrcaPen's
+[public material database](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/materials.json).
+
+Records identify material kind, superconducting status, numeric properties,
+and explicit AEDT library names. An alias selects an existing identity;
+it does not create a new physical material.
+
+Use the [generated material API](../reference/index.qmd#materials) for signatures
+and the [Layers & Stack guide](layers.qmd) for assigning material and height together.
+
+## Surface interfaces
+
+| Interface | Physical boundary |
+| --- | --- |
+| MA | Metal–air |
+| MS | Metal–substrate |
+| SA | Substrate–air |
+
+The database includes Woods2019 Si and LiteratureCentral interface presets.
+Their thickness, permittivity, loss tangent, and source are model assumptions
+you select, not automatic process defaults or measured properties for every device.
+
+For participation calculations, preserve the preset and field-side choice with
+the returned result. [Participation & Surface Loss](../simulation/requirements/epr-loss.qmd)
+links the concrete tutorials. [Research](../papers/surface-loss-participation.md)
+collects the source literature.

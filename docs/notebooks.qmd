@@ -1,84 +1,42 @@
 ---
-title: "Simulation"
-description: "Define the simulation need, then select a layout and notebook that can demonstrate it."
+title: "Choose a Simulation"
+description: "Choose a calculation by the electrical quantity you need."
 sidebar: simulation
 ---
 
-Start with what a simulation must let you do—not with available layouts or
-solver commands. The **Pages × Notebook suite** connects candidate requirements
-to canonical notebook cases. Pages explain the intended product and observations;
-notebooks own concrete settings and real tool calls. No new solved results are
-claimed for the source-only suite.
+Choose the question first, then open a tutorial with the matching geometry,
+excitation, and backend. Layout use is independent of solver installation.
 
-OrcaPen owns fabrication facts, public source layouts and the user's model intent.
-SCGSim owns the reusable toolchain that must carry those facts through native
-modeling, execution and returned results. A notebook is an operation and
-evidence entry point; it does not replace either contract.
+| Question | Guide | Starting model |
+| --- | --- | --- |
+| What capacitance does this conductor arrangement have? | [Capacitance](simulation/requirements/electrostatic-capacitance.qmd) | Square pad and surrounding ground |
+| What are the natural or loaded modes? | [Resonance & Eigenmodes](simulation/requirements/eigenmode.qmd) | Finite CPW, pad LC, or loaded meander |
+| How do signals reflect and transmit? | [S-parameters & Ports](simulation/requirements/driven-terminal.qmd) | CPW–resonator with Lumped or Wave excitation |
+| What are the uniform-line parameters? | [Cross-section Simulation](simulation/requirements/q2d-cross-section.qmd) | Explicit Q2D section |
+| Where is field energy stored, and how do interface assumptions affect loss? | [Participation & Surface Loss](simulation/requirements/epr-loss.qmd) | Pad LC and local interface regions |
 
-## Two requirement perspectives
+Open a guide above for tutorials and downloads, or browse the
+[Model Gallery](public-pdk-examples/test-components.md) for source layouts.
 
-The layers describe **who needs what**, not a ranking of important and minor
-features.
+## Before you run
 
-- **Layer 1 · OrcaPen user requirements** states the physical product and the
-  high-level Palace/AEDT workflow required to produce it.
-- **Layer 2 · SCGSim tool requirements** states the geometry, model, numerical
-  evidence and portable-result requirements shared by those workflows.
+Read the selected tutorial's setup and use its stated OrcaPen, SCGSim, and
+solver versions. Optional AEDT and Palace runtimes are separate.
+The repository's ordinary dependency groups may differ from a tutorial's required environment.
 
-OrcaPen is the requirements customer: it supplies source/process facts and model
-intent, and inspects the final product. SCGSim owns implementation and solver
-integration. These pages do not prescribe API calls or track implementation status.
+Keep the tutorial's conductor references, stack, materials, exterior, and port
+conventions together. Use a new output directory for a new run; use its
+returned-run analysis action to read an existing result.
 
-Read a Layer 1 page first, follow its Layer 2 links, and only then select a
-layout and notebook. One requirement may need several notebooks; one layout
-may support several requirements. Neither count is fixed.
+⚠️ Saved outputs can use earlier model or runtime versions. Check the selected
+tutorial's status before treating its displayed results as results of its current source.
 
-## Layer 1 · OrcaPen user requirements
+## Upcoming workflows
 
-| I need to… | Requirement contract |
-| --- | --- |
-| Extract capacitance with an explicit conductor/reference convention | [Electrostatic and capacitance extraction](simulation/requirements/electrostatic-capacitance.qmd) |
-| Find modes of an explicitly bounded electromagnetic model | [Ordinary eigenmode](simulation/requirements/eigenmode.qmd) |
-| Include explicit linear circuit loads in a mode calculation | [Lumped RLC eigenmode](simulation/requirements/lumped-rlc-eigenmode.qmd) |
-| Interpret participation and loss with declared field and interface provenance | [EPR and loss analysis](simulation/requirements/epr-loss.qmd) |
-| Excite a terminal network through Lumped or Wave ports | [Driven Terminal](simulation/requirements/driven-terminal.qmd) |
-| Excite and read a modal port network | [Driven Modal](simulation/requirements/driven-modal.qmd) |
-| Extract resistance and inductance with real source/sink assignments | [Q3D AC/RL extraction](simulation/requirements/q3d-acrl.qmd) |
-| Extract per-unit-length quantities from an authored cross-section | [Q2D cross-section extraction](simulation/requirements/q2d-cross-section.qmd) |
+⏳ AC/RL loop and mutual-inductance workflows are not completed.
+The existing Q3D examples remain available for their stated extraction scope;
+they are not a substitute for the upcoming loop/mutual workflow.
 
-## Layer 2 · SCGSim tool requirements
-
-Use [source and ownership](simulation/tools/source-ownership.qmd) to bind
-identities; [curves, holes and transforms](simulation/tools/curves-holes-transforms.qmd)
-to preserve shape meaning; [materials, stack and Z](simulation/tools/materials-stack-z.qmd)
-to declare physical representation; and [contacts and multilevel structures](simulation/tools/contacts-multilevel.qmd)
-to distinguish contact from overlap. [Mesh, FEM and AMR](simulation/tools/mesh-fem-amr.qmd)
-covers discretization evidence. [Handoff, Resolve and Report](simulation/tools/handoff-resolve-report.qmd)
-covers the usable returned workflow.
-
-## Select evidence, not just a picture
-
-A [source inspection plate](public-pdk-examples/test-components.md) shows the
-authored geometry. It is not evidence of native lowering, conductor assignment,
-mesh conformity or solving. Track source availability, preparation, native
-model readback, solving, strict resolution and reporting separately.
-
-The [notebook catalog](simulation/notebooks.qmd) links source ownership,
-curves/holes/transforms and multilevel contact observations; pad and finite-CPW
-cases; shared RLC and Lumped/Wave Terminal cases; and Q2D extraction. It also
-keeps historical examples and evidence separate. A linked notebook is a candidate
-starting point, not proof that it satisfies a new requirement. Missing source
-semantics or unsupported operations stay visible; do not fill them with guessed
-native identities or plausible output.
-
-## Review and next steps
-
-Review physical meaning and expected observations before choosing concrete
-operation controls. These contracts introduce no numerical accuracy threshold
-or solver-agreement criterion. Native convergence classifications and warnings
-remain visible, but do not themselves establish research adequacy.
-
-The current suite remains **CONVERGING / LOCAL CANDIDATE**. Its clean derived
-notebooks are source-only, with native preparation, meshing and solving
-separately controlled. The ordinary environment and dependency pins remain
-unchanged. Historical output is not execution of a revised source.
+⏳ Palace cross-section simulation is pending SCGSim development.
+Use the [AEDT Q2D section](simulation/requirements/q2d-cross-section.qmd) for the
+available cross-section tutorial.
