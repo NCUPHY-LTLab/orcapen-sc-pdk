@@ -1,0 +1,305 @@
+---
+title: "TSV-grounded CPW · Driven Terminal Wave"
+jupyter:
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+execute:
+  enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "4126a6f162f30d5fdaf4242b69cda2c17531bbaf0315f60ba09f7acb5e63c10d"
+---
+
+![TSV-stitched CPW: eight ground TSV sites, 60 µm bores and 0.2 µm radial walls.](../../_images/tsv-stitched-cpw.png)
+
+Build a finite CPW whose top and bottom Ground planes are stitched by two rows
+of hollow TSVs. The Signal reaches both die X edges so the exterior cuts carry
+Wave ports. This 3D example makes the TSV distance/placement and Ground paths
+inspectable; it does not predict their optimum density, impedance or slotline
+suppression. A Q2D slice cannot represent the discrete TSV array.
+The default full-run flow uses Broadband adaptation over 3–8 GHz and a Fast
+11-point sweep, with at most three adaptive passes and delta-S 0.02. These
+Human-confirmed first-trial controls are not an accuracy or scientific-success
+criterion. Native execution and shared-runtime admission remain pending;
+this source authoring is not a solved result.
+See the [TSV guide](../../../../simulation/tsv-model-inspection.qmd) and
+[Driven Terminal requirement](../../../../simulation/requirements/driven-terminal.qmd).
+
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
+
+
+## Setup and Imports
+
+The following imports are public source/model APIs; they do not open a Desktop.
+
+## Setup and Run Controls
+
+```{python}
+#| id: tsv-terminal-controls
+import hashlib
+import subprocess
+import sys
+from dataclasses import replace
+from importlib.metadata import version
+from pathlib import Path
+from uuid import uuid4
+
+from IPython.display import display
+from scgsim.aedt import (
+    FrequencySweepSpec,
+    HfssRunControl,
+    TerminalPort,
+    prepare_hfss_driven_from_geometry,
+    prepare_planar_geometry_input,
+    resolve_prepared_model,
+    resolve_results,
+)
+from scgsim.geometry import (
+    ApproximationProfile,
+    GeometryBuildInput,
+    LayoutPolygonSpec,
+    SemanticEntitySpec,
+)
+
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import get_tsv_source_records, tsv_ground_stitched_cpw
+
+# Actions: run | prepare_handoff | analyze_handoff | source | build_model | inspect_model
+WORKFLOW_ACTION = "run"
+DIE = "D0"
+WIDTH_UM = 10.0
+GAP_UM = 6.0
+DIE_SIDE_UM = 1000.0
+BORE_DIAMETER_UM = 60.0
+WALL_THICKNESS_UM = 0.2
+TSV_ROW_Y_UM = 100.0
+TSV_X_UM = (-300.0, -100.0, 100.0, 300.0)
+MODEL = "thin_film"
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODEL, revision="v1", parameters={})
+SETUP_NAME = "Setup1"
+SWEEP_NAME = "Sweep1"
+SWEEP_START_GHZ = 3.0
+SWEEP_STOP_GHZ = 8.0
+SWEEP_POINTS = 11
+MAXIMUM_PASSES = 3
+MAXIMUM_DELTA_S = 0.02
+MINIMUM_PASSES = 1
+MINIMUM_CONVERGED_PASSES = 1
+PERCENT_REFINEMENT = 30.0
+RUN_CONTROL = (
+    None
+    if WORKFLOW_ACTION == "build_model"
+    else HfssRunControl(
+        setup_name=SETUP_NAME,
+        sweep_name=SWEEP_NAME,
+        sweep=FrequencySweepSpec(SWEEP_START_GHZ, SWEEP_STOP_GHZ, SWEEP_POINTS),
+        maximum_passes=MAXIMUM_PASSES,
+        minimum_passes=MINIMUM_PASSES,
+        minimum_converged_passes=MINIMUM_CONVERGED_PASSES,
+        maximum_delta_s=MAXIMUM_DELTA_S,
+        percent_refinement=PERCENT_REFINEMENT,
+    )
+)
+RUN_ID = f"tsv-cpw-terminal-{uuid4().hex[:12]}"
+OUTPUT_ROOT = Path(".artifacts/SCGSimExamples/TSV")
+RUN_DIR = OUTPUT_ROOT / RUN_ID
+SOURCE_DIR = OUTPUT_ROOT / f"{RUN_ID}-source"
+RETURNED_RUN_DIR = None  # Set an explicit actual root for analyze_handoff or inspect_model.
+PROJECT_NAME = "TSVGroundCPWTerminalThinFilm"
+DESIGN_NAME = "Terminal"
+REGION_PADDING_XYZ_UM = (0.0, 100.0, 1000.0)
+GEOMETRY_WORKERS = 1
+RESOURCES = None  # No host allocation selected here; native admission is separate.
+SIGNAL_ENTITY_IDS = (f"{DIE}/SIGNAL",)
+GROUND_ENTITY_IDS = (f"{DIE}/TOP_GROUND", f"{DIE}/BACK_GROUND") + tuple(
+    f"{DIE}/TSV_{i}" for i in range(2 * len(TSV_X_UM))
+)
+PORT_ORDER = ((1, "o1", "-X"), (2, "o2", "+X"))
+DEEMBED_UM = 0.0
+if WORKFLOW_ACTION not in {
+    "run",
+    "prepare_handoff",
+    "analyze_handoff",
+    "source",
+    "build_model",
+    "inspect_model",
+}:
+    raise ValueError("Unknown WORKFLOW_ACTION")
+display({name: version(name) for name in ("orcapen-sc-pdk", "gdsfactory", "scgsim")})
+```
+
+`run` prepares a fresh handoff, invokes the full-solve CLI and reads results.
+`prepare_handoff` stops at portable inputs; `source` stays at layout/source facts.
+`analyze_handoff` reads an explicit returned root without a factory, getter,
+GDS write, preparation or CLI call. Separately, `build_model` passes
+`run_control=None` to the candidate's model-only Prepare Only transaction;
+`inspect_model` reads that returned model. Neither is a Model+Setup/reuse API.
+Resource flags do not contain CAD descendants; native admission is separate.
+
+## Create Simulation Component / Coupon
+
+```{python}
+#| id: tsv-terminal-coupon
+if WORKFLOW_ACTION not in {"analyze_handoff", "inspect_model"}:
+    orcapen_sc_pdk.activate()
+    coupon = tsv_ground_stitched_cpw(
+        die=DIE,
+        width_um=WIDTH_UM,
+        gap_um=GAP_UM,
+        die_side_um=DIE_SIDE_UM,
+        bore_diameter_um=BORE_DIAMETER_UM,
+        wall_thickness_um=WALL_THICKNESS_UM,
+        tsv_row_y_um=TSV_ROW_Y_UM,
+        tsv_x_um=TSV_X_UM,
+    )
+    coupon.plot()
+```
+
+The source places eight hollow TiN TSVs outside the two CPW gaps. Its top and
+back Ground remain positive conductor regions with explicitly preserved holes.
+Surface Al thickness and substrate Z come from the PDK, not the port settings.
+
+## Initialize AEDT Project / App
+
+The explicit `run` or `build_model` CLI owns its HFSS Driven Terminal session. No source
+cell attaches to a live Desktop or manually creates another native client.
+
+{{< include _source_input.qmd >}}
+
+## Simulation Configuration
+
+The outward cut normals are −X / +X, distinct from the source Signal-to-Ground
+direction. Ports use explicit source Entity IDs rather than guessed native
+object names. The shared candidate's Wave record does not carry a caller integration
+line; source direction facts are not presented as an independently assigned
+native line. Renormalization is off; zero de-embed distance is not a reference
+plane shift. Inactive native 50 Ω metadata is not a source load or solved Zo.
+
+```{python}
+#| id: tsv-terminal-handoff
+HANDOFF = None
+if WORKFLOW_ACTION in {"run", "prepare_handoff", "build_model"}:
+    ports = tuple(
+        TerminalPort(
+            index=index,
+            name=name,
+            side=side,
+            reference_objects=GROUND_ENTITY_IDS,
+            signal_entity_ids=SIGNAL_ENTITY_IDS,
+            deembed_um=DEEMBED_UM,
+        )
+        for index, name, side in PORT_ORDER
+    )
+    geometry = prepare_planar_geometry_input(
+        build_input, prepared_stack=stack, modeling=APPROXIMATION_PROFILE.name
+    )
+    HANDOFF = prepare_hfss_driven_from_geometry(
+        modeling=APPROXIMATION_PROFILE.name,
+        geometry=geometry,
+        project_name=PROJECT_NAME,
+        design_name=DESIGN_NAME,
+        run_control=RUN_CONTROL,
+        ports=ports,
+        output_dir=RUN_DIR,
+        geometry_workers=GEOMETRY_WORKERS,
+        resources=RESOURCES,
+    )
+    display([port.to_payload() for port in ports])
+    display(HANDOFF)
+```
+
+Zero X enclosure padding makes the Wave cuts exterior. The remaining Region
+faces retain the closed HFSS exterior treatment, without Radiation or PML.
+The frozen native runtime maps the sweep endpoints to Broadband adaptation
+and uses a Fast sweep with the explicit 11-point count. These type choices are
+runtime behavior, not invented `HfssRunControl` keyword fields. Only
+`build_model` omits the Analysis Setup/sweep through `run_control=None`.
+
+## Solve and Export
+
+`run` invokes the actual full-solve CLI. `build_model` alone adds the real
+`--prepare-only` flag for build/readback/save/release without Analyze or a sweep.
+Native failures propagate through `check=True` without retries or fabricated results.
+
+```{python}
+#| id: tsv-terminal-native
+if WORKFLOW_ACTION in {"run", "build_model"}:
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scgsim.aedt.run",
+            "--handoff",
+            str(HANDOFF.metadata_path),
+            "--execute",
+        ]
+        + (["--prepare-only"] if WORKFLOW_ACTION == "build_model" else []),
+        check=True,
+    )
+```
+
+## Adaptive-Pass Convergence / Solver Diagnostics
+
+Read actual returned numerical/performance evidence before interpreting network
+response. Three passes and 11 sweep points are the confirmed short trial, not
+convergence proof. Missing/corrupt results and save/release failures remain
+strict resolver errors; no automatic retry or substituted result is used.
+
+```{python}
+#| id: tsv-terminal-resolve
+RESULT = None
+PREPARED_MODEL = None
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    RESULT = resolve_results(HANDOFF.run_dir if WORKFLOW_ACTION == "run" else RETURNED_RUN_DIR)
+    RESULT.show_all_results(show_details=True)
+elif WORKFLOW_ACTION in {"build_model", "inspect_model"}:
+    PREPARED_MODEL = resolve_prepared_model(
+        HANDOFF.run_dir if WORKFLOW_ACTION == "build_model" else RETURNED_RUN_DIR
+    )
+```
+
+## Results: Plots and Readable Tables
+
+### Physics Analysis Results
+
+Display the actual Terminal network response with its ordered terminals,
+frequency grid, units and reference-plane provenance. Terminal Touchstone port
+impedance or terminal/derived impedance is not modal Wave Port Zo; do not
+substitute it for a separate Modal Solution Data `Port Zo` extraction. This
+source does not invent a load, a characteristic-impedance result or a new
+extraction API. Model-only readback instead inspects Wave assignments, face
+sheets, walls and cut Silicon; missing boundary queries remain unknown.
+
+```{python}
+#| id: tsv-terminal-readback
+if RESULT is not None:
+    display(RESULT.physics_results())
+elif PREPARED_MODEL is not None:
+    display(PREPARED_MODEL.project_path)
+    display(PREPARED_MODEL.readback)
+```
+
+### Simulation Performance / Benchmarks
+
+Display actual solved timing/pass/mesh evidence separately from physics. The
+model-only branch retains build/save/release evidence without solved benchmarks.
+A view of the model is not a field, connectivity or impedance result.
+
+```{python}
+#| id: tsv-terminal-model-stage
+if RESULT is not None:
+    display(RESULT.simulation_benchmark())
+elif PREPARED_MODEL is not None:
+    display({"mode": PREPARED_MODEL.mode, "model_stage": PREPARED_MODEL.model_stage})
+```
+
+## Save and Release AEDT
+
+The transaction saves and releases its own Desktop. Keep each project with its
+necessary companions and inspect a separate writable copy. Existing
+Solid projects and images remain their original evidence, not outputs of this
+mixed Thin Film/Solid source notebook.

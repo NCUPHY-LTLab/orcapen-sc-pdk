@@ -1,12 +1,15 @@
 [build-system]
 requires = ["uv_build>=0.10.8,<0.12.0"]
-build-backend = "uv_build"
+build-backend = "orcapen_build"
+backend-path = ["."]
 
 [project]
-name = "orpen-sc-pdk"
-version = "0.1.0"
-description = "OrPen superconducting quantum/RF public PDK for GDSFactory"
+name = "orcapen-sc-pdk"
+version = "0.1.0.dev2"
+description = "OrcaPen superconducting quantum/RF public PDK for GDSFactory"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "LICENSING.md", "THIRD_PARTY_NOTICES.md"]
 requires-python = ">=3.12,<3.14"
 authors = [{ name = "OrPenStrike" }]
 keywords = [
@@ -28,15 +31,14 @@ dependencies = [
 ]
 
 [project.urls]
-documentation = "https://orpenstrike.github.io/orpen-sc-pdk/"
-repository = "https://github.com/OrPenStrike/orpen-sc-pdk/"
+documentation = "https://orpenstrike.github.io/orcapen-sc-pdk/"
+repository = "https://github.com/OrPenStrike/orcapen-sc-pdk/"
 
 [project.optional-dependencies]
 dev = [
   "pytest>=9.0.0",
   "ruff>=0.15.11",
 ]
-gdsfactoryplus = ["gdsfactoryplus==1.8.20", "httpx"]
 circuit-runtime = ["superconducting-circuits-runtime"]
 
 [dependency-groups]
@@ -50,14 +52,13 @@ docs = [
 palace-notebooks = ["scgsim[palace,visualization]"]
 aedt-notebooks = ["scgsim[aedt]"]
 ecosystem-dev = [
-  "gplugins",
   "kaleido>=1.0.0",
   "pandas>=2.0",
   "plotly>=6.0.0",
 ]
 
 [tool.uv.sources]
-scgsim = { git = "https://github.com/OrPenStrike/scgsim.git", rev = "a504f1c0c8d5fd879e000164fd1a2b4c6ea0c850" }
+scgsim = { git = "https://github.com/OrPenStrike/scgsim.git", rev = "0051d6e8924d8e79c0e03b560592ec65fe5659a1" }
 superconducting-circuits-runtime = { git = "https://github.com/arfiligol/superconducting-circuits-research-workbench.git", rev = "f3430cb3c4b3a72d6b60bc99929475f3d0c41f57", subdirectory = "core/python/runtime" }
 
 [tool.ruff]
@@ -68,19 +69,28 @@ target-version = "py312"
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["orpen_sc_pdk"]
+known-first-party = ["orcapen_sc_pdk"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.uv.build-backend]
 module-root = ""
+module-name = "orcapen_sc_pdk"
+source-include = [
+  "orcapen_build.py",
+  "docs/usage/*.md",
+  "docs/usage/resources.toml",
+  "docs/public-pdk-examples/component-authoring.md",
+  "notebooks/src/**/*.qmd",
+  "notebooks/src/**/*.py",
+]
 
 [tool.gdsfactoryplus]
-name = "orpen_sc_pdk"
+name = "orcapen_sc_pdk"
 
 [tool.gdsfactoryplus.pdk]
-name = "orpen_sc_pdk"
+name = "orcapen_sc_pdk"
 cells_no_model_expected = [
   "indium_bump",
   "indium_ground",
@@ -96,4 +106,8 @@ cells_no_model_expected = [
   "manhattan_style_junction",
   "martinis2022_differential_ribbon_capacitor",
   "straight",
+  "cpw_handoff",
+  "rounded_end_metal_segment",
+  "rounded_rectangle",
+  "wire_corner",
 ]

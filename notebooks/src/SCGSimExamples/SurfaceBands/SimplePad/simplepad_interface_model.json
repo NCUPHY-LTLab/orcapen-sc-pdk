@@ -1,0 +1,97 @@
+{
+  "purpose": "Editable illustrative SimplePad geometry and numeric controls; ordinary JSON input, not a Snapshot or Q2dSpec codec.",
+  "public_source_commit": "c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c",
+  "coordinate_system": {
+    "unit": "um", "source_cut_layout_Y_um": 0.0,
+    "local_X": "original layout X minus translation_um", "translation_um": 100.0,
+    "local_Y": "original stack Z", "omitted_axis": "original layout Y",
+    "physical_facing_edges_x_um": [0.0, 20.0],
+    "assumption": "Per-unit-length straight edge with finite truncation, not global pad/corner invariance. Artificial metal ends are not distance origins. MA sidewalls own their top outer corner caps."
+  },
+  "rectangles": [
+    {"name": "Signal", "material": "Al", "x": [-5.0, 0.0], "y": [0.0, 0.1]},
+    {"name": "ReferenceGround", "material": "Al", "x": [20.0, 25.0], "y": [0.0, 0.1]},
+    {"name": "SiBulk", "material": "Si", "x": [-5.0, 25.0], "y": [-5.0, -0.002]},
+    {"name": "MS_left_near", "material": "MS", "x": [-0.5, 0.0], "y": [-0.002, 0.0]},
+    {"name": "MS_left_middle", "material": "MS", "x": [-1.0, -0.5], "y": [-0.002, 0.0]},
+    {"name": "MS_left_far", "material": "MS", "x": [-5.0, -1.0], "y": [-0.002, 0.0]},
+    {"name": "MS_right_near", "material": "MS", "x": [20.0, 20.5], "y": [-0.002, 0.0]},
+    {"name": "MS_right_middle", "material": "MS", "x": [20.5, 21.0], "y": [-0.002, 0.0]},
+    {"name": "MS_right_far", "material": "MS", "x": [21.0, 25.0], "y": [-0.002, 0.0]},
+    {"name": "SA_left_near", "material": "SA", "x": [0.0, 0.5], "y": [-0.002, 0.0]},
+    {"name": "SA_left_middle", "material": "SA", "x": [0.5, 1.0], "y": [-0.002, 0.0]},
+    {"name": "SA_far", "material": "SA", "x": [1.0, 19.0], "y": [-0.002, 0.0]},
+    {"name": "SA_right_middle", "material": "SA", "x": [19.0, 19.5], "y": [-0.002, 0.0]},
+    {"name": "SA_right_near", "material": "SA", "x": [19.5, 20.0], "y": [-0.002, 0.0]},
+    {"name": "MA_left_top_near", "material": "MA", "x": [-0.5, 0.0], "y": [0.1, 0.102]},
+    {"name": "MA_left_top_middle", "material": "MA", "x": [-1.0, -0.5], "y": [0.1, 0.102]},
+    {"name": "MA_left_top_far", "material": "MA", "x": [-5.0, -1.0], "y": [0.1, 0.102]},
+    {"name": "MA_right_top_near", "material": "MA", "x": [20.0, 20.5], "y": [0.1, 0.102]},
+    {"name": "MA_right_top_middle", "material": "MA", "x": [20.5, 21.0], "y": [0.1, 0.102]},
+    {"name": "MA_right_top_far", "material": "MA", "x": [21.0, 25.0], "y": [0.1, 0.102]},
+    {"name": "MA_left_sidewall", "material": "MA", "x": [0.0, 0.002], "y": [0.0, 0.102]},
+    {"name": "MA_right_sidewall", "material": "MA", "x": [19.998, 20.0], "y": [0.0, 0.102]}
+  ],
+  "base_material_identity_source": "Al, Si and vacuum identities come from orcapen_sc_pdk.get_material_records() in an ordinary wheel built from public commit c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c; source: https://github.com/OrPenStrike/orcapen-sc-pdk/blob/c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c/orcapen_sc_pdk/materials.py",
+  "materials": {
+    "MA": {"material_id": "MA", "kind": "dielectric", "is_superconducting": false, "library_name": "SimplePadLocal_MA"},
+    "MS": {"material_id": "MS", "kind": "dielectric", "is_superconducting": false, "library_name": "SimplePadLocal_MS"},
+    "SA": {"material_id": "SA", "kind": "dielectric", "is_superconducting": false, "library_name": "SimplePadLocal_SA"}
+  },
+  "material_properties": {
+    "Si": {"permittivity": 11.9, "dielectric_loss_tangent": 2.6e-7, "permeability": 1.0},
+    "vacuum": {"permittivity": 1.0, "dielectric_loss_tangent": 0.0, "permeability": 1.0},
+    "MA": {"permittivity": 10.0, "dielectric_loss_tangent": 0.0033, "permeability": 1.0},
+    "MS": {"permittivity": 11.4, "dielectric_loss_tangent": 0.0004698936049788292, "permeability": 1.0},
+    "SA": {"permittivity": 6.635, "dielectric_loss_tangent": 0.0017, "permeability": 1.0}
+  },
+  "interfaces": {
+    "MA": {"preset": "LiteratureCentral_MA", "thickness_um": 0.002},
+    "MS": {"preset": "LiteratureCentral_MS", "thickness_um": 0.002},
+    "SA": {"preset": "LiteratureCentral_SA", "thickness_um": 0.002}
+  },
+  "conductors": [
+    {"name": "Signal", "conductor_type": "SignalLine", "object_names": ["Signal"], "thickness_um": 0.1},
+    {"name": "Ground", "conductor_type": "ReferenceGround", "object_names": ["ReferenceGround"], "thickness_um": 0.1}
+  ],
+  "sources": [{"name": "Signal", "magnitude_v": 1.0, "phase_deg": 0.0}],
+  "reference_ground": {"name": "Ground", "potential_V": 0.0, "phase_deg": 0.0, "CG_source_entry": false},
+  "areas": [
+    {"name": "MA_I0_1", "material_id": "MA", "object_names": ["MA_left_top_near", "MA_left_top_middle", "MA_right_top_near", "MA_right_top_middle", "MA_left_sidewall", "MA_right_sidewall"], "quantity": "electric_field_squared"},
+    {"name": "MA_I0p5_1", "material_id": "MA", "object_names": ["MA_left_top_middle", "MA_right_top_middle"], "quantity": "electric_field_squared"},
+    {"name": "MS_I0_1", "material_id": "MS", "object_names": ["MS_left_near", "MS_left_middle", "MS_right_near", "MS_right_middle"], "quantity": "electric_field_squared"},
+    {"name": "MS_I0p5_1", "material_id": "MS", "object_names": ["MS_left_middle", "MS_right_middle"], "quantity": "electric_field_squared"},
+    {"name": "SA_I0_1", "material_id": "SA", "object_names": ["SA_left_near", "SA_left_middle", "SA_right_near", "SA_right_middle"], "quantity": "electric_field_squared"},
+    {"name": "SA_I0p5_1", "material_id": "SA", "object_names": ["SA_left_middle", "SA_right_middle"], "quantity": "electric_field_squared"}
+  ],
+  "ratios": [
+    {"name": "MA_F", "numerator": ["MA_I0_1"], "denominator": ["MA_I0p5_1"]},
+    {"name": "MS_F", "numerator": ["MS_I0_1"], "denominator": ["MS_I0p5_1"]},
+    {"name": "SA_F", "numerator": ["SA_I0_1"], "denominator": ["SA_I0p5_1"]}
+  ],
+  "region_padding_um": [1.0, 1.0, 5.0, 1.0],
+  "region_boundary_status": "Native default exterior behavior, UNOBSERVED; no guaranteed Open, mirror or periodic assignment.",
+  "local_length_mesh_status": "UNASSIGNED: source requests 0.001um interface and 0.5um bulk are not applied in this illustration.",
+  "matrix_run_control": {"setup_name": "Setup1", "frequency_ghz": 6.0, "maximum_passes": 3, "convergence_percent": 1.0, "minimum_passes": 1, "minimum_converged_passes": 1, "percent_refinement": 30.0},
+  "aedt_version": "2024.2",
+  "resources_proposed": {"cores": 4, "ram_limit_percent": 8, "tasks": 1, "math_threads": 1, "admission": "NOT_ADMITTED"},
+  "palace": {
+    "component_name": "square_pad_capacitor",
+    "component_parameters": {"pad_side_um": 200.0, "gap_um": 20.0, "die_side_um": 1000.0, "junction_width_um": 2.0},
+    "include_airbridges": false,
+    "vacuum_padding_um": [250.0, 250.0, 1000.0],
+    "root_id": "chip", "coupon_padding_um": 0.0,
+    "nets": {"pad": ["chip/PAD"], "ground": ["chip/GROUND"]},
+    "approximation": {"name": "route_b", "revision": "v1", "parameters": {}},
+    "port": {"name": "chip/o_junction_lumped", "layer": "D0_TOP_M1", "layout_sheet": true, "inductance": 1e-8},
+    "eigenmode": {"num_modes": 1, "target": 1e9, "tolerance": 1e-6, "save": 1},
+    "mesh_controls": {"refined_mesh_size_um": 10.0, "max_mesh_size_um": 200.0, "algorithm_3d": "Delaunay", "threads": 1, "surface_threads": 1, "geometry_order": 1, "high_order_optimize": true},
+    "numerical_controls": {"order": 2, "tolerance": 1e-6, "max_iterations": 2000, "solver_type": "Default", "preconditioner": "Default", "device": "CPU", "amr_max_passes": 10, "amr_tolerance": 0.02, "amr_update_fraction": 0.15, "amr_nonconformal": false, "save_adapt_iterations": true, "output_paraview": true, "output_grid_function": false},
+    "handoff_resources": {"processes": 8, "threads": 1, "command_style": "wrapper"},
+    "band_cuts_um": [0.5, 1.0], "precision_um": 0.001,
+    "boundary_segments": null,
+    "edge_selection": "All original outer/hole loops of each caller-selected source-backed parent; never child seams.",
+    "correction": {"mode": 1, "sample_lower_um": 0.5, "replacement_upper_um": 1.0},
+    "factor_application": "One illustrative straight-edge factor per interface across all selected parents, including multiple MA top/wall parents; corner/outer-edge equivalence remains unverified."
+  }
+}

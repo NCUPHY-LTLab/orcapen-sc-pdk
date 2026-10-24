@@ -1,0 +1,160 @@
+# Bundle metadata only. Content is copied from the one canonical source listed.
+[[resources]]
+id = "guides/overview"
+kind = "guide"
+title = "OrcaPen package usage knowledge"
+summary = "Capabilities, prerequisites, canonical source inventory and runtime boundaries."
+status = "Available guide; knowledge transport CONVERGING."
+source = "docs/usage/index.md"
+
+[[resources]]
+id = "guides/component-authoring"
+kind = "guide"
+title = "Public component authoring"
+summary = "PDK activation, discovery, physical units, material records, ports and previews."
+status = "Available public authoring procedure."
+source = "docs/public-pdk-examples/component-authoring.md"
+
+[[resources]]
+id = "guides/semantic-inspection"
+kind = "guide"
+title = "Semantic geometry inspection"
+summary = "Concept views and artifact-bound inspection plates from real geometry."
+status = "Available diagnostic procedure; no scientific acceptance claim."
+source = "docs/usage/semantic-inspection.md"
+
+[[resources]]
+id = "guides/component-simulation-notebooks"
+kind = "guide"
+title = "Public Component Simulation notebook rules"
+summary = "QMD and Jupytext authority, saved outputs, stage-local workflow and failures."
+status = "Available notebook procedure; simulation contracts belong to SCGSim."
+source = "docs/usage/component-simulation-notebooks.md"
+
+[[resources]]
+id = "api/pdk"
+kind = "api"
+title = "PDK activation and registry source"
+summary = "Exact version source for activate, get_pdk, cells and cross-sections."
+status = "Available public API source; resource text is never executed by discovery."
+source = "orcapen_sc_pdk/pdk.py"
+
+[[resources]]
+id = "api/material-records"
+kind = "api"
+title = "Material and interface record API source"
+summary = "Copy-returning records, validation and explicit failure behavior."
+status = "Available public API source."
+source = "orcapen_sc_pdk/materials.py"
+
+[[resources]]
+id = "api/technology"
+kind = "api"
+title = "Technology and LayerStack source"
+summary = "Exact layer, stack, connectivity, routing and cross-section definitions."
+status = "Public PDK model definitions; not fabrication qualification."
+source = "orcapen_sc_pdk/tech.py"
+
+[[resources]]
+id = "reference/material-records"
+kind = "reference"
+title = "Public material and interface presets"
+summary = "Numerical inputs and provenance including synthetic LiteratureCentral presets."
+status = "Public model records; literature-central values are not measured process data."
+source = "orcapen_sc_pdk/materials.json"
+
+[[resources]]
+id = "examples/kosen-route-a-electrostatic"
+kind = "example"
+title = "Kosen Route A Electrostatic"
+summary = "Canonical QMD consumer showing PDK semantics and receipt-bound analysis."
+status = "CONVERGING public example; selected run artifacts required for analysis."
+source = "notebooks/src/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.qmd"
+
+[[resources]]
+id = "examples/kosen-route-b-electrostatic"
+kind = "example"
+title = "Kosen Route B Electrostatic"
+summary = "Finite-metal public component workflow with explicit grounded boundaries."
+status = "CONVERGING public example; selected run artifacts required for analysis."
+source = "notebooks/src/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.qmd"
+
+[[resources]]
+id = "examples/kosen-route-a-eigenmode"
+kind = "example"
+title = "Kosen Route A Eigenmode"
+summary = "Canonical thin-film eigenmode and Surface-EPR consumer source."
+status = "CONVERGING public example; no fresh-run or convergence claim."
+source = "notebooks/src/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.qmd"
+
+[[resources]]
+id = "examples/kosen-route-b-eigenmode"
+kind = "example"
+title = "Kosen Route B Eigenmode"
+summary = "Canonical physical-geometry eigenmode and Surface-EPR consumer source."
+status = "CONVERGING public example; authoring actions can create artifacts."
+source = "notebooks/src/ComponentSimulation/Kosen2024_Xmon/palace_route_b_eigenmode.qmd"
+
+[[resources]]
+id = "examples/kosen-q3d"
+kind = "example"
+title = "Kosen Q3D"
+summary = "Canonical public QMD showing explicit PDK material and conductor selection."
+status = "CONVERGING consumer example; AEDT runtime prerequisites are SCGSim-owned."
+source = "notebooks/src/ComponentSimulation/Kosen2024_Xmon/aedt_q3d.qmd"
+
+[[resources]]
+id = "examples/kosen-boundary-alignment"
+kind = "example"
+title = "Kosen electrostatic boundary alignment"
+summary = "Analysis-only comparison source; requires its exact sealed artifacts and evidence."
+status = "Historical/diagnostic experiment; no solver-agreement claim."
+source = "notebooks/src/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.qmd"
+
+[[resources]]
+id = "examples/cpw-q3d"
+kind = "example"
+title = "Finite-ground CPW Q3D"
+summary = "Canonical QMD consumer with explicit geometry, material and net controls."
+status = "Public example; preparation/solve requires explicit execution intent."
+source = "notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.qmd"
+
+[[resources]]
+id = "examples/cpw-hfss-driven-modal"
+kind = "example"
+title = "Finite-ground CPW HFSS Driven Modal"
+summary = "Historical settings and source-only binding limitation note; no executable Modal workflow."
+status = "Nonexecutable historical authoring note; current usable Modal notebook incomplete."
+source = "notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.qmd"
+
+[[resources]]
+id = "examples/cpw-hfss-driven-terminal"
+kind = "example"
+title = "Finite-ground CPW HFSS Driven Terminal"
+summary = "Public geometry, explicit assignments and visible execution controls."
+status = "Public example; consult installed SCGSim for backend capability and requirements."
+source = "notebooks/src/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_terminal.py"
+
+[[resources]]
+id = "examples/cpw-hfss-eigenmode"
+kind = "example"
+title = "Finite-ground CPW HFSS Eigenmode"
+summary = "Canonical QMD eigenmode consumer example."
+status = "Public example; consult installed SCGSim for backend capability and requirements."
+source = "notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd"
+
+[[resources]]
+id = "examples/cpw-q2d"
+kind = "example"
+title = "Finite-ground CPW native Q2D cross-section"
+summary = "Native cross-section example without a GDS-only solver fixture."
+status = "Public example; Q2D geometry and runtime APIs are SCGSim-owned."
+source = "notebooks/src/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.qmd"
+
+[[resources]]
+id = "examples/geometry-viewer"
+kind = "example"
+title = "Read-only Palace Geometry Viewer"
+summary = "Existing-artifact inspection controls without preparation or solving."
+status = "Read-only diagnostic example; source artifacts required."
+source = "notebooks/src/Tools/palace_geometry_viewer.py"

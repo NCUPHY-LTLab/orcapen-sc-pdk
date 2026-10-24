@@ -1,0 +1,101 @@
+{
+  "run_id": "circular_pad_palace_eigenmode_20261007_08",
+  "handoff_id": "9f9b745aeca2dbe385d4f5b86f6d4e05ac004280d34da193deed17dccd7449f5",
+  "evidence_class": "public-derived-existing-synthetic-model-source-and-result",
+  "semantic_state": "CONVERGING",
+  "source_revisions": {
+    "orpen_executed_producer": "c79b91ef882079d937fce20129f3cbd477e8438d",
+    "orpen_later_dependency_checkpoint_not_executed": "15901998082ab90242671677c7fd02c7bc339496",
+    "scgsim_public_byte_binding": "2eed1eb4a9bcc7b1b020feb4953d5ed27e7d7b71",
+    "scgsim_wheel_sha256": "925a096b4ae247fddc2ac357cdf8025979f50463721312a808ff4cefafc35b40",
+    "scgsim_version": "1.1.0rc1",
+    "scgsim_release_status": "installable develop revision, not stable",
+    "palace_corrected_source": "4e9e1b7232b4c8ca8b964be7e70f1848f578de37",
+    "palace_tree": "cc331201fa18a9e042a8191076d070a6a0d90b46",
+    "palace_elf_sha256": "85e11f62cb72b7248e79753df0edf010881e3c31deb944267f30cedd2fac024b",
+    "palace_cli_version": "UNKNOWN"
+  },
+  "source_layout_identity": {
+    "source_revision": "ff4dcea00d4961ff4f8264f69a0bb8bfe43ed10d",
+    "gds_sha256": "c36667a5d024530b6f7d7ef4df1b304ad31435a41feb7e57e3a535e23746694f",
+    "note": "Existing source-layout PNG retained byte-for-byte; not a fresh08 mesh, field plot or new render."
+  },
+  "analysis_selection": {
+    "WORKFLOW_ACTION": "analyze_handoff",
+    "RUN_ID": "circular_pad_palace_eigenmode_20261007_08",
+    "EXPECTED_HANDOFF_ID": "9f9b745aeca2dbe385d4f5b86f6d4e05ac004280d34da193deed17dccd7449f5",
+    "selected_pass_index": 4,
+    "reason": "final_snapshot",
+    "integrity": "receipt_bound",
+    "note": "Existing clean-kernel analysis performed strict Resolve and Report without native operations. This later presentation and the later dependency checkpoint were not executed as fresh08."
+  },
+  "input_sha256": {
+    "mesh": "1105cdc1c3a729d7ec87b63a51671619bc5d58ecdae8bdef046752ca427159ee",
+    "config": "e7f1a67eb7862587e25bb508a836cda1732c69de6a9d515dfb81ab276d17c9b8",
+    "mesh_manifest": "30d34bfa5d6636fe2c0b702286e337f70df00af0c61552a28942bdf2ae43f7a1",
+    "index_map": "078cb86cd6c5e5b2c3a80344645af90fb832088618a02fbb62f2124c1a0a6fad"
+  },
+  "observation_sha256": {
+    "safe_terminal_receipt": "f0c34a4bc25b9f43a3b82673f591b60c09e5b752ad07b570e36b9505332e3f45",
+    "returned_run_receipt": "ac46ce7ac5d509665ceb07e68609537ae4908eb99b452cd6a7e303e9317b257e",
+    "executed_analysis_notebook": "494f1a8a92d8578333c0140b6e8ee9b78eab03e139bdabfeabf366973b37747a",
+    "report_observation": "8bd828d8651856e6c92703d91b622652185889cde9a05aa776b17bbfca06ff91",
+    "typed_epr_rows": "2a2903ed480faa6fcdfe7fd43787614dbfaf61df5e6c552a1bf7bdbcd799f4d5",
+    "analysis_binding": "78bedd23d93da386c0421d79e473ad0aecc938a5bd70ee2033488120b8b8163c",
+    "report_html": "0d49fad91e69d326fabec289434e9dd9e03ada7c804b4fda650ba78860a41441",
+    "cad_interpretation": "4536b52004bea6e6b7a0bfa84a3e0c7424be6623f73a9d6f707ca8808ef50e20",
+    "local_final_curvature_derivative": "e11bb9dcb904bd9e7d44c0991d386b52774ed622f20e6c8e81775c8d2aa8af90",
+    "local_final_boundary_vtu_piece": "70a6d51348c47ba3f963450463c75cee62954d19e7d525b25478ee9b5334f8ee"
+  },
+  "derivation": {
+    "source_layout.png": "Existing disk GDS rendering of layer 1/0 electrodes and layer 202/1 non-metal locator; unchanged original identity.",
+    "frequency_amr.csv": "Select mode-1 frequencies and error_norm from five sealed report-observation passes; no solver, Resolve or Report replay.",
+    "frequency_amr.png": "Plot frequency_amr.csv; configured indicator 0.02 is a declared input, not an adequacy criterion.",
+    "typed_epr.csv": "Select nine surface, two bulk and one junction participation row from sealed typed-epr-rows.json, preserving native sign."
+  },
+  "observations": {
+    "native_executions": 1,
+    "refinement_operations": 4,
+    "solve_estimate_snapshots": 5,
+    "final_frequency_hz": 5573354161.115,
+    "final_indicator_norm": 0.1186681863426,
+    "configured_amr_tolerance": 0.02,
+    "final_nd_unknowns": 846008,
+    "final_tetrahedra": 114197,
+    "mpi_processes": 8,
+    "omp_threads": 1,
+    "elapsed_native_s": 12080.010512229,
+    "reported_peak_node_memory_mb": 7949.05078125,
+    "normalization_energy_j": 4.169884754072e-12,
+    "signed_junction_participation": -0.9948401783541,
+    "local_curvature": {
+      "attribute": 14,
+      "rank": 1,
+      "cell_index": 3051,
+      "boundary_id": "chip/PAD_OUTER",
+      "role": "outer",
+      "vtk_type": 69,
+      "coordinate_units": "serialized; no physical conversion inferred",
+      "strict_receipt_lists_piece": false,
+      "interpretation": "Representative source-bound final sidewall cell locally non-affine after four refinements; not global accuracy or shared-node motion evidence."
+    }
+  },
+  "limits": [
+    "PCG nonconvergences at 10000 iterations and initial natural PMC/ZeroCharge warning retained.",
+    "Final indicator versus configured tolerance is an observation, not a convergence/adequacy Gate.",
+    "Uniform area/length surrogate, not exact equipotential curved-terminal voltage.",
+    "Synthetic interface loss assumptions and signed native junction result are not measured device Q/T1 or negative physical stored energy.",
+    "Local coordinate evidence is separately hashed; VTU pieces are not strict-receipt-listed.",
+    "No global geometry accuracy, exact R100 fidelity, shared-node motion or continuous-circle accuracy claim.",
+    "Fresh08 produced new component/Plan/CAD/mesh/config/handoff before one native execution; equal config hash does not mean reuse.",
+    "Later presentation not executed; earlier attempts remain historical in Git/original custody.",
+    "No raw returned artifact distribution or download promise."
+  ],
+  "public_artifact_sha256": {
+    "source_layout.png": "1fc658dea21c22996204e208453a6bffa9f34ed36f7ef5e593cf571e32ba4910",
+    "frequency_amr.csv": "545ab97508056a95cd0ef3fb5bdfb905d7a7c23b8cb29e14ee85fc58336eac9a",
+    "frequency_amr.png": "d6f1a23b3ece076da74e615cfc38927a3558d6a252c68e25a87d22dbebf43f50",
+    "typed_epr.csv": "a6c070d909379b6632599a31bbad18675d5d5ea00f0dbce607e84e7acc170681",
+    "README.md": "10bd914f8795857f5e440d9b6b5bd739c41827c92df204597a307f8d102a4eab"
+  }
+}

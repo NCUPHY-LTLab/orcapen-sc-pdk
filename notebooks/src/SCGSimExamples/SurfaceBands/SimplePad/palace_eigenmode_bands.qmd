@@ -1,0 +1,388 @@
+---
+title: "SimplePad — Palace surface bands and returned Q2D correction"
+jupyter:
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+  simulation_notebook:
+    kind: single
+execute:
+  enabled: false
+---
+
+Build the public SimplePad, inspect its actual source catalogue, and select original-parent surface-distance bands before applying the [Q2D example's](aedt_q2d_interfaces.qmd) returned factors. Edit numeric geometry and controls in [the companion model](simplepad_interface_model.json); the catalogue supplies actual source identities and field sides during authoring.
+
+⏳ Execution pending — use the separately provisioned CPython 3.12.14 / GDSFactory 9.48.0 environment, an ordinary OrcaPen wheel built from pinned public source `c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c`, and the selected SCGSim candidate. The execution owner supplies the official Palace 0.18.1 executable binding and the separate serial, MPI, and nonconformal stages; this page prepares one explicitly selected run.
+
+The field correction uses one illustrative straight-edge factor per interface across all selected parents. Corner, hole, and outer-edge equivalence remains unverified.
+
+## Setup and Imports
+
+```{python}
+#| id: band-palace-imports
+import importlib.metadata
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+from uuid import uuid4
+
+from IPython.display import display
+from scgsim.geometry.models.surface_bands import SurfaceDistanceBandSpec
+from scgsim.palace.results.epr_correction import (
+    SurfaceEprCorrectionRule,
+    SurfaceEprParentSelection,
+    apply_surface_epr_correction,
+)
+
+WORKFLOW_ACTION = "prepare_handoff"
+RUN_ID = f"simplepad_palace_bands_{uuid4().hex}"
+OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SimplePadSurfaceBands"
+RUN_ROOT = OUTPUT_ROOT / RUN_ID / "palace"
+SOURCE_OUTPUT_DIR = OUTPUT_ROOT / RUN_ID / "source-inputs"
+CORRECTION_OUTPUT_DIR = OUTPUT_ROOT / RUN_ID / "corrections"
+if WORKFLOW_ACTION not in {"AUTHORING_ONLY", "prepare_handoff", "run", "analyze_handoff"}:
+    raise ValueError("Unknown WORKFLOW_ACTION")
+MODEL_PATH = (
+    Path(os.environ["SIMPLEPAD_MODEL_INPUT_PATH"])
+    if WORKFLOW_ACTION == "analyze_handoff"
+    else Path("simplepad_interface_model.json")
+)
+with MODEL_PATH.open(encoding="utf-8") as stream:
+    model = json.load(stream)
+if WORKFLOW_ACTION != "analyze_handoff":
+    import gdsfactory as gf
+    import orcapen_sc_pdk
+    from orcapen_sc_pdk import get_interface_preset_records, get_material_records
+    from orcapen_sc_pdk.tech import get_single_die_layer_stack
+    from scgsim.geometry import (
+        ApproximationProfile,
+        GeometryPlan,
+        interpret_physical_geometry,
+        surface_distance_band_catalogue,
+    )
+    from scgsim.geometry.compiler import build_route_construction_plan
+    from scgsim.palace import EigenmodeSim
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    from scgsim.aedt import resolve_results
+    from scgsim.palace import inspect_run_trustworthiness, resolve_palace_result
+display({
+    "python": sys.version,
+    "gdsfactory": importlib.metadata.version("gdsfactory"),
+    "orcapen-sc-pdk": importlib.metadata.version("orcapen-sc-pdk"),
+    "scgsim": importlib.metadata.version("scgsim"),
+    "run_id": RUN_ID,
+})
+```
+
+### Read retained selections only for returned analysis
+
+Authoring derives selections directly from the original snapshot below. Only `analyze_handoff` reads `SIMPLEPAD_BAND_SELECTIONS_PATH`, pointing to the actual run's retained `selected-parents.json`. Each retained row contains:
+
+| Key | Required content |
+| --- | --- |
+| `interface_kind` | `MA`, `MS`, or `SA`, as actually selected. |
+| `field_side` | The actual Palace field-side label for this parent. |
+| `geometry` | A canonical `SurfaceDistanceBandSpec` payload containing real `parent_surface_id`, `source_entity_id`, `source_polygon_id`, `distances_um`, `precision_um`, and `boundary_segments`. |
+
+Returned analysis uses the retained canonical geometry payload and actual field side without rebuilding the component or regenerating its catalogue.
+
+```{python}
+#| id: band-palace-selections
+if WORKFLOW_ACTION == "analyze_handoff":
+    SELECTIONS_PATH = Path(os.environ["SIMPLEPAD_BAND_SELECTIONS_PATH"])
+    with SELECTIONS_PATH.open(encoding="utf-8") as stream:
+        selection_rows = json.load(stream)
+    selected_parents = tuple(
+        (
+            row["interface_kind"],
+            row["field_side"],
+            SurfaceDistanceBandSpec.from_payload(row["geometry"]),
+        )
+        for row in selection_rows
+    )
+```
+
+Check: use the retained selections and model input from the exact returned Palace run.
+
+## Build Component Coupon
+
+```{python}
+#| id: band-palace-component
+if WORKFLOW_ACTION != "analyze_handoff":
+    component_controls = model["palace"]
+    orcapen_sc_pdk.activate()
+    gf.clear_cache()
+    component = gf.get_component(
+        component_controls["component_name"],
+        **component_controls["component_parameters"],
+    )
+    layer_stack = get_single_die_layer_stack(
+        include_airbridges=component_controls["include_airbridges"]
+    )
+    plan = GeometryPlan(
+        component=component,
+        root_id=component_controls["root_id"],
+        layer_stack=layer_stack,
+        material_records=get_material_records(),
+        coupon_padding_um=component_controls["coupon_padding_um"],
+    )
+    plan.set_nets({name: tuple(members) for name, members in component_controls["nets"].items()})
+    plan.set_vacuum_region(padding=tuple(component_controls["vacuum_padding_um"]))
+    original_snapshot = plan.prepare()
+    display(component)
+    display({"bbox_um": str(component.dbbox()), "ports": component.ports})
+```
+
+### Inspect the original-parent catalogue
+
+The selection policy is all actual catalogue rows whose `interface_type` is a key in the model's MA/MS/SA interface mapping. Each selected row's first exact `source_bindings` pair is its declared provenance anchor; it does not narrow the original-edge selection. `field_side` comes from surface metadata `face_kind`, while physical contribution ledger sides are displayed separately.
+
+```{python}
+#| id: band-palace-catalogue
+if WORKFLOW_ACTION != "analyze_handoff":
+    source_input = original_snapshot.geometry_input
+    profile = ApproximationProfile(**model["palace"]["approximation"])
+    effective_input, effective_stack, physical = interpret_physical_geometry(
+        source_input, original_snapshot.stack, profile
+    )
+    construction = build_route_construction_plan(
+        effective_input, route="B", representation_context=physical.context
+    )
+    surfaces = {surface.surface_id: surface for surface in construction.surfaces}
+    catalogue = surface_distance_band_catalogue(construction, build_input=effective_input)
+    catalogue_rows = []
+    for item in catalogue:
+        surface = surfaces[item["parent_surface_id"]]
+        metadata = surface.metadata
+        provenance = metadata.get("source_provenance", {})
+        catalogue_rows.append({
+            **item,
+            "interface_type": metadata.get("interface_type"),
+            "field_side": metadata.get("face_kind"),
+            "field_side_source": "SurfacePlanRecord.metadata.face_kind",
+            "physical_contribution_sides": [
+                entry.get("side")
+                for entry in provenance.get("surface_contribution_ledger", ())
+            ],
+            "source_provenance": provenance,
+        })
+    display(catalogue_rows)
+    SOURCE_OUTPUT_DIR.mkdir(parents=True, exist_ok=False)
+    with (SOURCE_OUTPUT_DIR / "model-input.json").open("x", encoding="utf-8") as stream:
+        json.dump(model, stream, indent=2, allow_nan=False)
+    with (SOURCE_OUTPUT_DIR / "source-catalogue.json").open("x", encoding="utf-8") as stream:
+        json.dump(catalogue_rows, stream, indent=2, allow_nan=False)
+    selected_rows = [
+        row for row in catalogue_rows if row["interface_type"] in model["interfaces"]
+    ]
+    display(selected_rows)
+    display({
+        "selected_count": len(selected_rows),
+        "by_interface": {
+            kind: sum(row["interface_type"] == kind for row in selected_rows)
+            for kind in model["interfaces"]
+        },
+    })
+    selected_parents_list = []
+    for row in selected_rows:
+        anchor = row["source_bindings"][0]
+        spec = SurfaceDistanceBandSpec(
+            parent_surface_id=row["parent_surface_id"],
+            source_entity_id=anchor["source_entity_id"],
+            source_polygon_id=anchor["source_polygon_id"],
+            distances_um=tuple(model["palace"]["band_cuts_um"]),
+            precision_um=model["palace"]["precision_um"],
+            boundary_segments=model["palace"]["boundary_segments"],
+        )
+        selected_parents_list.append((row["interface_type"], row["field_side"], spec))
+    selected_parents = tuple(selected_parents_list)
+    plan.set_surface_distance_bands(tuple(spec for kind, side, spec in selected_parents))
+    snapshot = plan.prepare()
+    with (SOURCE_OUTPUT_DIR / "selected-parents.json").open("x", encoding="utf-8") as stream:
+        json.dump([
+            {"interface_kind": kind, "field_side": side, "geometry": spec.to_payload()}
+            for kind, side, spec in selected_parents
+        ], stream, indent=2, allow_nan=False)
+```
+
+Check: inspect the full catalogue's origin-support status and selected rows. Exact binding pairs are used directly, including literal `None` polygon identities where supplied; empty bindings and unsupported lineage propagate producer errors. The second `prepare()` uses the same plan and component, with all original outer and hole edges selected; child and port-split seams remain excluded as distance origins.
+
+## Configure EPR / Problem
+
+```{python}
+#| id: band-palace-problem
+if WORKFLOW_ACTION != "analyze_handoff":
+    sim = EigenmodeSim(approximation_profile=profile)
+    sim.set_plan(snapshot)
+    sim.set_output_dir(RUN_ROOT)
+    raw_presets = get_interface_preset_records()
+    interface_source_records = {
+        kind: raw_presets[selection["preset"]]
+        for kind, selection in model["interfaces"].items()
+    }
+    sim.set_surface_epr(
+        approximation_profile=profile,
+        representation="B",
+        specs={
+            kind: {
+                "thickness": model["interfaces"][kind]["thickness_um"],
+                "permittivity": model["material_properties"][kind]["permittivity"],
+                "loss_tangent": model["material_properties"][kind]["dielectric_loss_tangent"],
+                "source": record["source"],
+                "preset": model["interfaces"][kind]["preset"],
+            }
+            for kind, record in interface_source_records.items()
+        },
+    )
+    port = model["palace"]["port"]
+    sim.add_port(
+        port["name"], layer=port["layer"], layout_sheet=port["layout_sheet"],
+        inductance=port["inductance"],
+    )
+    sim.set_epr_request(
+        surface_interfaces=tuple(model["interfaces"]),
+        bulk_domain_ids=None,
+        port_names=(port["name"],),
+    )
+    sim.set_eigenmode(**model["palace"]["eigenmode"])
+    display(interface_source_records)
+    display(sim.input_summary())
+```
+
+## Build Mesh
+
+```{python}
+#| id: band-palace-mesh
+if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
+    controls = model["palace"]["mesh_controls"]
+    sim.set_mesh(
+        refined_mesh_size=controls["refined_mesh_size_um"],
+        max_mesh_size=controls["max_mesh_size_um"],
+        algorithm_3d=controls["algorithm_3d"],
+        threads=controls["threads"],
+        surface_threads=controls["surface_threads"],
+        geometry_order=controls["geometry_order"],
+        high_order_optimize=controls["high_order_optimize"],
+    )
+    MESH_PATH = sim.mesh()
+    display(MESH_PATH)
+```
+
+## Generate Config
+
+```{python}
+#| id: band-palace-config
+if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
+    sim.set_numerical(**model["palace"]["numerical_controls"])
+    CONFIG_PATH = sim.write_config()
+    display(CONFIG_PATH)
+    display(sim.mesh_summary())
+```
+
+## Prepare Handoff
+
+Preparation performs real geometry and meshing, but starts no Palace solve. The execution owner supplies the actual official executable wrapper through `PALACE_EXECUTABLE` and any setup lines through `PALACE_SETUP_COMMANDS`. The model retains the original explicit MPI resource request and conformal controls; serial and nonconformal stages require their own explicit controls and authorization.
+
+Before choosing `run`, also set `SIMPLEPAD_Q2D_RETURNED_RUN_DIR` to the completed Q2D example's actual returned directory; the correction stage reads its resolved factors.
+
+```{python}
+#| id: band-palace-handoff
+if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
+    PALACE_EXECUTABLE = os.environ["PALACE_EXECUTABLE"]
+    SETUP_COMMANDS = tuple(os.environ.get("PALACE_SETUP_COMMANDS", "").splitlines())
+    with (SOURCE_OUTPUT_DIR / "interface-source-records.json").open("x", encoding="utf-8") as stream:
+        json.dump(interface_source_records, stream, indent=2, allow_nan=False)
+    HANDOFF = sim.prepare_handoff(
+        profile="direct-local",
+        executable=PALACE_EXECUTABLE,
+        resources=model["palace"]["handoff_resources"],
+        setup_commands=SETUP_COMMANDS,
+    )
+    display(HANDOFF)
+    display({"retain_independently": HANDOFF.handoff_id})
+    if WORKFLOW_ACTION == "run":
+        subprocess.run([str(HANDOFF.script_path)], cwd=HANDOFF.run_dir, check=True)
+```
+
+Check: retain the handoff ID independently. Only an explicit `run` action invokes the native script.
+
+## Analyze Returned Run
+
+In a fresh analysis kernel, choose `analyze_handoff`. Supply the actual returned inputs:
+
+| Environment input | Retained input |
+| --- | --- |
+| `SIMPLEPAD_PALACE_RETURNED_RUN_DIR` | Palace returned directory. |
+| `SIMPLEPAD_PALACE_HANDOFF_ID` | Independently retained Palace handoff ID. |
+| `SIMPLEPAD_Q2D_RETURNED_RUN_DIR` | Q2D returned directory. |
+| `SIMPLEPAD_BAND_SELECTIONS_PATH` | The Palace run's retained `selected-parents.json`. |
+| `SIMPLEPAD_MODEL_INPUT_PATH` | The Palace run's retained source `model-input.json`. |
+
+### Run Identity
+
+### Numerical Evidence
+
+### Simulation Benchmark
+
+```{python}
+#| id: band-palace-returned
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    RETURNED_RUN_DIR = (
+        HANDOFF.run_dir if WORKFLOW_ACTION == "run"
+        else Path(os.environ["SIMPLEPAD_PALACE_RETURNED_RUN_DIR"])
+    )
+    EXPECTED_HANDOFF_ID = (
+        HANDOFF.handoff_id if WORKFLOW_ACTION == "run"
+        else os.environ["SIMPLEPAD_PALACE_HANDOFF_ID"]
+    )
+    report = inspect_run_trustworthiness(RETURNED_RUN_DIR)
+    display(report.show_run_trustworthiness(show_details=True))
+    display(report.show_simulation_benchmark(show_details=True))
+    result = resolve_palace_result(
+        RETURNED_RUN_DIR, expected_handoff_id=EXPECTED_HANDOFF_ID
+    )
+    epr = result.epr_result()
+    q2d_fields = resolve_results(
+        Path(os.environ["SIMPLEPAD_Q2D_RETURNED_RUN_DIR"])
+    ).q2d_fields()
+```
+
+### Physics Analysis Results
+
+Each typed rule binds all selected parents for one interface and the actual returned native iteration. Multiple MA top/wall parents stay separate selections. The correction is `p_final = p_ge1 + F * p_0.5_1`.
+
+```{python}
+#| id: band-palace-correction
+if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
+    correction_controls = model["palace"]["correction"]
+    CORRECTION_OUTPUT_DIR.mkdir(parents=True, exist_ok=False)
+    for kind in model["interfaces"]:
+        factor = q2d_fields.correction_factor(kind + "_F")
+        rule = SurfaceEprCorrectionRule(
+            mode=correction_controls["mode"],
+            palace_iteration=epr.provenance["palace_native_iteration"],
+            interface_kind=kind,
+            parent_selections=tuple(
+                SurfaceEprParentSelection(geometry=spec, field_side=side)
+                for selected_kind, side, spec in selected_parents
+                if selected_kind == kind
+            ),
+            sample_lower_um=correction_controls["sample_lower_um"],
+            replacement_upper_um=correction_controls["replacement_upper_um"],
+            q2d_factor_name=kind + "_F",
+            q2d_numerator_areas=(kind + "_I0_1",),
+            q2d_denominator_areas=(kind + "_I0p5_1",),
+        )
+        corrected = apply_surface_epr_correction(epr, rule=rule, q2d_factor=factor)
+        display(corrected.show())
+        with (CORRECTION_OUTPUT_DIR / f"{kind}-correction.json").open("x", encoding="utf-8") as stream:
+            json.dump(corrected.to_payload(), stream, indent=2, allow_nan=False)
+    display(CORRECTION_OUTPUT_DIR)
+```
+
+Check: read the actual band inventory, factor provenance, and corrected values together. Provider completeness errors propagate directly; no local workaround supplies missing children or field values.
+
+The original [SimplePad notebook](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c/notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd), [factory](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py), and [material records](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c/orcapen_sc_pdk/materials.json) define the unchanged public source.

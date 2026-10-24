@@ -1,0 +1,13 @@
+kind,interface,owner,side,participation,signed_palace,margin_um
+surface,MA,Ground,sidewall,1.39016671445e-8,false,0
+surface,MA,Ground,top,1.259351932212e-7,false,0
+surface,MA,Pad,sidewall,3.451643605219e-8,false,0
+surface,MA,Pad,top,3.572671682388e-7,false,0
+surface,MS,Ground,bottom,1.560241834445e-5,false,0
+surface,MS,Pad,bottom,4.55403703566e-5,false,0
+surface,SA,substrate,interface,5.722668112064e-5,false,0
+surface,SA,substrate,sidewall,1.569352761338e-8,false,0
+surface,SA,vacuum-substrate,interface,2.241866602509e-9,false,0
+bulk,,Si,,0.9202311812879,false,
+bulk,,vacuum,,0.07976881871207,false,
+junction,,chip/o_junction_lumped,,-0.9948401783541,true,

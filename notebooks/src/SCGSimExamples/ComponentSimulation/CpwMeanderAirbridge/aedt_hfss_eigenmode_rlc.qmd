@@ -1,0 +1,222 @@
+---
+title: "17-bridge CPW–meander · HFSS Lumped RLC Eigenmode"
+jupyter:
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+execute:
+  enabled: false
+scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
+scgsim_source_archive_sha256: "4126a6f162f30d5fdaf4242b69cda2c17531bbaf0315f60ba09f7acb5e63c10d"
+---
+
+![17-bridge CPW–meander coupon: Lumped launchers.](../../_images/meander-lumped.png)
+
+Use the launcher variant to observe modes with two explicit linear resistive
+loads. The same nonmetal supports are reused by the
+[Lumped Terminal notebook](aedt_hfss_driven_terminal_lumped.ipynb); geometry
+does not irrevocably select a solver treatment. Read the
+[Lumped RLC requirement](../../../../simulation/requirements/lumped-rlc-eigenmode.qmd)
+for the system and expected outputs.
+
+Fresh construction uses the local shared-physical candidate, not a
+published wheel. Retained results keep their original runtime identities.
+
+Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
+
+## Action and identity
+
+```{python}
+#| id: meander-rlc-imports
+import json
+import subprocess
+import sys
+from importlib.metadata import version
+from pathlib import Path
+from uuid import uuid4
+
+from IPython.display import display
+from scgsim.aedt import AedtResources, EigenmodeRunControl, EigenmodeSim, LumpedRlc, resolve_results
+from scgsim.geometry import (
+    ApproximationProfile,
+    GeometryBuildInput,
+    LayoutPolygonSpec,
+    LumpedSupport,
+    SemanticEntitySpec,
+    VacuumRegionSpec,
+    apply_vacuum_region_to_stack,
+)
+
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import cpw_meander_airbridge_lumped_coupon
+from orcapen_sc_pdk.cells.simulation import get_cpw_meander_airbridge_source_records
+
+WORKFLOW_ACTION = "run"  # author | prepare_handoff | prepare_only | run | analyze
+VARIANT = "lumped"
+RUN_ID = f"meander-rlc-{uuid4().hex[:12]}"
+OUTPUT_ROOT = Path("notebooks/.artifacts/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge")
+RUN_DIR = OUTPUT_ROOT / RUN_ID
+RETURNED_RUN_DIR = OUTPUT_ROOT / "returned-run"  # Explicit relocated completed/partial input.
+ANALYSIS_KIND = "strict"  # strict | receipt_only (for incomplete returns)
+display({name: version(name) for name in ("scgsim", "gdsfactory", "orcapen-sc-pdk")})
+```
+
+## Layout and physical stack
+
+![Selected launcher source geometry; not a native model.](https://raw.githubusercontent.com/OrPenStrike/orcapen-sc-pdk/f4f509843c2c7177773798bf6a8a906f94c63a11/docs/_static/images/test-components/driven-terminal-lumped-resonator.png)
+
+The source is Al M1 0…0.1 µm, Al posts 0.1…3.1 µm and Al decks 3.1…3.4 µm
+on the PDK Si substrate. The 17 full-landing bridges join Ground across slots,
+not Signal. The two launcher locators are on 202/1 at source Z=0.05 µm;
+their normals and directed Signal→Ground contacts are distinct facts.
+
+```{python}
+#| id: meander-rlc-layout
+if WORKFLOW_ACTION != "analyze":
+    orcapen_sc_pdk.activate()
+    coupon = cpw_meander_airbridge_lumped_coupon()
+    coupon.plot()
+```
+
+{{< include _source_input.qmd >}}
+
+## Loads, enclosure and adaptive search
+
+Initial controls retain the selected source case: **pure R**, parallel topology,
+50 Ω at each launcher; `None` disables L and C. They are general linear RLC
+loads, not junctions and not an automatic EPR request. `MODEL="thin_film"`
+uses the declared M1/local-deck/contact map; selecting Solid preserves the
+same physical source. The finite XY enclosure and source air top are retained;
+the HFSS exterior uses its closed default boundary, not a radiation condition.
+
+```{python}
+#| id: meander-rlc-settings
+MODEL = "thin_film"  # solid | thin_film; an explicit model choice, not source rewrite.
+APPROXIMATION_PROFILE = ApproximationProfile(name=MODEL, revision="v1", parameters={})
+resistance_ohm = 50.0
+inductance_h = None
+capacitance_f = None
+run_control = EigenmodeRunControl(
+    setup_name="Setup1",
+    minimum_frequency_ghz=1.0,
+    num_modes=1,
+    maximum_passes=2,
+    minimum_passes=1,
+    minimum_converged_passes=1,
+    maximum_delta_frequency_percent=1.0,
+    percent_refinement=30.0,
+)
+resources = AedtResources(cores=4, ram_limit_percent=20)
+geometry_workers = 1
+if WORKFLOW_ACTION != "analyze":
+    sim = EigenmodeSim(modeling=APPROXIMATION_PROFILE.name)
+    sim.set_geometry(build_input)
+    sim.set_stack(stack)
+    sim.set_eigenmode(
+        project_name=RUN_ID,
+        design_name="MeanderRlcEigenmode",
+        run_control=run_control,
+        resources=resources,
+        geometry_workers=geometry_workers,
+    )
+    for support in supports:
+        sim.add_lumped_rlc(
+            LumpedRlc(
+                support_id=support.support_id,
+                topology="parallel",
+                resistance_ohm=resistance_ohm,
+                inductance_h=inductance_h,
+                capacitance_f=capacitance_f,
+            )
+        )
+    sim.set_output_dir(RUN_DIR)
+    display(sim.input_summary())
+```
+
+## Prepare / handoff
+
+Preparation is a separate explicit action. Review its source/effective Z,
+support membership, enclosure and enabled load components before any later
+native run. The resource request is not a host-wide hard RAM cap or a reserved
+license. This publication round does not execute the following preparation.
+
+```{python}
+#| id: meander-rlc-prepare
+HANDOFF = None
+if WORKFLOW_ACTION in {"prepare_handoff", "prepare_only", "run"}:
+    HANDOFF = sim.prepare_handoff()
+    display(HANDOFF)
+```
+
+## Run: explicit native transaction
+
+```{python}
+#| id: meander-rlc-run
+if WORKFLOW_ACTION == "run":
+    subprocess.run([str(HANDOFF.script_path)], cwd=HANDOFF.run_dir, check=True)
+```
+
+Do not select `run` during documentation authoring. Future execution must bind
+actual ownership, allocation and a fresh output directory; never reuse or
+restart a stopped historical job.
+
+## Prepare-only native model inspection
+
+Select `prepare_only` to build, read back, save and release the native model
+without Analyze. This does not produce solved physics results.
+
+```{python}
+#| id: aedt-hfss-eigenmode-rlc-prepare-only
+if WORKFLOW_ACTION == "prepare_only":
+    from scgsim.aedt import resolve_prepared_model
+
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scgsim.aedt.run",
+            "--handoff",
+            str(HANDOFF.metadata_path),
+            "--execute",
+            "--prepare-only",
+        ],
+        check=True,
+    )
+    display(resolve_prepared_model(HANDOFF.run_dir))
+```
+
+## Returned Run: new kernel, no source rebuild
+
+Restart the kernel, choose `analyze`, and set the returned directory explicitly.
+Strict resolution checks the actual return. For a known incomplete transaction,
+`receipt_only` exposes its recorded state without pretending it is a resolved
+physics result. No automatic retry or catch-and-success fallback is used.
+
+```{python}
+#| id: meander-rlc-returned
+RESULT = None
+if WORKFLOW_ACTION in {"run", "analyze"}:
+    if WORKFLOW_ACTION == "run" or ANALYSIS_KIND == "strict":
+        RESULT = resolve_results(HANDOFF.run_dir if WORKFLOW_ACTION == "run" else RETURNED_RUN_DIR)
+    elif ANALYSIS_KIND == "receipt_only":
+        display(json.loads((RETURNED_RUN_DIR / "metadata/aedt_run_receipt.json").read_text()))
+    else:
+        raise ValueError("choose strict or receipt_only analysis")
+```
+
+### Physics and numerical history
+
+```{python}
+#| id: meander-rlc-report
+if RESULT is not None:
+    display(RESULT.physics_results())
+    display(RESULT.simulation_benchmark())
+    display(RESULT.show_all_results(show_details=True))
+```
+
+Inspect loaded mode frequencies/fields, enabled loads and original units
+separately from adaptive history and resource records. A two-pass limit is not
+an adequacy claim; retain warnings, missing data and nonconverged status.
+This notebook does not infer Q/T1 or compare aligned reference planes with the
+geometrically different Wave variant.

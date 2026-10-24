@@ -7,10 +7,13 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+orcapen_sc_pdk/_agent_knowledge/
+# Preserve excluded generated WIP from before the namespace migration.
+orpen_sc_pdk/_agent_knowledge/
 /docs/_build/
 /docs-quarto/.quarto/
 /docs-quarto/_site/
 batch.log
 notebooks/*.ipynb
-orpen_sc_pdk/cells/privates/*
-!orpen_sc_pdk/cells/privates/.gitkeep
+orcapen_sc_pdk/cells/privates/*
+!orcapen_sc_pdk/cells/privates/.gitkeep

@@ -5,12 +5,18 @@ project:
     - "*.qmd"
     - "*.md"
     - "home/*.md"
-    - "features/gdsfactoryplus-discovery.md"
     - "features/scgsim-integration.md"
+    - "features/docs-theme.md"
     - "public-pdk-examples/*.md"
     - "usage/*.md"
+    - "simulation/**/*.qmd"
     - "papers/*.md"
     - "notebooks/Public_Docs/component_gallery.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb"
@@ -18,96 +24,152 @@ project:
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/aedt_q3d.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.ipynb"
     - "notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_terminal.ipynb"
-    - "notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb"
-    - "notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb"
-    - "notebooks/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb"
-    - "notebooks/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb"
+    - "notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb"
     - "reference/*.qmd"
+    - "!notebooks/src/"
   resources:
+    - askr-versions.json
     - _static/images/components/*.svg
-    - layout-viewer/*
+    - _static/images/test-components/*
+    - _static/images/scgsim-examples/*
+    - "notebooks/src/SCGSimExamples/_images/*"
+    - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/*.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CircularPad/*.ipynb"
+    - "notebooks/ComponentSimulation/CpwFiniteGround/*.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/*.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/*.ipynb"
+    - "notebooks/SCGSimExamples/ComponentSimulation/TSV/*.ipynb"
+    - "notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/*.ipynb"
+    - "notebooks/SCGSimExamples/**/*.ipynb"
+    - "notebooks/src/SCGSimExamples/**/*.qmd"
+    - "notebooks/src/ComponentSimulation/Kosen2024_Xmon/**/*.qmd"
   pre-render:
     - uv run --project .. --group docs quartodoc build
 
 website:
-  title: "OrPen SC PDK"
-  site-url: https://orpenstrike.github.io/orpen-sc-pdk/
-  favicon: assets/orpen-mark.svg
-  repo-url: https://github.com/OrPenStrike/orpen-sc-pdk
+  title: "OrcaPen SC PDK"
+  site-url: https://orpenstrike.github.io/orcapen-sc-pdk/
+  favicon: assets/orcapen-mark.svg
+  repo-url: https://github.com/OrPenStrike/orcapen-sc-pdk
   repo-actions: [edit, issue]
   navbar:
-    logo: assets/orpen-mark.svg
+    logo: assets/orcapen-mark.svg
     search: true
     left:
       - text: Overview
         href: index.qmd
-      - text: SCQ Design Kit
-        href: https://github.com/arfiligol/SCQ_Design
-      - text: Development
-        href: developing-features.md
-      - text: Notebooks
+      - text: Get Started
+        href: getting-started.md
+      - text: Cells
+        href: public-pdk-examples/index.md
+      - text: Process
+        href: materials-and-technology.md
+      - text: Simulation
         href: notebooks.qmd
-      - text: Layout Viewer
-        href: layout-viewer.qmd
       - text: API
         href: reference/index.qmd
   sidebar:
-    style: docked
-    contents:
-      - index.qmd
-      - section: Public PDK
-        contents:
-          - home/pdk-responsibilities.md
-          - home/ecosystem-workspace.md
-          - materials-and-technology.md
-          - public-pdk-examples/index.md
-          - public-pdk-examples/component-authoring.md
-      - section: Development
-        contents:
-          - developing-features.md
-          - features/scgsim-integration.md
-          - features/gdsfactoryplus-discovery.md
-      - section: Notebooks and Layouts
-        contents:
-          - notebooks.qmd
-          - layout-viewer.qmd
-          - notebooks/Public_Docs/component_gallery.ipynb
-          - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb
-          - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb
-          - notebooks/ComponentSimulation/Kosen2024_Xmon/aedt_q3d.ipynb
-          - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb
-          - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_eigenmode.ipynb
-          - notebooks/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.ipynb
-          - notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_terminal.ipynb
-          - notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb
-          - notebooks/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb
-      - section: API Reference
-        contents:
-          - reference/index.qmd
-      - section: Public Research
-        contents:
-          - paper-review.md
-          - papers/cpw-resonator-references.md
-          - papers/transmon-reference-designs.md
-          - papers/flip-chip-3d-integration.md
+    - id: cells
+      title: Cells
+      collapse-level: 1
+      contents:
+        - public-pdk-examples/index.md
+        - public-pdk-examples/test-components.md
+        - public-pdk-examples/component-authoring.md
+        - notebooks/Public_Docs/component_gallery.ipynb
+    - id: process
+      title: Process
+      contents:
+        - materials-and-technology.md
+        - home/pdk-responsibilities.md
+    - id: simulation
+      title: Simulation
+      contents:
+        - text: Overview
+          href: notebooks.qmd
+        - section: Layer 1 · OrcaPen user requirements
+          contents:
+            - simulation/requirements/electrostatic-capacitance.qmd
+            - simulation/requirements/eigenmode.qmd
+            - simulation/requirements/lumped-rlc-eigenmode.qmd
+            - simulation/requirements/epr-loss.qmd
+            - simulation/requirements/driven-terminal.qmd
+            - simulation/requirements/driven-modal.qmd
+            - simulation/requirements/q3d-acrl.qmd
+            - simulation/requirements/q2d-cross-section.qmd
+        - section: Layer 2 · SCGSim tool requirements
+          contents:
+            - simulation/tools/source-ownership.qmd
+            - simulation/tools/curves-holes-transforms.qmd
+            - simulation/tools/materials-stack-z.qmd
+            - simulation/tools/contacts-multilevel.qmd
+            - simulation/tools/mesh-fem-amr.qmd
+            - simulation/tools/handoff-resolve-report.qmd
+        - section: SCGSim examples
+          contents:
+            - simulation/notebooks.qmd
+            - features/scgsim-integration.md
+            - section: Pad examples
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb
+            - section: Xmon examples and historical evidence
+              contents:
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/aedt_q3d.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_eigenmode.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.ipynb
+            - section: CPW examples
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb
+                - notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb
+            - section: Launcher / exterior-cut pair
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb
+            - section: Source geometry observations
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb
+            - section: TSV examples
+              contents:
+                - simulation/tsv-model-inspection.qmd
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb
+    - id: api
+      title: API
+      contents:
+        - auto: reference
 
 format:
-  html:
-    theme:
-      light: [cosmo, theme-light.scss]
-      dark: [cosmo, theme-dark.scss]
-    css: [styles.css, layout-viewer.css]
+  askr-html:
+    css: [styles.css]
     html-math-method: mathjax
-    respect-user-color-scheme: true
-    toc: true
-    page-layout: article
-    grid:
-      sidebar-width: 260px
-      body-width: 960px
-      margin-width: 240px
-      gutter-width: 2.5rem
     code-copy: true
-    code-overflow: wrap
 
 execute:
   enabled: false
@@ -115,7 +177,7 @@ execute:
 quartodoc:
   style: pkgdown
   dir: reference
-  package: orpen_sc_pdk
+  package: orcapen_sc_pdk
   title: API Reference
   sections:
     - title: Package
@@ -136,6 +198,9 @@ quartodoc:
         - cells.resonator
         - cells.resonator_hanger
         - cells.resonator_meander
+        - cells.finite_ground_cpw_coupon
+        - cells.cpw_meander_airbridge_lumped_coupon
+        - cells.cpw_meander_airbridge_wave_coupon
         - cells.martinis2022_differential_ribbon_capacitor
     - title: Materials
       desc: Copy-returning public material and interface records.

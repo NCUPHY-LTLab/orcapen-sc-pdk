@@ -1,0 +1,17 @@
+<script>
+// Logout is independent of image viewing and remains plain navigation.
+(() => {
+  function setup() {
+    const template = document.getElementById('askr-logout-config');
+    if (template) {
+      const tools = document.querySelector('#quarto-header .quarto-navbar-tools');
+      if (!tools) throw new Error('Askr Logout requires a website Header with navbar tools.');
+      tools.append(template.content.cloneNode(true));
+      document.getElementById('quarto-header').classList.add('askr-has-logout');
+    }
+
+  }
+  if (document.readyState === 'complete') setup();
+  else window.addEventListener('load', setup, {once: true});
+})();
+</script>

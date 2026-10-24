@@ -1,4 +1,4 @@
-# Documentation helper targets for the public OrPen PDK docs workflow.
+# Documentation helper targets for the public OrcaPen PDK docs workflow.
 
 docs_source := "docs"
 notebook_source := "notebooks/src"

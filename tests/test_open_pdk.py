@@ -4,7 +4,7 @@ from pathlib import Path
 
 import gdsfactory as gf
 
-from orpen_sc_pdk.cells import (
+from orcapen_sc_pdk.cells import (
     dicing_edge,
     interdigital_capacitor,
     launcher,
@@ -12,14 +12,14 @@ from orpen_sc_pdk.cells import (
     resonator,
     taper,
 )
-from orpen_sc_pdk.pdk import PDK
-from orpen_sc_pdk.tech import LAYER, LAYER_STACK
+from orcapen_sc_pdk.pdk import PDK
+from orcapen_sc_pdk.tech import LAYER, LAYER_STACK
 
 
 def test_pdk_activates_and_builds_public_cells() -> None:
     PDK.activate()
 
-    assert gf.get_active_pdk().name == "orpen_sc_pdk"
+    assert gf.get_active_pdk().name == "orcapen_sc_pdk"
     assert "D0_TOP_M1" in LAYER_STACK.layers
     assert (LAYER.D1_D2_INDIUM_BUMP.layer, LAYER.D1_D2_INDIUM_BUMP.datatype) == (41, 0)
     assert launcher().ports
@@ -81,7 +81,7 @@ def test_flip_chip_layer_metadata() -> None:
 
 
 def test_public_pdk_has_no_private_imports_or_gds() -> None:
-    package_root = Path(__file__).resolve().parents[1] / "orpen_sc_pdk"
+    package_root = Path(__file__).resolve().parents[1] / "orcapen_sc_pdk"
     source_text = "\n".join(path.read_text() for path in package_root.rglob("*.py"))
 
     assert "ncuas_designs" not in source_text

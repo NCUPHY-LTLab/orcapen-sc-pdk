@@ -1,0 +1,141 @@
+## Import GDS and Build the HFSS/Q3D/Q2D Model
+
+The canonical OrcaPen getter supplies actual placed polygon exteriors, holes,
+source occurrences, physical levels and materials. This cell only adopts the
+explicit case Net grouping and constructs SCGSim's public input records.
+It does not infer connectivity or register invented children.
+This cell constructs source input; actual native import/build belongs to the
+later CLI transaction, not this source observation.
+
+The background recipe records the existing `px`, `py`, `pz` margins as the
+surrounding vacuum complement. Its bounds are already padded; the recipe does
+not add those margins to the background a second time.
+
+```{python}
+#| id: tsv-owner-source-input
+if WORKFLOW_ACTION not in {"analyze_handoff", "inspect_model"}:
+    bounds = coupon.dbbox()
+    regions = coupon.info["tsv_source"]["source_regions"]
+    source_bottom = min(r["z_interval_um"][0] for r in regions)
+    source_top = max(r["z_interval_um"][1] for r in regions)
+    px, py, pz = REGION_PADDING_XYZ_UM
+    background = {
+        "semantic_id": "CALLER_BACKGROUND",
+        "role": "solution_region",
+        "material_id": "vacuum",
+        "material_kind": "vacuum",
+        "priority": 99,
+        "geometry_kind": "domain",
+        "geometry": {
+            "domain_bounds_um": {
+                "x_min_um": bounds.left - px,
+                "x_max_um": bounds.right + px,
+                "y_min_um": bounds.bottom - py,
+                "y_max_um": bounds.top + py,
+            },
+            "z_min_um": source_bottom - pz,
+            "z_max_um": source_top + pz,
+        },
+        "metadata": {
+            "meaning": "computational background complement",
+            "is_auto_vacuum_region": True,
+            "vacuum_region_padding_um": {
+                "x_minus_um": px,
+                "x_plus_um": px,
+                "y_minus_um": py,
+                "y_plus_um": py,
+                "z_minus_um": pz,
+                "z_plus_um": pz,
+            },
+        },
+    }
+    source = get_tsv_source_records(coupon, host_solution_region=background)
+    caller_nets = {
+        **dict.fromkeys(SIGNAL_ENTITY_IDS, "Signal"),
+        **dict.fromkeys(GROUND_ENTITY_IDS, "Ground"),
+    }
+    records = source["geometry_input"]
+    stack = source["stack"]
+    for layer in stack["layers"]:
+        layer["net_id"] = caller_nets[layer["semantic_id"]]
+    # Keep physical material records; add only the compiler's kind vocabulary.
+    geometry_kinds = {
+        "superconductor": "conductor",
+        "dielectric": "dielectric",
+        "vacuum": "vacuum",
+    }
+    stack["materials"] = {
+        name: {
+            **record,
+            "kind": geometry_kinds[record["material_kind"]],
+            "permittivity": record["relative_permittivity"],
+        }
+        for name, record in stack["materials"].items()
+    }
+    build_input = GeometryBuildInput(
+        polygons=tuple(LayoutPolygonSpec(**p) for p in records["polygons"]),
+        entities=tuple(
+            SemanticEntitySpec(**{**e, "net_id": caller_nets.get(e["semantic_id"])})
+            for e in records["entities"]
+        ),
+        solution_regions=records["solution_regions"],
+        metadata={**records["metadata"], "caller_final_nets": caller_nets},
+    )
+    display(
+        {
+            "source_parameters": coupon.info["tsv_source"]["parameters"],
+            "source_contacts": records["metadata"]["source_contacts"],
+            "source_ports": records["metadata"]["source_ports"],
+            "caller_nets": caller_nets,
+            "physical_layer_declarations": {
+                e.semantic_id: e.metadata["physical_layer"]
+                for e in build_input.entities
+                if e.material_kind == "conductor"
+            },
+        }
+    )
+```
+
+## Geometry Verification
+
+These are source observations. Silicon already has the authored bore holes;
+the TSV wall is an annulus, not a filled cylinder. In `thin_film`, face films
+follow their declared contact side while TSV `retained_solid` levels stay
+finite. SCGSim owns the effective-Z mapping and the actual backend geometry.
+The current AEDT path consumes sampled GDS polygon witnesses; exact circular
+recipes remain source intent, not active native curve reconstruction.
+
+### Fresh source witness
+
+```{python}
+#| id: tsv-source-gds
+if WORKFLOW_ACTION in {"run", "prepare_handoff", "build_model"}:
+    SOURCE_DIR.mkdir(parents=True, exist_ok=False)
+    gds_path = coupon.write_gds(SOURCE_DIR / "source.gds", with_metadata=False)
+    gds_bytes = Path(gds_path).read_bytes()
+    gds_sha256 = hashlib.sha256(gds_bytes).hexdigest()
+    stack["metadata"]["gds_sha256"] = gds_sha256
+    build_input = replace(build_input, metadata={**build_input.metadata, "gds_sha256": gds_sha256})
+```
+
+The exported witness and normalized source records come from the same component.
+The backend helper owns actual lowering; this notebook does not interpret a
+source GDS hash as an actual native geometry observation.
+
+## Materials and Boundaries
+
+Al and TiN remain the physical source materials; their PDK superconducting
+declarations select ideal native conductor treatment. Silicon is a perforated
+dielectric solid. The caller-authored background is the surrounding complement,
+not a second overlapping occupied body. Final Nets are the explicit grouping
+above, not a connectivity result inferred by the notebook.
+
+## Simulation Setup
+
+The notebook's explicit run control selects the Human-confirmed first-trial
+physics settings before preparation. `build_model` alone passes
+`run_control=None` for the candidate's model-only transaction, without an
+Analysis Setup or sweep. The getter now carries the same selected neutral
+`physical_layer` declaration on Entity and stack records. Shared interpretation
+belongs to SCGSim, not notebook arithmetic. Read-only returned-run
+actions skip every component/getter/GDS/preparation stage above.
