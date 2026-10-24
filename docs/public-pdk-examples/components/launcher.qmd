@@ -1,0 +1,37 @@
+---
+title: "Launcher"
+sidebar: get-started
+---
+
+`launcher` tapers a large pad to a CPW neck. It also defines a simulation-boundary
+marker at the pad side.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("launcher")
+```
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `pad_width`, `pad_length` | 150 µm, 150 µm | Pad dimensions. |
+| `taper_length` | 150 µm | Transition length from pad to CPW neck. |
+| `side_gap_height`, `end_gap_width` | 85 µm, 85 µm | Ground-mask clearances at pad sides and end. |
+| `cpw_xs` | `coplanar_waveguide` | CPW neck cross-section. |
+
+## Ports and layers
+
+`o_neck` and `o_pad` are DRAW route ports. `o_lumped` marks the simulation
+boundary; it is not a solver result. The factory creates DRAW, ETCH,
+GROUND_MASK, and SIM_BOUNDARY geometry.
+
+![Default launcher DRAW and ETCH layout.](../../_static/images/components/launcher.svg)
+
+See the [generated API reference](../../reference/cells.launcher.qmd#orcapen_sc_pdk.cells.launcher)
+and [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/cpw.py).

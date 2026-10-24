@@ -1,0 +1,33 @@
+---
+title: "Straight"
+sidebar: get-started
+---
+
+`straight` delegates to GDSFactory's straight path with OrcaPen's
+[`cpw_6_7_6`](../cross-sections.qmd#cpw_6_7_6) cross-section by default.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("straight")
+```
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `length` | 10 µm | Path length. |
+| `npoints` | 2 | Number of path points. |
+| `cross_section` | `cpw_6_7_6` | Cross-section used to extrude the path. |
+| `width` | `None` | Optional width passed to GDSFactory. |
+
+## Ports and layers
+
+The selected cross-section defines the path sections, layers, and connection
+ports. See the [cross-section guide](../cross-sections.qmd) for the default
+recipe and the [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py)
+for the factory definition.

@@ -6,7 +6,7 @@ sidebar: false
 
 Design superconducting and RF layouts with reusable cells, CPW cross-sections,
 layers, stacks, and materials. Start with a layout, then choose a simulation
-only when you need electrical quantities.
+when you need a physical quantity.
 
 ![An OrcaPen CPW resonator: DRAW and ETCH geometry.](_static/images/components/resonator.svg){#fig-home-resonator width=85%}
 

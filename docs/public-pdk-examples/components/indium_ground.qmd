@@ -1,0 +1,39 @@
+---
+title: "Indium ground field"
+sidebar: get-started
+---
+
+`indium_ground` places a centered regular field of passive indium bumps and can skip sites that overlap a keepout region.
+
+## Build the default component
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("indium_ground")
+~~~
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `width` | 9900 µm | Field width. |
+| `height` | 9900 µm | Field height. |
+| `bump_gap` | 40 µm | Edge-to-edge gap between bump footprints. |
+| `margin` | 90 µm | Keep clear at the field edges. |
+| `indium_bump_size` | 20 µm | Side length of each bump body. |
+| `under_bump_size` | 40 µm | Side length of each contact pad. |
+| `keepout_region` | `None` | Optional `gf.Region`; overlapping sites are skipped. |
+| `indium_bump_layer` | `LAYER.D0_D1_INDIUM_BUMP` | Bump-body layer. |
+| `under_bump_layer` | `LAYER.D0_D1_UNDER_BUMP` | Contact-pad layer. |
+| `include_under_bump` | `True` | Include the contact pad in each footprint. |
+
+The site pitch is the edge gap plus the larger enabled square footprint, so the default pitch is 80 µm. The keepout check uses the combined bump and contact-pad footprint when the contact pad is included.
+
+## Ports and layers
+
+The field has no ports. The default layer pair places the indium body and its under-bump contact geometry. The nominal bump stack thickness is 8 µm. The under-bump layer is excluded from simulation.
+
+The [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/indium.py) defines this factory.

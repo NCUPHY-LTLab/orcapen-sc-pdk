@@ -1,0 +1,38 @@
+---
+title: "Resonator hanger"
+sidebar: get-started
+---
+
+`resonator_hanger` builds the hanger head of a readout resonator. Its coupling
+straight is centered at the origin so a parent layout can align the hanger to
+another feature.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("resonator_hanger")
+```
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `coupling_length` | 200 µm | Coupling straight length. |
+| `straight_length` | 160 µm | Hanger straight length. |
+| `cpw_xs` | `cpw_6_10_6` | CPW cross-section. |
+| `cpw_radius` | 100 µm | Bend radius. |
+| `bend_npoints` | 16 | Bend discretization points. |
+
+## Ports and layers
+
+The component exposes `o_hanger_start`, `o_hanger_center`, `o_hanger_end`,
+`o_hanger_readout_coupling_start`, and `o_hanger_readout_coupling_end`.
+`o_hanger_center` is a placement anchor, not a route terminus. DRAW, ETCH, and
+GROUND_MASK layers are configurable.
+
+See the [generated API reference](../../reference/cells.resonator_hanger.qmd#orcapen_sc_pdk.cells.resonator_hanger)
+and [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/resonator_hanger.py).

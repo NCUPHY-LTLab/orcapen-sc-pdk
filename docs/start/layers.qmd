@@ -94,13 +94,11 @@ The same prefix rule gives every exact name in this table.
 | `D1_BOTTOM` | `(11, 0)` | `(11, 1)` | `(22, 0)` | `(83, 0)` | `(202, 2)` |
 | `D1_TOP` | `(13, 0)` | `(13, 1)` | `(23, 0)` | `(82, 0)` | `(202, 3)` |
 
-| Layer family | Physical stack level |
-| --- | --- |
-| `<prefix>_AB_DRAW` | `<prefix>_AIRBRIDGE`: elevated Al deck. |
-| `<prefix>_AB_VIA` | `<prefix>_AIRBRIDGE_VIA`: finite Al posts. |
-| `<prefix>_JJ_DRAW` | None. Junction drawing layers have no declared stack thickness or material. |
-| `<prefix>_ALN` | None. These are alignment layers, not a declared AlN material film. |
-| `<prefix>_SIM_BOUNDARY` | Same-named zero-thickness vacuum locator sheet, not metal or an automatically assigned solver boundary. |
+- `<prefix>_AB_DRAW` maps to `<prefix>_AIRBRIDGE`, an elevated Al deck.
+- `<prefix>_AB_VIA` maps to `<prefix>_AIRBRIDGE_VIA`, finite Al posts.
+- `<prefix>_JJ_DRAW` has no physical stack level; junction drawing layers have no declared stack thickness or material.
+- `<prefix>_ALN` has no physical stack level; these are alignment layers, not a declared AlN material film.
+- `<prefix>_SIM_BOUNDARY` maps to a same-named zero-thickness vacuum locator sheet; it is not metal and is not an automatically assigned solver boundary.
 
 ### Integration
 

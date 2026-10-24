@@ -4,21 +4,22 @@ sidebar: get-started
 ---
 
 Choose a registered OrcaPen factory for the geometry you need. Activate the
-PDK first, then inspect the factory's typed settings before changing dimensions.
+PDK first, then use its [component guide](components/index.qmd) to inspect the
+defaults, ports, and layers before changing dimensions.
 
 For path-based cells, choose the widths, gaps, and layer recipe in
 [Cross-sections](cross-sections.qmd), including CPW, coupled traces, and strips.
 
-| Family | Examples |
+| Family | Component guides |
 | --- | --- |
-| CPW and resonators | `straight`, `taper`, `resonator`, `resonator_hanger`, `resonator_meander` |
-| Capacitors | `interdigital_capacitor`, `martinis2022_differential_ribbon_capacitor` |
-| Connections | `launcher`, `cpw_t_junction`, `airbridge`, `indium_bump` |
-| Primitives | `cpw_handoff`, `rounded_end_metal_segment`, `rounded_rectangle`, `wire_corner` |
+| CPW and resonators | [straight](components/straight.qmd), [taper](components/taper.qmd), [resonator](components/resonator.qmd), [resonator_hanger](components/resonator_hanger.qmd), [resonator_meander](components/resonator_meander.qmd) |
+| Capacitors | [interdigital_capacitor](components/interdigital_capacitor.qmd), [martinis2022_differential_ribbon_capacitor](components/martinis2022_differential_ribbon_capacitor.qmd) |
+| Connections | [launcher](components/launcher.qmd), [cpw_t_junction](components/cpw_t_junction.qmd), [airbridge](components/airbridge.qmd), [indium_bump](components/indium_bump.qmd), [indium_ground](components/indium_ground.qmd) |
+| Primitives | [cpw_handoff](components/cpw_handoff.qmd), [rounded_end_metal_segment](components/rounded_end_metal_segment.qmd), [rounded_rectangle](components/rounded_rectangle.qmd), [wire_corner](components/wire_corner.qmd) |
 | Simulation layouts | Square/circular pads, finite CPW, strips, flip-chip, airbridge, and TSV models in the [Model Gallery](test-components.md) |
 
 Use the [generated cell API](../reference/index.qmd#cells) for signatures,
-[shared primitives](shared-primitives.md) for their connection roles, and
+[shared primitives](shared-primitives.md) for connection roles, and
 [GDSFactory guides](component-authoring.md) for placement, connection, and routing.
 
 ## Choose a cell with flat tags
@@ -44,22 +45,8 @@ builds a CPW resonator from hanger and meander sections.
 
 ### Interdigital capacitor
 
-[Factory source: `interdigital_capacitor`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/cells/layout/capacitor.py)
-provides the reusable interdigital capacitor layout.
-
-`corner_radius_um=0.0` preserves the sharp default. Set a positive radius (for
-example `corner_radius_um=1.0`) to round the merged electrode finger tips,
-roots and taper transitions, and the ground-mask contour. Both outer CPW cut
-planes stay flat, with unchanged ports and nominal straight finger/end gaps.
-Real outer and hole boundaries are rounded separately; hole-serialization
-bridges are not physical corners.
-The existing `half` option is unchanged. Negative/nonfinite radii and tangent
-arcs that cannot fit adjacent contour segments raise `ValueError`; the radius
-is never silently reduced. Circular arcs are sampled at at most 5 degrees per
-chord, including tangent endpoints, then quantized to the existing PDK grid.
-Corner-local clearances can differ from nominal straight gaps. This geometry
-option is not fabrication, DRC or solver certification; the preview below shows
-the sharp default.
+[Component guide](components/interdigital_capacitor.qmd) covers the factory
+settings and corner-radius behavior. The image below shows the sharp default.
 
 ![Default interdigital capacitor: actual DRAW and ETCH.](../_static/images/components/interdigital_capacitor.svg){#fig-layout-idc}
 

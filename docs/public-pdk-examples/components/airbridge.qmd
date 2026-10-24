@@ -1,0 +1,32 @@
+---
+title: "Airbridge"
+sidebar: get-started
+---
+
+`airbridge` creates a centered rectangular bridge deck and two endpoint pads for a same-face layout. Geometry dimensions use micrometres.
+
+## Build the default component
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("airbridge")
+~~~
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `bridge_span` | 84 µm | Deck extent along local Y. |
+| `bridge_width` | 12 µm | Deck extent along local X. |
+| `via_size` | 14 µm | Side length of each endpoint pad. |
+| `airbridge_draw_layer` | `LAYER.D0_TOP_AB_DRAW` | Bridge deck layer. |
+| `airbridge_via_layer` | `LAYER.D0_TOP_AB_VIA` | Endpoint pad layer. |
+
+## Ports and layers
+
+The component has no ports. The default layer pair describes an elevated Al deck with finite Al posts. The physical-stack model uses a nominal rectangular deck with finite Al posts. The registered same-face prefixes are `D0_TOP`, `D0_BOTTOM`, `D1_BOTTOM`, and `D1_TOP`; these receive stack semantics. Custom layer pairs remain layout-only.
+
+API: [airbridge reference](../../reference/cells.airbridge.qmd#orcapen_sc_pdk.cells.airbridge). Source: [pinned public definition](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/airbridge.py).

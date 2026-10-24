@@ -1,0 +1,32 @@
+---
+title: "Wire corner"
+sidebar: get-started
+---
+
+`wire_corner` is a sharp corner adapter for a selected GDSFactory cross-section.
+
+## Build the default component
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("wire_corner")
+~~~
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `cross_section` | `"cpw_6_7_6"` | 7 µm trace, 6 µm gaps, D0 top M1 draw/etch/ground-mask layers. |
+| `port_names` | `("e1", "e2")` | Names for the two corner ports. |
+| `port_types` | `("electrical", "electrical")` | Port types. |
+| `width` | `None` | Optional cross-section width override. |
+| `radius` | `None` | Forwarded to GDSFactory; GF 9.48 ignores it. |
+
+## Ports and layers
+
+The default ports are `e1` and `e2`, both electrical. Layer geometry comes from the selected cross-section. In GF 9.48 the corner remains sharp; the radius argument does not create a curve.
+
+The [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py) defines this factory.

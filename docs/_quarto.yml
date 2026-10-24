@@ -10,6 +10,7 @@ project:
     - "features/docs-theme.md"
     - "public-pdk-examples/*.md"
     - "public-pdk-examples/*.qmd"
+    - "public-pdk-examples/components/**/*.qmd"
     - "usage/*.md"
     - "simulation/**/*.qmd"
     - "papers/*.md"
@@ -96,6 +97,26 @@ website:
           contents:
             - text: Overview
               href: public-pdk-examples/index.md
+            - section: Components
+              contents:
+                - text: All components
+                  href: public-pdk-examples/components/index.qmd
+                - public-pdk-examples/components/straight.qmd
+                - public-pdk-examples/components/taper.qmd
+                - public-pdk-examples/components/resonator.qmd
+                - public-pdk-examples/components/resonator_hanger.qmd
+                - public-pdk-examples/components/resonator_meander.qmd
+                - public-pdk-examples/components/interdigital_capacitor.qmd
+                - public-pdk-examples/components/martinis2022_differential_ribbon_capacitor.qmd
+                - public-pdk-examples/components/launcher.qmd
+                - public-pdk-examples/components/cpw_t_junction.qmd
+                - public-pdk-examples/components/airbridge.qmd
+                - public-pdk-examples/components/indium_bump.qmd
+                - public-pdk-examples/components/indium_ground.qmd
+                - public-pdk-examples/components/cpw_handoff.qmd
+                - public-pdk-examples/components/rounded_end_metal_segment.qmd
+                - public-pdk-examples/components/rounded_rectangle.qmd
+                - public-pdk-examples/components/wire_corner.qmd
             - public-pdk-examples/cross-sections.qmd
         - start/layers.qmd
         - start/materials.qmd

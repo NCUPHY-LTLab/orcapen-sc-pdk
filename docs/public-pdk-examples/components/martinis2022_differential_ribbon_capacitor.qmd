@@ -1,0 +1,36 @@
+---
+title: "Martinis 2022 differential ribbon capacitor"
+sidebar: get-started
+---
+
+`martinis2022_differential_ribbon_capacitor` builds a differential ribbon
+capacitor layout.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("martinis2022_differential_ribbon_capacitor")
+```
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `a_um` | 50 µm | Inner electrode offset. |
+| `b_um` | 100 µm | Outer electrode offset; must exceed `a_um`. |
+| `ell_r_um` | 1391 µm | Ribbon length. |
+
+## Ports and layers
+
+The layout contains two DRAW electrodes and no ETCH geometry. The named ports
+`o_mesh_positive_electrode` and `o_mesh_negative_electrode` identify the two
+electrodes for meshing; they are not route ports.
+
+![Default Martinis ribbon capacitor DRAW layout.](../../_static/images/components/martinis2022_differential_ribbon_capacitor.svg)
+
+See the [generated API reference](../../reference/cells.martinis2022_differential_ribbon_capacitor.qmd#orcapen_sc_pdk.cells.martinis2022_differential_ribbon_capacitor)
+and [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/martinis.py).
