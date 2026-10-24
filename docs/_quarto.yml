@@ -61,6 +61,8 @@ project:
     - "notebooks/src/ComponentSimulation/Kosen2024_Xmon/**/*.qmd"
   pre-render:
     - uv run --project .. --group docs quartodoc build
+  post-render:
+    - python3 ../scripts/copy_surface_band_sources.py
 
 website:
   title: "OrcaPen SC PDK"
