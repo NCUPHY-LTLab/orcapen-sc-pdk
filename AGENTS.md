@@ -25,3 +25,17 @@ only for layout, component, or geometry work.
 Package usage starts at `docs/usage/index.md`.
 The canonical Skills own the full collaboration and Git policy; do
 not duplicate it here.
+
+## Documentation Ownership
+
+Resolve registered roles and handoffs through `$scq-collaboration-roles`.
+After exact path/hunk handoff, the OrcaPen Documentation Lead owns reader-facing
+information architecture, narrative, navigation, and terminology; documentation
+Preview ownership follows its explicit handoff. Development retains product,
+API, schema, scientific semantics, docstrings, generators, packaged knowledge
+behavior, executable notebook/tutorial code, CI, build, release, and serialized
+Git operations.
+
+Use exact hunk leases for mixed files. Send each coherent documentation change
+and its exact source identity to Development for implementation consistency.
+This handoff does not automatically authorize product edits or new tests.
