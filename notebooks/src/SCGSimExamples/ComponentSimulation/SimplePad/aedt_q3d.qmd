@@ -1,5 +1,7 @@
 ---
-title: "Simple Pad — Q3D Capacitance"
+title: "Capacitance — SimplePad Q3D"
+sidebar: simulation
+development_status: PUBLIC_TOPIC_SOURCE_CHECKPOINT
 jupyter:
   kernelspec:
     display_name: Python 3
@@ -9,87 +11,41 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
-scgsim_source_archive_sha256: "4126a6f162f30d5fdaf4242b69cda2c17531bbaf0315f60ba09f7acb5e63c10d"
+scgsim_authoring_source: PUBLIC_TOPIC_SOURCE_CHECKPOINT
+scgsim_source_commit: "99242d2d35a20e04ea2c4fb6a0092bd7b61e544d"
+scgsim_source_tree: "17603c7a9cbc8c47be2edc8f14ac762428515a62"
+scgsim_source_base_commit: "1db787b5f5296099b4623a2cce76677c7d1aaeab"
+scgsim_source_patch_sha256: "cbe39b25670fd4d717e008e1d4b1f6bdffd0f64a8ae7f42264825129e856df34"
+orcapen_source_commit: "14cbc1756b0e7ba96d525cab5bb9fb1ebfaf9b38"
 ---
 
-![Square-pad coupon: 200 µm pad, 20 µm gap and 1000 µm die.](../../_images/square-pad.png)
+Build the default public SimplePad and inspect its layout first. Then use that
+component for capacitance extraction, with settings placed beside the operation
+they control.
 
-Extract the square pad's capacitance and conductance at 5 GHz. See the
-[capacitance requirements](../../../../simulation/requirements/electrostatic-capacitance.html).
-The 200 µm pad, 20 µm gap and connected surrounding Ground occupy one
-1000 µm Si die: Al 100 nm above Si 500 µm. The explicit body-v3 model retains
-Signal source −Z / sink +Z, native Ground, an open Region, and `solve_ac_rl=False`.
-It is a PEC extraction model, not a finite-conductivity loss measurement.
+<a href="aedt_q3d.ipynb" data-noresolveinput download>Download IPYNB</a> ·
+<a href="../../../src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.qmd" data-noresolveinput download>Download QMD source</a>
 
-Fresh construction uses the local shared-physical candidate, not a
-published wheel. Retained results keep their original runtime identities.
+![Default square pad: 200 µm island, 20 µm gap, and 1000 µm die.](../../_images/square-pad.png)
 
-Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
+## Part 1 — Construct and inspect the layout
 
-## Setup and Imports
+### Load layout APIs and choose an action
+
+These imports use the layout/PDK APIs, not SCGSim or AEDT.
+The default action is `prepare_handoff`; choosing `analyze_handoff` skips
+component construction so a returned run can be read independently.
 
 ```{python}
-#| id: q3d-imports
-import importlib.metadata
-import os
-import subprocess
-import sys
-from pathlib import Path
-from uuid import uuid4
-
+#| id: q3d-layout-imports
 import gdsfactory as gf
 from IPython.display import display
-from scgsim.aedt import (
-    AedtResources,
-    MatrixRunControl,
-    PdkMaterial,
-    Q3dBodySpec,
-    Q3dNetSpec,
-    Q3dSpec,
-    prepare_handoff,
-    resolve_results,
-)
-from scgsim.geometry import (
-    ApproximationProfile,
-    PhysicalLayerDeclaration,
-    interpret_physical_layers,
-)
 
 import orcapen_sc_pdk
 from orcapen_sc_pdk import get_material_records
-from orcapen_sc_pdk.tech import LAYER, get_single_die_layer_stack
-```
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
 
-## Setup and Run Controls
-
-```{python}
-#| id: q3d-controls
-WORKFLOW_ACTION = "run"  # AUTHORING_ONLY | prepare_handoff | prepare_only | run | analyze_handoff
-RUN_ID = f"simple_pad_aedt_q3d_{uuid4().hex}"
-MODELING = "solid"
-APPROXIMATION_PROFILE = ApproximationProfile(name=MODELING, revision="v1", parameters={})
-OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SCGSimExamples" / "SimplePad"
-RUN_DIR = OUTPUT_ROOT / RUN_ID
-PAD_SIDE_UM = 200.0
-GAP_UM = 20.0
-DIE_SIDE_UM = 1000.0
-JUNCTION_WIDTH_UM = 2.0
-VACUUM_PADDING_UM = (250.0, 250.0, 1000.0)
-AEDT_VERSION = "2024.2"
-PYAEDT_VERSION = "1.3.0"
-SCGSIM_RUNTIME_SOURCE = "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED"
-SETUP_NAME = "Setup1"
-MAXIMUM_PASSES = 10
-CONVERGENCE_PERCENT = 1.0
-RESOURCES = AedtResources(cores=4, ram_limit_percent=30)
-EXTRACTION_FREQUENCY_GHZ = 5.0
-SOLVE_AC_RL = False
-GROUNDED_REGION_NET = None
-SOURCE_GDS = OUTPUT_ROOT / "source_gds" / f"{RUN_ID}.gds"
-PAD_IMPORT_LAYER = (300, 0)
-GROUND_IMPORT_LAYER = (301, 0)
-SUBSTRATE_IMPORT_LAYER = (302, 0)
+WORKFLOW_ACTION = "prepare_handoff"
 if WORKFLOW_ACTION not in {
     "AUTHORING_ONLY",
     "prepare_handoff",
@@ -100,158 +56,137 @@ if WORKFLOW_ACTION not in {
     raise ValueError("Unknown WORKFLOW_ACTION")
 ```
 
-## Create Simulation Component / Coupon
+### Build the registered default component
+
+The factory provides the 200 µm pad, 20 µm opening clearance, 1000 µm die, and 2 µm
+junction locator width. No geometry settings are overridden here. The single-die
+stack supplies Al 0.1 µm above Si 500 µm; its nonmetal locator is not a Q3D body.
 
 ```{python}
 #| id: q3d-component
 if WORKFLOW_ACTION != "analyze_handoff":
     orcapen_sc_pdk.activate()
     gf.clear_cache()
-    component = gf.get_component(
-        "square_pad_capacitor",
-        pad_side_um=PAD_SIDE_UM,
-        gap_um=GAP_UM,
-        die_side_um=DIE_SIDE_UM,
-        junction_width_um=JUNCTION_WIDTH_UM,
-    )
-    layer_stack = get_single_die_layer_stack()
-    material_records = get_material_records()
-
-    display(component)
+    component = gf.get_component("square_pad_capacitor")
 ```
 
-## Initialize AEDT Project / App
-Preparation creates a portable SCGSim package, not a live Desktop session.
-Only the generated runner in the explicit `run` action owns native AEDT.
+```{python}
+#| id: q3d-layout-inspection
+if WORKFLOW_ACTION != "analyze_handoff":
+    display(component)
+    component.plot()
+    display({"bbox_um": str(component.dbbox())})
+```
+
+```{python}
+#| id: q3d-settings-inspection
+if WORKFLOW_ACTION != "analyze_handoff":
+    display({
+        "component_name": component.name,
+        "settings": component.settings,
+    })
+```
+
+```{python}
+#| id: q3d-ports-inspection
+if WORKFLOW_ACTION != "analyze_handoff":
+    display([
+        {
+            "name": port.name,
+            "center_um": port.dcenter,
+            "width_um": port.dwidth,
+            "orientation_deg": port.orientation,
+            "port_type": port.port_type,
+            "layer": port.layer,
+        }
+        for port in component.ports
+    ])
+```
+
+```{python}
+#| id: q3d-stack-inspection
+if WORKFLOW_ACTION != "analyze_handoff":
+    layer_stack = get_single_die_layer_stack()
+    display([
+        {
+            "level": name,
+            "z_min_um": level.zmin,
+            "z_max_um": level.zmin + level.thickness,
+            "thickness_um": level.thickness,
+            "material": level.material,
+        }
+        for name, level in layer_stack.layers.items()
+    ])
+```
+
+Check the layout, actual factory settings, physical port records, and stack
+together. Keep `component` and `layer_stack` available for Part 2.
+
+## Part 2 — Configure, prepare, run, and read the simulation
+
+### Load the simulation APIs and identify the runtime
+
+::: {.callout-warning title="Runtime requirement"}
+The terminal-pair API used below is in the public SCGSim source at commit [`99242d2d35a20e04ea2c4fb6a0092bd7b61e544d`](https://github.com/NCUPHY-LTLab/scgsim/tree/99242d2d35a20e04ea2c4fb6a0092bd7b61e544d); the existing `2.0.0rc15` wheel does not include it. The requested solver versions remain AEDT 2024.2 and PyAEDT 1.3.0.
+:::
+
+```{python}
+#| id: q3d-imports
+import importlib.metadata
+import os
+import subprocess
+import sys
+from pathlib import Path
+from uuid import uuid4
+
+from scgsim.aedt import (
+    AedtResources,
+    MatrixRunControl,
+    PdkMaterial,
+    Q3dTerminalPair,
+    prepare_q3d_from_geometry,
+    resolve_results,
+)
+from scgsim.geometry import GeometryPlan
+```
 
 ```{python}
 #| id: q3d-runtime
+AEDT_VERSION = "2024.2"
+PYAEDT_VERSION = "1.3.0"
+SCGSIM_SOURCE_STATUS = "PUBLIC_TOPIC_SOURCE_CHECKPOINT"
+SCGSIM_SOURCE_COMMIT = "99242d2d35a20e04ea2c4fb6a0092bd7b61e544d"
+SCGSIM_SOURCE_TREE = "17603c7a9cbc8c47be2edc8f14ac762428515a62"
+SCGSIM_SOURCE_BASE_COMMIT = "1db787b5f5296099b4623a2cce76677c7d1aaeab"
+SCGSIM_SOURCE_PATCH_SHA256 = "cbe39b25670fd4d717e008e1d4b1f6bdffd0f64a8ae7f42264825129e856df34"
 display(
     {
         "requested_aedt": AEDT_VERSION,
-        "requested_pyaedt": PYAEDT_VERSION,
+        "producer_locked_pyaedt": PYAEDT_VERSION,
         "installed_pyaedt": importlib.metadata.version("pyaedt"),
         "installed_scgsim": importlib.metadata.version("scgsim"),
-        "runtime_source": SCGSIM_RUNTIME_SOURCE,
-        "run_id": RUN_ID,
+        "required_scgsim_source_status": SCGSIM_SOURCE_STATUS,
+        "required_scgsim_source_commit": SCGSIM_SOURCE_COMMIT,
+        "required_scgsim_source_tree": SCGSIM_SOURCE_TREE,
+        "required_scgsim_base_commit": SCGSIM_SOURCE_BASE_COMMIT,
+        "required_scgsim_patch_sha256": SCGSIM_SOURCE_PATCH_SHA256,
     }
 )
 ```
 
-## Import GDS and Build the HFSS/Q3D/Q2D Model
-The GDSFactory split below retains the canonical **positive** DRAW as an
-inspection artifact only, not a native Q3D input. The actual request uses
-explicit source-free body-v3 records (`geometry_source=None`), not the
-terminal-free GeometryPlan helper or a helper-produced GDS/stack/trace binding.
+### Select material identities and electrical Net intent
 
-Source correspondence follows `square_pad_capacitor` directly: the pad is a
-centered `PAD_SIDE_UM` square; its opening side is `PAD_SIDE_UM + 2*GAP_UM`.
-The four positive Ground strips have width `(DIE_SIDE_UM-opening_side)/2`
-and offset `(DIE_SIDE_UM+opening_side)/4`. Their union is exactly the centered
-die square minus that centered opening: one connected body with one hole,
-not four independently assigned nets. The substrate is the same die square.
-At the current controls, pad edges are ±100 um, opening edges ±120 um and
-die edges ±500 um. Finite Z bounds come from the selected PDK levels: Al
-0–0.1 um, Si -500–0 um. The nonmetal locator and negative mask are not bodies.
-
-```{python}
-#| id: q3d-source
-if WORKFLOW_ACTION != "analyze_handoff":
-    pad_selector = gf.components.rectangle(
-        size=(PAD_SIDE_UM, PAD_SIDE_UM),
-        centered=True,
-        layer=LAYER.D0_TOP_M1_DRAW,
-    )
-    pad_geometry = gf.boolean(
-        A=component,
-        B=pad_selector,
-        operation="and",
-        layer=PAD_IMPORT_LAYER,
-        layer1=LAYER.D0_TOP_M1_DRAW,
-        layer2=LAYER.D0_TOP_M1_DRAW,
-    )
-    ground_geometry = gf.boolean(
-        A=component,
-        B=pad_selector,
-        operation="not",
-        layer=GROUND_IMPORT_LAYER,
-        layer1=LAYER.D0_TOP_M1_DRAW,
-        layer2=LAYER.D0_TOP_M1_DRAW,
-    )
-    substrate_geometry = component.extract(layers=[LAYER.D0_SUBSTRATE_AREA])
-    substrate_geometry.remap_layers({LAYER.D0_SUBSTRATE_AREA: SUBSTRATE_IMPORT_LAYER})
-    q3d_geometry = gf.Component()
-    q3d_geometry << pad_geometry
-    q3d_geometry << ground_geometry
-    q3d_geometry << substrate_geometry
-    if WORKFLOW_ACTION in {"prepare_handoff", "prepare_only", "run"}:
-        SOURCE_GDS.parent.mkdir(parents=True, exist_ok=True)
-        with SOURCE_GDS.open("xb") as stream:
-            q3d_geometry.write_gds(stream.name, with_metadata=False)
-    metal_level = layer_stack.layers["D0_TOP_M1"]
-    substrate_level = layer_stack.layers["D0_SUBSTRATE"]
-    # Owner-authored rings from the same component parameters, not GDS conversion.
-    p = PAD_SIDE_UM / 2
-    h = (PAD_SIDE_UM + 2 * GAP_UM) / 2
-    d = DIE_SIDE_UM / 2
-    pad_ring = ((-p, -p), (p, -p), (p, p), (-p, p))
-    die_ring = ((-d, -d), (d, -d), (d, d), (-d, d))
-    opening_hole = ((-h, -h), (-h, h), (h, h), (h, -h))
-    bodies = (
-        Q3dBodySpec(
-            "pad_body",
-            pad_ring,
-            (),
-            metal_level.zmin,
-            metal_level.zmin + metal_level.thickness,
-            "Al",
-            "signal",
-            "pad",
-            physical_layer_id=metal_level.info["physical_layer"]["physical_layer_id"],
-        ),
-        Q3dBodySpec(
-            "ground_body",
-            die_ring,
-            (opening_hole,),
-            metal_level.zmin,
-            metal_level.zmin + metal_level.thickness,
-            "Al",
-            "ground",
-            "ground",
-            physical_layer_id=metal_level.info["physical_layer"]["physical_layer_id"],
-        ),
-        Q3dBodySpec(
-            "substrate_body",
-            die_ring,
-            (),
-            substrate_level.zmin,
-            substrate_level.zmin + substrate_level.thickness,
-            "Si",
-            "substrate",
-            None,
-            physical_layer_id=substrate_level.info["physical_layer"]["physical_layer_id"],
-        ),
-    )
-```
-
-## Geometry Verification
-This is source inspection, not native geometry readback. The actual runner
-must retain native material, object, net, bounds and assignment observations
-in its receipt; analyze those observations after retrieval.
-
-```{python}
-#| id: q3d-geometry
-if WORKFLOW_ACTION != "analyze_handoff":
-    display({"component_bbox_um": str(component.dbbox()), "ports": component.ports})
-    display(q3d_geometry)
-    display({"source_free_bodies": bodies, "inspection_gds": SOURCE_GDS})
-```
-
-## Materials and Boundaries
+Material identities come from the selected PDK records. `GeometryPlan` uses the
+component roles `PAD` and `GROUND` under root `chip`, producing `chip/PAD` and
+`chip/GROUND`. The final Nets map Signal `pad` and Ground `ground` to those
+entities. The `pad` terminal pair keeps source and sink on `chip/PAD`, at −Z
+and +Z respectively. These assignments are distinct from the nonmetal junction
+locator.
 
 ```{python}
 #| id: q3d-materials
 if WORKFLOW_ACTION != "analyze_handoff":
+    material_records = get_material_records()
     materials = {
         material_id: PdkMaterial(
             material_id,
@@ -263,21 +198,71 @@ if WORKFLOW_ACTION != "analyze_handoff":
     }
 ```
 
-## Ports / Nets / Excitations
-
 ```{python}
 #| id: q3d-nets
 if WORKFLOW_ACTION != "analyze_handoff":
-    nets = (
-        Q3dNetSpec("pad", "Signal", ("pad_body",), "pad_body", "-Z", "pad_body", "+Z"),
-        Q3dNetSpec("ground", "Ground", ("ground_body",)),
-    )
+    final_nets = {
+        "pad": ("chip/PAD",),
+        "ground": ("chip/GROUND",),
+    }
+    net_types = {"pad": "Signal", "ground": "Ground"}
+    physical_ground_nets = ("ground",)
+    terminal_pairs = {
+        "pad": Q3dTerminalPair(
+            source_entity_id="chip/PAD",
+            source_side="-Z",
+            sink_entity_id="chip/PAD",
+            sink_side="+Z",
+        ),
+    }
 ```
 
-## Simulation Setup
+### Build the simulation geometry
+
+`GeometryPlan` combines the registered Part 1 `component` and `layer_stack` with
+the PDK material records; it does not override the factory geometry. The Signal
+pad and connected Ground occupy the Al layer; the substrate occupies the selected
+Si interval. The nonmetal junction locator is excluded from Q3D bodies.
+
+```{python}
+#| id: q3d-controls
+RUN_ID = f"simple_pad_aedt_q3d_{uuid4().hex}"
+OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SCGSimExamples" / "SimplePad"
+RUN_DIR = OUTPUT_ROOT / RUN_ID
+```
+
+```{python}
+#| id: q3d-source
+if WORKFLOW_ACTION != "analyze_handoff":
+    plan = GeometryPlan(
+        component=component,
+        root_id="chip",
+        layer_stack=layer_stack,
+        material_records=material_records,
+        coupon_padding_um=0.0,
+    )
+    plan.set_nets(final_nets)
+```
+
+```{python}
+#| id: q3d-geometry
+if WORKFLOW_ACTION != "analyze_handoff":
+    display(plan.entities)
+```
+
+### Configure the extraction
+
+This remains a 5 GHz capacitance/conductance extraction with ten adaptive passes
+and a 1% convergence request. The minimum-pass and refinement defaults are
+unchanged. It is a PEC extraction model, not a finite-conductivity loss
+measurement.
 
 ```{python}
 #| id: q3d-setup
+SETUP_NAME = "Setup1"
+EXTRACTION_FREQUENCY_GHZ = 5.0
+MAXIMUM_PASSES = 10
+CONVERGENCE_PERCENT = 1.0
 if WORKFLOW_ACTION != "analyze_handoff":
     run_control = MatrixRunControl(
         setup_name=SETUP_NAME,
@@ -287,55 +272,69 @@ if WORKFLOW_ACTION != "analyze_handoff":
     )
 ```
 
-## Simulation Configuration
+### Keep the solid model and exterior with the request
+
+Use solid Al and Si, the original open Region padding, no AC/RL solve, and no
+dedicated grounded enclosure Net. After setting the padding on `plan`,
+`plan.prepare()` captures a geometry snapshot that retains the final Net
+membership set by `plan.set_nets()`. `prepare_q3d_from_geometry` receives
+that snapshot with the materials, Net types, terminal pairs, and matrix controls.
+
+```{python}
+#| id: q3d-model-controls
+MODELING = "solid"
+VACUUM_PADDING_UM = (250.0, 250.0, 1000.0)
+```
 
 ```{python}
 #| id: q3d-spec
-if WORKFLOW_ACTION != "analyze_handoff":
-    px, py, pz = VACUUM_PADDING_UM
-    physical_layers = tuple(
-        PhysicalLayerDeclaration.from_payload(level.info["physical_layer"])
-        for level in (metal_level, substrate_level)
-    )
-    spec = Q3dSpec(
-        modeling=APPROXIMATION_PROFILE.name,
-        project_name=RUN_ID,
-        design_name="SimplePadQ3d",
-        physical_layers=physical_layers,
-        physical_representation=interpret_physical_layers(physical_layers, APPROXIMATION_PROFILE),
-        materials=materials,
-        vacuum_material_id="vacuum",
-        bodies=bodies,
-        nets=nets,
-        geometry_source=None,
-        run_control=run_control,
-        region_padding_um=(px, px, py, py, pz, pz),
-        solve_ac_rl=SOLVE_AC_RL,
-        grounded_region_net=GROUNDED_REGION_NET,
-        aedt_version=AEDT_VERSION,
-        pyaedt_version=PYAEDT_VERSION,
-    )
-    display(spec)
+if WORKFLOW_ACTION in {"prepare_handoff", "prepare_only", "run"}:
+    plan.set_vacuum_region(padding=VACUUM_PADDING_UM)
+    snapshot = plan.prepare()
+    display(snapshot.geometry_input)
 ```
 
-## Solve and Export
-A fresh handoff directory is required by SCGSim. Preparation never opens
-AEDT or solves. Change the action to `run` only for explicitly authorized
-native host execution; that branch invokes only the generated runner.
+### Choose resources, prepare, and explicitly run
+
+The original resource request is four cores and 30% RAM. Preparation writes
+a fresh portable handoff without opening AEDT; only the explicit `run` action
+invokes the generated native runner. Retain the handoff/spec identity when
+moving the package to another host.
+
+```{python}
+#| id: q3d-resources
+RESOURCES = AedtResources(cores=4, ram_limit_percent=30)
+```
 
 ```{python}
 #| id: q3d-handoff
 if WORKFLOW_ACTION in {"prepare_handoff", "prepare_only", "run"}:
-    HANDOFF = prepare_handoff(spec=spec, output_dir=RUN_DIR, resources=RESOURCES)
+    px, py, pz = VACUUM_PADDING_UM
+    HANDOFF = prepare_q3d_from_geometry(
+        snapshot,
+        aedt_version=AEDT_VERSION,
+        modeling=MODELING,
+        output_dir=RUN_DIR,
+        project_name=RUN_ID,
+        design_name="SimplePadQ3d",
+        materials=materials,
+        net_types=net_types,
+        physical_ground_nets=physical_ground_nets,
+        terminal_pairs=terminal_pairs,
+        run_control=run_control,
+        region_padding_um=(px, px, py, py, pz, pz),
+        resources=RESOURCES,
+    )
     display(HANDOFF)
     if WORKFLOW_ACTION == "run":
         subprocess.run([str(HANDOFF.script_path)], cwd=HANDOFF.run_dir, check=True)
 ```
 
-## Prepare-only native model inspection
+### Optional: inspect a native model without solving
 
-Select `prepare_only` to build, read back, save and release the native model
-without Analyze. This does not produce solved physics results.
+Select `prepare_only` to construct, read back, save and release the native model
+without Analyze. This action produces model observations, not solved
+capacitance.
 
 ```{python}
 #| id: aedt-q3d-prepare-only
@@ -357,12 +356,11 @@ if WORKFLOW_ACTION == "prepare_only":
     display(resolve_prepared_model(HANDOFF.run_dir))
 ```
 
-## Adaptive-Pass Convergence / Solver Diagnostics
-Use a fresh kernel and an explicit returned run directory, not live preparation
-state. The strict resolver reads sealed receipt identity, copied inputs and
-native readback. Missing or corrupt artifacts fail; nothing synthesizes a
-successful return. Retain the exact preparation-side spec/manifest identity
-independently when transporting the package.
+### Read a returned run
+
+In a fresh kernel, choose `analyze_handoff` and set
+`SIMPLE_PAD_RETURNED_RUN_DIR` to the actual returned directory.
+Strict resolution reads retained inputs, receipt and native observations.
 
 ```{python}
 #| id: q3d-resolve
@@ -377,8 +375,10 @@ if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
     result.show_all_results(show_details=True)
 ```
 
-## Results: Plots and Readable Tables
-### Physics Analysis Results
+### Physics
+
+Read each capacitance and conductance matrix with units, conductor order,
+reference convention and any matrix reduction.
 
 ```{python}
 #| id: q3d-physics
@@ -386,7 +386,10 @@ if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
     display(result.physics_results())
 ```
 
-### Simulation Performance / Benchmarks
+### Performance
+
+Inspect the requested setup and actual adaptive/resource history alongside
+the extracted quantities.
 
 ```{python}
 #| id: q3d-benchmark
@@ -394,10 +397,10 @@ if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
     display(result.simulation_benchmark())
 ```
 
-## Save and Release AEDT
-The generated runner saves the exact project and releases only its owned
-Desktop session. The strict resolver requires successful save/release and
-hash-bound output. No native outcome exists at this source checkpoint.
+### Saved project and release
+
+The generated runner saves the project and releases its owned Desktop session.
+The returned project and receipt paths identify those retained artifacts.
 
 ```{python}
 #| id: q3d-release
@@ -406,3 +409,7 @@ if WORKFLOW_ACTION in {"run", "analyze_handoff"}:
 elif WORKFLOW_ACTION in {"prepare_handoff", "prepare_only", "run"}:
     display(HANDOFF.archive_path)
 ```
+
+For generic backend APIs, use the
+[SCGSim documentation](https://github.com/OrPenStrike/scgsim/tree/develop/docs)
+at the version selected for the completed tutorial.
