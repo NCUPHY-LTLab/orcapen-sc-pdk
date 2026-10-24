@@ -88,6 +88,7 @@ website:
         href: developing-features.md
   sidebar:
     - id: get-started
+      collapse-level: 1
       title: Get Started
       contents:
         - getting-started.md
@@ -99,6 +100,7 @@ website:
         - start/layers.qmd
         - start/materials.qmd
     - id: simulation
+      collapse-level: 1
       title: Simulation
       contents:
         - notebooks.qmd
@@ -109,6 +111,7 @@ website:
         - simulation/requirements/epr-loss.qmd
         - public-pdk-examples/test-components.md
     - id: api
+      collapse-level: 1
       title: API
       contents:
         - text: PDK & Technology
@@ -123,6 +126,7 @@ website:
           contents:
             - auto: reference
     - id: research
+      collapse-level: 1
       title: Research
       contents:
         - paper-review.md
@@ -131,6 +135,7 @@ website:
         - papers/flip-chip-3d-integration.md
         - papers/surface-loss-participation.md
     - id: development
+      collapse-level: 1
       title: Development
       contents:
         - developing-features.md

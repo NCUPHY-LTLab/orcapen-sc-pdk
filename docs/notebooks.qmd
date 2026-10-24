@@ -1,41 +1,28 @@
 ---
 title: "Choose a Simulation"
-description: "Choose a calculation by the electrical quantity you need."
+description: "Choose a calculation by the physical quantity you need."
 sidebar: simulation
 ---
 
 Choose the question first, then open a tutorial with the matching geometry,
-excitation, and backend. Layout use is independent of solver installation.
+excitation, and backend.
 
-| Question | Guide | Starting model |
-| --- | --- | --- |
-| What capacitance does this conductor arrangement have? | [Capacitance](simulation/requirements/electrostatic-capacitance.qmd) | Square pad and surrounding ground |
-| What are the natural or loaded modes? | [Resonance & Eigenmodes](simulation/requirements/eigenmode.qmd) | Finite CPW, pad LC, or loaded meander |
-| How do signals reflect and transmit? | [S-parameters & Ports](simulation/requirements/driven-terminal.qmd) | CPW–resonator with Lumped or Wave excitation |
-| What are the uniform-line parameters? | [Cross-section Simulation](simulation/requirements/q2d-cross-section.qmd) | Explicit Q2D section |
-| Where is field energy stored, and how do interface assumptions affect loss? | [Participation & Surface Loss](simulation/requirements/epr-loss.qmd) | Pad LC and local interface regions |
+| Question | Guide |
+| --- | --- |
+| What capacitance does this conductor arrangement have? | [Capacitance](simulation/requirements/electrostatic-capacitance.qmd) |
+| What are the natural or loaded modes? | [Resonance & Eigenmodes](simulation/requirements/eigenmode.qmd) |
+| How do signals reflect and transmit? | [S-parameters & Ports](simulation/requirements/driven-terminal.qmd) |
+| What are the uniform-line parameters? | [Cross-section Simulation](simulation/requirements/q2d-cross-section.qmd) |
+| Where is field energy stored, and how do interface assumptions affect loss? | [Participation & Surface Loss](simulation/requirements/epr-loss.qmd) |
 
-Open a guide above for tutorials and downloads, or browse the
-[Model Gallery](public-pdk-examples/test-components.md) for source layouts.
-
-## Before you run
-
-Read the selected tutorial's setup and use its stated OrcaPen, SCGSim, and
-solver versions. Optional AEDT and Palace runtimes are separate.
-The repository's ordinary dependency groups may differ from a tutorial's required environment.
-
-Keep the tutorial's conductor references, stack, materials, exterior, and port
-conventions together. Use a new output directory for a new run; use its
-returned-run analysis action to read an existing result.
-
-⚠️ Saved outputs can use earlier model or runtime versions. Check the selected
-tutorial's status before treating its displayed results as results of its current source.
+::: {.callout-note}
+Match the OrcaPen, SCGSim, and solver versions listed in each tutorial.
+Version differences may require code adjustments.
+:::
 
 ## Upcoming workflows
 
 ⏳ AC/RL loop and mutual-inductance workflows are not completed.
-The existing Q3D examples remain available for their stated extraction scope;
-they are not a substitute for the upcoming loop/mutual workflow.
 
 ⏳ Palace cross-section simulation is pending SCGSim development.
 Use the [AEDT Q2D section](simulation/requirements/q2d-cross-section.qmd) for the
