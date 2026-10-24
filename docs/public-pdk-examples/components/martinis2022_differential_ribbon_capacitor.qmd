@@ -1,6 +1,6 @@
 ---
 title: "Martinis 2022 differential ribbon capacitor"
-sidebar: get-started
+sidebar: api
 ---
 
 `martinis2022_differential_ribbon_capacitor` builds a differential ribbon

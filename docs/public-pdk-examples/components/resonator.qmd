@@ -1,6 +1,6 @@
 ---
 title: "Resonator"
-sidebar: get-started
+sidebar: api
 ---
 
 `resonator` combines a CPW hanger and meander, with optional tail and qubit

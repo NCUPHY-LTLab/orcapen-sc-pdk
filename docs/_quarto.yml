@@ -93,31 +93,7 @@ website:
       title: Get Started
       contents:
         - getting-started.md
-        - section: Cells
-          contents:
-            - text: Overview
-              href: public-pdk-examples/index.md
-            - section: Components
-              contents:
-                - text: All components
-                  href: public-pdk-examples/components/index.qmd
-                - public-pdk-examples/components/straight.qmd
-                - public-pdk-examples/components/taper.qmd
-                - public-pdk-examples/components/resonator.qmd
-                - public-pdk-examples/components/resonator_hanger.qmd
-                - public-pdk-examples/components/resonator_meander.qmd
-                - public-pdk-examples/components/interdigital_capacitor.qmd
-                - public-pdk-examples/components/martinis2022_differential_ribbon_capacitor.qmd
-                - public-pdk-examples/components/launcher.qmd
-                - public-pdk-examples/components/cpw_t_junction.qmd
-                - public-pdk-examples/components/airbridge.qmd
-                - public-pdk-examples/components/indium_bump.qmd
-                - public-pdk-examples/components/indium_ground.qmd
-                - public-pdk-examples/components/cpw_handoff.qmd
-                - public-pdk-examples/components/rounded_end_metal_segment.qmd
-                - public-pdk-examples/components/rounded_rectangle.qmd
-                - public-pdk-examples/components/wire_corner.qmd
-            - public-pdk-examples/cross-sections.qmd
+        - start/common-cells.qmd
         - start/layers.qmd
         - start/materials.qmd
     - id: simulation
@@ -146,19 +122,43 @@ website:
             - reference/get_sample_functions.qmd
         - section: Cells
           contents:
-            - reference/cells.airbridge.qmd
-            - reference/cells.interdigital_capacitor.qmd
-            - reference/cells.cpw_t_junction.qmd
-            - reference/cells.launcher.qmd
-            - reference/cells.mtl_bend_coupling_section.qmd
-            - reference/cells.n_trace_mtl_section.qmd
-            - reference/cells.resonator.qmd
-            - reference/cells.resonator_hanger.qmd
-            - reference/cells.resonator_meander.qmd
-            - reference/cells.finite_ground_cpw_coupon.qmd
-            - reference/cells.cpw_meander_airbridge_lumped_coupon.qmd
-            - reference/cells.cpw_meander_airbridge_wave_coupon.qmd
-            - reference/cells.martinis2022_differential_ribbon_capacitor.qmd
+            - text: Overview
+              href: public-pdk-examples/index.md
+            - section: Components
+              contents:
+                - text: All components
+                  href: public-pdk-examples/components/index.qmd
+                - public-pdk-examples/components/straight.qmd
+                - public-pdk-examples/components/taper.qmd
+                - public-pdk-examples/components/resonator.qmd
+                - public-pdk-examples/components/resonator_hanger.qmd
+                - public-pdk-examples/components/resonator_meander.qmd
+                - public-pdk-examples/components/interdigital_capacitor.qmd
+                - public-pdk-examples/components/martinis2022_differential_ribbon_capacitor.qmd
+                - public-pdk-examples/components/launcher.qmd
+                - public-pdk-examples/components/cpw_t_junction.qmd
+                - public-pdk-examples/components/airbridge.qmd
+                - public-pdk-examples/components/indium_bump.qmd
+                - public-pdk-examples/components/indium_ground.qmd
+                - public-pdk-examples/components/cpw_handoff.qmd
+                - public-pdk-examples/components/rounded_end_metal_segment.qmd
+                - public-pdk-examples/components/rounded_rectangle.qmd
+                - public-pdk-examples/components/wire_corner.qmd
+            - section: Function references
+              contents:
+                - reference/cells.airbridge.qmd
+                - reference/cells.interdigital_capacitor.qmd
+                - reference/cells.cpw_t_junction.qmd
+                - reference/cells.launcher.qmd
+                - reference/cells.mtl_bend_coupling_section.qmd
+                - reference/cells.n_trace_mtl_section.qmd
+                - reference/cells.resonator.qmd
+                - reference/cells.resonator_hanger.qmd
+                - reference/cells.resonator_meander.qmd
+                - reference/cells.finite_ground_cpw_coupon.qmd
+                - reference/cells.cpw_meander_airbridge_lumped_coupon.qmd
+                - reference/cells.cpw_meander_airbridge_wave_coupon.qmd
+                - reference/cells.martinis2022_differential_ribbon_capacitor.qmd
         - section: Materials & Interfaces
           contents:
             - reference/materials.get_material_records.qmd

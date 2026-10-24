@@ -1,6 +1,6 @@
 ---
 title: "Wire corner"
-sidebar: get-started
+sidebar: api
 ---
 
 `wire_corner` is a sharp corner adapter for a selected GDSFactory cross-section.

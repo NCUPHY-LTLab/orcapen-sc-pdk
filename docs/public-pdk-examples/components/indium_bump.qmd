@@ -1,6 +1,6 @@
 ---
 title: "Indium bump"
-sidebar: get-started
+sidebar: api
 ---
 
 `indium_bump` places one centered square indium bump, with an optional under-bump contact pad.

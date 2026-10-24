@@ -1,6 +1,6 @@
 ---
 title: "Indium ground field"
-sidebar: get-started
+sidebar: api
 ---
 
 `indium_ground` places a centered regular field of passive indium bumps and can skip sites that overlap a keepout region.

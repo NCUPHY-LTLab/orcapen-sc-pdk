@@ -1,6 +1,6 @@
 ---
 title: "CPW T-junction"
-sidebar: get-started
+sidebar: api
 ---
 
 `cpw_t_junction` joins a straight CPW trunk to a perpendicular branch. It uses

@@ -1,6 +1,6 @@
 ---
 title: "Taper"
-sidebar: get-started
+sidebar: api
 ---
 
 `taper` creates a CPW transition between two conductor widths and gap sizes.

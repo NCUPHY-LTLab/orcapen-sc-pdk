@@ -1,6 +1,6 @@
 ---
 title: "CPW handoff"
-sidebar: get-started
+sidebar: api
 ---
 
 `cpw_handoff` joins a native coplanar waveguide to a route-width section with one taper.

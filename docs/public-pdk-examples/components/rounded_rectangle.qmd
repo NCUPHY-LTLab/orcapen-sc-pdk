@@ -1,6 +1,6 @@
 ---
 title: "Rounded rectangle"
-sidebar: get-started
+sidebar: api
 ---
 
 `rounded_rectangle` creates a centered GDSFactory rounded rectangle and forwards its edge ports.

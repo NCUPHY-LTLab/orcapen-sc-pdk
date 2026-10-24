@@ -1,6 +1,6 @@
 ---
 title: "Resonator meander"
-sidebar: get-started
+sidebar: api
 ---
 
 `resonator_meander` creates a meandering CPW body. Its `length` applies to the

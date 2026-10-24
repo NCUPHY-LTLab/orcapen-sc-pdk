@@ -1,6 +1,6 @@
 ---
 title: "Interdigital capacitor"
-sidebar: get-started
+sidebar: api
 ---
 
 `interdigital_capacitor` creates a pair of interleaved electrodes with CPW

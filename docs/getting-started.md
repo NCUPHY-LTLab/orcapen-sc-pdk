@@ -53,7 +53,7 @@ uv run example.py
 
 | Task | Guide |
 | --- | --- |
-| Pick a capacitor, resonator, launcher, or primitive | [Cells](public-pdk-examples/index.md) |
+| Start with a launcher or resonator | [Common Cells](start/common-cells.qmd) |
 | Select geometry layers and physical heights | [Layers & Stack](start/layers.qmd) |
 | Choose bulk materials or surface-interface assumptions | [Materials & Interfaces](start/materials.qmd) |
 | Select a CPW section and inspect layout interfaces | [Cross-sections](public-pdk-examples/cross-sections.qmd) |

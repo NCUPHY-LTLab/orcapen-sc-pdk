@@ -1,6 +1,6 @@
 ---
 title: "Launcher"
-sidebar: get-started
+sidebar: api
 ---
 
 `launcher` tapers a large pad to a CPW neck. It also defines a simulation-boundary

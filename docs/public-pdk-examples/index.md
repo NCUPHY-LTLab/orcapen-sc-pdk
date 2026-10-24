@@ -1,6 +1,6 @@
 ---
 title: "Cells"
-sidebar: get-started
+sidebar: api
 ---
 
 Choose a registered OrcaPen factory for the geometry you need. Activate the

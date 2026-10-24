@@ -1,6 +1,6 @@
 ---
 title: "Straight"
-sidebar: get-started
+sidebar: api
 ---
 
 `straight` delegates to GDSFactory's straight path with OrcaPen's

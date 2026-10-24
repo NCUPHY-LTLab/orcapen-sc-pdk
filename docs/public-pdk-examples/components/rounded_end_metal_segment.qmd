@@ -1,6 +1,6 @@
 ---
 title: "Rounded-end metal segment"
-sidebar: get-started
+sidebar: api
 ---
 
 `rounded_end_metal_segment` creates a metal segment with a flat left face and a semicircular right cap.

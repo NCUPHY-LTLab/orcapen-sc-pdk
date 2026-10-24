@@ -1,6 +1,6 @@
 ---
 title: "Resonator hanger"
-sidebar: get-started
+sidebar: api
 ---
 
 `resonator_hanger` builds the hanger head of a readout resonator. Its coupling

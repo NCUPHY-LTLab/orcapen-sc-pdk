@@ -1,6 +1,6 @@
 ---
 title: "Components"
-sidebar: get-started
+sidebar: api
 ---
 
 Choose a registered layout factory, then use its guide for default settings,

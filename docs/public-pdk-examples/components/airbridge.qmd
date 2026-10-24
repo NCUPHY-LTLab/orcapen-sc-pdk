@@ -1,6 +1,6 @@
 ---
 title: "Airbridge"
-sidebar: get-started
+sidebar: api
 ---
 
 `airbridge` creates a centered rectangular bridge deck and two endpoint pads for a same-face layout. Geometry dimensions use micrometres.
