@@ -86,6 +86,19 @@ Modal results.
 Historical output is not execution of these revised sources. The current suite
 does not claim that every branch is complete, supported or natively observed.
 
+## SimplePad surface bands and local-interface correction
+
+Start with the Q2D example to prepare local-interface field factors, then use
+the Palace example to select original-parent surface bands and analyze returned
+corrections. Download the shared
+<a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" download>model JSON</a>
+beside either downloaded notebook or QMD; it owns their geometry and numeric controls.
+
+| Example | Notebook / download | Canonical source download |
+| --- | --- | --- |
+| SimplePad local interfaces — Q2D fields and factors | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd" download>QMD</a> |
+| SimplePad — Palace surface bands and returned Q2D correction | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd" download>QMD</a> |
+
 ## TSV examples
 
 The [TSV workflow and model-inspection guide](tsv-model-inspection.qmd) links three OrcaPen-owned
