@@ -96,8 +96,8 @@ beside either downloaded notebook or QMD; it owns their geometry and numeric con
 
 | Example | Notebook / download | Canonical source download |
 | --- | --- | --- |
-| SimplePad local interfaces — Q2D fields and factors | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd" download>QMD</a> |
-| SimplePad — Palace surface bands and returned Q2D correction | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd" download>QMD</a> |
+| SimplePad local interfaces — Q2D fields and factors | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd" data-noresolveinput download>QMD</a> |
+| SimplePad — Palace surface bands and returned Q2D correction | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd" data-noresolveinput download>QMD</a> |
 
 ## TSV examples
 
