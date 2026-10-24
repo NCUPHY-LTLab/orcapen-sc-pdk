@@ -6,6 +6,9 @@ sidebar: get-started
 Choose a registered OrcaPen factory for the geometry you need. Activate the
 PDK first, then inspect the factory's typed settings before changing dimensions.
 
+For path-based cells, choose the widths, gaps, and layer recipe in
+[Cross-sections](cross-sections.qmd), including CPW, coupled traces, and strips.
+
 | Family | Examples |
 | --- | --- |
 | CPW and resonators | `straight`, `taper`, `resonator`, `resonator_hanger`, `resonator_meander` |

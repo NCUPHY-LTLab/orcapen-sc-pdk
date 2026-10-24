@@ -1,0 +1,164 @@
+---
+title: "Cross-sections"
+sidebar: get-started
+execute:
+  enabled: false
+---
+
+Choose a cross-section to define the widths, transverse offsets, layers, and
+connection ports extruded along a path. A cross-section is an XY layout recipe;
+combine it with [Layers & Stack](../start/layers.qmd) for physical Z and material.
+
+## Definitions and registered names
+
+The functions live in
+[tech.py](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/tech.py#L678).
+The active PDK exposes these **16 registry names** through
+[`pdk.py`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/pdk.py#L113).
+Aliases below select the same function, not additional physical layers.
+
+| Registry name(s) | Default transverse geometry (µm) | Default source layers |
+| --- | --- | --- |
+| `coplanar_waveguide`, `cpw` | Signal width 10; gap 6 on each side | D0 TOP DRAW / ETCH / GROUND_MASK |
+| `cpw_2dot7_4_2dot7` | Signal width 4; gaps 2.7 | D0 TOP DRAW / ETCH / GROUND_MASK |
+| `cpw_6_7_6` | Signal width 7; gaps 6 | D0 TOP DRAW / ETCH / GROUND_MASK |
+| `cpw_6_10_6` | Signal width 10; gaps 6 | D0 TOP DRAW / ETCH / GROUND_MASK |
+| `cpw_15_5_15` | Signal width 5; gaps 15 | **D1 BOTTOM** DRAW / ETCH / GROUND_MASK |
+| `launcher_cross_section_big` | Signal width 200; gaps 110 | D0 TOP DRAW / ETCH / GROUND_MASK |
+| `n_trace_coplanar_waveguide` | Two traces, widths (7, 7); each trace has two gaps of 6; inter-trace ground strip 3 | D0 TOP DRAW / ETCH / GROUND_MASK |
+| `coupled_cpw_w7_s6_d3` | Fixed two-trace widths (7, 7), gaps (6, 6), ground strip (3) | D0 TOP DRAW / ETCH / GROUND_MASK |
+| `microstrip`, `strip`, `strip_metal` | One additive metal strip, width 10 | `D0_TOP_M1_DRAW` |
+| `etch`, `etch_only` | CPW width 10 / gap 6 recipe with **all sections on ETCH** | `D0_TOP_M1_ETCH` |
+| `josephson_junction_cross_section_wide` | One wire, width 0.2 | `D0_TOP_JJ_DRAW` |
+| `josephson_junction_cross_section_narrow` | One wire, width 0.09 | `D0_TOP_JJ_DRAW` |
+
+D0 TOP's DRAW / ETCH / GROUND_MASK pairs are `(1, 0)` / `(1, 1)` /
+`(110, 0)`; D1 BOTTOM uses `(2, 0)` / `(2, 1)` / `(110, 1)`.
+D0 TOP JJ DRAW is `(21, 0)` and has no physical stack level.
+
+The parameterized CPW functions accept explicit layer selections and default to
+a 100 µm bend radius. The fixed-gap wrappers retain their stated gap when
+`width` changes; `cpw_15_5_15` also exposes `gap`.
+The launcher and junction factories take no parameters. `microstrip` accepts
+`width` and `layer`; its name does not add a backside ground plane, dielectric
+stack, or microstrip solver model.
+
+## CPW sections: signal, slots, and ground mask
+
+For signal width `W` and gap `S`, `coplanar_waveguide()` defines four sections:
+
+| Section name | Width | Offset from path centre | Source layer |
+| --- | --- | --- | --- |
+| `cpw_draw` | `W` | 0 | DRAW |
+| `cpw_etch_neg` | `S` | `−(W + S)/2` | ETCH |
+| `cpw_etch_pos` | `S` | `+(W + S)/2` | ETCH |
+| `cpw_ground_mask` | `W + 2S` | 0 | GROUND_MASK |
+
+For `cpw_6_10_6`, the signal occupies transverse `x = −5..5`, the slots
+occupy `−11..−5` and `5..11`, and the mask spans `−11..11`.
+The mask is a construction region, not another conductor. Outer ground requires
+the component's face/domain geometry; this cross-section does not prescribe a
+finite ground width.
+
+### Transverse physical schematics
+
+![CPW, additive strip, and coupled CPW transverse source schematics with local x and stack z axes.](cross-sections.svg)
+
+These source-derived schematics combine D0 TOP recipes with the single-die
+stack: 0.1 µm Al on 500 µm Si. Local transverse `x` is the section-offset
+coordinate, not a global chip axis. Vertical scale is broken and exaggerated;
+outer grounds are cropped for illustration, with no finite ground extent
+selected. These are diagrams, not Q2D geometry or solver output.
+
+### Multiple traces: ground strip is not trace spacing
+
+The generic `n_trace_coplanar_waveguide()` accepts `trace_widths`,
+`trace_gaps`, `inter_trace_ground_widths`, optional `trace_names`, the three
+source layers, and `radius`. For N traces it takes N widths, N per-trace gap
+values, and N−1 inter-trace ground widths. Each trace has its own gap on both
+sides. The total mask-and-ground span is
+`sum(trace_widths) + 2*sum(trace_gaps) + sum(inter_trace_ground_widths)`.
+
+The default coupled recipe spans 41 µm between the outer slot edges.
+With the source's offset convention, `t1` is at +11 µm and `t2` at −11 µm:
+
+| Transverse interval x (µm) | Role |
+| --- | --- |
+| Less than −20.5 | Outer ground supplied by the component/domain |
+| −20.5 to −14.5 | 6 µm slot |
+| −14.5 to −7.5 | 7 µm trace `t2` |
+| −7.5 to −1.5 | 6 µm slot |
+| −1.5 to 1.5 | **3 µm ground strip** |
+| 1.5 to 7.5 | 6 µm slot |
+| 7.5 to 14.5 | 7 µm trace `t1` |
+| 14.5 to 20.5 | 6 µm slot |
+| Greater than 20.5 | Outer ground supplied by the component/domain |
+
+The nearest trace edges are 15 µm apart: 6 µm slot + 3 µm ground + 6 µm slot.
+Their centres are 22 µm apart. `D3` names the intervening ground strip,
+not a 3 µm signal-to-signal gap. The source authors trace DRAW, ETCH slots and
+ground masks; it leaves the ground strip as residual face metal.
+
+Trace DRAW sections are named `t1`, `t2`, … unless `trace_names` is supplied.
+Each trace exposes `<name>_o1` / `<name>_o2` connection ports.
+Slot sections use `<name>_s_neg` / `<name>_s_pos`; the first mask is
+`cpw_ground_mask`, and subsequent masks are `<name>_ground_mask`.
+
+## Use a section in a component and report its settings
+
+Activate OrcaPen, resolve the named section, and pass it to the registered
+[`straight` primitive](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/cells/layout/primitives.py#L70).
+Run this example in the installed OrcaPen environment. It prints the actual
+section records, component settings, and geometric connection ports.
+
+```python
+import gdsfactory as gf
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import straight
+
+orcapen_sc_pdk.activate()
+gf.clear_cache()
+xs = gf.get_cross_section("cpw_6_10_6")
+component = straight(length=200, cross_section=xs)
+
+print("Cross-section:", xs.name)
+for section in xs.sections:
+    print({
+        "name": section.name,
+        "width_um": section.width,
+        "offset_um": section.offset,
+        "layer": section.layer,
+    })
+print("Component:", component.name)
+print("Settings:", component.settings)
+for port in component.ports:
+    print({
+        "name": port.name,
+        "center_um": port.dcenter,
+        "width_um": port.dwidth,
+        "orientation_deg": port.orientation,
+        "port_type": port.port_type,
+        "layer": port.layer,
+    })
+```
+
+Check: the report includes a 10 µm DRAW section at offset 0, two 6 µm ETCH
+sections at offsets −8 and +8, and a 22 µm ground-mask section. Read the actual
+returned layer values and port records alongside the component settings.
+
+The example returns component `straight_L200_N2_CScpw_6_10_6_WNone`, with settings
+`length=200`, `npoints=2`, `cross_section='cpw_6_10_6'`, and `width=None`.
+
+| Port | Centre (µm) | Width (µm) | Orientation | Returned type |
+| --- | --- | ---: | ---: | --- |
+| `o1` | `(0, 0)` | 10 | 180° | `optical` |
+| `o2` | `(200, 0)` | 10 | 0° | `optical` |
+
+`optical` is the registered GDSFactory connection-port type used by this straight
+factory. Select simulation excitation separately in
+[Simulation ports](../simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals).
+
+For placement and connecting these geometric ports, use the
+[GDSFactory instances and ports guide](https://gdsfactory.github.io/gdsfactory/notebooks/01_references/).
+For excitation sheets, conductor references and electrical terminals, continue
+with [S-parameters & Ports](../simulation/requirements/driven-terminal.qmd).

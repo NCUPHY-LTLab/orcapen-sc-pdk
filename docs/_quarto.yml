@@ -9,6 +9,7 @@ project:
     - "features/scgsim-integration.md"
     - "features/docs-theme.md"
     - "public-pdk-examples/*.md"
+    - "public-pdk-examples/*.qmd"
     - "usage/*.md"
     - "simulation/**/*.qmd"
     - "papers/*.md"
@@ -90,10 +91,13 @@ website:
       title: Get Started
       contents:
         - getting-started.md
-        - public-pdk-examples/index.md
+        - section: Cells
+          contents:
+            - text: Overview
+              href: public-pdk-examples/index.md
+            - public-pdk-examples/cross-sections.qmd
         - start/layers.qmd
         - start/materials.qmd
-        - start/cross-sections-ports.qmd
     - id: simulation
       title: Simulation
       contents:

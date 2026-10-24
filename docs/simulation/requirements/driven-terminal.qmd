@@ -6,6 +6,49 @@ sidebar: simulation
 Calculate reflection and transmission using a defined excitation and reference.
 Choose the port model before comparing S-parameters between geometries or solvers.
 
+## Geometric ports, simulation locators, and terminals
+
+| Object | Meaning | What the reader selects |
+| --- | --- | --- |
+| GDSFactory connection port | Position, orientation, width, layer, and type at a component connection plane. It lets layout instances connect. | A matching cross-section and actual child port. |
+| OrcaPen simulation locator | A named port identifying component-owned sheet or marker geometry. Its `sim_*` type describes a locator role. | The qualified locator name and intended source geometry. |
+| Solver port or terminal | An electrical assignment to conductors and supporting geometry for the chosen problem. | Signal/reference conductors, ordering, direction, excitation, and normalization. |
+
+A connection port does not automatically become an excitation. A simulation
+locator does not add its own metal, sheet polygon, mesh size, impedance, or
+circuit element. The component authors geometry; the SCGSim problem assigns its
+electrical meaning. For ordinary placement and connection, follow
+[GDSFactory instances and ports](https://gdsfactory.github.io/gdsfactory/notebooks/01_references/).
+
+### OrcaPen locator helpers
+
+The public [port helpers](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/port_operations.py)
+add a named GDSFactory port to existing component geometry. Each takes the
+component plus `name`, `center`, `layer`, and optional `width` and `orientation`.
+Physical centres and widths use µm; read returned ports through `dcenter` and
+`dwidth`.
+
+| Helper | Registered locator type | Use |
+| --- | --- | --- |
+| `add_mesh_port()` | `sim_mesh` | Identify a feature for local mesh selection; choose mesh lengths in the simulation. |
+| `add_junction_lumped_port()` | `sim_junction_lumped` | Identify a junction sheet; choose linearized inductance and other problem controls separately. |
+| `add_driven_lumped_port()` | `sim_lumped` | Identify an excitation sheet; choose resistance, source, and activity in the solver problem. |
+
+The [type registry](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/port_metadata.py)
+also declares `sim_cpw`, `sim_terminal`, `sim_wave`, and `sim_current`.
+PDK activation registers these strings with GDSFactory; a type label alone is
+not a Palace or AEDT assignment.
+
+For example, [SimplePad](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py)
+draws a nonmetal east-gap sheet on `D0_TOP_SIM_BOUNDARY` and locates it with
+`o_junction_lumped`. The optional inductance belongs to the eigenmode problem,
+not the locator. In a component hierarchy, select its actual qualified name
+(for example `chip/o_junction_lumped`) together with its intended conductor pair.
+
+For Q2D, author native section conductors and their reference grouping in the
+[Cross-section Simulation](q2d-cross-section.qmd) tutorial; geometric connection
+ports are not that model's voltage-source definitions.
+
 ## Terminal excitation
 
 The CPW–meander examples keep the resonator and airbridges while changing
@@ -41,5 +84,5 @@ frequency samples, port ordering, reference impedance, and adaptive history.
 Keep setup adaptation separate from sweep completion.
 
 Touchstone reference impedance and a solved Wave-port characteristic impedance
-are different quantities. For layout-only connection planes, see
-[Cross-sections & Ports](../../start/cross-sections-ports.qmd).
+are different quantities. For the layout recipes and reported geometric ports,
+see [Cross-sections](../../public-pdk-examples/cross-sections.qmd).

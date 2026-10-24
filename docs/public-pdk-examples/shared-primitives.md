@@ -85,5 +85,5 @@ Caller-selected cross-sections remain explicit; no private CPW default is copied
 
 Use the registered public names in the active PDK. Keep each factory's
 sampling and port roles when composing a layout; see
-[Cross-sections & Ports](../start/cross-sections-ports.qmd) and
+[Cross-sections](cross-sections.qmd) and
 [GDSFactory guides](component-authoring.md).

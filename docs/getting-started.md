@@ -44,7 +44,7 @@ appears below the cell. Lengths and physical port dimensions use micrometres.
 | Pick a capacitor, resonator, launcher, or primitive | [Cells](public-pdk-examples/index.md) |
 | Select geometry layers and physical heights | [Layers & Stack](start/layers.qmd) |
 | Choose bulk materials or surface-interface assumptions | [Materials & Interfaces](start/materials.qmd) |
-| Select a CPW section and inspect layout interfaces | [Cross-sections & Ports](start/cross-sections-ports.qmd) |
+| Select a CPW section and inspect layout interfaces | [Cross-sections](public-pdk-examples/cross-sections.qmd) |
 | Place, connect, route, or export a layout | [GDSFactory and OrcaPen](public-pdk-examples/component-authoring.md) |
 | Calculate an electrical quantity | [Choose a Simulation](notebooks.qmd) |
 

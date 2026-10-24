@@ -3,39 +3,11 @@ title: "Cross-sections & Ports"
 sidebar: get-started
 ---
 
-Choose an OrcaPen cross-section before routing, then use the actual ports
-returned by the selected cell. A layout port describes a connection plane;
-solver terminals and electrical reference conductors are separate choices.
+Read [Cells → Cross-sections](../public-pdk-examples/cross-sections.qmd) for the
+complete OrcaPen registry, transverse geometry, and a component settings example.
 
-## Select a cross-section
-
-The active PDK registers CPW, coupled-CPW, strip, etch, launcher, and junction
-sections. Named choices include `coplanar_waveguide`, `cpw_6_7_6`,
-and `cpw_6_10_6`; inspect their definitions rather than inferring geometry
-from a display name.
-
-- [PDK registry and cross-section definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/pdk.py)
-- [Technology functions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py)
-- [Layers & Stack](layers.qmd)
-
-Activate OrcaPen before resolving a named section. Use a matching section at
-each connection, including trace width, gap, and layer choices.
-
-## Read layout ports
-
-Inspect each cell's actual port names, physical centre, orientation, width,
-type, and layer. GDSFactory's physical-unit properties such as `dcenter`
-and `dwidth` use micrometres; integer database coordinates use a different scale.
-
-Forward or connect actual child ports using
+For electrical assignments, read
+[S-parameters & Ports](../simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals).
+It distinguishes layout connection ports, simulation locators, and solver
+terminals. Generic component connection is covered by
 [GDSFactory instances and ports](https://gdsfactory.github.io/gdsfactory/notebooks/01_references/).
-The [OrcaPen cell gallery](../public-pdk-examples/index.md) and
-[primitive descriptions](../public-pdk-examples/shared-primitives.md) identify
-factory-specific connection and locator roles.
-
-## Choose the electrical problem separately
-
-A nonmetal locator can identify a sheet without creating metal or assigning
-an excitation. For voltage, current, terminal ordering, or reference impedance,
-use [S-parameters & Ports](../simulation/requirements/driven-terminal.qmd).
-For a uniform-line model, use [Cross-section Simulation](../simulation/requirements/q2d-cross-section.qmd).

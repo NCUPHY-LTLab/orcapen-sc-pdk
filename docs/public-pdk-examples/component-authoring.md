@@ -14,7 +14,7 @@ to register OrcaPen's cells and cross-sections.
 | Route between ports | [GDSFactory routing](https://gdsfactory.github.io/gdsfactory/notebooks/04_routing/) |
 | Choose OrcaPen factories and primitives | [Cells](index.md) and [shared primitives](shared-primitives.md) |
 | Select process layers, physical heights, and materials | [Layers & Stack](../start/layers.qmd) and [Materials & Interfaces](../start/materials.qmd) |
-| Choose a section or understand a locator | [Cross-sections & Ports](../start/cross-sections-ports.qmd) |
+| Choose a section or understand a locator | [Cross-sections](cross-sections.qmd) and [simulation ports](../simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals) |
 
 Keep OrcaPen active when using named PDK factories or sections. Use the
 GDSFactory API matching your installed package version.

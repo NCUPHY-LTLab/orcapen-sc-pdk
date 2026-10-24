@@ -25,7 +25,8 @@ not part of the generated function index.
 - [PDK registry](reference/get_pdk.qmd#orcapen_sc_pdk.get_pdk).
 - [Cross-section definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py)
   and [port types](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/ports.py).
-- [Cross-sections & Ports guide](start/cross-sections-ports.qmd).
+- [Cross-sections guide](public-pdk-examples/cross-sections.qmd) and
+  [simulation ports and terminals](simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals).
 
 ## Materials & Interfaces {#materials-interfaces}
 
