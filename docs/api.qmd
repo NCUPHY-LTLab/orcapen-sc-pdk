@@ -1,34 +1,16 @@
 ---
 title: "API"
 sidebar: api
+toc: false
 ---
 
-Use the generated function references for exact signatures and parameters.
-Technology and port definitions link to the public source where they are
-not part of the generated function index.
+Use the generated reference pages for function signatures and parameters. This
+overview links the main entry points, layout factories, technology and port
+definitions, and material records.
 
-## PDK & Technology {#pdk-technology}
-
-- [activate](reference/activate.qmd#orcapen_sc_pdk.activate) and
-  [get_pdk](reference/get_pdk.qmd#orcapen_sc_pdk.get_pdk).
-- [Generated package reference](reference/index.qmd#package).
-- [Layer maps, stack getters, and technology definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py).
-
-## Cells & Primitives {#cells-primitives}
-
-- [Generated cell reference](reference/index.qmd#cells).
-- [Choose a cell](public-pdk-examples/index.md) or read
-  [primitive roles](public-pdk-examples/shared-primitives.md).
-
-## Cross-sections & Ports {#cross-sections-ports}
-
-- [PDK registry](reference/get_pdk.qmd#orcapen_sc_pdk.get_pdk).
-- [Cross-section definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py)
-  and [port types](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/ports.py).
-- [Cross-sections guide](public-pdk-examples/cross-sections.qmd) and
-  [simulation ports and terminals](simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals).
-
-## Materials & Interfaces {#materials-interfaces}
-
-- [Generated material and interface functions](reference/index.qmd#materials).
-- [Materials & Interfaces guide](start/materials.qmd).
+| Area | Reference and guides |
+| --- | --- |
+| [PDK & Technology]{#pdk-technology} | [`activate()`](reference/activate.qmd#orcapen_sc_pdk.activate) · [`get_pdk()`](reference/get_pdk.qmd#orcapen_sc_pdk.get_pdk) · [`get_sample_functions()`](reference/get_sample_functions.qmd#orcapen_sc_pdk.get_sample_functions) · [Layer maps, stack getters, and technology definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py) |
+| [Cells & Primitives]{#cells-primitives} | [`cells.resonator()`](reference/cells.resonator.qmd#orcapen_sc_pdk.cells.resonator) · [`cells.interdigital_capacitor()`](reference/cells.interdigital_capacitor.qmd#orcapen_sc_pdk.cells.interdigital_capacitor) · [All cell references](reference/index.qmd#cells) · [Cells guide](public-pdk-examples/index.md) · [Primitive roles](public-pdk-examples/shared-primitives.md) |
+| [Cross-sections & Ports]{#cross-sections-ports} | [`get_pdk()`](reference/get_pdk.qmd#orcapen_sc_pdk.get_pdk) · [Cross-section definitions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py) · [Port types](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/ports.py) · [Cross-sections guide](public-pdk-examples/cross-sections.qmd) · [Simulation ports and terminals](simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals) |
+| [Materials & Interfaces]{#materials-interfaces} | [`materials.get_material_records()`](reference/materials.get_material_records.qmd#orcapen_sc_pdk.materials.get_material_records) · [`materials.get_material_alias_records()`](reference/materials.get_material_alias_records.qmd#orcapen_sc_pdk.materials.get_material_alias_records) · [`materials.get_interface_preset_records()`](reference/materials.get_interface_preset_records.qmd#orcapen_sc_pdk.materials.get_interface_preset_records) · [All material and interface references](reference/index.qmd#materials) · [Materials & Interfaces guide](start/materials.qmd) |
