@@ -7,13 +7,49 @@ sidebar: simulation
 Choose the question first, then open a tutorial with the matching geometry,
 excitation, and backend.
 
-| Question | Guide |
-| --- | --- |
-| What capacitance does this conductor arrangement have? | [Capacitance](simulation/requirements/electrostatic-capacitance.qmd) |
-| What are the natural or loaded modes? | [Resonance & Eigenmodes](simulation/requirements/eigenmode.qmd) |
-| How do signals reflect and transmit? | [S-parameters & Ports](simulation/requirements/driven-terminal.qmd) |
-| What are the uniform-line parameters? | [Cross-section Simulation](simulation/requirements/q2d-cross-section.qmd) |
-| Where is field energy stored, and how do interface assumptions affect loss? | [Participation & Surface Loss](simulation/requirements/epr-loss.qmd) |
+::: {.simulation-chooser-cards}
+
+:::: {.card .mb-3 .border}
+::::: {.card-body .p-4}
+## [Capacitance](simulation/requirements/electrostatic-capacitance.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+
+<p class="card-text">What capacitance does this conductor arrangement have?</p>
+:::::
+::::
+
+:::: {.card .mb-3 .border}
+::::: {.card-body .p-4}
+## [Resonance & Eigenmodes](simulation/requirements/eigenmode.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+
+<p class="card-text">What are the natural or loaded modes?</p>
+:::::
+::::
+
+:::: {.card .mb-3 .border}
+::::: {.card-body .p-4}
+## [S-parameters & Ports](simulation/requirements/driven-terminal.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+
+<p class="card-text">How do signals reflect and transmit?</p>
+:::::
+::::
+
+:::: {.card .mb-3 .border}
+::::: {.card-body .p-4}
+## [Cross-section Simulation](simulation/requirements/q2d-cross-section.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+
+<p class="card-text">What are the uniform-line parameters?</p>
+:::::
+::::
+
+:::: {.card .mb-3 .border}
+::::: {.card-body .p-4}
+## [Participation & Surface Loss](simulation/requirements/epr-loss.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+
+<p class="card-text">Where is field energy stored, and how do interface assumptions affect loss?</p>
+:::::
+::::
+
+:::
 
 ::: {.callout-note}
 Match the OrcaPen, SCGSim, and solver versions listed in each tutorial.
