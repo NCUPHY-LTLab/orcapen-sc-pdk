@@ -28,14 +28,25 @@ not duplicate it here.
 
 ## Documentation Ownership
 
-Resolve registered roles and handoffs through `$scq-collaboration-roles`.
-After exact path/hunk handoff, the OrcaPen Documentation Lead owns reader-facing
-information architecture, narrative, navigation, and terminology; documentation
-Preview ownership follows its explicit handoff. Development retains product,
-API, schema, scientific semantics, docstrings, generators, packaged knowledge
-behavior, executable notebook/tutorial code, CI, build, release, and serialized
-Git operations.
+Resolve ownership and delivery through `$scq-collaboration-roles` and
+`$v1-lifecycle`. After the one-time handoff of active edits, the OrcaPen
+Documentation Lead owns reader-facing authoring, corrections, site presentation,
+and documentation task closeout through its own existing Luna workers. This
+includes information architecture, wording, navigation and anchors, cards,
+CSS/theme adoption, and documentation-only rendering configuration or helpers.
+Ordinary documentation work needs no recurring Development prose approval or
+release. Transfer an existing Preview through its explicit custody handoff.
 
-Use exact hunk leases for mixed files. Send each coherent documentation change
-and its exact source identity to Development for implementation consistency.
-This handoff does not automatically authorize product edits or new tests.
+Documentation authors reader wording, including docstrings, in mixed product or
+configuration files and coordinates only exact overlapping hunks with the
+current writer. Development retains product behavior, APIs, schemas, scientific
+meaning, generators, packaged knowledge behavior, executable notebook/tutorial
+code, CI, build, and release. Consult Development for implementation defects
+or unresolved product/scientific meaning; send each coherent candidate and
+exact source identity for implementation consistency, not editorial approval.
+
+The existing Git owner and Integration perform commit, push, remote readback,
+and applicable protection and privacy steps for reviewed Documentation
+candidates. Mechanical delivery does not transfer writing responsibility or
+create an editorial approval step. This hunk grants no product change
+authority and adds no test or validation workflow.
