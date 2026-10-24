@@ -17,6 +17,9 @@ project:
     - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb"
     - "notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb"
     - "notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb"
+    # Render these canonical sources beside their companion-relative resources.
+    - "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd"
+    - "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb"
@@ -39,7 +42,6 @@ project:
     - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb"
     - "notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb"
     - "reference/*.qmd"
-    - "!notebooks/src/"
   resources:
     - askr-versions.json
     - _static/images/components/*.svg
@@ -55,15 +57,16 @@ project:
     - "notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/*.ipynb"
     - "notebooks/SCGSimExamples/**/*.ipynb"
     - "notebooks/src/SCGSimExamples/**/*.qmd"
+    - "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json"
     - "notebooks/src/ComponentSimulation/Kosen2024_Xmon/**/*.qmd"
   pre-render:
     - uv run --project .. --group docs quartodoc build
 
 website:
   title: "OrcaPen SC PDK"
-  site-url: https://orpenstrike.github.io/orcapen-sc-pdk/
+  site-url: https://ncuphy-ltlab.github.io/orcapen-sc-pdk/
   favicon: assets/orcapen-mark.svg
-  repo-url: https://github.com/OrPenStrike/orcapen-sc-pdk
+  repo-url: https://github.com/NCUPHY-LTLab/orcapen-sc-pdk
   repo-actions: [edit, issue]
   navbar:
     logo: assets/orcapen-mark.svg
@@ -129,6 +132,10 @@ website:
                 - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb
                 - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb
                 - notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb
+            - section: SimplePad surface bands
+              contents:
+                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd
+                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd
             - section: Xmon examples and historical evidence
               contents:
                 - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb
