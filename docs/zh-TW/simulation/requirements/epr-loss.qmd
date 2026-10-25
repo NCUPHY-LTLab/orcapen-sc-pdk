@@ -1,0 +1,35 @@
+---
+title: "參與率（Participation）與表面損耗"
+sidebar: simulation
+---
+
+計算所選模態的能量儲存位置，再套用明確選擇的材料與介面損耗假設。請使用 LC/EPR 教學，不要將未負載頻率計算當成參與率結果。
+
+## 模型與前置條件
+
+請保留導體與接面／負載定義、堆疊、外部區域，以及指定的表面或體積。MA、MS 與 SA 代表不同介面；其厚度、介電常數、損耗正切及場側都是所選模型輸入。
+
+依教學指定的 Palace 或 AEDT 環境及儲存場設定操作。選擇預設值前，請閱讀[材料與介面](../../start/materials.qmd)。
+
+## 選擇教學
+
+| 任務 | 教學 |
+| --- | --- |
+| 焊墊 LC 模態及表面／塊材貢獻 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| HFSS 原生場積分評估 | [SimplePad HFSS LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| 明確幾何帶區與局部介面修正 | [SimplePad Palace 表面帶區](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) 搭配 [Q2D 介面因子](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) |
+
+## 判讀參與率與損耗
+
+逐項閱讀貢獻時，請核對能量分母、所選模態與計算回合、介面／場側識別，以及儲存場輸入。保留帶正負號的接面貢獻以便識別。參與率、依假設估算的損耗、原生 Q 值與量測壽命是不同物理量。
+
+幾何修正時，請同時檢查所選的原始母區帶、取樣區域、保留區域與回傳 Q2D 因子。教學中的直邊近似不能證明轉角等效。
+
+## SurfaceBands 下載
+
+| 教學 | 下載 |
+| --- | --- |
+| Q2D 局部介面 | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd" data-noresolveinput download>QMD</a> |
+| Palace 表面帶區 | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd" data-noresolveinput download>QMD</a> |
+
+請將共用<a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" download>模型 JSON</a>與任一筆記本或 QMD 放在一起。

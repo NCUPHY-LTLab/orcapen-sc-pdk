@@ -1,0 +1,205 @@
+---
+title: "圖層（Layer）與堆疊（Layer Stack）"
+sidebar: get-started
+---
+
+OrcaPen 將 XY 圖層（Layer）名稱與實體高度、材料、顯示方式及連通性分開。先用圖層對照識別多邊形，再選擇符合單晶粒或雙晶粒覆晶（Flip-chip）組裝的堆疊（Layer Stack）。
+
+## 四種技術定義
+
+| 定義 | 用途 |
+| --- | --- |
+| `LAYER`（亦稱 `L`） | `LayerMapOrpenSCPDK` 中具名的 GDS `(layer, datatype)` 配對，用來識別 XY 幾何，不會指定高度或材料。 |
+| `LAYER_STACK` | 實體 `LayerLevel` 紀錄，包含來源幾何、`zmin`、厚度、材料與層級模擬中繼資料。M1 使用衍生幾何，而非單一原始多邊形圖層。 |
+| `LAYER_VIEWS` | 來自 `layers.yaml` 的顯示群組、顏色、填充線與可見性；顯示設定不會改變實體幾何。 |
+| `LAYER_CONNECTIVITY` | 宣告透過 TSV、凸塊與空橋連接的圖層；這與元件選定的 Nets 及端點不同。 |
+
+現有 LayerViews 顯示群組為 `Metal`、`Airbridge`、`Junction`、`DesignIntent`、`Integration`、`Alignment`、`Admin`、`gdsfactory` 與 `Simulation`。下表依用途整理圖層；群組名稱只控制顯示分類，不代表實體材料。完整定義請見[技術來源](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/tech.py)及[圖層視圖](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/layers.yaml)。以下座標與厚度皆為微米（µm）；圖層配對表示為 `(layer, datatype)`。
+
+## 晶粒、表面與 Z 座標系
+
+`D0` 與 `D1` 分別代表下層及上層晶粒。`TOP` 與 `BOTTOM` 是共用堆疊座標系中的晶粒表面。預設堆疊將 D0 頂部基板表面設於 `z = 0`；這是選定的原點，不是所有堆疊都必須採用的原點。
+
+| 表面前綴 | 基板表面 Z | 朝外方向 | 組裝位置 |
+| --- | ---: | --- | --- |
+| `D0_BOTTOM` | −500 | −Z | 下方外側表面 |
+| `D0_TOP` | 0 | +Z | 晶粒間隙的下表面 |
+| `D1_BOTTOM` | 8.2 | −Z | 晶粒間隙的上表面 |
+| `D1_TOP` | 508.2 | +Z | 上方外側表面 |
+
+目前預設 M1 層的偏移為零、厚度為 0.1 µm。TOP 金屬從其基板表面朝 +Z 延伸；BOTTOM 金屬朝 −Z 延伸。
+
+| M1 層 | 表面 Z (µm) | 偏移 (µm) | 厚度 (µm) | Z 下界至上界 (µm) |
+| --- | ---: | ---: | ---: | --- |
+| `D0_BOTTOM_M1` | −500 | 0 | 0.1 | −500.1 至 −500 |
+| `D0_TOP_M1` | 0 | 0 | 0.1 | 0 至 0.1 |
+| `D1_BOTTOM_M1` | 8.2 | 0 | 0.1 | 8.1 至 8.2 |
+| `D1_TOP_M1` | 508.2 | 0 | 0.1 | 508.2 至 508.3 |
+
+相向 M1 表面位於 `z = 0.1` 與 `z = 8.1`：金屬間隙為 8 µm，兩基板表面的間距則為 8.2 µm。
+
+## 完整圖層對照
+
+### 表面 M1 幾何 {#face-m1-geometry}
+
+將各欄後綴接到列前綴，即可組成完整圖層名稱；例如 `D0_TOP` 加 `_M1_DRAW` 即為 `LAYER.D0_TOP_M1_DRAW`。
+
+| 前綴 | `_M1_DRAW` | `_M1_ETCH` | `_M1_DOMAIN` | `_GROUND_MASK` |
+| --- | --- | --- | --- | --- |
+| `D0_BOTTOM` | `(3, 0)` | `(3, 1)` | `(200, 0)` | `(111, 0)` |
+| `D0_TOP` | `(1, 0)` | `(1, 1)` | `(200, 1)` | `(110, 0)` |
+| `D1_BOTTOM` | `(2, 0)` | `(2, 1)` | `(200, 2)` | `(110, 1)` |
+| `D1_TOP` | `(4, 0)` | `(4, 1)` | `(200, 3)` | `(111, 1)` |
+
+四個來源圖層共同構成各表面的 M1 幾何，不是四層獨立實體薄膜。實體堆疊層名稱為 `<prefix>_M1`。以下三種操作用途不同：
+
+| 操作 | 定義與用途 |
+| --- | --- |
+| 堆疊衍生 M1 | `M1_DOMAIN − (M1_ETCH − M1_DRAW)`。DOMAIN 限定金屬範圍；DRAW 保護正向金屬，使其不被 ETCH 移除。衍生輸出配對為該表面的 M1 DRAW 配對。 |
+| 佈局蝕刻輔助函式 | `add_etch_for_component()` 回傳一份副本，其中 `M1_ETCH = GROUND_MASK − M1_DRAW`。預設使用 D0 TOP；呼叫者可指定其他表面的三個圖層。此函式衍生蝕刻遮罩，不建立堆疊或材料。 |
+| 元件表面接地遮罩路徑 | D0 TOP 與 D1 BOTTOM M1 宣告 `geometry_source="die_face_minus_ground_mask"`，其邊界分別來自 `D0_SUBSTRATE` 與 `D1_SUBSTRATE`。元件模擬使用所宣告的表面／接地遮罩配方及元件網路／端點標註，不會將每個遮罩多邊形都視為導體。 |
+
+[蝕刻輔助函式來源](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/helpers/layout/etch.py)定義第二種操作。`GROUND_MASK` 是 XY 建構輸入，不是另一個金屬層，也不是名為 Ground 的網路。
+
+### 其他表面專用圖層 {#other-face-specific-layers}
+
+同樣的前綴規則適用於下表中的完整名稱。
+
+| 前綴 | `_AB_DRAW` | `_AB_VIA` | `_JJ_DRAW` | `_ALN` | `_SIM_BOUNDARY` |
+| --- | --- | --- | --- | --- | --- |
+| `D0_BOTTOM` | `(12, 0)` | `(12, 1)` | `(20, 0)` | `(81, 0)` | `(202, 0)` |
+| `D0_TOP` | `(10, 0)` | `(10, 1)` | `(21, 0)` | `(80, 0)` | `(202, 1)` |
+| `D1_BOTTOM` | `(11, 0)` | `(11, 1)` | `(22, 0)` | `(83, 0)` | `(202, 2)` |
+| `D1_TOP` | `(13, 0)` | `(13, 1)` | `(23, 0)` | `(82, 0)` | `(202, 3)` |
+
+- `<prefix>_AB_DRAW` 對應 `<prefix>_AIRBRIDGE`，即高架 Al 平台。
+- `<prefix>_AB_VIA` 對應 `<prefix>_AIRBRIDGE_VIA`，即有限尺寸 Al 支柱。
+- `<prefix>_JJ_DRAW` 沒有實體堆疊層；接面繪製圖層未宣告堆疊厚度或材料。
+- `<prefix>_ALN` 沒有實體堆疊層；這些是對準圖層，不是已宣告的 AlN 材料薄膜。
+- `<prefix>_SIM_BOUNDARY` 對應同名零厚度真空定位薄片；它不是金屬，也不會自動成為求解器邊界。
+
+### 整合
+
+`Integration` 顯示群組包含 TSV 與晶粒間接觸圖層。
+
+| 完整圖層名稱 | 配對 | 實體堆疊層或用途 |
+| --- | --- | --- |
+| `D0_TOP_TSV` | `(31, 0)` | 同名 TiN 穿透 D0 層。 |
+| `D1_BOTTOM_TSV` | `(31, 1)` | 同名 TiN 穿透 D1 層。 |
+| `D0_D1_INDIUM_BUMP` | `(40, 0)` | 同名有限尺寸 In 凸塊本體。 |
+| `D0_D1_UNDER_BUMP` | `(40, 1)` | 同名 In 凸塊下金屬層（UBM）；模擬排除此層。 |
+| `D1_D2_INDIUM_BUMP` | `(41, 0)` | 僅有對照；無實體層。 |
+| `D1_D2_UNDER_BUMP` | `(41, 1)` | 僅有對照；無實體層。 |
+
+D1–D2 凸塊名稱保留圖層配對；此堆疊沒有定義 D2 基板、表面或晶粒間體積。
+
+### 設計意圖
+
+`DesignIntent` 顯示群組包含三種禁佈區，以及上方[表面 M1 幾何](#face-m1-geometry)列出的四種表面專用 `GROUND_MASK`。它們是建構與放置輸入，不是額外實體層。
+
+| 完整圖層名稱 | 配對 | 用途 |
+| --- | --- | --- |
+| `DEVICE_KEEPOUT` | `(120, 0)` | 無實體層；排除佈線及接地凸塊填充。 |
+| `ROUTING_KEEPOUT` | `(120, 1)` | 無實體層；排除佈線。 |
+| `D0_D1_INDIUM_GROUND_KEEPOUT` | `(120, 2)` | 無實體層；排除接地凸塊填充。 |
+
+### 模擬區域
+
+`Simulation` 顯示群組包含下列四種區域圖層、四種[M1_DOMAIN 圖層](#face-m1-geometry)及四種[SIM_BOUNDARY 定位器](#other-face-specific-layers)。實體層定義於後續堆疊表。
+
+| 完整圖層名稱 | 配對 | 實體堆疊層 |
+| --- | --- | --- |
+| `D0_SUBSTRATE_AREA` | `(201, 0)` | `D0_SUBSTRATE` 的 XY 範圍。 |
+| `D0_TO_D1_GAP_AREA` | `(201, 1)` | `D0_TO_D1_GAP` 的 XY 範圍。 |
+| `D1_SUBSTRATE_AREA` | `(201, 2)` | `D1_SUBSTRATE` 的 XY 範圍。 |
+| `OUTER_VACUUM_AREA` | `(201, 3)` | `OUTER_VACUUM` 的 XY 範圍。 |
+
+### 管理
+
+`Admin` 顯示群組包含切割、註記與錯誤路徑圖層。
+
+| 完整圖層名稱 | 配對 | 用途 |
+| --- | --- | --- |
+| `DICE` | `(70, 0)` | 無實體層；晶粒切割佈局。 |
+| `TEXT` | `(90, 0)` | 無實體層；註記。 |
+| `ERROR_PATH` | `(1000, 0)` | 無實體層；錯誤路徑顯示。 |
+
+### GDSFactory 工具圖層
+
+`gdsfactory` 顯示群組包含設定與實例標籤，以及隱藏的 `WG` 工具圖層。
+
+| 完整圖層名稱 | 配對 | 用途 |
+| --- | --- | --- |
+| `LABEL_SETTINGS` | `(100, 0)` | 無實體層；GDSFactory 設定標籤。 |
+| `LABEL_INSTANCE` | `(101, 0)` | 無實體層；GDSFactory 實例標籤。 |
+| `WG` | `(102, 0)` | 無實體層；GDSFactory 工具圖層，在圖層視圖中隱藏。 |
+
+## 完整實體堆疊
+
+`get_layer_stack()` 與 `get_two_die_flip_chip_layer_stack()` 提供下列完整堆疊。Z 範圍自 `zmin` 延伸至 `zmin + thickness`；定位器的範圍則收合為一個平面。這些是 PDK 標稱尺寸。
+
+### 基板與真空區域
+
+| 堆疊層 | Z 範圍 (µm) | 厚度 (µm) | 材料 |
+| --- | --- | ---: | --- |
+| `D0_SUBSTRATE` | −500 至 0 | 500 | `Si` |
+| `D0_TO_D1_GAP` | 0 至 8.2 | 8.2 | `vacuum` |
+| `D1_SUBSTRATE` | 8.2 至 508.2 | 500 | `Si` |
+| `OUTER_VACUUM` | 508.2 至 1508.2 | 1000 | `vacuum` |
+
+基板與間隙宣告 `simulation_role="solution_region"` 及 `include_in_component_simulation=True`。`OUTER_VACUUM` 標為 `is_airbox=True`，但 `include_in_component_simulation=False`；這個具名層不是完整的模擬外圍區域。
+
+### 表面金屬、空橋與定位薄片
+
+每列前綴搭配各欄後綴，可組成四個完整堆疊名稱。M1 為 0.1 µm Al；空橋支柱為 3 µm Al；空橋平台為 0.3 µm Al。`SIM_BOUNDARY` 是零厚度 `vacuum` 薄片。
+
+| 前綴 | `_M1` Z 範圍 | `_AIRBRIDGE_VIA` Z 範圍 | `_AIRBRIDGE` Z 範圍 | `_SIM_BOUNDARY` Z 平面 |
+| --- | --- | --- | --- | --- |
+| `D0_BOTTOM` | −500.1 至 −500 | −503.1 至 −500.1 | −503.4 至 −503.1 | −500.05 |
+| `D0_TOP` | 0 至 0.1 | 0.1 至 3.1 | 3.1 至 3.4 | 0.05 |
+| `D1_BOTTOM` | 8.1 至 8.2 | 5.1 至 8.1 | 4.8 至 5.1 | 8.15 |
+| `D1_TOP` | 508.2 至 508.3 | 508.3 至 511.3 | 511.3 至 511.6 | 508.25 |
+
+空橋支柱從外側 M1 表面開始；平台則從該表面外 3 µm 處開始。這是標稱矩形支柱／平台模型，不是回流拱形模型。四個表面的空橋層都明確宣告為導體角色。
+
+D0 TOP 與 D1 BOTTOM M1 也宣告導體角色及上述表面接地遮罩配方。D0 BOTTOM 與 D1 TOP M1 雖有實體 Al 層及衍生幾何，但目前中繼資料未宣告 `simulation_role`；因此四個 M1 表面的元件模擬中繼資料並不完全相同。
+
+`SIM_BOUNDARY` 薄片位於各 M1 薄膜的中面，用來定位元件層級端點或邊界選擇所需的薄片；激發與電路元件由模擬問題選擇。
+
+### TSV 與晶粒間接點
+
+| 堆疊層 | Z 範圍 (µm) | 厚度 (µm) | 材料 | 實體意義 |
+| --- | --- | ---: | --- | --- |
+| `D0_TOP_TSV` | −500 至 0 | 500 | `TiN` | 有限尺寸穿透基板實體；接觸 `D0_BOTTOM_M1` 與 `D0_TOP_M1`。 |
+| `D1_BOTTOM_TSV` | 8.2 至 508.2 | 500 | `TiN` | 有限尺寸穿透基板實體；接觸 `D1_BOTTOM_M1` 與 `D1_TOP_M1`。 |
+| `D0_D1_INDIUM_BUMP` | 0.1 至 8.1 | 8 | `In` | 相向金屬表面之間的有限尺寸導體。 |
+| `D0_D1_UNDER_BUMP` | 0 至 0.1 | 0.1 | `In` | UBM 來源層，設為 `exclude_from_simulation=True`；不納入模擬幾何。 |
+
+公開接地凸塊填充規格使用置中的 20 × 20 µm 凸塊本體及 40 × 40 µm 接觸範圍，格點原點為 `(0, 0)`。其禁佈區類別列於上方圖層對照；放置位置由元件選擇。
+
+## 選擇堆疊
+
+| 取得器 | 回傳層級 |
+| --- | --- |
+| `get_layer_stack()` | 完整雙晶粒堆疊：上列全部 24 層。 |
+| `get_two_die_flip_chip_layer_stack()` | 完整 `LAYER_STACK`。 |
+| `get_single_die_layer_stack()` | `D0_SUBSTRATE`、`D0_TOP_M1` 與 `D0_TOP_SIM_BOUNDARY` 的分離副本。這是預設單晶粒選擇。 |
+| `get_single_die_layer_stack(include_airbridges=True)` | 三個單晶粒層，加上 `D0_TOP_AIRBRIDGE_VIA` 與 `D0_TOP_AIRBRIDGE`。 |
+
+單晶粒取得器會移除頂部 M1 的晶粒間宿主空隙參考。它保留 PDK 實體尺寸與材料，但不含上層晶粒或晶粒間空腔；該模型的周圍真空區域由 SCGSim 提供。
+
+## 宣告的圖層連通性
+
+`LAYER_CONNECTIVITY` 中每個 tuple 依序列出第一個導體圖層、連接圖層與第二個導體圖層。宣告的五種連接如下：
+
+| 第一圖層 | 連接圖層 | 第二圖層 |
+| --- | --- | --- |
+| `D0_BOTTOM_M1_DRAW` | `D0_TOP_TSV` | `D0_TOP_M1_DRAW` |
+| `D1_BOTTOM_M1_DRAW` | `D1_BOTTOM_TSV` | `D1_TOP_M1_DRAW` |
+| `D0_TOP_M1_DRAW` | `D0_D1_INDIUM_BUMP` | `D1_BOTTOM_M1_DRAW` |
+| `D0_TOP_M1_DRAW` | `D0_TOP_AB_DRAW` | `D0_TOP_M1_DRAW` |
+| `D1_BOTTOM_M1_DRAW` | `D1_BOTTOM_AB_DRAW` | `D1_BOTTOM_M1_DRAW` |
+
+四個表面都有實體空橋層；連通性清單中的空橋項目僅包含 D0 TOP 與 D1 BOTTOM。
+
+接續閱讀[材料與介面](materials.qmd)或[橫截面與連接埠](cross-sections-ports.qmd)。

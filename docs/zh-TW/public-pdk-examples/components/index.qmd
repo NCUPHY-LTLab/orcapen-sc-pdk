@@ -1,0 +1,15 @@
+---
+title: "元件（Components）"
+sidebar: api
+---
+
+選擇已註冊的版圖工廠函式（factory），再依元件指南查看預設設定、連接埠（port）與圖層用途。幾何尺寸以微米為單位。
+
+| 類別 | 元件指南 |
+| --- | --- |
+| 共面波導（Coplanar Waveguide，CPW）路徑與共振器 | [straight](straight.qmd)、[taper](taper.qmd)、[resonator](resonator.qmd)、[resonator_hanger](resonator_hanger.qmd)、[resonator_meander](resonator_meander.qmd) |
+| 電容器 | [interdigital_capacitor](interdigital_capacitor.qmd)、[martinis2022_differential_ribbon_capacitor](martinis2022_differential_ribbon_capacitor.qmd) |
+| 饋入與接面 | [launcher](launcher.qmd)、[cpw_t_junction](cpw_t_junction.qmd) |
+| 連接結構與基本元件 | [airbridge](airbridge.qmd)、[indium_bump](indium_bump.qmd)、[indium_ground](indium_ground.qmd)、[cpw_handoff](cpw_handoff.qmd)、[rounded_end_metal_segment](rounded_end_metal_segment.qmd)、[rounded_rectangle](rounded_rectangle.qmd)、[wire_corner](wire_corner.qmd) |
+
+路徑寬度、間隙與區段圖層請見[橫截面](../cross-sections.qmd)。放置、連接、佈線與匯出方式請見 [GDSFactory 指南](../component-authoring.md)。

@@ -1,0 +1,32 @@
+---
+title: "共振器懸掛段（Resonator hanger）"
+sidebar: api
+---
+
+`resonator_hanger` 建立讀出共振器的懸掛端（hanger）。耦合直線段以原點為中心，方便上層版圖將懸掛端與其他結構對齊。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("resonator_hanger")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `coupling_length` | 200 µm | 耦合直線段長度。 |
+| `straight_length` | 160 µm | 懸掛段的直線長度。 |
+| `cpw_xs` | `cpw_6_10_6` | CPW 橫截面。 |
+| `cpw_radius` | 100 µm | 彎曲半徑。 |
+| `bend_npoints` | 16 | 彎曲離散取樣點數。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+元件提供 `o_hanger_start`、`o_hanger_center`、`o_hanger_end`、`o_hanger_readout_coupling_start` 與 `o_hanger_readout_coupling_end`。`o_hanger_center` 是放置錨點，不是佈線端點。DRAW、ETCH 與 GROUND_MASK 圖層皆可設定。
+
+請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.resonator_hanger.html#orcapen_sc_pdk.cells.resonator_hanger)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/resonator_hanger.py)。

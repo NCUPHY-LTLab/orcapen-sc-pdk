@@ -1,0 +1,9 @@
+askr:
+  languages:
+    items:
+      - code: zh-TW
+        label: 繁體中文
+        href: /orcapen-sc-pdk/
+      - code: en
+        label: English
+        href: /orcapen-sc-pdk/en/

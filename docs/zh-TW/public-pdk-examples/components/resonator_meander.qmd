@@ -1,0 +1,33 @@
+---
+title: "蛇形共振器（Resonator meander）"
+sidebar: api
+---
+
+`resonator_meander` 建立蛇形共面波導（coplanar waveguide，CPW）本體。`length` 僅計入蛇形本體；上層共振器另外計算懸掛段、尾段與選用的量子位元區段。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("resonator_meander")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `length` | 4000 µm | 蛇形本體的中心線目標長度。 |
+| `meanders` | 6 | 蛇形轉折數。 |
+| `bend_spec` | `bend_euler` | 彎曲元件規格。 |
+| `cpw_xs` | `cpw_6_10_6` | CPW 橫截面。 |
+| `cpw_radius` | 100 µm | 彎曲半徑。 |
+| `open_start`, `open_end` | `False`, `False` | 是否將對應端點設為開路。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+預設元件提供佈線連接埠 `o1` 與 `o2`；直線段也可提供網格連接埠。DRAW、ETCH 與 GROUND_MASK 圖層皆可設定。
+
+請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.resonator_meander.html#orcapen_sc_pdk.cells.resonator_meander)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/resonator_meander.py)。

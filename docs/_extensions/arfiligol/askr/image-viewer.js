@@ -2,13 +2,112 @@
 // source and captions belong to the document, camera state to this page only.
 (() => {
   'use strict';
+  const svgProperties = [
+    'color','fill','fill-opacity','fill-rule','stroke','stroke-width','stroke-linecap',
+    'stroke-linejoin','stroke-dasharray','stroke-dashoffset','stroke-opacity','opacity',
+    'font-family','font-size','font-style','font-weight','letter-spacing','word-spacing',
+    'text-anchor','dominant-baseline','text-decoration','text-rendering','shape-rendering',
+    'visibility','display','background-color','clip-path','mask','marker-start','marker-mid',
+    'marker-end','filter'
+  ];
+  const htmlProperties = [
+    'color','font-family','font-size','font-style','font-weight','line-height','text-align',
+    'text-decoration','white-space','word-break','overflow-wrap','vertical-align',
+    'background-color','border','box-sizing','display','height','max-height','max-width',
+    'margin','min-height','min-width','padding','width'
+  ];
+
+  function svgViewBox(svg) {
+    const box=svg.viewBox?.baseVal;
+    if(box&&box.width>0&&box.height>0) return {x:box.x,y:box.y,width:box.width,height:box.height};
+    try {
+      const bounds=svg.getBBox();
+      if(bounds.width>0&&bounds.height>0) return {x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height};
+    } catch (_) {}
+    const rect=svg.getBoundingClientRect();
+    return rect.width>0&&rect.height>0 ? {x:0,y:0,width:rect.width,height:rect.height} : null;
+  }
+
+  function readySvg(svg) {
+    if (!svg || !svg.isConnected) return false;
+    if (!svgViewBox(svg)) return false;
+    const rect = svg.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  function localizeSvgReferences(value) {
+    return value.replace(/url\((['"]?)(.*?)\1\)/g, (match, quote, reference) => {
+      try {
+        const resolved = new URL(reference, window.location.href);
+        if (resolved.origin === window.location.origin &&
+            resolved.pathname === window.location.pathname &&
+            resolved.search === window.location.search && resolved.hash) {
+          return `url("${resolved.hash}")`;
+        }
+      } catch (_) {}
+      return match;
+    });
+  }
+
+  function snapshotSvg(svg) {
+    const clone = svg.cloneNode(true);
+    const sourceNodes = [svg, ...svg.querySelectorAll('*')];
+    const cloneNodes = [clone, ...clone.querySelectorAll('*')];
+    const viewBox = svgViewBox(svg);
+    const width = viewBox.width;
+    const height = viewBox.height;
+    if (!clone.hasAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${width} ${height}`);
+    clone.setAttribute('width', `${width}px`);
+    clone.setAttribute('height', `${height}px`);
+    clone.setAttribute('preserveAspectRatio', svg.getAttribute('preserveAspectRatio') || 'xMidYMid meet');
+    clone.setAttribute('role', 'img');
+    clone.style.width = `${width}px`;
+    clone.style.height = `${height}px`;
+    clone.style.maxWidth = 'none';
+
+    for (let i = 0; i < sourceNodes.length; i++) {
+      const source = sourceNodes[i];
+      const target = cloneNodes[i];
+      if (!(source instanceof Element) || !(target instanceof Element)) continue;
+      const computed = getComputedStyle(source);
+      const properties = source.namespaceURI === 'http://www.w3.org/1999/xhtml'
+        ? [...svgProperties, ...htmlProperties]
+        : svgProperties;
+      for (const property of properties) {
+        const value = computed.getPropertyValue(property);
+        if (value) target.style.setProperty(property, localizeSvgReferences(value));
+      }
+      if (source.namespaceURI === 'http://www.w3.org/1999/xhtml' &&
+          !target.hasAttribute('xmlns')) {
+        target.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+      }
+    }
+    return clone;
+  }
+
+  function createDiagramEntry(svg, label) {
+    const markup = new XMLSerializer().serializeToString(snapshotSvg(svg));
+    const url = URL.createObjectURL(new Blob([markup], {type:'image/svg+xml;charset=utf-8'}));
+    return {
+      src:url, alt:label, caption:label, description:'',
+      cleanup:()=>URL.revokeObjectURL(url)
+    };
+  }
+
   function start() {
+    const mermaidWrappers = [...document.querySelectorAll('.askr-mermaid-view[data-askr-mermaid-view]')];
+    for (const wrapper of mermaidWrappers) {
+      const source = wrapper.querySelector('pre.mermaid-js');
+      if (!source) throw new Error('Askr Mermaid viewer could not capture native Mermaid source before rendering.');
+      wrapper.dataset.askrMermaidSource = source.textContent;
+    }
     const entries = [...document.querySelectorAll('a.askr-image-entry')].map(anchor => ({
       anchor, src:anchor.href, alt:anchor.querySelector('img')?.alt || '',
       caption:anchor.closest('.quarto-figure,figure')?.querySelector('figcaption')?.textContent || anchor.title || '',
       description:anchor.dataset.askrDescription || '', group:anchor.dataset.askrGallery
     }));
-    if (!entries.length) return;
+    if (!entries.length && !mermaidWrappers.length) return;
     const loop = document.querySelector('#askr-viewer-config')?.dataset.loop !== 'false';
     function resolve(id) {
       const el = document.getElementById(id);
@@ -120,10 +219,10 @@
         this.cx+=(x-w/2)/this.nw*(1/old-1/next); this.cy+=(y-h/2)/this.nh*(1/old-1/next);
         this.ratio=ratio; this.draw();
       }
-      destroy() { ++this.ticket; this.observer.disconnect(); this.root.remove(); }
+      destroy() { ++this.ticket; this.observer.disconnect(); this.root.remove(); this.entry.cleanup?.(); }
     }
     function open(entry,origin,existing=null) {
-      if(dialog.open) return; trigger=origin; scroll=window.scrollY;
+      if(dialog.open) { entry.cleanup?.(); return; } trigger=origin; scroll=window.scrollY;
       overflow=document.body.style.overflow; document.body.style.overflow='hidden';
       group=existing?[entry]:entry.group?entries.filter(e=>e.group===entry.group):[entry]; index=group.indexOf(entry);
       active=existing||new Viewer(entry);
@@ -165,6 +264,65 @@
       link.addEventListener('click',e=>{ e.preventDefault(); open(entry,link); });
       link.addEventListener('keydown',e=>{ if(e.key===' ') { e.preventDefault(); open(entry,link); } });
     }
+
+    function mermaidButton(label, text, action) {
+      const b=document.createElement('button'); b.type='button'; b.className='askr-mermaid-control';
+      b.textContent=text; b.setAttribute('aria-label',label); b.title=label;
+      b.addEventListener('click',action); return b;
+    }
+    function sourceDisclosure(wrapper) {
+      const details=document.createElement('details'); details.className='askr-mermaid-source';
+      const summary=document.createElement('summary'); summary.textContent='Mermaid source';
+      details.append(summary);
+      let populated=false;
+      details.addEventListener('toggle',()=>{
+        if(!details.open||populated) return;
+        populated=true;
+        const source=wrapper.dataset.askrMermaidSource || '';
+        const pre=document.createElement('pre'), code=document.createElement('code');
+        code.textContent=source; pre.append(code);
+        const status=document.createElement('span'); status.className='askr-mermaid-copy-status';
+        status.setAttribute('role','status');
+        const copy=mermaidButton('Copy Mermaid source','Copy',async()=>{
+          try {
+            if(!navigator.clipboard?.writeText) throw new Error('Clipboard access is unavailable.');
+            await navigator.clipboard.writeText(source); status.textContent='Copied.';
+          } catch (_) { status.textContent='Copy unavailable; select the source to copy it.'; }
+        });
+        details.append(pre,copy,status);
+      });
+      return details;
+    }
+    function watchMermaid(wrapper) {
+      const label=wrapper.dataset.askrMermaidLabel || 'View diagram';
+      const view=mermaidButton(label,label,()=>{
+        const svg=wrapper.querySelector('svg');
+        if(!readySvg(svg)) { view.disabled=true; status.textContent='Waiting for the native Mermaid diagram.'; return; }
+        open(createDiagramEntry(svg,label),view);
+      });
+      view.setAttribute('aria-haspopup','dialog');
+      view.disabled=true;
+      const details=sourceDisclosure(wrapper);
+      const status=document.createElement('p'); status.className='askr-mermaid-status';
+      status.setAttribute('role','status'); status.textContent='Waiting for the native Mermaid diagram.';
+      wrapper.append(view,details,status);
+      let mutations, resizing;
+      const stopWatching=()=>{ mutations.disconnect(); resizing.disconnect(); window.removeEventListener('pagehide',stopWatching); };
+      const check=()=>{
+        const ready=readySvg(wrapper.querySelector('svg'));
+        const waiting=ready?'':'Waiting for the native Mermaid diagram.';
+        if(view.disabled!==!ready) view.disabled=!ready;
+        if(status.textContent!==waiting) status.textContent=waiting;
+        if(ready) stopWatching();
+      };
+      mutations=new MutationObserver(check);
+      resizing=new ResizeObserver(check);
+      mutations.observe(wrapper,{childList:true,subtree:true});
+      resizing.observe(wrapper);
+      window.addEventListener('pagehide',stopWatching,{once:true});
+      check();
+    }
+    for(const wrapper of mermaidWrappers) watchMermaid(wrapper);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
 })();

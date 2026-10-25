@@ -1,0 +1,39 @@
+---
+title: "銦接地凸塊陣列（Indium ground field）"
+sidebar: api
+---
+
+`indium_ground` 建立置中的規則被動銦凸塊（indium bump）陣列，並可略過與禁佈區（keepout region）重疊的位置。
+
+## 建立預設元件 {#build-the-default-component}
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("indium_ground")
+~~~
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `width` | 9900 µm | 陣列區域寬度。 |
+| `height` | 9900 µm | 陣列區域高度。 |
+| `bump_gap` | 40 µm | 凸塊輪廓邊緣之間的間隙。 |
+| `margin` | 90 µm | 陣列邊緣的保留距離。 |
+| `indium_bump_size` | 20 µm | 每個凸塊本體的邊長。 |
+| `under_bump_size` | 40 µm | 每個接觸墊片的邊長。 |
+| `keepout_region` | `None` | 選用的 `gf.Region`；跳過與其重疊的位置。 |
+| `indium_bump_layer` | `LAYER.D0_D1_INDIUM_BUMP` | 凸塊本體圖層。 |
+| `under_bump_layer` | `LAYER.D0_D1_UNDER_BUMP` | 接觸墊片圖層。 |
+| `include_under_bump` | `True` | 在每個位置加入接觸墊片。 |
+
+排列節距為邊緣間隙加上已啟用正方形輪廓中較大的邊長，因此預設節距為 80 µm。若包含接觸墊片，禁佈區檢查會使用凸塊與接觸墊片的合併輪廓。
+
+## 連接埠與圖層 {#ports-and-layers}
+
+此陣列沒有連接埠。預設圖層配對放置銦本體與凸塊下接觸幾何形狀；凸塊標稱堆疊厚度為 8 µm。凸塊下圖層不納入模擬。
+
+此工廠函式由[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/indium.py)定義。

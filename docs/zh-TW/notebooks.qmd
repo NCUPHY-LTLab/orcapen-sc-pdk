@@ -1,0 +1,61 @@
+---
+title: "選擇模擬"
+description: "依所需物理量選擇計算方式。"
+sidebar: simulation
+---
+
+先確認要回答的問題，再開啟幾何、激發方式與後端相符的教學。
+
+::: {.simulation-chooser-cards}
+
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [電容](simulation/requirements/electrostatic-capacitance.qmd) {.askr-card-title .unlisted}
+
+<p class="card-text">此導體配置的電容是多少？</p>
+:::::
+::::
+
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [共振與本徵模態](simulation/requirements/eigenmode.qmd) {.askr-card-title .unlisted}
+
+<p class="card-text">自然模態或負載模態為何？</p>
+:::::
+::::
+
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [S 參數與連接埠](simulation/requirements/driven-terminal.qmd) {.askr-card-title .unlisted}
+
+<p class="card-text">訊號如何反射與傳輸？</p>
+:::::
+::::
+
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [橫截面模擬](simulation/requirements/q2d-cross-section.qmd) {.askr-card-title .unlisted}
+
+<p class="card-text">均勻傳輸線的參數為何？</p>
+:::::
+::::
+
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [參與率與表面損耗](simulation/requirements/epr-loss.qmd) {.askr-card-title .unlisted}
+
+<p class="card-text">場能儲存於何處？介面假設如何影響損耗？</p>
+:::::
+::::
+
+:::
+
+::: {.callout-note}
+請配合各教學所列的 OrcaPen、SCGSim 與求解器版本。版本差異可能需要調整程式碼。
+:::
+
+## 規劃中的工作流程
+
+⏳ AC/RL 迴路與互感工作流程尚未完成。
+
+⏳ Palace 橫截面模擬待 SCGSim 開發。現有橫截面教學請使用 [AEDT Q2D 章節](simulation/requirements/q2d-cross-section.qmd)。

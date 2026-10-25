@@ -1,0 +1,12 @@
+website:
+  site-url: http://127.0.0.1:42635/en/
+askr:
+  languages:
+    current: en
+    items:
+      - code: zh-TW
+        label: 繁體中文
+        href: /
+      - code: en
+        label: English
+        href: /en/

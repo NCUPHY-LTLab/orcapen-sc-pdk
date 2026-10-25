@@ -49,7 +49,10 @@ $grid-body-width: 630px !default;
 $grid-margin-width: 264px !default;
 $grid-column-gutter-width: 26px !default;
 $grid-docked-body-width: 630px !default;
-$qdk-tertiary: #84a59d !default;
+$qdk-tertiary: #4f756b !default;
+$qdk-muted-text: #6b6b6b !default;
+$qdk-muted-decoration: #b8b8b8 !default;
+$qdk-border: #e5e5e5 !default;
 $qdk-divider-content: rgba(43, 43, 43, .18) !default;
 $qdk-divider-layout: rgba(43, 43, 43, .08) !default;
 $qdk-mark: #fff23688 !default;
@@ -133,10 +136,10 @@ $qdk-code-copy-hover-background: var(--qdk-border) !default;
 $qdk-code-copy-hover-color: var(--qdk-heading) !default;
 $qdk-table-border: $table-border-color !default;
 $qdk-table-stripe: $table-striped-bg !default;
-$qdk-table-head-border: var(--qdk-muted) !default;
+$qdk-table-head-border: var(--qdk-muted-decoration) !default;
 $qdk-table-head-padding: .5rem !default;
 $qdk-table-cell-padding: .5rem !default;
-$qdk-table-head-line-height: 2rem !default;
+$qdk-table-head-line-height: 1.35 !default;
 $qdk-table-margin: var(--qdk-space) !default;
 $qdk-blockquote-color: var(--qdk-text) !default;
 $qdk-blockquote-border: var(--qdk-link) !default;
@@ -144,6 +147,18 @@ $qdk-blockquote-border-width: 3px !default;
 $qdk-blockquote-padding: var(--qdk-space) !default;
 $qdk-blockquote-margin: var(--qdk-space) !default;
 $qdk-assets-root: "_extensions/arfiligol/askr/assets" !default;
+
+// Quarto consumes these values when it compiles Mermaid's built-in theme.
+$mermaid-bg-color: $body-bg !default;
+$mermaid-edge-color: $qdk-muted-decoration !default;
+$mermaid-node-fg-color: $body-color !default;
+$mermaid-fg-color: $body-color !default;
+$mermaid-fg-color--lighter: $qdk-muted-text !default;
+$mermaid-fg-color--lightest: $qdk-muted-decoration !default;
+$mermaid-font-family: $font-family-sans-serif !default;
+$mermaid-label-bg-color: $body-bg !default;
+$mermaid-label-fg-color: $body-color !default;
+$mermaid-node-bg-color: $body-bg !default;
 
 /*-- scss:rules --*/
 @font-face { font-family: "Schibsted Grotesk"; src: url("#{$qdk-assets-root}/fonts/SchibstedGrotesk-Regular.woff2") format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
@@ -159,10 +174,11 @@ $qdk-assets-root: "_extensions/arfiligol/askr/assets" !default;
   --qdk-canvas: #{$body-bg};
   --qdk-text: #{$body-color};
   --qdk-heading: #{$headings-color};
-  --qdk-muted: #{$toc-color};
+  --qdk-muted: #{$qdk-muted-text};
+  --qdk-muted-decoration: #{$qdk-muted-decoration};
   --qdk-link: #{$link-color};
   --qdk-tertiary: #{$qdk-tertiary};
-  --qdk-border: #{$border-color};
+  --qdk-border: #{$qdk-border};
   --qdk-divider-content: #{$qdk-divider-content};
   --qdk-divider-layout: #{$qdk-divider-layout};
   --qdk-highlight: #{$code-bg};
@@ -277,6 +293,7 @@ $qdk-assets-root: "_extensions/arfiligol/askr/assets" !default;
 }
 
 html { overflow-x: clip; text-size-adjust: none; color-scheme: light; background: var(--qdk-canvas); font-size: calc(var(--qdk-chrome) * var(--_qdk-chrome-scale)) !important; scroll-behavior: smooth; }
+html.askr-reading-wide { --qdk-body: 780px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 #qdk-area-glass { pointer-events: none; }
 body { background: var(--qdk-canvas); color: var(--qdk-text); font-family: var(--qdk-body-font); font-weight: var(--qdk-body-weight); text-wrap: pretty; }
@@ -419,6 +436,24 @@ mark { background: var(--qdk-mark); border-radius: var(--qdk-inline-radius); col
 }
 #quarto-header .quarto-navigation-tool:hover { color: var(--qdk-control-hover); border-color: var(--qdk-control-hover); }
 #quarto-header .quarto-navigation-tool .bi { font-size: calc(var(--qdk-nav-size) * var(--qdk-ui) * var(--_qdk-ui-scale)); line-height: 1; }
+/* Keep Quarto's native reader toggle measurable beside search and other tools. */
+#quarto-header { --askr-tools-width: calc(var(--qdk-control-size) * var(--qdk-ui) * var(--_qdk-ui-scale)); }
+#quarto-header:has(.quarto-reader-toggle) { --askr-tools-width: calc(2 * var(--qdk-control-size) * var(--qdk-ui) * var(--_qdk-ui-scale) + var(--qdk-nav-gap)); }
+#quarto-header .quarto-reader-toggle {
+  align-items: center;
+  box-sizing: border-box;
+  border: 1px solid var(--qdk-control-border);
+  border-radius: var(--qdk-control-radius);
+  color: var(--qdk-control-color);
+  display: inline-flex;
+  flex: none;
+  height: calc(var(--qdk-control-size) * var(--qdk-ui) * var(--_qdk-ui-scale));
+  justify-content: center;
+  margin: 0;
+  padding: 0 !important;
+  width: calc(var(--qdk-control-size) * var(--qdk-ui) * var(--_qdk-ui-scale));
+}
+#quarto-header .quarto-reader-toggle:hover { border-color: var(--qdk-control-hover); color: var(--qdk-control-hover); }
 .askr-panel-tools { display: flex; flex-wrap: wrap; gap: var(--qdk-nav-gap); padding: .75rem 20px; }
 .askr-panel-tools:empty { display: none; }
 footer.footer { color: var(--qdk-muted); background: var(--qdk-canvas); }
@@ -464,6 +499,82 @@ footer.footer .nav-link .bi { line-height: 1; font-size: 1rem; }
 }
 #quarto-header .askr-logout:hover { color: var(--qdk-control-hover); border-color: var(--qdk-control-hover); }
 .askr-logout svg { width: calc(var(--qdk-nav-size) * var(--qdk-ui) * var(--_qdk-ui-scale)); height: calc(var(--qdk-nav-size) * var(--qdk-ui) * var(--_qdk-ui-scale)); }
+#quarto-header .askr-language-selector {
+  align-items: center;
+  display: inline-flex;
+  flex: none;
+  position: relative;
+}
+#quarto-header .askr-language-toggle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--qdk-control-border);
+  border-radius: var(--qdk-control-radius);
+  box-sizing: border-box;
+  color: var(--qdk-control-color);
+  display: inline-flex;
+  flex: none;
+  font: inherit;
+  font-size: calc(var(--qdk-nav-size) * var(--qdk-ui) * var(--_qdk-ui-scale));
+  line-height: 1.2;
+  height: calc(var(--qdk-control-size) * var(--qdk-ui) * var(--_qdk-ui-scale));
+  justify-content: center;
+  padding: 0;
+  width: calc(var(--qdk-control-size) * var(--qdk-ui) * var(--_qdk-ui-scale));
+}
+#quarto-header .askr-language-toggle::after { display: none; }
+#quarto-header .askr-language-toggle:hover,
+#quarto-header .askr-language-toggle:focus-visible,
+#quarto-header .askr-language-toggle.show {
+  border-color: var(--qdk-control-hover);
+  color: var(--qdk-control-hover);
+}
+#quarto-header .askr-language-toggle:focus-visible,
+#quarto-header .askr-language-menu .dropdown-item:focus-visible {
+  outline: 2px solid var(--qdk-focus);
+  outline-offset: 2px;
+}
+#quarto-header .askr-language-toggle svg {
+  flex: none;
+  height: calc(var(--qdk-nav-size) * var(--qdk-ui) * var(--_qdk-ui-scale));
+  width: calc(var(--qdk-nav-size) * var(--qdk-ui) * var(--_qdk-ui-scale));
+}
+#quarto-header .askr-language-text { white-space: nowrap; }
+#quarto-header .askr-language-menu {
+  background: var(--qdk-canvas);
+  border: 1px solid var(--qdk-border);
+  border-radius: var(--qdk-control-radius);
+  box-shadow: 0 .5rem 1.25rem rgba(0, 0, 0, .16);
+  margin-top: .35rem;
+  max-height: calc(100vh - 5rem);
+  max-width: calc(100vw - 1rem);
+  min-width: min(12rem, calc(100vw - 1rem));
+  overflow-y: auto;
+  padding: .25rem;
+}
+#quarto-header .askr-language-menu .dropdown-item {
+  align-items: center;
+  background: transparent;
+  border-radius: calc(var(--qdk-control-radius) - 1px);
+  color: var(--qdk-text);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  overflow-wrap: anywhere;
+  padding: .4rem .55rem;
+  white-space: normal;
+}
+#quarto-header .askr-language-menu .dropdown-item:hover,
+#quarto-header .askr-language-menu .dropdown-item:focus-visible {
+  background: var(--qdk-highlight);
+  color: var(--qdk-tertiary);
+}
+#quarto-header .askr-language-menu .dropdown-item.active {
+  background: var(--qdk-highlight);
+  color: var(--qdk-heading);
+  font-weight: 600;
+}
+#quarto-header .askr-language-marker { color: var(--qdk-link); flex: none; }
 #quarto-header #quarto-search {
   grid-column: 6;
   grid-row: 1;
@@ -795,8 +906,10 @@ div.callout.callout-style-default:is(.callout-note, .callout-tip, .callout-impor
 .callout.callout-style-default:has(> .callout-header), .callout.callout-style-simple:has(> .callout-header), .callout.callout-style-minimal:has(> .callout-header) { padding-block: 0; }
 div.callout.callout-style-default > .callout-header, div.callout.callout-style-simple > .callout-header, div.callout.callout-style-minimal > .callout-header { box-sizing: border-box; margin: 0; min-block-size: calc(var(--qdk-callout-icon-size) * var(--qdk-ui) * var(--_qdk-ui-scale) + 2 * var(--qdk-callout-header-padding) * var(--_qdk-callout-scale)); }
 .callout .callout-title-container { font-family: var(--qdk-body-font); font-size: inherit; font-weight: var(--qdk-callout-title-weight); line-height: var(--qdk-callout-title-line-height); margin: 0; }
+.callout .callout-title-container { color: color-mix(in srgb, var(--qdk-text) 72%, var(--qdk-callout-color)); }
 div.callout.callout-style-default:not(.no-icon) div.callout-title-container { margin: 0; }
 .callout .callout-icon-container { background: currentColor; height: calc(var(--qdk-callout-icon-size) * var(--qdk-ui) * var(--_qdk-ui-scale)); margin: 0; min-width: calc(var(--qdk-callout-icon-size) * var(--qdk-ui) * var(--_qdk-ui-scale)); width: calc(var(--qdk-callout-icon-size) * var(--qdk-ui) * var(--_qdk-ui-scale)); -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
+.callout .callout-icon-container, .callout .callout-btn-toggle { color: var(--qdk-callout-color); }
 .callout .callout-icon-container > i { display: none; }
 .callout .callout-icon-container:has(.no-icon) { display: none; }
 .callout .callout-title-container, .callout .callout-icon-container, .callout .callout-btn-toggle { align-self: center; }
@@ -843,22 +956,47 @@ div.sourceCode > pre.sourceCode, div.sourceCode > pre.sourceCode > code.sourceCo
 
 .table-responsive, .cell-output, .cell-output-display, .quarto-embedded-source-code, .sourceCode, pre { max-width: 100%; overflow-x: auto; }
 .table-responsive { min-width: 0; }
+.askr-table-scroll { box-sizing: border-box; inline-size: 100%; margin-block: var(--qdk-table-margin); max-inline-size: 100%; min-inline-size: 0; overflow-x: auto; overscroll-behavior-inline: contain; }
+.askr-table-scroll:focus-visible, .askr-wide-figure:focus-visible { outline: var(--qdk-focus-width) solid var(--qdk-focus); outline-offset: var(--qdk-focus-offset); }
 table { border-color: var(--qdk-table-border); margin: var(--qdk-table-margin) 0; }
+.askr-table-scroll > table { margin-block: 0; }
 .table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-striped-bg: var(--qdk-table-stripe); }
 td code, th code { overflow-wrap: anywhere; }
 #refs .csl-entry { overflow-wrap: anywhere; }
 thead th, .table > thead > tr > th { border-bottom: 1px solid var(--qdk-table-head-border); line-height: var(--qdk-table-head-line-height); padding: var(--qdk-table-head-padding); }
 tbody td, .table > tbody > tr > td { border-bottom: 1px solid var(--qdk-table-border); padding: var(--qdk-table-cell-padding); }
-.MathJax, .katex-display, img, video { max-width: 100%; }
-.MathJax, .katex-display { overflow-x: auto; overflow-y: hidden; padding: .15rem 0; }
-.askr-copyable-math { margin-block: 1rem; min-width: 0; }
-.askr-math-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; }
-.askr-math-copy { background: transparent; border: 1px solid var(--qdk-border); border-radius: var(--qdk-inline-radius); color: var(--qdk-text); cursor: pointer; font: inherit; font-size: .8rem; padding: .25rem .5rem; }
+.askr-table-compact :is(th, td) { padding: .25rem .4rem; line-height: 1.35; }
+.askr-table-numeric :is(th, td) { font-variant-numeric: tabular-nums; }
+.askr-symbol-table table, table.askr-symbol-table { table-layout: fixed; width: 100%; }
+.askr-symbol-table table col:first-child, table.askr-symbol-table col:first-child { width: 5rem !important; }
+.askr-symbol-table table col:not(:first-child), table.askr-symbol-table col:not(:first-child) { width: auto !important; }
+.askr-symbol-table :is(th, td):first-child { font-family: var(--qdk-mono-font); overflow-wrap: anywhere; white-space: normal; width: 5rem; }
+.askr-symbol-table :is(th, td):not(:first-child) { overflow-wrap: anywhere; }
+.MathJax, mjx-container, .katex-display, img, video { max-width: 100%; }
+.MathJax_Display, mjx-container[display="true"], .katex-display { overflow-x: auto; overflow-y: hidden; padding: .15rem 0; }
+mjx-container[display="true"] mjx-labels, .katex-display .tag { color: var(--qdk-muted); font-variant-numeric: tabular-nums; }
+.askr-wide-figure { box-sizing: border-box; inline-size: 100%; max-inline-size: 100%; overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain; }
+.askr-wide-figure :is(img, video, svg) { max-width: none; }
+.askr-page-facts { display: grid; gap: .25rem .8rem; grid-template-columns: minmax(0, max-content) minmax(0, 1fr); margin: 1rem 0 0; font-size: .9rem; line-height: 1.4; }
+.askr-page-fact { display: contents; }
+.askr-page-facts dt, .askr-page-facts dd { margin: 0; }
+.askr-page-facts dt { color: var(--qdk-muted); font-weight: 600; }
+.askr-page-facts dd { overflow-wrap: anywhere; }
+.theorem { background: color-mix(in srgb, var(--qdk-canvas) 96%, var(--qdk-muted-decoration)); border-inline-start: 3px solid var(--qdk-divider-layout); border-radius: var(--qdk-inline-radius); margin-block: var(--qdk-space); padding: .65rem .9rem; }
+.theorem-title { color: var(--qdk-heading); font-weight: 600; }
+.proof { border-inline-start: 2px solid var(--qdk-divider-layout); color: var(--qdk-text); margin-block: var(--qdk-space); padding-inline-start: .9rem; }
+.proof-title { color: var(--qdk-muted); font-style: italic; font-weight: 600; }
+.askr-copyable-math { margin-block: 1rem; min-width: 0; position: relative; }
+.askr-math-actions { align-items: center; display: flex; flex-wrap: wrap; font-size: .7rem; gap: .35rem; inset-block-start: -1rem; inset-inline-end: .25rem; justify-content: flex-end; line-height: 1.2; max-inline-size: 100%; opacity: 0; padding: 0; pointer-events: none; position: absolute; transition: opacity .15s ease; z-index: 1; }
+.askr-copyable-math:is(:hover, :focus-within) .askr-math-actions { opacity: 1; pointer-events: auto; }
+.askr-math-copy { background: transparent; border: 1px solid var(--qdk-border); border-radius: var(--qdk-inline-radius); color: var(--qdk-text); cursor: pointer; font: inherit; font-size: .7rem; padding: .1rem .3rem; }
 .askr-math-copy:hover { background: var(--qdk-highlight); }
 .askr-math-copy { transition: border-color .2s ease, color .2s ease, background-color .2s ease; }
 .askr-math-copy.is-copied { border-color: var(--qdk-tertiary); color: var(--qdk-tertiary); }
 .askr-math-status-success { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .askr-math-copy { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .askr-math-actions { transition: none; } }
+@media (hover: none), (pointer: coarse) { .askr-math-actions { opacity: 1; pointer-events: auto; } }
 .askr-math-copy:focus-visible, .askr-math-source textarea:focus-visible { outline: 2px solid var(--qdk-focus); outline-offset: 2px; }
 
 // Entry links stay usable without JavaScript; viewer chrome is image-viewer.css.
@@ -878,7 +1016,7 @@ tbody td, .table > tbody > tr > td { border-bottom: 1px solid var(--qdk-table-bo
   line-height: 1.3;
 }
 .askr-image-view:hover { border-color: var(--qdk-control-hover); color: var(--qdk-control-hover); }
-.askr-math-status { color: var(--qdk-text); font-size: .8rem; }
+.askr-math-status { color: var(--qdk-text); font-size: .7rem; }
 .askr-math-source textarea { background: var(--qdk-code-background); border: 1px solid var(--qdk-border); color: var(--qdk-text); display: block; font-family: var(--qdk-mono-font); min-height: 5rem; padding: .5rem; resize: vertical; width: 100%; }
 
 @media (max-width: 991.98px) {
@@ -892,23 +1030,33 @@ tbody td, .table > tbody > tr > td { border-bottom: 1px solid var(--qdk-table-bo
 }
 
 @media (min-width: 992px) {
-  /* Quarto's docked formula adds 200px to the body and parks leftover space in a
-     right-hand 5fr column. These variables feed one track list so the measure
-     stays centered. The grid line names are the residual coupling. */
-  body.docked .page-columns {
+  /* Quarto's named regions stay separate in every desktop layout; only the
+     article's public max-width changes with the reading profile. */
+  #quarto-content.page-columns {
     grid-template-columns:
-      [screen-start] minmax(calc(var(--qdk-gutter) * var(--_qdk-gutter-scale)), 1fr)
-      [screen-start-inset page-start] calc(var(--qdk-sidebar) * var(--_qdk-sidebar-scale))
-      [page-start-inset body-start-outset body-start] calc(var(--qdk-gutter) * var(--_qdk-gutter-scale))
-      [body-content-start] minmax(0, calc(var(--qdk-body) * var(--_qdk-body-scale)))
+      [screen-start] calc(var(--qdk-gutter) * var(--_qdk-gutter-scale))
+      [screen-start-inset] minmax(0, 1fr)
+      [page-start] minmax(0, calc(var(--qdk-sidebar) * var(--_qdk-sidebar-scale) * .2))
+      [page-start-inset] minmax(0, calc(var(--qdk-sidebar) * var(--_qdk-sidebar-scale) * .6))
+      [body-start-outset] minmax(0, calc(var(--qdk-sidebar) * var(--_qdk-sidebar-scale) * .2))
+      [body-start] calc(var(--qdk-gutter) * var(--_qdk-gutter-scale))
+      [body-content-start] minmax(0, min(calc(var(--qdk-body) * var(--_qdk-body-scale)), calc(100vw - 2 * var(--qdk-gutter) * var(--_qdk-gutter-scale) - var(--qdk-sidebar) * var(--_qdk-sidebar-scale) - var(--qdk-margin) * var(--_qdk-margin-scale) - 2 * var(--qdk-gutter) * var(--_qdk-gutter-scale))))
       [body-content-end] calc(var(--qdk-gutter) * var(--_qdk-gutter-scale))
-      [body-end] calc(var(--qdk-margin) * var(--_qdk-margin-scale))
-      [body-end-outset page-end-inset page-end] minmax(calc(var(--qdk-gutter) * var(--_qdk-gutter-scale)), 1fr)
-      [screen-end-inset screen-end];
+      [body-end] minmax(0, calc(var(--qdk-margin) * var(--_qdk-margin-scale) * .2))
+      [body-end-outset] minmax(0, calc(var(--qdk-margin) * var(--_qdk-margin-scale) * .6))
+      [page-end-inset] minmax(0, calc(var(--qdk-margin) * var(--_qdk-margin-scale) * .2))
+      [page-end] minmax(0, 1fr)
+      [screen-end-inset] calc(var(--qdk-gutter) * var(--_qdk-gutter-scale))
+      [screen-end];
   }
+  #quarto-content .page-columns.page-full { grid-template-columns: subgrid; }
+  #quarto-document-content.page-full { inline-size: auto; justify-self: stretch; margin-inline: 0; max-width: none; }
   body.docked .sidebar.sidebar-navigation {
     grid-column: page-start / body-start;
   }
+
+  #quarto-content.page-columns:not(:has(#quarto-sidebar)) { --_qdk-sidebar-scale: 0; }
+  #quarto-content.page-columns:not(:has(#quarto-margin-sidebar)) { --_qdk-margin-scale: 0; }
 }
 
 /* Content type (--qdk-chrome) is the article and its headings. UI size
@@ -920,6 +1068,7 @@ tbody td, .table > tbody > tr > td { border-bottom: 1px solid var(--qdk-table-bo
 }
 @media (min-width: 1280px) and (max-width: 1439.98px) {
   :root { --_qdk-sidebar-scale: #{240 / 264}; --_qdk-margin-scale: #{240 / 264}; --_qdk-gutter-scale: #{22 / 26}; --_qdk-chrome-scale: #{17 / 18}; --_qdk-ui-scale: #{1.08 / 1.15}; }
+  html.askr-reading-wide #quarto-content.page-columns { --_qdk-sidebar-scale: #{200 / 264}; --_qdk-margin-scale: #{160 / 264}; --_qdk-gutter-scale: #{16 / 26}; }
 }
 @media (min-width: 1920px) and (max-width: 2559.98px) {
   :root { --_qdk-body-scale: 1.1; --_qdk-sidebar-scale: #{290 / 264}; --_qdk-margin-scale: #{290 / 264}; --_qdk-gutter-scale: #{29 / 26}; --_qdk-chrome-scale: #{20 / 18}; --_qdk-ui-scale: #{1.27 / 1.15}; }
@@ -930,4 +1079,59 @@ tbody td, .table > tbody > tr > td { border-bottom: 1px solid var(--qdk-table-bo
 @media (max-width: 629.98px) {
   :root { --_qdk-chrome-scale: #{16 / 18}; --_qdk-ui-scale: #{1.02 / 1.15}; }
   #quarto-document-content { max-width: 100%; inline-size: 100%; }
+}
+@media (max-width: 575.98px) {
+  .askr-symbol-table table col:first-child, table.askr-symbol-table col:first-child { width: 4rem !important; }
+  .askr-symbol-table :is(th, td):first-child { overflow-wrap: anywhere; white-space: normal; width: 4rem; }
+}
+
+/* Askr cards */
+.askr-card {
+  background: var(--qdk-canvas);
+  border: 1px solid var(--qdk-border);
+  border-radius: var(--qdk-control-radius);
+  color: var(--qdk-text);
+  margin: 0 0 1rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 0;
+  transition: border-color 150ms ease;
+}
+.askr-card:hover { border-color: var(--qdk-link); }
+.askr-card:focus-within {
+  border-color: var(--qdk-link);
+  outline: .2rem solid var(--qdk-focus);
+  outline-offset: .15rem;
+}
+section.askr-card-title { font-size: inherit; margin: 0; }
+.askr-card :is(h1, h2, h3, h4, h5, h6).askr-card-title,
+.askr-card-title > :is(h1, h2, h3, h4, h5, h6) {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  margin: 0 0 .5rem;
+}
+#quarto-document-content .askr-card .askr-card-title a {
+  color: var(--qdk-heading);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+#quarto-document-content .askr-card:hover .askr-card-title a,
+#quarto-document-content .askr-card:focus-within .askr-card-title a,
+#quarto-document-content .askr-card .askr-card-title a:hover,
+#quarto-document-content .askr-card .askr-card-title a:focus-visible {
+  color: var(--qdk-tertiary);
+  text-decoration: none;
+}
+.askr-card-body { display: flow-root; margin: 0; padding: 1.25rem 1.5rem; }
+#quarto-document-content .askr-card-body > :first-child,
+#quarto-document-content .askr-card-body > :first-child > :first-child { margin-block-start: 0; }
+#quarto-document-content .askr-card-body > :last-child,
+#quarto-document-content .askr-card-body > :last-child > :last-child { margin-block-end: 0; }
+@media (max-width: 575.98px) {
+  .askr-card-body { padding: 1rem; }
+  .askr-card :is(h1, h2, h3, h4, h5, h6).askr-card-title,
+  .askr-card-title > :is(h1, h2, h3, h4, h5, h6) { font-size: 1.1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .askr-card { transition: none; }
 }

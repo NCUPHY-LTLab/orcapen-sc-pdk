@@ -1,0 +1,36 @@
+---
+title: "圓頭金屬線段（Rounded-end metal segment）"
+sidebar: api
+---
+
+`rounded_end_metal_segment` 建立左端為平面、右端為半圓圓頭的金屬線段（metal segment）。
+
+## 建立預設元件 {#build-the-default-component}
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("rounded_end_metal_segment")
+~~~
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `length` | 100 µm | 從平面端至圓頭頂端的總長度。 |
+| `width` | 10 µm | 線段寬度；圓頭半徑為此值的一半。 |
+| `ground_mask_margin` | 6 µm | 從 DRAW 輪廓向外擴張遮罩。 |
+| `n_cap_points` | 17 | 每四分之一圓頭的取樣點數，包含端點。 |
+| `draw_layer` | `LAYER.D0_TOP_M1_DRAW` | 金屬輪廓。 |
+| `etch_layer` | `LAYER.D0_TOP_M1_ETCH` | MASK 減去 DRAW。 |
+| `ground_mask_layer` | `LAYER.D0_TOP_GROUND_MASK` | 向外擴張的接地遮罩輪廓。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+`o1` 是位於 `(0, 0)`、朝向 −X 的佈線連接埠。`o_mesh` 在 DRAW 上標記圓頭中心，供選擇網格區域；它不是第二個佈線連接埠，也不是網格尺寸設定。
+
+寬度須為正值，長度須至少為寬度的一半。在最短長度時，`o_mesh` 位於平面邊界上，與 `o1` 的中心重合。遮罩由 DRAW 輪廓的幾何偏移產生。
+
+此工廠函式由[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py)定義。

@@ -1,0 +1,57 @@
+---
+title: "S 參數與連接埠（Port）"
+sidebar: simulation
+---
+
+使用明確定義的激發與參考計算反射與傳輸。比較不同幾何或求解器的 S 參數前，先選定連接埠模型。
+
+## 幾何連接埠、模擬定位器與端點 {#geometric-ports-simulation-locators-and-terminals}
+
+| 物件 | 意義 | 使用者選擇項目 |
+| --- | --- | --- |
+| GDSFactory 連接埠 | 元件連接平面上的位置、方向、寬度、圖層與類型，讓佈局實例得以連接。 | 相符的橫截面與實際子元件連接埠。 |
+| OrcaPen 模擬定位器 | 以具名連接埠識別元件所擁有的薄片或標記幾何；其 `sim_*` 類型描述定位器角色。 | 限定名稱及預期來源幾何。 |
+| 求解器連接埠或端點 | 為所選問題指派給導體與支撐幾何的電氣定義。 | 訊號／參考導體、順序、方向、激發與正規化。 |
+
+連接埠不會自動成為激發。模擬定位器本身不會增加金屬、薄片多邊形、網格尺寸、阻抗或電路元件。元件負責建立幾何；SCGSim 問題負責指定電氣意義。一般放置與連接方式請參閱[GDSFactory instances and ports](https://gdsfactory.github.io/gdsfactory/notebooks/01_references/)（英文）。
+
+### OrcaPen 定位器輔助函式
+
+公開的[連接埠輔助函式](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/port_operations.py)會在既有元件幾何上新增具名 GDSFactory 連接埠。每個函式接收元件，以及 `name`、`center`、`layer`，並可選擇 `width` 與 `orientation`。實體中心與寬度採用 µm；回傳連接埠可透過 `dcenter` 與 `dwidth` 讀取。
+
+| 輔助函式 | 已註冊定位器類型 | 用途 |
+| --- | --- | --- |
+| `add_mesh_port()` | `sim_mesh` | 標示局部網格選擇所需特徵；網格長度在模擬中選擇。 |
+| `add_junction_lumped_port()` | `sim_junction_lumped` | 標示接面薄片；線性化電感及其他問題控制需另行選擇。 |
+| `add_driven_lumped_port()` | `sim_lumped` | 標示激發薄片；電阻、訊號源及求解器問題中的啟用狀態需另行選擇。 |
+
+[類型登錄表](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/port_metadata.py)也宣告 `sim_cpw`、`sim_terminal`、`sim_wave` 與 `sim_current`。啟用 PDK 時會將這些字串註冊至 GDSFactory；單有類型標籤並不等於 Palace 或 AEDT 指派。
+
+例如，[SimplePad](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py)會在 `D0_TOP_SIM_BOUNDARY` 畫出非金屬東側間隙薄片，並以 `o_junction_lumped` 定位。選用電感屬於本徵模態問題，而非定位器。在元件階層中，應選擇實際限定名稱（例如 `chip/o_junction_lumped`），並搭配預期導體配對。
+
+Q2D 模型須依[橫截面模擬](q2d-cross-section.qmd)教學建立原生截面導體與參考分組；幾何連接埠不是該模型的電壓源定義。
+
+## 端點激發
+
+CPW－蛇形線範例保留諧振器與空橋，只改變激發幾何。
+
+| 連接埠種類 | 幾何與參考 | 教學 |
+| --- | --- | --- |
+| 集總 | 內部非金屬訊號－接地支撐薄片與發射器 | [HFSS 集總端點](../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.qmd" data-noresolveinput download>QMD</a> |
+| 波端 | 外部截面處以固定寬度 CPW 結尾 | [HFSS 波端](../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.qmd" data-noresolveinput download>QMD</a> |
+
+使用教學指定的 AEDT／SCGSim 環境。保留訊號與參考導體、連接埠順序、積分方向、正規化、去嵌入與重新正規化選擇。[模型展示集](../../public-pdk-examples/test-components.md#driven-terminal-lumped-and-wave-port-comparison)展示兩種來源佈局。
+
+TSV 縫合傳輸線請參考獨立的 [TSV 端點工作流程](../tsv-model-inspection.qmd)。
+
+## 模態連接埠模型 {#modal-port-models}
+
+Terminal 與 Modal 是不同的求解詮釋；Wave 則是連接埠種類。[有限 CPW Driven Modal 說明](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.qmd" data-noresolveinput download>QMD</a> 說明其預期模型。
+
+⏳ 該 Modal 說明不是可執行的求解器教學。現有完整工作流程請使用上方 Terminal 範例，並保留其中的導體參考慣例。
+
+## 判讀響應
+
+求解前檢查原生連接埠指派。閱讀回傳 S 資料時，應確認頻率取樣、連接埠順序、參考阻抗與適應歷程。設定適應與掃頻完成狀態應分開檢視。
+
+Touchstone 參考阻抗與求解後的 Wave 連接埠特性阻抗是不同量。佈局配方與回報的幾何連接埠請見[橫截面](../../public-pdk-examples/cross-sections.qmd)。

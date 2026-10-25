@@ -3,8 +3,9 @@ title: "Documentation & Website"
 sidebar: development
 ---
 
-Edit the reader pages in `docs/` and the canonical tutorial sources in
-`notebooks/src/`. Build with Quarto 1.10.19; the site keeps notebook execution disabled.
+Edit English reader pages in `docs/`, their Traditional Chinese translations in
+`docs/zh-TW/`, and canonical tutorial sources in `notebooks/src/`. Build with
+Quarto 1.10.19; the site keeps notebook execution disabled.
 
 ## Build locally
 
@@ -14,7 +15,8 @@ just docs
 ```
 
 Check: generated notebook inputs match their QMD sources, and the site appears
-in `docs/_site/`. The pre-render step generates the API reference with quartodoc.
+in `docs/_site/`. Traditional Chinese is the default homepage; English is in
+`docs/_site/en/`. The pre-render step generates the API reference with quartodoc.
 
 For a local preview:
 
@@ -24,6 +26,9 @@ just serve-docs
 
 Check: open `http://127.0.0.1:8000`. Inspect the desktop navigation and the
 collapsed menu at narrow widths.
+The command builds both editions with local language links before starting the
+static server. Rebuild with `quarto render docs --profile preview --no-execute`
+after editing; refresh the browser to see the new pages.
 
 ## Edit notebooks without changing their results
 
@@ -37,7 +42,7 @@ Keep simulation execution separate from site generation.
 
 ## Pages and downloads
 
-Pull requests build the site for review. A successful build on `main`
+Ready pull requests build the site for review; Draft builds are skipped. A successful build on `main`
 deploys to [GitHub Pages](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/).
 
 The SurfaceBands examples render from their canonical QMD paths so sibling

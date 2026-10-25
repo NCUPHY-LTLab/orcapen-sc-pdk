@@ -1,0 +1,33 @@
+---
+title: "饋入元件（Launcher）"
+sidebar: api
+---
+
+`launcher` 將大型墊片漸變至共面波導（coplanar waveguide，CPW）窄頸，並在墊片側定義模擬邊界標記。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("launcher")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `pad_width`, `pad_length` | 150 µm, 150 µm | 墊片尺寸。 |
+| `taper_length` | 150 µm | 墊片至 CPW 窄頸的過渡長度。 |
+| `side_gap_height`, `end_gap_width` | 85 µm, 85 µm | 墊片側面與端部的接地遮罩間距。 |
+| `cpw_xs` | `coplanar_waveguide` | CPW 窄頸橫截面。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+`o_neck` 與 `o_pad` 是 DRAW 上的佈線連接埠。`o_lumped` 標記模擬邊界，不是求解器結果。工廠函式建立 DRAW、ETCH、GROUND_MASK 與 SIM_BOUNDARY 幾何形狀。
+
+![預設饋入元件的 DRAW 與 ETCH 版圖。](../../_static/images/components/launcher.svg)
+
+請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.launcher.html#orcapen_sc_pdk.cells.launcher)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/cpw.py)。

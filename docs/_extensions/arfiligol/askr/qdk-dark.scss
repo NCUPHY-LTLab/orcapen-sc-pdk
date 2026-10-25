@@ -10,6 +10,12 @@ $sidebar-bg: #161618 !default;
 $sidebar-fg: #d4d4d4 !default;
 $sidebar-hl: #7b97aa !default;
 $toc-color: #646464 !default;
+$qdk-muted-text: #a0a0a0 !default;
+$qdk-muted-decoration: #646464 !default;
+$qdk-tertiary: #8fb7a8 !default;
+$qdk-border: #393639 !default;
+$callout-color-important: #c69af0 !default;
+$callout-color-caution: #ff8f8f !default;
 $border-color: #393639 !default;
 $headings-color: #ebebec !default;
 $table-border-color: #393639 !default;
@@ -22,6 +28,16 @@ $qdk-divider-content: rgba(212, 212, 212, .24) !default;
 $qdk-divider-layout: rgba(212, 212, 212, .10) !default;
 $qdk-mark: #e5c76b33 !default;
 $qdk-code-color: var(--qdk-text) !default;
+
+$mermaid-bg-color: $body-bg !default;
+$mermaid-edge-color: $qdk-muted-decoration !default;
+$mermaid-node-fg-color: $body-color !default;
+$mermaid-fg-color: $body-color !default;
+$mermaid-fg-color--lighter: $qdk-muted-text !default;
+$mermaid-fg-color--lightest: $qdk-muted-decoration !default;
+$mermaid-label-bg-color: $body-bg !default;
+$mermaid-label-fg-color: $body-color !default;
+$mermaid-node-bg-color: $body-bg !default;
 
 /*-- scss:rules --*/
 html { color-scheme: dark; }
@@ -49,15 +65,18 @@ html { color-scheme: dark; }
   --qdk-canvas: #{$body-bg};
   --qdk-text: #{$body-color};
   --qdk-heading: #{$headings-color};
-  --qdk-muted: #{$toc-color};
+  --qdk-muted: #{$qdk-muted-text};
+  --qdk-muted-decoration: #{$qdk-muted-decoration};
   --qdk-link: #{$link-color};
   --qdk-tertiary: #{$qdk-tertiary};
-  --qdk-border: #{$border-color};
+  --qdk-border: #{$qdk-border};
   --qdk-divider-content: #{$qdk-divider-content};
   --qdk-divider-layout: #{$qdk-divider-layout};
   --qdk-highlight: #{$code-bg};
   --qdk-mark: #{$qdk-mark};
   --qdk-focus: #{$link-color};
+  --qdk-callout-important: #{$callout-color-important};
+  --qdk-callout-caution: #{$callout-color-caution};
 }
 
 /*

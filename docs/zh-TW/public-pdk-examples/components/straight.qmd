@@ -1,0 +1,29 @@
+---
+title: "直線段（Straight）"
+sidebar: api
+---
+
+`straight` 使用 GDSFactory 的直線路徑，預設搭配 OrcaPen 的 [`cpw_6_7_6`](../cross-sections.qmd#cpw_6_7_6) 橫截面（cross-section）。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("straight")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `length` | 10 µm | 路徑長度。 |
+| `npoints` | 2 | 路徑點數。 |
+| `cross_section` | `cpw_6_7_6` | 沿路徑擠出的橫截面。 |
+| `width` | `None` | 傳給 GDSFactory 的選用寬度。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+選定的橫截面定義路徑各區段、圖層與幾何連接埠。預設組成請見[橫截面指南](../cross-sections.qmd)，工廠函式定義請見[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py)。

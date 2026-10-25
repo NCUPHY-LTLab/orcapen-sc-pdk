@@ -9,41 +9,41 @@ excitation, and backend.
 
 ::: {.simulation-chooser-cards}
 
-:::: {.card .mb-3 .border}
-::::: {.card-body .p-4}
-## [Capacitance](simulation/requirements/electrostatic-capacitance.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [Capacitance](simulation/requirements/electrostatic-capacitance.qmd) {.askr-card-title .unlisted}
 
 <p class="card-text">What capacitance does this conductor arrangement have?</p>
 :::::
 ::::
 
-:::: {.card .mb-3 .border}
-::::: {.card-body .p-4}
-## [Resonance & Eigenmodes](simulation/requirements/eigenmode.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [Resonance & Eigenmodes](simulation/requirements/eigenmode.qmd) {.askr-card-title .unlisted}
 
 <p class="card-text">What are the natural or loaded modes?</p>
 :::::
 ::::
 
-:::: {.card .mb-3 .border}
-::::: {.card-body .p-4}
-## [S-parameters & Ports](simulation/requirements/driven-terminal.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [S-parameters & Ports](simulation/requirements/driven-terminal.qmd) {.askr-card-title .unlisted}
 
 <p class="card-text">How do signals reflect and transmit?</p>
 :::::
 ::::
 
-:::: {.card .mb-3 .border}
-::::: {.card-body .p-4}
-## [Cross-section Simulation](simulation/requirements/q2d-cross-section.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [Cross-section Simulation](simulation/requirements/q2d-cross-section.qmd) {.askr-card-title .unlisted}
 
 <p class="card-text">What are the uniform-line parameters?</p>
 :::::
 ::::
 
-:::: {.card .mb-3 .border}
-::::: {.card-body .p-4}
-## [Participation & Surface Loss](simulation/requirements/epr-loss.qmd) {.card-title .mt-0 .mb-3 .unlisted}
+:::: {.askr-card}
+::::: {.askr-card-body}
+## [Participation & Surface Loss](simulation/requirements/epr-loss.qmd) {.askr-card-title .unlisted}
 
 <p class="card-text">Where is field energy stored, and how do interface assumptions affect loss?</p>
 :::::

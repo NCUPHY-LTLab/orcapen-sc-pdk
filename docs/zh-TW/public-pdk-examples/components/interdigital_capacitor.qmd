@@ -1,0 +1,44 @@
+---
+title: "指叉電容（Interdigital capacitor）"
+sidebar: api
+---
+
+`interdigital_capacitor` 建立一對交錯電極，並帶有共面波導（coplanar waveguide，CPW）端點延伸段。公開連接埠位於 CPW 外側截切面。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("interdigital_capacitor")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `fingers` | 20 | 交錯指條的數量。 |
+| `finger_length` | 100 µm | 指條長度。 |
+| `finger_gap`, `finger_width` | 3.3 µm, 3.3 µm | 指條的標稱間距與寬度。 |
+| `taper_length` | 150 µm | 端點漸變段長度。 |
+| `terminal_extension_length_um` | 100 µm | 每個 CPW 端點延伸段的長度。 |
+| `capacitor_ground_gap` | 85 µm | 與接地遮罩輪廓的間隙。 |
+| `cpw_xs` | `coplanar_waveguide` | CPW 橫截面。 |
+| `half` | `False` | 選擇完整或半側幾何形狀。 |
+| `corner_radius_um` | 0 µm | 圓角半徑；零表示保留尖角。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+`o_capacitor_in` 與 `o_capacitor_out` 位於 CPW 外側截切面。獨立元件的端點維持開放，組裝時在這些平面連接 CPW 佈線。工廠函式建立 DRAW、GROUND_MASK 與衍生 ETCH 幾何形狀。
+
+## 圓角半徑 {#corner-radius}
+
+預設 `corner_radius_um=0` 保留尖角輪廓。正半徑會將合併後的電極與接地遮罩輪廓圓角化，同時保留平坦的外側截切面、連接埠及直線指條／端部的標稱間隙。若相切圓弧無法放入，會拋出 `ValueError`，而不縮小要求的半徑。因此，轉角附近的間距可能不同於標稱直線間隙。此幾何設定不代表已通過製程、設計規則或求解器驗證。
+
+半徑須為有限且非負的值。外輪廓與孔洞輪廓分別圓角化；每段弦所對應的圓弧角度不超過 5°，再量化至既有 PDK 網格。
+
+![預設指叉電容的 DRAW 與 ETCH 版圖。](../../_static/images/components/interdigital_capacitor.svg)
+
+請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.interdigital_capacitor.html#orcapen_sc_pdk.cells.interdigital_capacitor)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/capacitor.py)。

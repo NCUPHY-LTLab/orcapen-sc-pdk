@@ -90,7 +90,7 @@
     var tools = container.querySelector('.quarto-navbar-tools');
     var collapseTools = tools && area.contains(tools);
     var authoredTools = tools ? Array.from(tools.children).filter(function (el) {
-      return !el.matches('.quarto-color-scheme-toggle, .quarto-reader-toggle, .askr-logout');
+      return !el.matches('.quarto-color-scheme-toggle, .quarto-reader-toggle, .askr-logout, .askr-language-selector');
     }) : [];
     var panelTools;
     if (collapseTools) {

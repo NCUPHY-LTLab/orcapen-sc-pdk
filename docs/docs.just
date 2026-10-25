@@ -27,10 +27,11 @@ docs-prerequisites: write-justfile-help check-notebooks
 docs: docs-prerequisites
     quarto render {{docs_source}}
 
-# Build and serve HTML documentation locally.
+# Build both language editions and serve Traditional Chinese at the site root.
 [group('docs')]
 serve-docs port="8000": docs-prerequisites
-    quarto preview {{docs_source}} --host 127.0.0.1 --port "{{port}}"
+    quarto render {{docs_source}} --profile preview --no-execute
+    python3 -m http.server "{{port}}" --bind 127.0.0.1 --directory {{docs_source}}/_site
 
 # Remove generated documentation output.
 [group('docs')]

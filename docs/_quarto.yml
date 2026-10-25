@@ -1,6 +1,6 @@
 project:
   type: website
-  output-dir: _site
+  output-dir: _site/en
   render:
     - "*.qmd"
     - "*.md"
@@ -45,6 +45,7 @@ project:
     - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb"
     - "notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb"
     - "reference/*.qmd"
+    - "!zh-TW/"
   resources:
     - askr-versions.json
     - _static/images/components/*.svg
@@ -66,16 +67,33 @@ project:
     - uv run --project .. --group docs quartodoc build
   post-render:
     - python3 ../scripts/copy_surface_band_sources.py
+    - uv run --project .. --group docs python ../scripts/build_bilingual_docs.py
+
+lang: en
+
+profile:
+  group:
+    - [published, preview]
+
+askr:
+  languages:
+    current: en
 
 website:
   title: "OrcaPen SC PDK"
-  site-url: https://ncuphy-ltlab.github.io/orcapen-sc-pdk/
+  site-url: https://ncuphy-ltlab.github.io/orcapen-sc-pdk/en/
   favicon: assets/orcapen-mark.svg
   repo-url: https://github.com/NCUPHY-LTLab/orcapen-sc-pdk
   repo-actions: [edit, issue]
   navbar:
     logo: assets/orcapen-mark.svg
     search: true
+    tools-collapse: false
+    tools:
+      - icon: github
+        href: https://github.com/NCUPHY-LTLab/orcapen-sc-pdk
+        text: GitHub repository
+        aria-label: GitHub repository
     left:
       - text: Get Started
         href: getting-started.md
@@ -190,6 +208,8 @@ format:
     css: [styles.css]
     html-math-method: mathjax
     code-copy: true
+    respect-user-color-scheme: true
+    smooth-scroll: false
 
 execute:
   enabled: false

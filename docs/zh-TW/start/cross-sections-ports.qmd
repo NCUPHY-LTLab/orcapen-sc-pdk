@@ -1,0 +1,8 @@
+---
+title: "橫截面（cross-section）與連接埠"
+sidebar: get-started
+---
+
+完整 OrcaPen 登錄表、橫向幾何及元件設定範例，請閱讀[元件 → 橫截面](../public-pdk-examples/cross-sections.qmd)。
+
+電氣指派請閱讀[ S 參數與連接埠](../simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals)。該頁區分佈局連接埠、模擬定位器與求解器端點。一般元件連接方式請見[GDSFactory instances and ports](https://gdsfactory.github.io/gdsfactory/notebooks/01_references/)（英文）。
