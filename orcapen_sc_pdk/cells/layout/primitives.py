@@ -7,12 +7,13 @@ from math import cos, pi, sin
 import gdsfactory as gf
 from gdsfactory.typings import CrossSectionSpec, LayerSpec, PortNames, PortTypes
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.taper import taper
 from orcapen_sc_pdk.ports import add_mesh_port
 from orcapen_sc_pdk.tech import LAYER, coplanar_waveguide
 
 
-@gf.cell(tags=["layout", "primitive", "bend_circular", "circular_arc"])
+@curves.sampled_cell(tags=["layout", "primitive", "bend_circular", "circular_arc"])
 def bend_circular(
     radius: float | None = None,
     angle: float = 90.0,
@@ -25,7 +26,7 @@ def bend_circular(
 ) -> gf.Component:
     """Return a GF circular bend with a project CPW default cross-section."""
 
-    return gf.components.bend_circular(
+    return curves.bend_circular(
         radius=radius,
         angle=angle,
         npoints=npoints,
@@ -37,7 +38,7 @@ def bend_circular(
     )
 
 
-@gf.cell(tags=["layout", "primitive", "bend_euler"])
+@curves.sampled_cell(tags=["layout", "primitive", "bend_euler"])
 def bend_euler(
     radius: float | None = None,
     angle: float = 90.0,
@@ -52,7 +53,7 @@ def bend_euler(
 ) -> gf.Component:
     """Return a GF Euler bend with a project CPW default cross-section."""
 
-    return gf.components.bend_euler(
+    return curves.bend_euler(
         radius=radius,
         angle=angle,
         p=p,
@@ -66,7 +67,7 @@ def bend_euler(
     )
 
 
-@gf.cell(tags=["layout", "primitive", "straight"])
+@curves.sampled_cell(tags=["layout", "primitive", "straight"])
 def straight(
     length: float = 10.0,
     npoints: int = 2,
@@ -83,7 +84,7 @@ def straight(
     )
 
 
-@gf.cell(tags=["layout", "primitive", "cpw", "taper"])
+@curves.sampled_cell(tags=["layout", "primitive", "cpw", "taper"])
 def cpw_handoff(
     length: float = 200.0,
     taper_length: float = 50.0,
@@ -151,12 +152,12 @@ def cpw_handoff(
     return c
 
 
-@gf.cell(tags=["layout", "primitive", "metal", "rounded_end"])
+@curves.sampled_cell(tags=["layout", "primitive", "metal", "rounded_end"])
 def rounded_end_metal_segment(
     length: float = 100.0,
     width: float = 10.0,
     ground_mask_margin: float = 6.0,
-    n_cap_points: int = 17,
+    n_cap_points: int | None = None,
     draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
     etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
@@ -173,6 +174,8 @@ def rounded_end_metal_segment(
         raise ValueError("width must be positive and length must contain the half-width cap")
     if ground_mask_margin < 0:
         raise ValueError("ground_mask_margin must be nonnegative for expansion")
+    if n_cap_points is None:
+        n_cap_points = curves.arc_points(width / 2, 90)
     if n_cap_points < 2:
         raise ValueError("each cap quarter needs its two endpoints")
     radius = width / 2
@@ -207,12 +210,12 @@ def rounded_end_metal_segment(
     return c
 
 
-@gf.cell(tags=["layout", "primitive", "rounded_rectangle"])
+@curves.sampled_cell(tags=["layout", "primitive", "rounded_rectangle"])
 def rounded_rectangle(
     width: float = 100.0,
     height: float = 50.0,
     corner_radius: float = 7.0,
-    n_corner_points: int = 20,
+    n_corner_points: int | None = None,
     ground_mask_margin: float = 6.0,
     draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
     ground_mask_layer: LayerSpec | None = None,
@@ -226,6 +229,11 @@ def rounded_rectangle(
     """
     if width <= 0 or height <= 0 or not 0 <= corner_radius <= min(width, height) / 2:
         raise ValueError("positive dimensions must contain the nonnegative corner radius")
+    if n_corner_points is None:
+        sampling_radius = corner_radius + (
+            ground_mask_margin if ground_mask_layer is not None else 0
+        )
+        n_corner_points = curves.arc_points(sampling_radius, 90) if sampling_radius > 0 else 2
     if n_corner_points < 2:
         raise ValueError("each rounded corner needs its two endpoints")
     c = gf.Component()
@@ -253,7 +261,7 @@ def rounded_rectangle(
     return c
 
 
-@gf.cell(tags=["layout", "primitive", "wire_corner"])
+@curves.sampled_cell(tags=["layout", "primitive", "wire_corner"])
 def wire_corner(
     cross_section: CrossSectionSpec = "cpw_6_7_6",
     port_names: PortNames = ("e1", "e2"),

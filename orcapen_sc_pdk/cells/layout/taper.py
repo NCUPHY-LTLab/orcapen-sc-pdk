@@ -2,10 +2,11 @@
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@gf.cell(tags=["layout", "primitive", "taper"])
+@curves.sampled_cell(tags=["layout", "primitive", "taper"])
 def taper(
     width1: float = 10.0,
     width2: float = 7.0,

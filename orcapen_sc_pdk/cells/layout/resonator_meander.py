@@ -3,6 +3,7 @@
 import gdsfactory as gf
 from gdsfactory.typings import ComponentSpec, CrossSectionSpec
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.ports import add_mesh_port
 from orcapen_sc_pdk.tech import (
     CPW_ETCH_POS,
@@ -12,7 +13,7 @@ from orcapen_sc_pdk.tech import (
 )
 
 
-@gf.cell(tags=["layout", "resonator", "meander"])
+@curves.sampled_cell(tags=["layout", "resonator", "meander"])
 def resonator_meander(
     length: float = 4000.0,
     meanders: int = 6,
@@ -20,7 +21,7 @@ def resonator_meander(
     bend_spec: ComponentSpec = "bend_euler",
     cpw_xs: CrossSectionSpec = "cpw_6_10_6",
     cpw_radius: float = 100.0,
-    bend_npoints: int | None = 16,
+    bend_npoints: int | None = None,
     start_with_bend: bool = False,
     end_with_bend: bool = False,
     open_start: bool = False,
@@ -73,7 +74,7 @@ def resonator_meander(
             "start_with_bend/end_with_bend."
         )
 
-    bend_length = float(bend.info["length"])
+    bend_length = curves.design_length(bend)
     total_straight_length = length - meanders * bend_length
     straight_lengths: list[float] = []
 
