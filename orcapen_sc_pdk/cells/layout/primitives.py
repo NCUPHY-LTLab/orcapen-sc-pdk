@@ -174,7 +174,8 @@ def rounded_end_metal_segment(
         raise ValueError("width must be positive and length must contain the half-width cap")
     if ground_mask_margin < 0:
         raise ValueError("ground_mask_margin must be nonnegative for expansion")
-    if n_cap_points is None:
+    automatic_cap = n_cap_points is None
+    if automatic_cap:
         n_cap_points = curves.arc_points(width / 2, 90)
     if n_cap_points < 2:
         raise ValueError("each cap quarter needs its two endpoints")
@@ -192,7 +193,22 @@ def rounded_end_metal_segment(
     draw.add_polygon(points, layer=draw_layer)
     c << draw
     mask = gf.Component()
-    mask.add_polygon(points, layer=ground_mask_layer)
+    mask_points = points
+    if automatic_cap and curves.resolve_sampling()[0] == "diameter":
+        # The opening has its own radius; do not inherit the metal's tier.
+        mask_count = curves.arc_points(radius + ground_mask_margin, 90)
+        mask_angles = [
+            -pi / 2 + i * pi / (2 * (mask_count - 1)) for i in range(mask_count)
+        ]
+        mask_angles += [
+            i * pi / (2 * (mask_count - 1)) for i in range(1, mask_count)
+        ]
+        mask_points = [
+            (0.0, -radius),
+            *[(center_x + radius * cos(a), radius * sin(a)) for a in mask_angles],
+            (0.0, radius),
+        ]
+    mask.add_polygon(mask_points, layer=ground_mask_layer)
     mask.offset(layer=ground_mask_layer, distance=ground_mask_margin)
     c << mask
     c << gf.boolean(
@@ -229,11 +245,15 @@ def rounded_rectangle(
     """
     if width <= 0 or height <= 0 or not 0 <= corner_radius <= min(width, height) / 2:
         raise ValueError("positive dimensions must contain the nonnegative corner radius")
+    mask_corner_points = n_corner_points
     if n_corner_points is None:
         sampling_radius = corner_radius + (
             ground_mask_margin if ground_mask_layer is not None else 0
         )
         n_corner_points = curves.arc_points(sampling_radius, 90) if sampling_radius > 0 else 2
+        mask_corner_points = n_corner_points
+        if curves.resolve_sampling()[0] == "diameter":
+            n_corner_points = curves.arc_points(corner_radius, 90) if corner_radius > 0 else 2
     if n_corner_points < 2:
         raise ValueError("each rounded corner needs its two endpoints")
     c = gf.Component()
@@ -255,7 +275,7 @@ def rounded_rectangle(
             height=height + 2 * ground_mask_margin,
             corner_radius_x=corner_radius + ground_mask_margin,
             corner_radius_y=corner_radius + ground_mask_margin,
-            n_corner_points=n_corner_points,
+            n_corner_points=mask_corner_points,
             layer=ground_mask_layer,
         )
     return c
