@@ -1,9 +1,14 @@
-# Flip-Chip And 3D Integration
+---
+title: "Flip-Chip and 3D Integration"
+sidebar: research
+---
 
-**Design family:** multi-die / package
+Use this topic to select public multi-die superconducting circuit and package
+references, including die-face, bump, and interface assumptions.
 
-**Status:** source selection
+⏳ Reference selection is in progress. Choose a paper with enough geometry
+and contact information to define the intended structure.
 
-Collect public flip-chip or 3D superconducting circuit papers that can exercise
-multi-face layer semantics, indium bump assumptions, and package-scale
-simulation workflows.
+See [Layers & Stack](../start/layers.qmd) for OrcaPen's die-face definitions
+and the [Model Gallery](../public-pdk-examples/test-components.md#reading-the-multi-level-views)
+for existing flip-chip and airbridge geometry.

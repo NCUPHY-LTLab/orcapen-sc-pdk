@@ -1,0 +1,17 @@
+---
+title: "OrcaPen SC PDK"
+description: "適用於 GDSFactory 的超導與射頻佈局、製程紀錄及模擬範例。"
+sidebar: false
+---
+
+OrcaPen 是超導與射頻（Radio Frequency，RF）的製程設計套件（Process Design Kit，PDK），提供可重用的元件（Cell）、共面波導（Coplanar Waveguide，CPW）橫截面（Cross-section）、圖層、堆疊與材料。先建立版圖，再依需求選擇要計算的物理量。
+
+![OrcaPen CPW 諧振器：DRAW 與 ETCH 幾何。](_static/images/components/resonator.svg){#fig-home-resonator width=85%}
+
+{{< askr-image-view target="fig-home-resonator" label="檢視諧振器佈局" >}}
+
+- [入門](getting-started.md)：安裝 OrcaPen、啟用 PDK，並建立第一個元件。
+- [模擬](notebooks.qmd)：選擇電容、模態、S 參數、橫截面或參與率分析。
+- [API](api.qmd)：查閱產生的函式參考與技術定義。
+
+前往[研究](paper-review.md)查看公開設計參考，或到[開發](developing-features.md)參與程式與文件貢獻。

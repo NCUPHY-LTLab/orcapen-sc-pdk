@@ -4,11 +4,12 @@ from math import sqrt
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.ports import add_junction_lumped_port
 from orcapen_sc_pdk.tech import LAYER
 
 
-@gf.cell(tags=["simulation", "capacitor", "simple_pad", "single_die"])
+@curves.sampled_cell(tags=["simulation", "capacitor", "simple_pad", "single_die"])
 def square_pad_capacitor(
     pad_side_um: float = 200.0,
     gap_um: float = 20.0,
@@ -104,7 +105,7 @@ def square_pad_capacitor(
     return component
 
 
-@gf.cell(tags=["simulation", "capacitor", "circular_pad", "single_die", "circular_arc"])
+@curves.sampled_cell(tags=["simulation", "capacitor", "circular_pad", "single_die", "circular_arc"])
 def circular_pad_capacitor(
     outer_radius_um: float = 100.0,
     inner_radius_um: float = 0.0,
@@ -131,17 +132,17 @@ def circular_pad_capacitor(
 
     component = gf.Component()
     if inner_radius_um == 0:
-        pad = gf.components.circle(radius=outer_radius_um, layer=LAYER.D0_TOP_M1_DRAW)
+        pad = curves.circle(radius=outer_radius_um, layer=LAYER.D0_TOP_M1_DRAW)
         pad_selector = (0.0, 0.0)
     else:
-        pad = gf.components.ring(
+        pad = curves.ring(
             radius=(outer_radius_um + inner_radius_um) / 2,
             width=outer_radius_um - inner_radius_um,
             layer=LAYER.D0_TOP_M1_DRAW,
         )
         pad_selector = ((outer_radius_um + inner_radius_um) / 2, 0.0)
     component << pad
-    opening = gf.components.circle(radius=opening_radius, layer=LAYER.D0_TOP_GROUND_MASK)
+    opening = curves.circle(radius=opening_radius, layer=LAYER.D0_TOP_GROUND_MASK)
     component << opening
     die = gf.components.rectangle(
         size=(die_side_um, die_side_um), centered=True, layer=LAYER.D0_SUBSTRATE_AREA
@@ -276,7 +277,7 @@ def _circle_boundary(radius: float, *, clockwise: bool = False) -> list[dict]:
     ]
 
 
-@gf.cell(tags=["simulation", "primitive", "curved_strip", "single_die", "circular_arc"])
+@curves.sampled_cell(tags=["simulation", "primitive", "curved_strip", "single_die", "circular_arc"])
 def straight_to_circular_strip(
     straight_length_um: float = 100.0,
     bend_radius_um: float = 100.0,
@@ -296,7 +297,7 @@ def straight_to_circular_strip(
         raise ValueError("die must contain the curved strip")
     path = gf.path.Path()
     path.append(gf.path.straight(length=straight_length_um))
-    path.append(gf.path.arc(radius=bend_radius_um, angle=90))
+    path.append(curves.arc(radius=bend_radius_um, angle=90))
     strip = gf.path.extrude(path, width=strip_width_um, layer=LAYER.D0_TOP_M1_DRAW)
     component = gf.Component()
     component << strip

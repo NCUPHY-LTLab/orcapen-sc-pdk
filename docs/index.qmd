@@ -1,58 +1,20 @@
 ---
 title: "OrcaPen SC PDK"
-description: "Public superconducting quantum and RF PDK documentation."
+description: "Superconducting and RF layouts, process records, and simulation examples for GDSFactory."
+sidebar: false
 ---
 
-`orcapen-sc-pdk` provides public superconducting quantum/RF layout cells, CPW
-cross-sections, process layers, materials and semantic source geometry for
-GDSFactory. Install the package in your own project; keep private chip designs,
-parameters and run evidence in that project.
+Design superconducting and RF layouts with reusable cells, CPW cross-sections,
+layers, stacks, and materials. Start with a layout, then choose a simulation
+when you need a physical quantity.
 
-OrcaPen means an orca's pen, inspired by the cute story of an orca and a penguin.
-A person who loves that idea is developing an open superconducting process design kit.
-The current renamed wheel is a local candidate; see
-[Distribution and handoff](distribution.md).
+![An OrcaPen CPW resonator: DRAW and ETCH geometry.](_static/images/components/resonator.svg){#fig-home-resonator width=85%}
 
-## Component layouts
+{{< askr-image-view target="fig-home-resonator" label="Explore the resonator layout" >}}
 
-![Default CPW resonator: actual DRAW and ETCH.](_static/images/components/resonator.svg){#fig-overview-resonator width=35%}
+- [Get Started](getting-started.md): Install OrcaPen, activate the PDK, and build your first cell.
+- [Simulation](notebooks.qmd): Choose capacitance, modes, S-parameters, cross-sections, or participation analysis.
+- [API](api.qmd): Find generated function references and technology definitions.
 
-{{< askr-image-view target="fig-overview-resonator" label="Image: resonator" >}}
-
-![Default interdigital capacitor: actual DRAW and ETCH.](_static/images/components/interdigital_capacitor.svg){#fig-overview-idc width=65%}
-
-{{< askr-image-view target="fig-overview-idc" label="Image: interdigital capacitor" >}}
-
-Open [Cells](public-pdk-examples/index.md#components-layout) for more component
-views, or the [Test Components Set](public-pdk-examples/test-components.md) for
-source-derived pad, strip, CPW, flip-chip and airbridge layouts. These are
-image previews of current default factories: deep-teal DRAW and soft light-teal ETCH,
-with auxiliary layers omitted. They are not a native GDS or simulation viewer.
-
-Build reusable cells with GDSFactory and compose layouts using OrcaPen's CPW
-cross-sections, layers and materials. The base M1 film defaults to 100 nm;
-airbridge and bump levels retain their separately declared dimensions.
-Examples are not measured process specifications.
-
-Simulation is optional: version-bound notebooks pass layouts and semantic
-intent to SCGSim for native geometry, meshes, solver handoff and reporting.
-
-## Choose a task
-
-- [Get Started](getting-started.md): install, activate OrcaPen and build a cell.
-- [Cells](public-pdk-examples/index.md): choose factories, source test-layout
-  families, tags or the inline component layout gallery.
-- [Process](materials-and-technology.md): layers, stack, materials, interface
-  presets and the source/runtime ownership boundary.
-- [Simulation](notebooks.qmd): choose a version-bound public SCGSim example;
-  distinguish revised source candidates from retained execution evidence.
-- [API](reference/index.qmd): package, cell and material interfaces.
-
-Source availability is not native mesh/contact/solver proof. The public source
-test layouts and newer runtime examples retain their stated limitations.
-
-## Contributor and research links
-
-[Development](developing-features.md), [workspace boundaries](home/ecosystem-workspace.md),
-[theme/toolchain](features/docs-theme.md) and [public paper research](paper-review.md)
-are secondary resources. They are not prerequisites for using the public PDK.
+Explore [Research](paper-review.md) for public design references, or
+[Development](developing-features.md) to contribute and work on the documentation.

@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 850" role="img" aria-labelledby="title description">
+<title id="title">OrcaPen transverse cross-section schematics</title>
+<desc id="description">Source-derived CPW, additive strip, and coupled CPW on D0 top: 0.1 micrometre aluminium above 500 micrometres silicon. Vertical scale is broken and exaggerated. Outer ground is cropped and has no selected finite width. The coupled central ground is 3 micrometres wide, between two 6 micrometre slots.</desc>
+<rect width="1000" height="850" fill="white"/>
+<g font-family="sans-serif" fill="#172b3a" font-size="15">
+<g transform="translate(0 0)">
+<text x="35" y="27" font-size="20" font-weight="bold">CPW: W = 10 µm, S = 6 µm</text>
+<text x="35" y="50" font-size="13">Local transverse x; path extends out of page</text>
+<rect x="200" y="100" width="600" height="105" fill="#cdddec" stroke="#738da4"/>
+<text x="500" y="152" text-anchor="middle">Si: z = −500 to 0 µm</text>
+<text x="500" y="174" text-anchor="middle" font-size="13">Vertical scale broken; thickness 500 µm</text>
+<path d="M190 140 l10 -6 l10 12 l10 -6 M780 140 l10 -6 l10 12 l10 -6" fill="none" stroke="#172b3a" stroke-width="2"/>
+<text x="815" y="88">Al: z = 0..0.1 µm</text>
+<text x="815" y="107" font-size="12">Thickness exaggerated</text>
+<text x="815" y="135">Vacuum above</text>
+<path d="M175 210 V70 m-4 7 l4 -7 l4 7" stroke="#172b3a" fill="none"/>
+<text x="159" y="69">z</text>
+<text x="160" y="107" text-anchor="end" font-size="12">0</text>
+<text x="160" y="205" text-anchor="end" font-size="12">−500</text>
+<rect x="200" y="88" width="190" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="295" y="80" text-anchor="middle" font-size="13">Ground</text>
+<rect x="450" y="88" width="100" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="500" y="80" text-anchor="middle" font-size="13">Signal</text>
+<rect x="610" y="88" width="190" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="705" y="80" text-anchor="middle" font-size="13">Ground</text>
+<text x="420" y="64" text-anchor="middle" font-size="12">S = 6</text>
+<text x="500" y="64" text-anchor="middle" font-size="12">W = 10</text>
+<text x="580" y="64" text-anchor="middle" font-size="12">S = 6</text>
+<path d="M390 207 V221" stroke="#738da4" fill="none"/>
+<text x="390" y="234" text-anchor="middle" font-size="12">-11</text>
+<path d="M450 207 V221" stroke="#738da4" fill="none"/>
+<text x="450" y="234" text-anchor="middle" font-size="12">-5</text>
+<path d="M550 207 V221" stroke="#738da4" fill="none"/>
+<text x="550" y="234" text-anchor="middle" font-size="12">5</text>
+<path d="M610 207 V221" stroke="#738da4" fill="none"/>
+<text x="610" y="234" text-anchor="middle" font-size="12">11</text>
+<path d="M200 212 H800 m-7 -4 l7 4 l-7 4" stroke="#172b3a" fill="none"/><text x="814" y="216">x (µm)</text>
+<path d="M200 84 V111 M800 84 V111" stroke="#172b3a" stroke-dasharray="3 3"/>
+<text x="500" y="270" text-anchor="middle" font-size="13">Outer grounds cropped at illustration edges; no finite ground width selected.</text>
+</g>
+<g transform="translate(0 275)">
+<text x="35" y="27" font-size="20" font-weight="bold">Additive strip: W = 10 µm</text>
+<text x="35" y="50" font-size="13">Local transverse x; path extends out of page</text>
+<rect x="200" y="100" width="600" height="105" fill="#cdddec" stroke="#738da4"/>
+<text x="500" y="152" text-anchor="middle">Si: z = −500 to 0 µm</text>
+<text x="500" y="174" text-anchor="middle" font-size="13">Vertical scale broken; thickness 500 µm</text>
+<path d="M190 140 l10 -6 l10 12 l10 -6 M780 140 l10 -6 l10 12 l10 -6" fill="none" stroke="#172b3a" stroke-width="2"/>
+<text x="815" y="88">Al: z = 0..0.1 µm</text>
+<text x="815" y="107" font-size="12">Thickness exaggerated</text>
+<text x="815" y="135">Vacuum above</text>
+<path d="M175 210 V70 m-4 7 l4 -7 l4 7" stroke="#172b3a" fill="none"/>
+<text x="159" y="69">z</text>
+<text x="160" y="107" text-anchor="end" font-size="12">0</text>
+<text x="160" y="205" text-anchor="end" font-size="12">−500</text>
+<rect x="450" y="88" width="100" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="500" y="80" text-anchor="middle" font-size="13">Strip</text>
+<text x="500" y="64" text-anchor="middle" font-size="12">W = 10</text>
+<path d="M450 207 V221" stroke="#738da4" fill="none"/>
+<text x="450" y="234" text-anchor="middle" font-size="12">-5</text>
+<path d="M550 207 V221" stroke="#738da4" fill="none"/>
+<text x="550" y="234" text-anchor="middle" font-size="12">5</text>
+<path d="M200 212 H800 m-7 -4 l7 4 l-7 4" stroke="#172b3a" fill="none"/><text x="814" y="216">x (µm)</text>
+<text x="500" y="260" text-anchor="middle" font-size="13">No ground plane is created by the strip recipe.</text>
+</g>
+<g transform="translate(0 550)">
+<text x="35" y="27" font-size="20" font-weight="bold">Coupled CPW: W = 7 µm, S = 6 µm, D = 3 µm ground</text>
+<text x="35" y="50" font-size="13">Local transverse x; path extends out of page</text>
+<rect x="200" y="100" width="600" height="105" fill="#cdddec" stroke="#738da4"/>
+<text x="500" y="152" text-anchor="middle">Si: z = −500 to 0 µm</text>
+<text x="500" y="174" text-anchor="middle" font-size="13">Vertical scale broken; thickness 500 µm</text>
+<path d="M190 140 l10 -6 l10 12 l10 -6 M780 140 l10 -6 l10 12 l10 -6" fill="none" stroke="#172b3a" stroke-width="2"/>
+<text x="815" y="88">Al: z = 0..0.1 µm</text>
+<text x="815" y="107" font-size="12">Thickness exaggerated</text>
+<text x="815" y="135">Vacuum above</text>
+<path d="M175 210 V70 m-4 7 l4 -7 l4 7" stroke="#172b3a" fill="none"/>
+<text x="159" y="69">z</text>
+<text x="160" y="107" text-anchor="end" font-size="12">0</text>
+<text x="160" y="205" text-anchor="end" font-size="12">−500</text>
+<rect x="200" y="88" width="95" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="247.5" y="80" text-anchor="middle" font-size="13">Ground</text>
+<rect x="355" y="88" width="70" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="390" y="80" text-anchor="middle" font-size="13">t2</text>
+<rect x="485" y="88" width="30" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="500" y="80" text-anchor="middle" font-size="13">G</text>
+<rect x="575" y="88" width="70" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="610" y="80" text-anchor="middle" font-size="13">t1</text>
+<rect x="705" y="88" width="95" height="12" fill="#127d85" stroke="#07545a"/>
+<text x="752.5" y="80" text-anchor="middle" font-size="13">Ground</text>
+<text x="325" y="64" text-anchor="middle" font-size="12">6</text>
+<text x="390" y="64" text-anchor="middle" font-size="12">7</text>
+<text x="455" y="64" text-anchor="middle" font-size="12">6</text>
+<text x="500" y="64" text-anchor="middle" font-size="12">3</text>
+<text x="545" y="64" text-anchor="middle" font-size="12">6</text>
+<text x="610" y="64" text-anchor="middle" font-size="12">7</text>
+<text x="675" y="64" text-anchor="middle" font-size="12">6</text>
+<path d="M295 207 V219" stroke="#738da4" fill="none"/>
+<text x="295" y="232" text-anchor="middle" font-size="12">-20.5</text>
+<path d="M355 207 V236" stroke="#738da4" fill="none"/>
+<text x="355" y="249" text-anchor="middle" font-size="12">-14.5</text>
+<path d="M425 207 V219" stroke="#738da4" fill="none"/>
+<text x="425" y="232" text-anchor="middle" font-size="12">-7.5</text>
+<path d="M485 207 V236" stroke="#738da4" fill="none"/>
+<text x="485" y="249" text-anchor="middle" font-size="12">-1.5</text>
+<path d="M515 207 V219" stroke="#738da4" fill="none"/>
+<text x="515" y="232" text-anchor="middle" font-size="12">1.5</text>
+<path d="M575 207 V236" stroke="#738da4" fill="none"/>
+<text x="575" y="249" text-anchor="middle" font-size="12">7.5</text>
+<path d="M645 207 V219" stroke="#738da4" fill="none"/>
+<text x="645" y="232" text-anchor="middle" font-size="12">14.5</text>
+<path d="M705 207 V236" stroke="#738da4" fill="none"/>
+<text x="705" y="249" text-anchor="middle" font-size="12">20.5</text>
+<path d="M200 212 H800 m-7 -4 l7 4 l-7 4" stroke="#172b3a" fill="none"/><text x="814" y="216">x (µm)</text>
+<path d="M200 84 V111 M800 84 V111" stroke="#172b3a" stroke-dasharray="3 3"/>
+<text x="500" y="270" text-anchor="middle" font-size="13">Outer grounds cropped at illustration edges; no finite ground width selected.</text>
+</g>
+</g>
+</svg>

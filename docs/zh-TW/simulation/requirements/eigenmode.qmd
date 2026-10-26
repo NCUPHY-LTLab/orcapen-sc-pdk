@@ -1,0 +1,27 @@
+---
+title: "共振與本徵模態（Eigenmode）"
+sidebar: simulation
+---
+
+求出有界電磁模型的頻率與場。依欲計算的物理系統，選擇未負載、LC 負載或明確 RLC 負載模型。
+
+## 選擇模型
+
+| 模型 | 起始教學 |
+| --- | --- |
+| 未負載有限 CPW | [Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> 或 [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| 帶明確線性電感支路的焊墊 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> 或 [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| 曲面焊墊邊界 | [CircularPad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| 封閉 TSV 模型 | [TSV HFSS 本徵模態](../tsv-model-inspection.qmd) |
+
+依所選教學設定求解器環境、導體連通性、堆疊與外部區域。搜尋頻率與要求的模態數決定計算內容；網格與適應設定控制離散化方式。
+
+## 負載模態 {#loaded-modes}
+
+[CPW－蛇形線 RLC 教學](../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.qmd" data-noresolveinput download>QMD</a> 對所選組合加入明確線性負載。請保留其支撐片、啟用支路、拓樸與接點方向。此模型不會自動加入 Josephson 非線性。
+
+## 判讀模態
+
+應依實際場型識別模態，不可只依頻率排序。一起閱讀頻率與適應歷程；僅在所選損耗模型及回傳輸出提供原生 Q 值時才報告該值。
+
+介面或接面能量分析請接續閱讀[參與率與表面損耗](epr-loss.qmd)。

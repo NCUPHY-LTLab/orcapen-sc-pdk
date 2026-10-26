@@ -1,0 +1,37 @@
+---
+title: "共面波導銜接段（CPW handoff）"
+sidebar: api
+---
+
+`cpw_handoff` 以一段漸變段（taper）將原始共面波導（coplanar waveguide，CPW）連接至佈線寬度的區段。
+
+## 建立預設元件 {#build-the-default-component}
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("cpw_handoff")
+~~~
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `length` | 200 µm | 總長度，包含一次漸變段長度。 |
+| `taper_length` | 50 µm | 出口漸變段的長度。 |
+| `native_width` / `native_gap` | 10 µm / 6 µm | 原始端的導線寬度與間隙。 |
+| `route_width` / `route_gap` | 7 µm / 6 µm | 佈線端的導線寬度與間隙。 |
+| `radius` | 100 µm | 橫截面的佈線中繼資料。 |
+| `draw_layer` | `LAYER.D0_TOP_M1_DRAW` | 導線繪製圖層。 |
+| `etch_layer` | `LAYER.D0_TOP_M1_ETCH` | 蝕刻圖層。 |
+| `ground_mask_layer` | `LAYER.D0_TOP_GROUND_MASK` | 接地遮罩圖層。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+`o1` 位於 `(0, 0)`，朝向 −X，採用原始寬度；`o2` 位於 `(length, 0)`，朝向 +X，採用佈線寬度。兩者皆在 DRAW 圖層。半徑是佈線中繼資料，這個直線銜接元件不包含彎曲。
+
+`length` 須為正值，`taper_length` 須介於零與 `length` 之間。漸變段長度為零時，兩端的導線寬度與間隙都須相同。
+
+此工廠函式由[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py)定義。

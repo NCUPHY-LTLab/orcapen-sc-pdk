@@ -1,0 +1,26 @@
+---
+title: "電容（Capacitance）"
+sidebar: simulation
+---
+
+計算焊墊孤島相對於周圍接地的電容。若需要明確指定導體與參考配置，而非全波傳輸模型，可從 SimplePad 開始。
+
+## 模型與前置條件
+
+請保留所選教學中的孤島、非金屬開口、接地、介電基板與周圍區域。比較矩陣值前，先選定電位參考與外部區域處理方式。
+
+使用教學指定的 SCGSim 環境及 Palace 或 AEDT Q3D。[圖層與堆疊](../../start/layers.qmd)及[材料與介面](../../start/materials.qmd)說明製程輸入。
+
+## 選擇教學
+
+| 後端 | 教學 | 檢查項目 |
+| --- | --- | --- |
+| Palace | [SimplePad 靜電](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.qmd" data-noresolveinput download>QMD</a> | 電位參考、邊界、網格與回傳電容 |
+| AEDT Q3D | [SimplePad 擷取](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.qmd" data-noresolveinput download>QMD</a> | 原生材料／Net 指派與矩陣項目順序 |
+| AEDT Q3D | [有限 CPW 擷取](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.qmd" data-noresolveinput download>QMD</a> | 有限導體配置與教學啟用的矩陣族 |
+
+## 判讀結果
+
+讀取電容時，應一併記錄單位、導體順序、參考端與任何矩陣縮減。將要求的設定及適應歷程與數值一起檢視。不同外部區域或導體慣例需要分別詮釋。
+
+自然模態請接續閱讀[共振與本徵模態](eigenmode.qmd)；均勻傳輸線請見[橫截面模擬](q2d-cross-section.qmd)。

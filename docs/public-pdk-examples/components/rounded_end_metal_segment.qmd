@@ -1,0 +1,36 @@
+---
+title: "Rounded-end metal segment"
+sidebar: api
+---
+
+`rounded_end_metal_segment` creates a metal segment with a flat left face and a semicircular right cap.
+
+## Build the default component
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("rounded_end_metal_segment")
+~~~
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `length` | 100 µm | Total extent from the flat face to the cap tip. |
+| `width` | 10 µm | Segment width; cap radius is half this value. |
+| `ground_mask_margin` | 6 µm | Expand the mask outline from DRAW. |
+| `n_cap_points` | 17 | Points per cap quarter, including endpoints. |
+| `draw_layer` | `LAYER.D0_TOP_M1_DRAW` | Metal outline. |
+| `etch_layer` | `LAYER.D0_TOP_M1_ETCH` | MASK minus DRAW. |
+| `ground_mask_layer` | `LAYER.D0_TOP_GROUND_MASK` | Expanded ground-mask outline. |
+
+## Ports and layers
+
+`o1` is the route port at `(0, 0)`, facing −X. `o_mesh` marks the cap centre on DRAW for mesh-region selection; it is not a second route port or a mesh-size setting.
+
+The width must be positive and length must be at least half the width. At that minimum length, `o_mesh` lies on the flat boundary at `o1`'s centre. The mask uses a geometric offset of the DRAW outline.
+
+The [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py) defines this factory.

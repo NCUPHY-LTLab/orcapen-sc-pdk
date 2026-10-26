@@ -1,0 +1,30 @@
+---
+title: "共面波導 T 型接面（CPW T-junction）"
+sidebar: api
+---
+
+`cpw_t_junction` 將共面波導（coplanar waveguide，CPW）直線主幹連接至垂直分支。它採用 OrcaPen CPW 橫截面（cross-section），包含 DRAW、負向與正向 ETCH，以及 GROUND_MASK 區段。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("cpw_t_junction")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `trunk_length` | 200 µm | 直線主幹的長度。 |
+| `branch_length` | 100 µm | 垂直分支的長度。 |
+| `cross_section` | `coplanar_waveguide` | 橫截面，須包含 OrcaPen CPW 所需的各區段。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+`o1` 與 `o2` 位於主幹兩端，`o_branch` 朝向 +Y。幾何圖層由選定的橫截面決定，預設組成請見[橫截面](../cross-sections.qmd)。
+
+請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.cpw_t_junction.html#orcapen_sc_pdk.cells.cpw_t_junction)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/cpw.py)。

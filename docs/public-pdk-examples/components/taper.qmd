@@ -1,0 +1,33 @@
+---
+title: "Taper"
+sidebar: api
+---
+
+`taper` creates a CPW transition between two conductor widths and gap sizes.
+The default keeps the gap at 6 µm while changing the conductor width from 10 µm
+to 7 µm.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("taper")
+```
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `width1`, `width2` | 10 µm, 7 µm | Conductor widths at the two ends. |
+| `gap1`, `gap2` | 6 µm, 6 µm | CPW gap sizes at the two ends. |
+| `length` | 100 µm | Transition length. |
+
+## Ports and layers
+
+The route ports are `o_taper_in` and `o_taper_out`, both on the DRAW conductor.
+The factory creates DRAW, GROUND_MASK, and derived ETCH geometry. See the
+[pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/taper.py)
+for the layer and port definitions.

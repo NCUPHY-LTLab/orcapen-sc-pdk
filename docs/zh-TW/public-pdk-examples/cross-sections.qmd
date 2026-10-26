@@ -1,0 +1,370 @@
+---
+title: "橫截面（Cross-sections）"
+sidebar: get-started
+toc: true
+toc-depth: 3
+execute:
+  enabled: false
+---
+
+選擇已註冊的橫截面，定義沿路徑擠出時的寬度、橫向偏移、圖層與幾何連接埠（Geometric connection port）。點選下列名稱，查看預設預覽、設定與各區段的確切圖層。
+
+| 註冊名稱 | 預設組成 |
+| --- | --- |
+| [coplanar_waveguide](#coplanar_waveguide) | 共面波導（Coplanar Waveguide，CPW）：寬度 10 µm／間隙 6 µm |
+| [coupled_cpw_w7_s6_d3](#coupled_cpw_w7_s6_d3) | 兩條 7 µm 導線／6 µm 槽隙／3 µm 接地帶 |
+| [cpw](#cpw) | 別名： coplanar_waveguide |
+| [cpw_2dot7_4_2dot7](#cpw_2dot7_4_2dot7) | CPW：寬度 4 µm／間隙 2.7 µm |
+| [cpw_6_7_6](#cpw_6_7_6) | CPW：寬度 7 µm／間隙 6 µm |
+| [cpw_6_10_6](#cpw_6_10_6) | CPW：寬度 10 µm／固定間隙 6 µm |
+| [cpw_15_5_15](#cpw_15_5_15) | D1 BOTTOM CPW：寬度 5 µm／間隙 15 µm |
+| [n_trace_coplanar_waveguide](#n_trace_coplanar_waveguide) | 可設定參數的多導線 CPW；預設 W7/S6/D3 |
+| [etch](#etch) | 僅蝕刻的 CPW 形遮罩 |
+| [etch_only](#etch_only) | 別名： etch |
+| [josephson_junction_cross_section_narrow](#josephson_junction_cross_section_narrow) | 約瑟夫森接面（Josephson Junction，JJ）繪製線：寬度 0.09 µm |
+| [josephson_junction_cross_section_wide](#josephson_junction_cross_section_wide) | JJ 繪製線：寬度 0.2 µm |
+| [launcher_cross_section_big](#launcher_cross_section_big) | 饋入 CPW：寬度 200 µm／間隙 110 µm |
+| [microstrip](#microstrip) | 正形金屬帶：寬度 10 µm |
+| [strip](#strip) | 別名： microstrip |
+| [strip_metal](#strip_metal) | 別名： microstrip |
+
+## 閱讀預覽圖 {#read-the-previews}
+
+每張預覽圖使用啟用 OrcaPen 後，由 GDSFactory 9.48.0 的 `gf.get_cross_section(name)` 回傳的實際預設區段紀錄。M1 組成先顯示晶片表面的橫向實體切面：0.1 µm 鋁（Al）與 500 µm 矽（Si）基板；金屬厚度經誇大，垂直比例採裁切與斷軸表示。CPW 槽隙及剩餘接地來自區段範圍，外側接地延伸至圖外，未指定有限寬度。顏色沿用既有 `layers.yaml` 設定。
+
+第二個面板顯示底層 XY 組成。每條水平帶的範圍為 `offset − width/2` 至 `offset + width/2`，單位為 µm。各區段紀錄分列顯示，讓重疊的 DRAW、ETCH 與 GROUND_MASK 都可辨識；**此面板的垂直方向不是實體 Z 軸**。各面板具有各自的水平比例。僅蝕刻與 JJ 項目只顯示組成面板：ETCH 繪製移除遮罩，JJ 繪製圖層則沒有宣告實體堆疊層級。
+
+請搭配[圖層與堆疊](../start/layers.qmd)確認 Z 座標與材料。D0 TOP M1 的鋁位於 z = 0..0.1 µm，下方是 500 µm 矽；D1 BOTTOM M1 位於 z = 8.1..8.2 µm，向外方向為 −Z。接地遮罩與蝕刻區段是建構輸入，不是額外金屬薄膜。這些橫截面沒有指定有限的外側接地寬度。
+
+定義位於
+[tech.py（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/tech.py#L678);
+16 個名稱註冊於
+[pdk.py（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/pdk.py#L113).
+下列表格列出各項預設圖層配置。彎曲半徑是佈線中繼資料，不表示橫向預覽圖中畫有彎曲。
+
+## 已註冊橫截面預覽 {#registered-cross-section-previews}
+
+### coplanar_waveguide {#coplanar_waveguide}
+
+可設定參數的 CPW：10 µm 訊號導線兩側各有 6 µm 槽隙。22 µm 接地遮罩界定槽隙，外側接地由元件表面／定義域幾何形狀提供。
+
+![coplanar_waveguide 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/coplanar_waveguide.svg)
+
+預設設定： `width=10`; `gap=6`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`; `D0_TOP_M1_ETCH` `(1, 1)`; `D0_TOP_GROUND_MASK` `(110, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 10 | 0 | `(1, 0)` |
+| `cpw_etch_neg` | 6 | -8 | `(1, 1)` |
+| `cpw_etch_pos` | 6 | 8 | `(1, 1)` |
+| `cpw_ground_mask` | 22 | 0 | `(110, 0)` |
+
+### coupled_cpw_w7_s6_d3 {#coupled_cpw_w7_s6_d3}
+
+固定雙導線組成：每條導線寬 7 µm，兩側各有 6 µm 槽隙。內側槽隙之間保留 3 µm 接地帶。導線中心位於 +11 與 −11 µm，最近的導線邊緣相距 15 µm，而非 3 µm。
+
+![coupled_cpw_w7_s6_d3 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/coupled_cpw_w7_s6_d3.svg)
+
+預設設定： `trace_names=None`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`; `D0_TOP_M1_ETCH` `(1, 1)`; `D0_TOP_GROUND_MASK` `(110, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `t1` | 7 | 11 | `(1, 0)` |
+| `t1_s_neg` | 6 | 17.5 | `(1, 1)` |
+| `cpw_ground_mask` | 19 | 11 | `(110, 0)` |
+| `t1_s_pos` | 6 | 4.5 | `(1, 1)` |
+| `t2_s_neg` | 6 | -4.5 | `(1, 1)` |
+| `t2` | 7 | -11 | `(1, 0)` |
+| `t2_ground_mask` | 19 | -11 | `(110, 0)` |
+| `t2_s_pos` | 6 | -17.5 | `(1, 1)` |
+
+### cpw {#cpw}
+
+[coplanar_waveguide](#coplanar_waveguide) 的別名，提供相同參數並回傳相同的預設區段幾何形狀。
+
+![cpw 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/cpw.svg)
+
+預設設定： `width=10`; `gap=6`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`; `D0_TOP_M1_ETCH` `(1, 1)`; `D0_TOP_GROUND_MASK` `(110, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 10 | 0 | `(1, 0)` |
+| `cpw_etch_neg` | 6 | -8 | `(1, 1)` |
+| `cpw_etch_pos` | 6 | 8 | `(1, 1)` |
+| `cpw_ground_mask` | 22 | 0 | `(110, 0)` |
+
+### cpw_2dot7_4_2dot7 {#cpw_2dot7_4_2dot7}
+
+訊號導線寬 4 µm、槽隙固定為 2.7 µm 的 CPW。變更寬度時仍保留 2.7 µm 間隙；預設接地遮罩寬度為 9.4 µm。
+
+![cpw_2dot7_4_2dot7 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/cpw_2dot7_4_2dot7.svg)
+
+預設設定： `width=4`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`; `D0_TOP_M1_ETCH` `(1, 1)`; `D0_TOP_GROUND_MASK` `(110, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 4 | 0 | `(1, 0)` |
+| `cpw_etch_neg` | 2.7 | -3.35 | `(1, 1)` |
+| `cpw_etch_pos` | 2.7 | 3.35 | `(1, 1)` |
+| `cpw_ground_mask` | 9.4 | 0 | `(110, 0)` |
+
+### cpw_6_7_6 {#cpw_6_7_6}
+
+訊號導線寬 7 µm、槽隙固定為 6 µm 的 CPW。預設接地遮罩寬度為 19 µm。
+
+![cpw_6_7_6 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/cpw_6_7_6.svg)
+
+預設設定： `width=7`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`; `D0_TOP_M1_ETCH` `(1, 1)`; `D0_TOP_GROUND_MASK` `(110, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 7 | 0 | `(1, 0)` |
+| `cpw_etch_neg` | 6 | -6.5 | `(1, 1)` |
+| `cpw_etch_pos` | 6 | 6.5 | `(1, 1)` |
+| `cpw_ground_mask` | 19 | 0 | `(110, 0)` |
+
+### cpw_6_10_6 {#cpw_6_10_6}
+
+訊號導線寬 10 µm、槽隙固定為 6 µm 的 CPW。預設幾何形狀與 coplanar_waveguide 相同；此包裝函式固定間隙，但開放寬度參數。
+
+![cpw_6_10_6 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/cpw_6_10_6.svg)
+
+預設設定： `width=10`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`; `D0_TOP_M1_ETCH` `(1, 1)`; `D0_TOP_GROUND_MASK` `(110, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 10 | 0 | `(1, 0)` |
+| `cpw_etch_neg` | 6 | -8 | `(1, 1)` |
+| `cpw_etch_pos` | 6 | 8 | `(1, 1)` |
+| `cpw_ground_mask` | 22 | 0 | `(110, 0)` |
+
+### cpw_15_5_15 {#cpw_15_5_15}
+
+位於 **D1 BOTTOM** 的 CPW，訊號導線寬 5 µm、槽隙為 15 µm，寬度與間隙皆可設定。預設實體堆疊中，此面的 0.1 µm 鋁從 z = 8.2 µm 的基板表面向 −Z 延伸，佔據 z = 8.1..8.2 µm。下方 XY 組成面板顯示橫向偏移，不表示向 +Z 擠出。
+
+![cpw_15_5_15 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/cpw_15_5_15.svg)
+
+預設設定： `width=5`; `gap=15`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D1_BOTTOM_M1_DRAW` `(2, 0)`; `D1_BOTTOM_M1_ETCH` `(2, 1)`; `D1_BOTTOM_GROUND_MASK` `(110, 1)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 5 | 0 | `(2, 0)` |
+| `cpw_etch_neg` | 15 | -10 | `(2, 1)` |
+| `cpw_etch_pos` | 15 | 10 | `(2, 1)` |
+| `cpw_ground_mask` | 35 | 0 | `(110, 1)` |
+
+### n_trace_coplanar_waveguide {#n_trace_coplanar_waveguide}
+
+可設定參數的多導線 CPW。N 條導線需要 N 個寬度、N 個逐導線間隙值（各自套用於該導線兩側），以及 N−1 個導線間接地寬度。預設雙導線幾何形狀與 [coupled_cpw_w7_s6_d3](#coupled_cpw_w7_s6_d3) 相同。
+
+![n_trace_coplanar_waveguide 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/n_trace_coplanar_waveguide.svg)
+
+預設設定： `trace_widths=(7, 7)`; `trace_gaps=(6, 6)`; `inter_trace_ground_widths=(3,)`; `trace_names=None`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`; `D0_TOP_M1_ETCH` `(1, 1)`; `D0_TOP_GROUND_MASK` `(110, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `t1` | 7 | 11 | `(1, 0)` |
+| `t1_s_neg` | 6 | 17.5 | `(1, 1)` |
+| `cpw_ground_mask` | 19 | 11 | `(110, 0)` |
+| `t1_s_pos` | 6 | 4.5 | `(1, 1)` |
+| `t2_s_neg` | 6 | -4.5 | `(1, 1)` |
+| `t2` | 7 | -11 | `(1, 0)` |
+| `t2_ground_mask` | 19 | -11 | `(110, 0)` |
+| `t2_s_pos` | 6 | -17.5 | `(1, 1)` |
+
+### etch {#etch}
+
+僅蝕刻的 CPW 形組成：全部四個區段，包括名為 cpw_draw 的區段，都使用 D0_TOP_M1_ETCH。其聯集跨度為 22 µm。這些多邊形是移除遮罩，不是金屬。
+
+![etch 實際預設橫向 XY 區段紀錄。](cross-sections/etch.svg)
+
+預設設定： `width=10`; `gap=6`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_ETCH` `(1, 1)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 10 | 0 | `(1, 1)` |
+| `cpw_etch_neg` | 6 | -8 | `(1, 1)` |
+| `cpw_etch_pos` | 6 | 8 | `(1, 1)` |
+| `cpw_ground_mask` | 22 | 0 | `(1, 1)` |
+
+### etch_only {#etch_only}
+
+[etch](#etch) 的別名，採用相同的部分套用函式預設值。所有回傳區段皆在 ETCH 上；區段名稱不會使其成為導體。
+
+![etch_only 實際預設橫向 XY 區段紀錄。](cross-sections/etch_only.svg)
+
+預設設定： `width=10`; `gap=6`; `radius=100`. 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_ETCH` `(1, 1)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 10 | 0 | `(1, 1)` |
+| `cpw_etch_neg` | 6 | -8 | `(1, 1)` |
+| `cpw_etch_pos` | 6 | 8 | `(1, 1)` |
+| `cpw_ground_mask` | 22 | 0 | `(1, 1)` |
+
+### josephson_junction_cross_section_narrow {#josephson_junction_cross_section_narrow}
+
+D0_TOP_JJ_DRAW 上的 0.09 µm 導線。此 JJ 繪製圖層沒有宣告實體堆疊層級、材料、厚度或 Z 範圍；預覽僅顯示 XY。
+
+![josephson_junction_cross_section_narrow 實際預設橫向 XY 區段紀錄。](cross-sections/josephson_junction_cross_section_narrow.svg)
+
+預設設定：無工廠函式參數。 回傳彎曲半徑： `10` µm.
+
+圖層： `D0_TOP_JJ_DRAW` `(21, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `_default` | 0.09 | 0 | `(21, 0)` |
+
+### josephson_junction_cross_section_wide {#josephson_junction_cross_section_wide}
+
+D0_TOP_JJ_DRAW 上的 0.2 µm 導線。此 JJ 繪製圖層沒有宣告實體堆疊層級、材料、厚度或 Z 範圍；預覽僅顯示 XY。
+
+![josephson_junction_cross_section_wide 實際預設橫向 XY 區段紀錄。](cross-sections/josephson_junction_cross_section_wide.svg)
+
+預設設定：無工廠函式參數。 回傳彎曲半徑： `10` µm.
+
+圖層： `D0_TOP_JJ_DRAW` `(21, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `_default` | 0.2 | 0 | `(21, 0)` |
+
+### launcher_cross_section_big {#launcher_cross_section_big}
+
+固定饋入 CPW：200 µm 訊號導線、110 µm 槽隙及 420 µm 接地遮罩。此工廠函式不接受參數。
+
+![launcher_cross_section_big 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/launcher_cross_section_big.svg)
+
+預設設定：無工廠函式參數。 回傳彎曲半徑： `100` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`; `D0_TOP_M1_ETCH` `(1, 1)`; `D0_TOP_GROUND_MASK` `(110, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `cpw_draw` | 200 | 0 | `(1, 0)` |
+| `cpw_etch_neg` | 110 | -155 | `(1, 1)` |
+| `cpw_etch_pos` | 110 | 155 | `(1, 1)` |
+| `cpw_ground_mask` | 420 | 0 | `(110, 0)` |
+
+### microstrip {#microstrip}
+
+D0_TOP_M1_DRAW 上一條寬 10 µm 的正形金屬帶。此組成不提供背面接地，也不構成完整的接地背板微帶線堆疊。
+
+![microstrip 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/microstrip.svg)
+
+預設設定： `width=10`. 回傳彎曲半徑： `10` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `_default` | 10 | 0 | `(1, 0)` |
+
+### strip {#strip}
+
+[microstrip](#microstrip) 的別名，採用相同寬度／圖層參數與預設正形金屬帶，不加入接地平面。
+
+![strip 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/strip.svg)
+
+預設設定： `width=10`. 回傳彎曲半徑： `10` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `_default` | 10 | 0 | `(1, 0)` |
+
+### strip_metal {#strip_metal}
+
+[microstrip](#microstrip) 的別名，採用相同寬度／圖層參數與預設正形金屬帶，不加入接地平面。
+
+![strip_metal 實體表面示意圖，以及下方的實際預設 XY 區段紀錄。](cross-sections/strip_metal.svg)
+
+預設設定： `width=10`. 回傳彎曲半徑： `10` µm.
+
+圖層： `D0_TOP_M1_DRAW` `(1, 0)`.
+
+| 實際區段 | 寬度（µm） | 偏移量（µm） | GDS 配對 |
+| --- | ---: | ---: | --- |
+| `_default` | 10 | 0 | `(1, 0)` |
+
+## 理解 CPW 接地組成 {#interpret-the-cpw-ground-recipe}
+
+訊號寬度為 `W`、間隙為 `S` 時，訊號是偏移量為零的 `cpw_draw`。兩個 ETCH 槽隙的寬度為 `S`，偏移量為 `±(W + S)/2`；GROUND_MASK 寬度為 `W + 2S`。周圍金屬由元件的表面／定義域組成提供。
+
+多導線的最外側槽隙邊緣間總跨度為 `sum(trace_widths) + 2*sum(trace_gaps) + sum(inter_trace_ground_widths)`。預設耦合組成的跨度為 41 µm。中央 3 µm 接地帶分隔兩個 6 µm 內側槽隙，訊號導線中心相距 22 µm。導線區段提供 `<name>_o1`／`<name>_o2` 連接埠。
+
+![D0 TOP CPW、正形金屬帶與耦合 CPW 的實體解讀。](cross-sections.svg)
+
+此實體示意圖結合 D0 TOP 組成與單晶片堆疊。垂直比例經斷軸與誇大處理；外側接地因繪圖而裁切，並未指定有限寬度。此圖不將 JJ 或僅蝕刻組成畫成實體金屬。
+
+## 在元件中使用橫截面並列出設定 {#use-a-section-in-a-component-and-report-its-settings}
+
+啟用 OrcaPen、取得具名橫截面，再傳給已註冊的
+[`straight` 基本元件（英文原始碼）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/cells/layout/primitives.py#L70).
+在已安裝 OrcaPen 的環境執行此範例，列出實際區段紀錄、元件設定與幾何連接埠。
+
+```python
+import gdsfactory as gf
+import orcapen_sc_pdk
+from orcapen_sc_pdk.cells import straight
+
+orcapen_sc_pdk.activate()
+gf.clear_cache()
+xs = gf.get_cross_section("cpw_6_10_6")
+component = straight(length=200, cross_section=xs)
+
+print("Cross-section:", xs.name)
+for section in xs.sections:
+    print({
+        "name": section.name,
+        "width_um": section.width,
+        "offset_um": section.offset,
+        "layer": section.layer,
+    })
+print("Component:", component.name)
+print("Settings:", component.settings)
+for port in component.ports:
+    print({
+        "name": port.name,
+        "center_um": port.dcenter,
+        "width_um": port.dwidth,
+        "orientation_deg": port.orientation,
+        "port_type": port.port_type,
+        "layer": port.layer,
+    })
+```
+
+確認：輸出包含偏移量 0 的 10 µm DRAW 區段、偏移量 −8 與 +8 的兩個 6 µm ETCH 區段，以及 22 µm 接地遮罩區段。請搭配元件設定閱讀實際回傳圖層值與連接埠紀錄。
+
+此範例回傳元件 `straight_L200_N2_CScpw_6_10_6_WNone`，設定為 `length=200`、`npoints=2`、`cross_section='cpw_6_10_6'` 與 `width=None`。
+
+| 連接埠 | 中心（µm） | 寬度（µm） | 朝向 | 回傳類型 |
+| --- | --- | ---: | ---: | --- |
+| `o1` | `(0, 0)` | 10 | 180° | `optical` |
+| `o2` | `(200, 0)` | 10 | 0° | `optical` |
+
+`optical` 是此直線工廠函式使用的已註冊 GDSFactory 幾何連接埠類型。模擬激發需另外依[模擬連接埠](../simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals)選擇。
+
+這些幾何連接埠的放置與連接方式請見 [GDSFactory 實例與連接埠指南（英文）](https://gdsfactory.github.io/gdsfactory/notebooks/01_references/)。激發片、參考導體與電氣端點請見 [S 參數與連接埠](../simulation/requirements/driven-terminal.qmd)。

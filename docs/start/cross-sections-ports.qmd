@@ -1,0 +1,13 @@
+---
+title: "Cross-sections & Ports"
+sidebar: get-started
+---
+
+Read [Cells → Cross-sections](../public-pdk-examples/cross-sections.qmd) for the
+complete OrcaPen registry, transverse geometry, and a component settings example.
+
+For electrical assignments, read
+[S-parameters & Ports](../simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals).
+It distinguishes layout connection ports, simulation locators, and solver
+terminals. Generic component connection is covered by
+[GDSFactory instances and ports](https://gdsfactory.github.io/gdsfactory/notebooks/01_references/).

@@ -1,0 +1,32 @@
+---
+title: "Indium bump"
+sidebar: api
+---
+
+`indium_bump` places one centered square indium bump, with an optional under-bump contact pad.
+
+## Build the default component
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("indium_bump")
+~~~
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `indium_bump_size` | 20 µm | Side length of the bump body. |
+| `under_bump_size` | 40 µm | Side length of the under-bump contact pad. |
+| `indium_bump_layer` | `LAYER.D0_D1_INDIUM_BUMP` | Bump-body layer. |
+| `under_bump_layer` | `LAYER.D0_D1_UNDER_BUMP` | Contact-pad layer. |
+| `include_under_bump` | `True` | Add the contact pad. |
+
+## Ports and layers
+
+The component has no ports. The default bump layer is indium with a nominal 8 µm stack thickness. The under-bump layer describes contact geometry and is excluded from simulation. Only the canonical bump-body layer receives a physical-stack entity; alternate body layers remain layout-only.
+
+The [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/indium.py) defines this factory.

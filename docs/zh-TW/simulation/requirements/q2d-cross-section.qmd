@@ -1,0 +1,30 @@
+---
+title: "橫截面（cross-section）模擬"
+sidebar: simulation
+---
+
+需要每單位長度傳輸線參數或局部直邊場模型時，使用均勻二維橫截面。有限發射器、彎角與元件轉角須以各自的三維方式詮釋。
+
+## AEDT Q2D
+
+[有限接地 CPW Q2D 教學](../../notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb) · <a href="../../notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.qmd" data-noresolveinput download>QMD</a> 建立原生矩形、將訊號與參考接地導體分組，並要求每單位長度矩陣。請依其前置需求設定 AEDT 與 SCGSim；此模型不需要 GDS 匯入或三維連接埠片。
+
+請保留截面座標軸、導體厚度、材料屬性、參考分組與 Region 邊界留白。讀取回傳矩陣時，應確認頻率、單位、導體順序與適應歷程。推導阻抗或傳播量時，請註明採用的矩陣縮減方式。
+
+### 局部介面場
+
+[SimplePad 局部介面 Q2D 教學](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) 定義明確的 MA/MS/SA 區域與場積分聯集。請一併下載其 <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> 與<a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" data-noresolveinput download>共用模型 JSON</a>。
+
+有限截斷與直邊模型都是明確假設；套用回傳因子時，請參閱[參與率與表面損耗](epr-loss.qmd)。
+
+## Palace
+
+⏳ **等待 SCGSim 開發。**
+
+## SurfaceBands 下載
+
+| 教學 | 下載 |
+| --- | --- |
+| Q2D 局部介面 | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd" data-noresolveinput download>QMD</a> |
+
+請將共用<a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" download>模型 JSON</a>與筆記本或 QMD 放在一起。

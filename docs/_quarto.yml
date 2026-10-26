@@ -1,13 +1,16 @@
 project:
   type: website
-  output-dir: _site
+  output-dir: _site/en
   render:
     - "*.qmd"
     - "*.md"
     - "home/*.md"
+    - "start/*.qmd"
     - "features/scgsim-integration.md"
     - "features/docs-theme.md"
     - "public-pdk-examples/*.md"
+    - "public-pdk-examples/*.qmd"
+    - "public-pdk-examples/components/**/*.qmd"
     - "usage/*.md"
     - "simulation/**/*.qmd"
     - "papers/*.md"
@@ -42,6 +45,7 @@ project:
     - "notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb"
     - "notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb"
     - "reference/*.qmd"
+    - "!zh-TW/"
   resources:
     - askr-versions.json
     - _static/images/components/*.svg
@@ -63,122 +67,149 @@ project:
     - uv run --project .. --group docs quartodoc build
   post-render:
     - python3 ../scripts/copy_surface_band_sources.py
+    - uv run --project .. --group docs python ../scripts/build_bilingual_docs.py
+
+lang: en
+
+profile:
+  group:
+    - [published, preview]
+
+askr:
+  languages:
+    current: en
 
 website:
   title: "OrcaPen SC PDK"
-  site-url: https://ncuphy-ltlab.github.io/orcapen-sc-pdk/
+  site-url: https://ncuphy-ltlab.github.io/orcapen-sc-pdk/en/
   favicon: assets/orcapen-mark.svg
   repo-url: https://github.com/NCUPHY-LTLab/orcapen-sc-pdk
   repo-actions: [edit, issue]
   navbar:
     logo: assets/orcapen-mark.svg
     search: true
+    tools-collapse: false
+    tools:
+      - icon: github
+        href: https://github.com/NCUPHY-LTLab/orcapen-sc-pdk
+        text: GitHub repository
+        aria-label: GitHub repository
     left:
-      - text: Overview
-        href: index.qmd
       - text: Get Started
         href: getting-started.md
-      - text: Cells
-        href: public-pdk-examples/index.md
-      - text: Process
-        href: materials-and-technology.md
       - text: Simulation
         href: notebooks.qmd
       - text: API
-        href: reference/index.qmd
+        href: api.qmd
+      - text: Research
+        href: paper-review.md
+      - text: Development
+        href: developing-features.md
   sidebar:
-    - id: cells
-      title: Cells
+    - id: get-started
       collapse-level: 1
+      title: Get Started
       contents:
-        - public-pdk-examples/index.md
-        - public-pdk-examples/test-components.md
-        - public-pdk-examples/component-authoring.md
-        - notebooks/Public_Docs/component_gallery.ipynb
-    - id: process
-      title: Process
-      contents:
-        - materials-and-technology.md
-        - home/pdk-responsibilities.md
+        - getting-started.md
+        - start/common-cells.qmd
+        - start/layers.qmd
+        - start/materials.qmd
     - id: simulation
+      collapse-level: 1
       title: Simulation
       contents:
-        - text: Overview
-          href: notebooks.qmd
-        - section: Layer 1 · OrcaPen user requirements
-          contents:
-            - simulation/requirements/electrostatic-capacitance.qmd
-            - simulation/requirements/eigenmode.qmd
-            - simulation/requirements/lumped-rlc-eigenmode.qmd
-            - simulation/requirements/epr-loss.qmd
-            - simulation/requirements/driven-terminal.qmd
-            - simulation/requirements/driven-modal.qmd
-            - simulation/requirements/q3d-acrl.qmd
-            - simulation/requirements/q2d-cross-section.qmd
-        - section: Layer 2 · SCGSim tool requirements
-          contents:
-            - simulation/tools/source-ownership.qmd
-            - simulation/tools/curves-holes-transforms.qmd
-            - simulation/tools/materials-stack-z.qmd
-            - simulation/tools/contacts-multilevel.qmd
-            - simulation/tools/mesh-fem-amr.qmd
-            - simulation/tools/handoff-resolve-report.qmd
-        - section: SCGSim examples
-          contents:
-            - simulation/notebooks.qmd
-            - features/scgsim-integration.md
-            - section: Pad examples
-              contents:
-                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb
-            - section: SimplePad surface bands
-              contents:
-                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd
-                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd
-            - section: Xmon examples and historical evidence
-              contents:
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/aedt_q3d.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_eigenmode.ipynb
-                - notebooks/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.ipynb
-            - section: CPW examples
-              contents:
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb
-                - notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb
-            - section: Launcher / exterior-cut pair
-              contents:
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb
-            - section: Source geometry observations
-              contents:
-                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb
-            - section: TSV examples
-              contents:
-                - simulation/tsv-model-inspection.qmd
-                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb
-                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb
+        - notebooks.qmd
+        - simulation/requirements/electrostatic-capacitance.qmd
+        - simulation/requirements/eigenmode.qmd
+        - simulation/requirements/driven-terminal.qmd
+        - simulation/requirements/q2d-cross-section.qmd
+        - simulation/requirements/epr-loss.qmd
+        - public-pdk-examples/test-components.md
     - id: api
+      collapse-level: 1
       title: API
       contents:
-        - auto: reference
+        - text: API overview
+          href: api.qmd
+        - text: Function index
+          href: reference/index.qmd
+        - section: Package
+          contents:
+            - reference/activate.qmd
+            - reference/get_pdk.qmd
+            - reference/get_sample_functions.qmd
+        - section: Cells
+          contents:
+            - text: Overview
+              href: public-pdk-examples/index.md
+            - section: Components
+              contents:
+                - text: All components
+                  href: public-pdk-examples/components/index.qmd
+                - public-pdk-examples/components/straight.qmd
+                - public-pdk-examples/components/taper.qmd
+                - public-pdk-examples/components/resonator.qmd
+                - public-pdk-examples/components/resonator_hanger.qmd
+                - public-pdk-examples/components/resonator_meander.qmd
+                - public-pdk-examples/components/interdigital_capacitor.qmd
+                - public-pdk-examples/components/martinis2022_differential_ribbon_capacitor.qmd
+                - public-pdk-examples/components/launcher.qmd
+                - public-pdk-examples/components/cpw_t_junction.qmd
+                - public-pdk-examples/components/airbridge.qmd
+                - public-pdk-examples/components/indium_bump.qmd
+                - public-pdk-examples/components/indium_ground.qmd
+                - public-pdk-examples/components/cpw_handoff.qmd
+                - public-pdk-examples/components/rounded_end_metal_segment.qmd
+                - public-pdk-examples/components/rounded_rectangle.qmd
+                - public-pdk-examples/components/wire_corner.qmd
+            - section: Function references
+              contents:
+                - reference/cells.airbridge.qmd
+                - reference/cells.interdigital_capacitor.qmd
+                - reference/cells.cpw_t_junction.qmd
+                - reference/cells.launcher.qmd
+                - reference/cells.mtl_bend_coupling_section.qmd
+                - reference/cells.n_trace_mtl_section.qmd
+                - reference/cells.resonator.qmd
+                - reference/cells.resonator_hanger.qmd
+                - reference/cells.resonator_meander.qmd
+                - reference/cells.finite_ground_cpw_coupon.qmd
+                - reference/cells.cpw_meander_airbridge_lumped_coupon.qmd
+                - reference/cells.cpw_meander_airbridge_wave_coupon.qmd
+                - reference/cells.martinis2022_differential_ribbon_capacitor.qmd
+        - section: Materials & Interfaces
+          contents:
+            - reference/materials.get_material_records.qmd
+            - reference/materials.get_material_alias_records.qmd
+            - reference/materials.get_interface_preset_records.qmd
+            - reference/materials.validate_material_kind_records.qmd
+            - reference/materials.validate_material_alias_records.qmd
+            - reference/materials.validate_interface_preset_records.qmd
+            - reference/materials.validate_aedt_material_records.qmd
+    - id: research
+      collapse-level: 1
+      title: Research
+      contents:
+        - paper-review.md
+        - papers/transmon-reference-designs.md
+        - papers/cpw-resonator-references.md
+        - papers/flip-chip-3d-integration.md
+        - papers/surface-loss-participation.md
+    - id: development
+      collapse-level: 1
+      title: Development
+      contents:
+        - developing-features.md
+        - home/ecosystem-workspace.md
+        - docs-publishing.md
 
 format:
   askr-html:
     css: [styles.css]
     html-math-method: mathjax
     code-copy: true
+    respect-user-color-scheme: true
+    smooth-scroll: false
 
 execute:
   enabled: false

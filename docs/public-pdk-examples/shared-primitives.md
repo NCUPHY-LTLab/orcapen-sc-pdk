@@ -1,4 +1,7 @@
-# Shared layout primitives
+---
+title: "Shared layout primitives"
+sidebar: get-started
+---
 
 These four registered factories are public source geometry, not electrical
 models, native simulation inputs or fabrication targets. Their neutral preview
@@ -78,13 +81,9 @@ the native ports are `(-W/2,0)` facing 180° and `(0,W/2)` facing 90°. GF owns
 the cross-section bounding geometry, electrical pins and supplied port contract.
 Caller-selected cross-sections remain explicit; no private CPW default is copied.
 
-## Migration and delivery
+## Use the primitives
 
-There are no `as_` aliases, private imports, sibling-device factories or fallback
-implementations. The public names and the above anchor, sampling and port
-differences are the migration surface. Private composition and callers stay
-with their consumer owner until an exact usable producer delivery is available.
-These factories are a local source candidate. The published old-namespace base
-cannot deliver an independent `orcapen_sc_pdk` patch; usable delivery depends on
-the pending OrcaPen namespace/integration lane and its privacy review. Local
-build success or a version string does not establish publication or adoption.
+Use the registered public names in the active PDK. Keep each factory's
+sampling and port roles when composing a layout; see
+[Cross-sections](cross-sections.qmd) and
+[GDSFactory guides](component-authoring.md).

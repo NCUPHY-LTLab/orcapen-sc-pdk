@@ -1,0 +1,37 @@
+---
+title: "Resonator meander"
+sidebar: api
+---
+
+`resonator_meander` creates a meandering CPW body. Its `length` applies to the
+meander body alone; a parent resonator accounts for hanger, tail, and optional
+qubit-segment geometry separately.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("resonator_meander")
+```
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `length` | 4000 µm | Meander body centerline target. |
+| `meanders` | 6 | Number of meander turns. |
+| `bend_spec` | `bend_euler` | Bend component specification. |
+| `cpw_xs` | `cpw_6_10_6` | CPW cross-section. |
+| `cpw_radius` | 100 µm | Bend radius. |
+| `open_start`, `open_end` | `False`, `False` | Whether to leave the corresponding end open. |
+
+## Ports and layers
+
+The default component exposes route ports `o1` and `o2`; straight sections can
+also expose mesh ports. DRAW, ETCH, and GROUND_MASK layers are configurable.
+
+See the [generated API reference](../../reference/cells.resonator_meander.qmd#orcapen_sc_pdk.cells.resonator_meander)
+and [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/resonator_meander.py).

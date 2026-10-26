@@ -1,0 +1,37 @@
+---
+title: "CPW handoff"
+sidebar: api
+---
+
+`cpw_handoff` joins a native coplanar waveguide to a route-width section with one taper.
+
+## Build the default component
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("cpw_handoff")
+~~~
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `length` | 200 µm | Total length, including the taper once. |
+| `taper_length` | 50 µm | Length of the outgoing taper. |
+| `native_width` / `native_gap` | 10 µm / 6 µm | Trace width and gap at the native end. |
+| `route_width` / `route_gap` | 7 µm / 6 µm | Trace width and gap at the route end. |
+| `radius` | 100 µm | Cross-section routing metadata. |
+| `draw_layer` | `LAYER.D0_TOP_M1_DRAW` | Trace draw layer. |
+| `etch_layer` | `LAYER.D0_TOP_M1_ETCH` | Etch layer. |
+| `ground_mask_layer` | `LAYER.D0_TOP_GROUND_MASK` | Ground-mask layer. |
+
+## Ports and layers
+
+`o1` is at `(0, 0)`, faces −X, and uses the native width. `o2` is at `(length, 0)`, faces +X, and uses the route width. Both are on DRAW. Radius is routing metadata; this straight handoff contains no bend.
+
+`length` must be positive and `taper_length` must be between zero and `length`. A zero-length taper requires equal native and route widths and gaps.
+
+The [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py) defines this factory.

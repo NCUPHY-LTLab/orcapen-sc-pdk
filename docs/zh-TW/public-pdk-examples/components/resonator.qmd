@@ -1,0 +1,36 @@
+---
+title: "共振器（Resonator）"
+sidebar: api
+---
+
+`resonator` 結合共面波導（coplanar waveguide，CPW）的懸掛段與蛇形段（meander），並可加入尾段與量子位元區段。`length` 是整體中心線目標長度；扣除其他區段後，剩餘長度分配給蛇形段。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("resonator")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `length` | 4000 µm | 整個共振器的中心線目標長度。 |
+| `meanders` | 6 | 蛇形轉折數。 |
+| `coupling_length` | 200 µm | 懸掛段的耦合區長度。 |
+| `hanger_straight_length` | 160 µm | 懸掛段的直線長度。 |
+| `cpw_xs` | `cpw_6_10_6` | CPW 橫截面。 |
+| `cpw_radius` | 100 µm | CPW 各段使用的彎曲半徑。 |
+| `open_end` | `True` | 加入開路端幾何形狀，取代一般 CPW 佈線連接埠。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+`o1` 標記懸掛段起點，`o_hanger_center` 是放置錨點，`o_hanger_end` 連接蛇形段。元件也提供讀出耦合錨點。DRAW、ETCH 與 GROUND_MASK 圖層皆可設定。預設版圖預覽請見[元件圖集](../index.md#components-layout)。
+
+![預設共振器的 DRAW 與 ETCH 版圖。](../../_static/images/components/resonator.svg)
+
+請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.resonator.html#orcapen_sc_pdk.cells.resonator)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/resonator.py)。

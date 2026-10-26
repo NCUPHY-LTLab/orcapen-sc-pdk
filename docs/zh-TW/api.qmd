@@ -1,0 +1,14 @@
+---
+title: "API"
+sidebar: api
+toc: false
+---
+
+函式簽章與參數請使用產生的參考頁。本總覽連結製程設計套件（Process Design Kit，PDK）的主要入口、佈局工廠、技術與連接埠定義，以及材料紀錄。
+
+| 範圍 | 參考與指引 |
+| --- | --- |
+| [PDK 與技術]{#pdk-technology} | [`activate()`](/orcapen-sc-pdk/en/reference/activate.html#orcapen_sc_pdk.activate) · [`get_pdk()`](/orcapen-sc-pdk/en/reference/get_pdk.html#orcapen_sc_pdk.get_pdk) · [`get_sample_functions()`](/orcapen-sc-pdk/en/reference/get_sample_functions.html#orcapen_sc_pdk.get_sample_functions) · [圖層對照、堆疊取得器與技術定義](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py) |
+| [元件與基礎圖形]{#cells-primitives} | [`cells.resonator()`](/orcapen-sc-pdk/en/reference/cells.resonator.html#orcapen_sc_pdk.cells.resonator) · [`cells.interdigital_capacitor()`](/orcapen-sc-pdk/en/reference/cells.interdigital_capacitor.html#orcapen_sc_pdk.cells.interdigital_capacitor) · [所有元件參考](/orcapen-sc-pdk/en/reference/index.html#cells) · [元件指引](public-pdk-examples/index.md) · [基礎圖形角色](public-pdk-examples/shared-primitives.md) |
+| [橫截面與連接埠]{#cross-sections-ports} | [`get_pdk()`](/orcapen-sc-pdk/en/reference/get_pdk.html#orcapen_sc_pdk.get_pdk) · [橫截面定義](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py) · [連接埠類型](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/ports.py) · [橫截面指引](public-pdk-examples/cross-sections.qmd) · [模擬連接埠與端點](simulation/requirements/driven-terminal.qmd#geometric-ports-simulation-locators-and-terminals) |
+| [材料與介面]{#materials-interfaces} | [`materials.get_material_records()`](/orcapen-sc-pdk/en/reference/materials.get_material_records.html#orcapen_sc_pdk.materials.get_material_records) · [`materials.get_material_alias_records()`](/orcapen-sc-pdk/en/reference/materials.get_material_alias_records.html#orcapen_sc_pdk.materials.get_material_alias_records) · [`materials.get_interface_preset_records()`](/orcapen-sc-pdk/en/reference/materials.get_interface_preset_records.html#orcapen_sc_pdk.materials.get_interface_preset_records) · [所有材料與介面參考](/orcapen-sc-pdk/en/reference/index.html#materials) · [材料與介面指引](start/materials.qmd) |

@@ -1,0 +1,255 @@
+---
+title: "Layers & Stack"
+sidebar: get-started
+---
+
+OrcaPen separates XY layer names from physical height, material, display, and
+connectivity. Use the layer map to identify polygons, then select the stack that
+matches a single die or a two-die flip-chip assembly.
+
+## Four technology definitions
+
+| Definition | What it defines |
+| --- | --- |
+| `LAYER` (also `L`) | Named GDS `(layer, datatype)` pairs in `LayerMapOrpenSCPDK`. A pair identifies XY geometry; it does not assign height or material. |
+| `LAYER_STACK` | Physical `LayerLevel` records: source geometry, `zmin`, thickness, material, and level-specific simulation metadata. M1 uses derived geometry rather than one raw polygon layer. |
+| `LAYER_VIEWS` | Display groups, colors, hatching, and visibility from `layers.yaml`. Display settings do not change physical geometry. |
+| `LAYER_CONNECTIVITY` | Declared layer-to-layer connections through TSVs, bumps, and airbridges. This is separate from a component's selected nets and terminals. |
+
+The existing LayerViews display groups are `Metal`, `Airbridge`, `Junction`,
+`DesignIntent`, `Integration`, `Alignment`, `Admin`, `gdsfactory`, and
+`Simulation`. The tables below organize those layers by purpose; group names
+control their display organization, not their physical material.
+
+The complete definitions are in
+[technology source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/tech.py)
+and [layer views](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/layers.yaml).
+All coordinates and thicknesses below are in micrometres (µm); layer pairs are
+written as `(layer, datatype)`.
+
+## Dies, faces, and the Z frame
+
+`D0` and `D1` identify the lower and upper dies. `TOP` and `BOTTOM` are their
+faces in the common stack frame. The default stack places the D0 top substrate
+face at `z = 0`; this is its chosen origin, not a required origin for every stack.
+
+| Face prefix | Substrate face Z | Outward direction | Position in the assembly |
+| --- | ---: | --- | --- |
+| `D0_BOTTOM` | −500 | −Z | Lower exterior face |
+| `D0_TOP` | 0 | +Z | Lower face of the interdie gap |
+| `D1_BOTTOM` | 8.2 | −Z | Upper face of the interdie gap |
+| `D1_TOP` | 508.2 | +Z | Upper exterior face |
+
+For the current default M1 levels, offset is zero and thickness is 0.1 µm.
+TOP metal extends toward +Z from its substrate face; BOTTOM metal extends
+toward −Z.
+
+| M1 level | Face Z (µm) | Offset (µm) | Thickness (µm) | Lower to upper Z (µm) |
+| --- | ---: | ---: | ---: | --- |
+| `D0_BOTTOM_M1` | −500 | 0 | 0.1 | −500.1 to −500 |
+| `D0_TOP_M1` | 0 | 0 | 0.1 | 0 to 0.1 |
+| `D1_BOTTOM_M1` | 8.2 | 0 | 0.1 | 8.1 to 8.2 |
+| `D1_TOP_M1` | 508.2 | 0 | 0.1 | 508.2 to 508.3 |
+
+The facing M1 surfaces are at `z = 0.1` and `z = 8.1`: an 8 µm metal-to-metal
+gap within an 8.2 µm substrate-face separation.
+
+## Complete layer map
+
+### Face M1 geometry
+
+Append each column's suffix to the row prefix to obtain the exact layer name;
+for example, `D0_TOP` + `_M1_DRAW` is `LAYER.D0_TOP_M1_DRAW`.
+
+| Prefix | `_M1_DRAW` | `_M1_ETCH` | `_M1_DOMAIN` | `_GROUND_MASK` |
+| --- | --- | --- | --- | --- |
+| `D0_BOTTOM` | `(3, 0)` | `(3, 1)` | `(200, 0)` | `(111, 0)` |
+| `D0_TOP` | `(1, 0)` | `(1, 1)` | `(200, 1)` | `(110, 0)` |
+| `D1_BOTTOM` | `(2, 0)` | `(2, 1)` | `(200, 2)` | `(110, 1)` |
+| `D1_TOP` | `(4, 0)` | `(4, 1)` | `(200, 3)` | `(111, 1)` |
+
+These four source layers feed a face's M1 geometry; they are not four separate
+physical films. The physical stack level is named `<prefix>_M1`.
+
+Three related operations have different purposes:
+
+| Operation | Definition and use |
+| --- | --- |
+| Stack-derived M1 | `M1_DOMAIN − (M1_ETCH − M1_DRAW)`. The domain bounds the metal; DRAW protects positive metal from removal by ETCH. Its derived output pair is the face's M1 DRAW pair. |
+| Layout etch helper | `add_etch_for_component()` returns a copy with `M1_ETCH = GROUND_MASK − M1_DRAW`. Its default layers are D0 TOP; callers can select another face's three layers. The helper derives an etch mask, not a stack or material. |
+| Component face-ground-mask route | D0 TOP and D1 BOTTOM M1 declare `geometry_source="die_face_minus_ground_mask"`, with bounds from `D0_SUBSTRATE` and `D1_SUBSTRATE`, respectively. Component simulation uses that declared face/ground-mask recipe and the component's net/terminal annotations, rather than treating each mask polygon as a conductor. |
+
+The [etch helper source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/helpers/layout/etch.py)
+defines the second operation. A GROUND_MASK is an XY construction input, not
+another metal level or a net named Ground.
+
+### Other face-specific layers
+
+The same prefix rule gives every exact name in this table.
+
+| Prefix | `_AB_DRAW` | `_AB_VIA` | `_JJ_DRAW` | `_ALN` | `_SIM_BOUNDARY` |
+| --- | --- | --- | --- | --- | --- |
+| `D0_BOTTOM` | `(12, 0)` | `(12, 1)` | `(20, 0)` | `(81, 0)` | `(202, 0)` |
+| `D0_TOP` | `(10, 0)` | `(10, 1)` | `(21, 0)` | `(80, 0)` | `(202, 1)` |
+| `D1_BOTTOM` | `(11, 0)` | `(11, 1)` | `(22, 0)` | `(83, 0)` | `(202, 2)` |
+| `D1_TOP` | `(13, 0)` | `(13, 1)` | `(23, 0)` | `(82, 0)` | `(202, 3)` |
+
+- `<prefix>_AB_DRAW` maps to `<prefix>_AIRBRIDGE`, an elevated Al deck.
+- `<prefix>_AB_VIA` maps to `<prefix>_AIRBRIDGE_VIA`, finite Al posts.
+- `<prefix>_JJ_DRAW` has no physical stack level; junction drawing layers have no declared stack thickness or material.
+- `<prefix>_ALN` has no physical stack level; these are alignment layers, not a declared AlN material film.
+- `<prefix>_SIM_BOUNDARY` maps to a same-named zero-thickness vacuum locator sheet; it is not metal and is not an automatically assigned solver boundary.
+
+### Integration
+
+The `Integration` display group contains the TSV and die-to-die contact layers.
+
+| Exact layer name | Pair | Physical stack level or purpose |
+| --- | --- | --- |
+| `D0_TOP_TSV` | `(31, 0)` | Same-named TiN through-D0 level. |
+| `D1_BOTTOM_TSV` | `(31, 1)` | Same-named TiN through-D1 level. |
+| `D0_D1_INDIUM_BUMP` | `(40, 0)` | Same-named finite In bump body. |
+| `D0_D1_UNDER_BUMP` | `(40, 1)` | Same-named In under-bump metallization (UBM) level; excluded from simulation. |
+| `D1_D2_INDIUM_BUMP` | `(41, 0)` | Mapping only; no physical level. |
+| `D1_D2_UNDER_BUMP` | `(41, 1)` | Mapping only; no physical level. |
+
+The D1–D2 bump names reserve layer pairs; this stack defines no D2 substrate,
+faces, or interdie volume.
+
+### Design intent
+
+The `DesignIntent` display group contains these three keepouts and the four
+face-specific [GROUND_MASK layers](#face-m1-geometry) listed above. These are
+construction and placement inputs, not additional physical levels.
+
+| Exact layer name | Pair | Purpose |
+| --- | --- | --- |
+| `DEVICE_KEEPOUT` | `(120, 0)` | No physical level; routing and ground-bump-fill exclusion. |
+| `ROUTING_KEEPOUT` | `(120, 1)` | No physical level; routing exclusion. |
+| `D0_D1_INDIUM_GROUND_KEEPOUT` | `(120, 2)` | No physical level; ground-bump-fill exclusion. |
+
+### Simulation regions
+
+The `Simulation` display group contains these four area layers, the four
+[M1_DOMAIN layers](#face-m1-geometry), and the four
+[SIM_BOUNDARY locators](#other-face-specific-layers). Their physical levels are
+defined in the stack tables below.
+
+| Exact layer name | Pair | Physical stack level |
+| --- | --- | --- |
+| `D0_SUBSTRATE_AREA` | `(201, 0)` | XY footprint for `D0_SUBSTRATE`. |
+| `D0_TO_D1_GAP_AREA` | `(201, 1)` | XY footprint for `D0_TO_D1_GAP`. |
+| `D1_SUBSTRATE_AREA` | `(201, 2)` | XY footprint for `D1_SUBSTRATE`. |
+| `OUTER_VACUUM_AREA` | `(201, 3)` | XY footprint for `OUTER_VACUUM`. |
+
+### Admin
+
+The `Admin` display group contains dicing, annotation, and error-path layers.
+
+| Exact layer name | Pair | Purpose |
+| --- | --- | --- |
+| `DICE` | `(70, 0)` | No physical level; dicing layout. |
+| `TEXT` | `(90, 0)` | No physical level; annotation. |
+| `ERROR_PATH` | `(1000, 0)` | No physical level; error-path display. |
+
+### GDSFactory utility
+
+The `gdsfactory` display group contains settings and instance labels plus the
+hidden `WG` utility layer.
+
+| Exact layer name | Pair | Purpose |
+| --- | --- | --- |
+| `LABEL_SETTINGS` | `(100, 0)` | No physical level; GDSFactory settings labels. |
+| `LABEL_INSTANCE` | `(101, 0)` | No physical level; GDSFactory instance labels. |
+| `WG` | `(102, 0)` | No physical level; GDSFactory utility layer, hidden in the layer views. |
+
+## Complete physical stack
+
+`get_layer_stack()` and `get_two_die_flip_chip_layer_stack()` provide the full
+stack below. Z intervals run from `zmin` to `zmin + thickness`; a locator's
+interval collapses to a plane. These are nominal PDK dimensions.
+
+### Substrates and vacuum regions
+
+| Stack level | Z interval (µm) | Thickness (µm) | Material |
+| --- | --- | ---: | --- |
+| `D0_SUBSTRATE` | −500 to 0 | 500 | `Si` |
+| `D0_TO_D1_GAP` | 0 to 8.2 | 8.2 | `vacuum` |
+| `D1_SUBSTRATE` | 8.2 to 508.2 | 500 | `Si` |
+| `OUTER_VACUUM` | 508.2 to 1508.2 | 1000 | `vacuum` |
+
+The substrates and gap declare `simulation_role="solution_region"` and
+`include_in_component_simulation=True`. `OUTER_VACUUM` is marked `is_airbox=True`
+but `include_in_component_simulation=False`; its named level is not a complete
+surrounding simulation envelope.
+
+### Face metal, airbridges, and locator sheets
+
+Each row prefix expands to four exact stack names using the column suffixes.
+M1 is 0.1 µm Al; airbridge posts are 3 µm Al; airbridge decks are 0.3 µm Al.
+SIM_BOUNDARY is a zero-thickness `vacuum` sheet.
+
+| Prefix | `_M1` Z interval | `_AIRBRIDGE_VIA` Z interval | `_AIRBRIDGE` Z interval | `_SIM_BOUNDARY` Z plane |
+| --- | --- | --- | --- | --- |
+| `D0_BOTTOM` | −500.1 to −500 | −503.1 to −500.1 | −503.4 to −503.1 | −500.05 |
+| `D0_TOP` | 0 to 0.1 | 0.1 to 3.1 | 3.1 to 3.4 | 0.05 |
+| `D1_BOTTOM` | 8.1 to 8.2 | 5.1 to 8.1 | 4.8 to 5.1 | 8.15 |
+| `D1_TOP` | 508.2 to 508.3 | 508.3 to 511.3 | 511.3 to 511.6 | 508.25 |
+
+Airbridge posts start at the outer M1 surface; the deck begins 3 µm beyond that
+surface. This is a nominal rectangular post/deck model, not a reflow arch.
+All four faces' airbridge levels explicitly declare conductor roles.
+
+D0 TOP and D1 BOTTOM M1 also declare conductor roles and the face-ground-mask
+recipe above. D0 BOTTOM and D1 TOP M1 have physical Al levels and derived geometry,
+but their current metadata does not declare `simulation_role`; the four M1 faces
+therefore do not carry identical component-simulation metadata.
+
+The SIM_BOUNDARY sheets sit at each M1 film's midplane. They locate a sheet for
+component-level terminal or boundary selection; excitation and circuit elements
+are chosen by the simulation problem.
+
+### TSVs and die-to-die contacts
+
+| Stack level | Z interval (µm) | Thickness (µm) | Material | Physical meaning |
+| --- | --- | ---: | --- | --- |
+| `D0_TOP_TSV` | −500 to 0 | 500 | `TiN` | Finite through-substrate solid; contacts `D0_BOTTOM_M1` and `D0_TOP_M1`. |
+| `D1_BOTTOM_TSV` | 8.2 to 508.2 | 500 | `TiN` | Finite through-substrate solid; contacts `D1_BOTTOM_M1` and `D1_TOP_M1`. |
+| `D0_D1_INDIUM_BUMP` | 0.1 to 8.1 | 8 | `In` | Finite conductor between the facing metal surfaces. |
+| `D0_D1_UNDER_BUMP` | 0 to 0.1 | 0.1 | `In` | UBM source level with `exclude_from_simulation=True`; omitted from the simulation geometry. |
+
+The public ground-bump-fill specification uses a centered 20 × 20 µm bump body
+and 40 × 40 µm contact footprint, with lattice origin `(0, 0)`. Its keepout
+classes are listed in the layer map above; the component selects placement.
+
+## Select a stack
+
+| Getter | Returned levels |
+| --- | --- |
+| `get_layer_stack()` | Full two-die stack: all 24 levels listed above. |
+| `get_two_die_flip_chip_layer_stack()` | The full `LAYER_STACK`. |
+| `get_single_die_layer_stack()` | Detached copies of `D0_SUBSTRATE`, `D0_TOP_M1`, and `D0_TOP_SIM_BOUNDARY`. This is the default single-die selection. |
+| `get_single_die_layer_stack(include_airbridges=True)` | The three single-die levels plus `D0_TOP_AIRBRIDGE_VIA` and `D0_TOP_AIRBRIDGE`. |
+
+The single-die getter removes the top M1 interdie host-void reference. It retains
+the PDK's physical dimensions and materials, without an upper die or interdie
+cavity; SCGSim supplies the surrounding vacuum envelope for that model.
+
+## Declared layer connectivity
+
+Each tuple in `LAYER_CONNECTIVITY` names a first conductor layer, a connecting
+layer, and a second conductor layer. These are the five declared connections:
+
+| First layer | Connecting layer | Second layer |
+| --- | --- | --- |
+| `D0_BOTTOM_M1_DRAW` | `D0_TOP_TSV` | `D0_TOP_M1_DRAW` |
+| `D1_BOTTOM_M1_DRAW` | `D1_BOTTOM_TSV` | `D1_TOP_M1_DRAW` |
+| `D0_TOP_M1_DRAW` | `D0_D1_INDIUM_BUMP` | `D1_BOTTOM_M1_DRAW` |
+| `D0_TOP_M1_DRAW` | `D0_TOP_AB_DRAW` | `D0_TOP_M1_DRAW` |
+| `D1_BOTTOM_M1_DRAW` | `D1_BOTTOM_AB_DRAW` | `D1_BOTTOM_M1_DRAW` |
+
+Physical airbridge levels exist on all four faces; the connectivity list includes
+airbridge entries only for D0 TOP and D1 BOTTOM.
+
+Continue with [Materials & Interfaces](materials.qmd) or
+[Cross-sections & Ports](cross-sections-ports.qmd).

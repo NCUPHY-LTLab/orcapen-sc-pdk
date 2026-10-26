@@ -1,0 +1,32 @@
+---
+title: "空氣橋（Airbridge）"
+sidebar: api
+---
+
+`airbridge` 在同一晶片表面建立置中的矩形空氣橋（airbridge）橋面與兩個端點墊片。幾何尺寸以微米為單位。
+
+## 建立預設元件 {#build-the-default-component}
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("airbridge")
+~~~
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `bridge_span` | 84 µm | 橋面沿局部 Y 的長度。 |
+| `bridge_width` | 12 µm | 橋面沿局部 X 的寬度。 |
+| `via_size` | 14 µm | 每個端點墊片的邊長。 |
+| `airbridge_draw_layer` | `LAYER.D0_TOP_AB_DRAW` | 橋面圖層。 |
+| `airbridge_via_layer` | `LAYER.D0_TOP_AB_VIA` | 端點墊片圖層。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+此元件沒有連接埠（port）。預設圖層對應懸空的鋁（Al）橋面與有限尺寸的鋁支柱，實體堆疊（physical stack）採用標稱矩形橋面及鋁支柱。已註冊的同面前綴為 `D0_TOP`、`D0_BOTTOM`、`D1_BOTTOM` 與 `D1_TOP`，皆有堆疊定義；自訂圖層配對僅定義平面版圖。
+
+API：[空氣橋 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.airbridge.html#orcapen_sc_pdk.cells.airbridge)。原始碼：[指定版本的公開定義（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/airbridge.py).

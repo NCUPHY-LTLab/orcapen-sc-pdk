@@ -1,49 +1,64 @@
 ---
-title: "Get Started"
+title: "Install & Activate"
+sidebar: get-started
 ---
 
-Use Python 3.12 or 3.13 and the GDSFactory version selected by this package.
-Install the reviewed local OrcaPen `0.1.0.dev2` candidate wheel in your existing
-Python environment, substituting the actual artifact path:
+Install the public source revision below, activate OrcaPen, and build a registered
+cell. Layout use needs neither Palace nor an AEDT installation.
+
+## Install
+
+Use Python 3.12 or 3.13 in your project environment. For a new project,
+initialize a uv project with `uv init --python 3.12` (or `--python 3.13`), then
+add the public source revision:
 
 ```bash
-python -m pip install /path/to/orcapen_sc_pdk-0.1.0.dev2-py3-none-any.whl
+uv add "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@aee7f8b848895f2d107f6b086310e866e8381f73"
+uv run python -c "import importlib.metadata as m; print(m.version('orcapen-sc-pdk'))"
 ```
 
-The candidate is local only: it has not been uploaded to a registry or PyPI.
-Record the exact version and wheel digest. See [Distribution and handoff](distribution.md)
-for review, GDSFactory+ use and future organization-registry publication.
+Check: the version command reports `0.1.0.dev2`.
+The package selects GDSFactory `~=9.48.0` and its other layout dependencies.
 
-## Activate and build
+## Activate and see a cell
+
+In a Jupyter notebook or Python script, use:
 
 ```python
 import gdsfactory as gf
-from orcapen_sc_pdk import activate, get_pdk
+import matplotlib.pyplot as plt
+from orcapen_sc_pdk import activate
 
 activate()
-component = gf.get_component("resonator", length=3500)
-print(component.name, component.dbbox(), component.layers)
-print(sorted(get_pdk().cells))
+component = gf.get_component("resonator")
+print(component.name)
+print(component.dbbox())
+component.plot()
+plt.show()
 ```
 
-If a compatible local layout viewer is available, call `component.show()` to
-open the cell. This is optional; the build above does not require a viewer.
+Check: the cell name and physical bounding box are printed, and a 2D layout
+appears in the notebook output or a plot window. Lengths and physical port
+dimensions use micrometres.
 
-Dimensions are in micrometres. Public factory defaults are preview settings,
-not measured device specifications; choose your own process and design
-parameters. Activate OrcaPen before resolving named cells or
-cross-sections; do not silently substitute another PDK.
+For a script, save the example as `example.py` and run:
 
-Choose the existing [Cells](public-pdk-examples/index.md) and read their typed
-settings/source intent before composing a design. Use [Process](materials-and-technology.md)
-for layers, materials and stack facts. The [build and compose guide](public-pdk-examples/component-authoring.md)
-shows how to use existing cells and their ports in your own component.
+```bash
+uv run example.py
+```
 
-## Add simulation only when needed
+![OrcaPen resonator layout.](_static/images/components/resonator.svg){width=80%}
 
-Layout use does not require an AEDT or Palace installation. Public simulation
-notebooks consume SCGSim's reusable simulation runtime.
-Select a [Simulation](notebooks.qmd) example and follow its exact runtime
-prerequisites. The newer source-only examples require a separate SCGSim v2
-environment; the ordinary project dependency groups do not select that cohort.
-Saved outputs and source-only revisions are not interchangeable evidence.
+## Choose your next step
+
+| Task | Guide |
+| --- | --- |
+| Start with a launcher or resonator | [Common Cells](start/common-cells.qmd) |
+| Select geometry layers and physical heights | [Layers & Stack](start/layers.qmd) |
+| Choose bulk materials or surface-interface assumptions | [Materials & Interfaces](start/materials.qmd) |
+| Select a CPW section and inspect layout interfaces | [Cross-sections](public-pdk-examples/cross-sections.qmd) |
+| Place, connect, route, or export a layout | [GDSFactory and OrcaPen](public-pdk-examples/component-authoring.md) |
+| Calculate a physical quantity | [Choose a Simulation](notebooks.qmd) |
+
+Simulation examples have their own SCGSim and solver prerequisites. Read the
+selected tutorial's setup before installing optional simulation dependencies.

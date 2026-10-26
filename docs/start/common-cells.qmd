@@ -1,0 +1,35 @@
+---
+title: "Common Cells"
+sidebar: get-started
+toc: true
+---
+
+Use this page to choose a common layout cell or a registered cross-section.
+
+| Start with | What it provides |
+| --- | --- |
+| [Launcher](#launcher){.text-nowrap} | A pad-to-CPW transition. |
+| [Resonator](#resonator){.text-nowrap} | A CPW hanger and meander layout. |
+| [Cross-sections](#cross-sections){.text-nowrap} | Registered width, offset, layer, and port recipes for paths. |
+
+## Launcher
+
+`launcher` tapers a large pad to a CPW neck and marks the pad-side simulation
+boundary. The default layout is shown below; see the [Launcher guide](../public-pdk-examples/components/launcher.qmd)
+for its settings and ports.
+
+![Default launcher layout showing the pad, taper, and CPW neck.](../_static/images/components/launcher.svg)
+
+## Resonator
+
+`resonator` combines a CPW hanger and meander, with optional tail and qubit
+segment geometry. The [Resonator guide](../public-pdk-examples/components/resonator.qmd)
+covers its settings and layout interfaces.
+
+![Default resonator layout.](../_static/images/components/resonator.svg)
+
+## Cross-sections
+
+Choose a registered cross-section to define widths, transverse offsets, layers,
+and connection ports along a path. Browse the [Cross-sections guide](../public-pdk-examples/cross-sections.qmd)
+for registered choices and default previews.

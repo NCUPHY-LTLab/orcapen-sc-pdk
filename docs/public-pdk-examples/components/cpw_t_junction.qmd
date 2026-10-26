@@ -1,0 +1,35 @@
+---
+title: "CPW T-junction"
+sidebar: api
+---
+
+`cpw_t_junction` joins a straight CPW trunk to a perpendicular branch. It uses
+an OrcaPen CPW cross-section with DRAW, negative and positive ETCH, and
+GROUND_MASK sections.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("cpw_t_junction")
+```
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `trunk_length` | 200 µm | Length of the straight trunk. |
+| `branch_length` | 100 µm | Length of the perpendicular branch. |
+| `cross_section` | `coplanar_waveguide` | Cross-section; must include the required OrcaPen CPW sections. |
+
+## Ports and layers
+
+`o1` and `o2` are at the trunk ends; `o_branch` points along +Y. Geometry layers
+come from the selected cross-section. See [Cross-sections](../cross-sections.qmd)
+for the default recipe.
+
+See the [generated API reference](../../reference/cells.cpw_t_junction.qmd#orcapen_sc_pdk.cells.cpw_t_junction)
+and [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/cpw.py).

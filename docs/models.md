@@ -1,17 +1,12 @@
 ---
-orphan: true
+title: "Models namespace"
+sidebar: development
 ---
 
-# Models Namespace
+`orcapen_sc_pdk.models` is reserved for future public PDK model facts.
+Use the existing [PDK and material references](api.qmd) for implemented interfaces,
+and [SCGSim](features/scgsim-integration.md) for simulation preparation and results.
 
-`orcapen_sc_pdk.models` is reserved for future public PDK model facts. It is not
-an analytical-model or solver runtime surface.
-
-The public PDK owns material records, technology/layer-stack semantics, public
-cells, and GF+ package metadata. Reusable simulation models, execution, and
-result interpretation belong in `scgsim`.
-
-The `cells_no_model_expected` metadata in `pyproject.toml` names 14 factories;
-it is not a blanket classification of all 30 registered cells. The exact list
-is the metadata authority. The empty `models` export is a reserved namespace,
-not implemented analytical models or solver behavior.
+The exact `cells_no_model_expected` list lives in the selected
+[project metadata](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/pyproject.toml);
+it is not a classification of every registered cell.

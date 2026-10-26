@@ -1,17 +1,13 @@
 ---
-title: "TSV · AEDT workflows and model inspection"
-description: "Three OrcaPen-owned TSV solve workflows with explicit returned-result analysis and optional model-only inspection."
+title: "TSV workflows and model inspection"
 sidebar: simulation
 ---
 
-These same three examples now author a default full-run flow: fresh handoff,
-native CLI solve, strict returned-result resolution, physics and benchmark views.
-The Human confirmed the short first-trial settings below. Source authoring is
-not native execution or scientific acceptance; joint runtime/native admission
-remains pending. OrcaPen supplies the selected neutral `physical_layer` carrier
-on Entity and stack metadata; SCGSim owns the common interpretation. OrcaPen owns the
-layouts and notebooks; SCGSim owns preparation, transactions and result readers.
-Optional model-only inspection remains distinct from solving.
+Choose a concentric pad or ground-stitched CPW model, then use the matching
+AEDT tutorial. Its QMD defines the exact runtime, geometry, and numerical controls.
+
+⏳ Native execution of these revised examples is pending. Use their source and
+model descriptions to prepare a calculation; keep earlier saved results with their original models.
 
 ## System and representation
 
@@ -29,6 +25,8 @@ The canonical factories in `orcapen_sc_pdk.cells.simulation.scgsim.tsv` own shap
 holes, source occurrences and contact intent. Concrete dimensions,
 Net membership and enclosure controls live in each notebook.
 
+
+
 ## Select the notebook
 
 | Example | Assignment to inspect | View / download |
@@ -37,53 +35,21 @@ Net membership and enclosure controls live in each notebook.
 | Concentric Eigenmode | Closed 3D model, without ports, loads or junctions | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.qmd" download>QMD</a> |
 | TSV-grounded CPW Terminal | Exterior Wave cuts, Signal/reference membership and terminal order | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.qmd" download>QMD</a> |
 
-The three QMDs include one canonical
-<a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/_source_input.qmd" download>source-input companion</a>.
-Download it beside the QMDs when rebuilding them; generated IPYNBs already
-contain its cells. Fresh construction requires the local shared-physical
-candidate, not a published wheel. The [published checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0)
-remains historical. Original observations and returned packages retain their
-own runtime identities; notebook provenance records the fresh authoring source.
 
-## Workflow and expected output
+The QMDs also need the shared
+<a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/_source_input.qmd" download>source-input companion</a>
+beside them. Generated IPYNBs already contain those cells.
 
-| Example | Human-confirmed first trial |
-| --- | --- |
-| Q3D C/G | 5 GHz; maximum 3 passes; 1% convergence; AC R/L off |
-| HFSS Eigenmode | minimum 1 GHz; 3 modes; maximum 3 passes; delta-frequency 1%; no junction, load or EPR |
-| Driven Terminal Wave | Broadband 3–8 GHz; Fast 11 points; maximum 3 passes; delta-S 0.02; original ordered o1/o2 references, no renormalization, de-embed 0 |
+## Use the workflow actions
 
-All three resolve minimum passes 1, consecutive converged passes 1 and
-refinement 30%. The three-pass endpoint is a short trial, not a success or
-accuracy threshold. Geometry, materials, enclosure, Nets and ports are retained.
+- `run` prepares a new layout and handoff, invokes the native solve, and reads returned results.
+- `prepare_handoff` stops at portable inputs.
+- `analyze_handoff` reads the explicitly selected returned directory without rebuilding geometry.
+- `build_model` and `inspect_model` are separate model-only actions.
 
-1. For `run`, build the canonical layout/getter inputs and export a fresh source
-   witness; preserve hollow walls, substrate holes and the explicit Nets.
-2. Prepare a new portable handoff with the selected complete run control.
-3. Invoke the full-solve CLI, then use `resolve_results`, `show_all_results`,
-   `physics_results` and `simulation_benchmark` on its actual returned artifacts.
-4. For `analyze_handoff`, select an explicit returned root in a fresh kernel.
-   Skip factory/getter/GDS/preparation/CLI entirely; do not silently pick a run.
-
-`prepare_handoff` stops at portable inputs, and `source` stops at source facts.
-Separately, `build_model` passes `run_control=None` and uses the checkpoint's
-real `--prepare-only` model-only transaction; `inspect_model` calls
-`resolve_prepared_model` on an explicit returned model. Neither is an available
-Model+Setup/reuse workflow. No invented flag or helper fills that gap.
-
-Inspect the actual body/sheet and assignment records, together with the saved
-project and necessary companions. Preserve inconclusive contact or
-boundary queries as unknown. Keep writable Human inspection copies separate
-from hash-bound producer files.
-
-::: {.callout-note title="Authoring is not execution evidence"}
-The full-run branches show actual C/G, mode or Terminal network results only
-after a real solve and strict resolution. Model-only readback cannot substitute
-for them. Nonconvergence, native errors and result missingness remain visible;
-there are no fabricated results, retries or accuracy claims. Terminal/derived
-impedance is not modal Wave Port Zo. No junction, EPR or new source load is added.
-:::
-
-These canonical sources and clean notebooks are a local **CONVERGING**
-candidate. Rendering them does not execute their cells; older Solid models are
-not outputs of the current mixed Thin Film/Solid examples.
+Inspect body/sheet assignments, hollow walls, substrate holes, Nets, and
+port references in the actual native model. Keep the model-only view separate
+from solved quantities. For interpreting the result, read
+[Capacitance](requirements/electrostatic-capacitance.qmd),
+[Resonance & Eigenmodes](requirements/eigenmode.qmd), or
+[S-parameters & Ports](requirements/driven-terminal.qmd).

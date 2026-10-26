@@ -8,6 +8,7 @@ from math import atan2, ceil, cos, hypot, isfinite, pi, sin, tan
 import gdsfactory as gf
 from gdsfactory.typings import CrossSectionSpec, Layer
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.helpers.layout import add_etch_for_component
 from orcapen_sc_pdk.tech import LAYER
 
@@ -15,7 +16,7 @@ from orcapen_sc_pdk.tech import LAYER
 def _rounded_contour(points, radius: float, cutplanes: tuple[float, float]):
     """Fillet a merged micrometre contour, leaving outer CPW planes intact.
 
-    Circular tangent arcs use at most 5 degrees per chord (72 per full circle),
+    Circular tangent arcs use the central sampling profile,
     including both tangent endpoints. GDSFactory quantizes these samples to its
     existing grid. This is polygonal geometry, not a fabrication accuracy claim.
     Adjacent tangent setbacks must fit their original edge; never clamp radius.
@@ -45,19 +46,20 @@ def _rounded_contour(points, radius: float, cutplanes: tuple[float, float]):
             continue
         direction = 1 if turn > 0 else -1
         start = (point[0] - setback * u[0], point[1] - setback * u[1])
-        center = (start[0] - direction * radius * u[1],
-                  start[1] + direction * radius * u[0])
+        center = (start[0] - direction * radius * u[1], start[1] + direction * radius * u[0])
         angle = atan2(start[1] - center[1], start[0] - center[0])
-        steps = ceil(abs(turn) / (pi / 36))
+        steps = curves.arc_points(radius, turn * 180 / pi) - 1
         rounded.extend(
-            (center[0] + radius * cos(angle + turn * i / steps),
-             center[1] + radius * sin(angle + turn * i / steps))
+            (
+                center[0] + radius * cos(angle + turn * i / steps),
+                center[1] + radius * sin(angle + turn * i / steps),
+            )
             for i in range(steps + 1)
         )
     return rounded
 
 
-@gf.cell(tags=["layout", "capacitor", "interdigital"])
+@curves.sampled_cell(tags=["layout", "capacitor", "interdigital"])
 def interdigital_capacitor(
     fingers: int = 20,
     finger_length: float = 100.0,

@@ -1,0 +1,37 @@
+---
+title: "圓角矩形（Rounded rectangle）"
+sidebar: api
+---
+
+`rounded_rectangle` 建立置中的 GDSFactory 圓角矩形（rounded rectangle），並轉交其邊緣連接埠。
+
+## 建立預設元件 {#build-the-default-component}
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("rounded_rectangle")
+~~~
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `width` | 100 µm | 矩形寬度。 |
+| `height` | 50 µm | 矩形高度。 |
+| `corner_radius` | 7 µm | X、Y 方向相同的圓角半徑。 |
+| `n_corner_points` | 20 | GDSFactory 每個圓角的取樣點數。 |
+| `ground_mask_margin` | 6 µm | 擴張選用的遮罩輪廓。 |
+| `draw_layer` | `LAYER.D0_TOP_M1_DRAW` | DRAW 圖層。 |
+| `ground_mask_layer` | `None` | 選用的遮罩圖層。 |
+| `port_type` | `"electrical"` | 傳給 GDSFactory 的連接埠類型。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+預設 DRAW 是 D0 頂面 M1 上的圓角矩形。轉交的 GDSFactory 側邊連接埠寬度為 `height - 2*corner_radius`，上／下邊連接埠寬度為 `width - 2*corner_radius`。設定 `port_type=None` 時不提供連接埠。選用遮罩是依邊距擴張的獨立矩形，沒有連接埠。此工廠函式不產生 ETCH。
+
+半徑不得超過較短邊的一半。每個圓角至少需要兩個端點。只有指定遮罩圖層時，預設邊距才會生效。
+
+此工廠函式由[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py)定義。

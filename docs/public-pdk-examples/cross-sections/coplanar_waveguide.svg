@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 826.0" role="img" aria-labelledby="physical-title physical-desc">
+<title id="physical-title">coplanar_waveguide physical face and XY recipe</title>
+<desc id="physical-desc">Physical local transverse cut of D0_TOP aluminium 0.1 micrometres on silicon 500 micrometres. Vertical scale is exaggerated and broken. Outer ground, where shown, continues beyond an illustrative crop and has no assigned finite width. Separate XY section-record bars follow.</desc>
+<rect width="1080" height="826.0" fill="white"/>
+<g font-family="sans-serif" fill="#172b3a">
+<text x="20" y="28" font-size="22" font-weight="bold">coplanar_waveguide · physical face cut</text>
+<text x="20" y="53" font-size="15">D0_TOP · local transverse x / stack z · face-local schematic, not a solver model</text>
+<text x="20" y="76" font-size="14">Z scale exaggerated and broken; only this face and its substrate are shown</text>
+<rect x="230" y="171" width="650" height="117" fill="#7CB342" stroke="#344854"/>
+<text x="555" y="229.5" text-anchor="middle" font-size="17">Si substrate · thickness 500 µm</text>
+<text x="555" y="252.5" text-anchor="middle" font-size="14">z = -500..0 µm · cropped / broken vertical scale</text>
+<path d="M220 229.5 l10 -7 l10 14 l10 -7 M860 229.5 l10 -7 l10 14 l10 -7" fill="none" stroke="#172b3a" stroke-width="2"/>
+<path d="M185 282 V106 m-5 8 l5 -8 l5 8" fill="none" stroke="#172b3a" stroke-width="2"/>
+<text x="172" y="103" font-size="17">+z</text>
+<text x="900" y="163" font-size="15">Al · 0.1 µm</text>
+<text x="900" y="183" font-size="13">z = 0..0.1 µm</text>
+<text x="900" y="203" font-size="13">outward +Z</text>
+<text x="555" y="110" text-anchor="middle" font-size="14">Adjacent vacuum / gap</text>
+<rect x="230.0" y="155" width="121.875" height="16" fill="#88E6DA" stroke="#344854"/>
+<rect x="462.67045454545456" y="155" width="184.65909090909093" height="16" fill="#88E6DA" stroke="#344854"/>
+<rect x="758.125" y="155" width="121.875" height="16" fill="#88E6DA" stroke="#344854"/>
+<text x="555.0" y="143" text-anchor="middle" font-size="14">cpw_draw: 10 µm</text>
+<text x="407.2727272727273" y="194" text-anchor="middle" font-size="13">slot 6</text>
+<text x="702.7272727272727" y="194" text-anchor="middle" font-size="13">slot 6</text>
+<path d="M230 148 V178 M880 148 V178" stroke="#172b3a" stroke-dasharray="3 3"/>
+<text x="555" y="315" text-anchor="middle" font-size="14">Ground continues beyond both crop edges; no finite outer-ground width assigned</text>
+<path d="M230 355 H880 m-7 -4 l7 4 l-7 4" stroke="#172b3a" fill="none"/>
+<text x="900" y="360" font-size="14">x (µm)</text>
+<path d="M351.875 351 V364" stroke="#738da4"/>
+<text x="351.875" y="376" text-anchor="middle" font-size="12">-11</text>
+<path d="M462.67045454545456 351 V381" stroke="#738da4"/>
+<text x="462.67045454545456" y="393" text-anchor="middle" font-size="12">-5</text>
+<path d="M647.3295454545455 351 V364" stroke="#738da4"/>
+<text x="647.3295454545455" y="376" text-anchor="middle" font-size="12">5</text>
+<path d="M758.125 351 V381" stroke="#738da4"/>
+<text x="758.125" y="393" text-anchor="middle" font-size="12">11</text>
+</g>
+<svg x="0" y="420" width="1080" height="406.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 406" role="img" aria-labelledby="recipe-title recipe-desc">
+<title id="recipe-title">coplanar_waveguide default XY sections</title>
+<desc id="recipe-desc">Each row shows one actual cross-section section at its transverse offset, with its recorded width and source layer color. Rows separate recipe layers, not physical Z.</desc>
+<rect width="1080" height="406" fill="white"/>
+<g font-family="sans-serif" fill="#172b3a">
+<text x="20" y="30" font-size="22" font-weight="bold">coplanar_waveguide</text>
+<text x="20" y="55" font-size="15">Default transverse XY recipe; rows are separate section records, not physical Z</text>
+<text x="20" y="78" font-size="14">Widths and offsets in µm; colors from the PDK layer views</text>
+<path d="M395 371 H1030" stroke="#172b3a"/>
+<text x="712" y="401" text-anchor="middle" font-size="14">transverse offset (µm)</text>
+<path d="M429.01785714285717 94 V375" stroke="#94a4af" stroke-dasharray="3 4"/>
+<text x="429.01785714285717" y="390" text-anchor="middle" font-size="13">-11</text>
+<path d="M712.5 94 V375" stroke="#94a4af" stroke-dasharray="3 4"/>
+<text x="712.5" y="390" text-anchor="middle" font-size="13">0</text>
+<path d="M995.9821428571429 94 V375" stroke="#94a4af" stroke-dasharray="3 4"/>
+<text x="995.9821428571429" y="390" text-anchor="middle" font-size="13">11</text>
+<text x="20" y="117" font-size="16">cpw_draw</text>
+<text x="20" y="137" font-size="13">D0_TOP_M1_DRAW · (1, 0)</text>
+<rect x="583.6444805194806" y="108" width="257.71103896103887" height="24" fill="#88E6DA" stroke="#344854"/>
+<text x="712.5" y="151" text-anchor="middle" font-size="13">width 10 · offset 0</text>
+<text x="20" y="181" font-size="16">cpw_etch_neg</text>
+<text x="20" y="201" font-size="13">D0_TOP_M1_ETCH · (1, 1)</text>
+<rect x="429.01785714285717" y="172" width="154.6266233766234" height="24" fill="#1FAF9A" stroke="#344854"/>
+<text x="506.33116883116884" y="215" text-anchor="middle" font-size="13">width 6 · offset -8</text>
+<text x="20" y="245" font-size="16">cpw_etch_pos</text>
+<text x="20" y="265" font-size="13">D0_TOP_M1_ETCH · (1, 1)</text>
+<rect x="841.3555194805194" y="236" width="154.62662337662346" height="24" fill="#1FAF9A" stroke="#344854"/>
+<text x="918.6688311688312" y="279" text-anchor="middle" font-size="13">width 6 · offset 8</text>
+<text x="20" y="309" font-size="16">cpw_ground_mask</text>
+<text x="20" y="329" font-size="13">D0_TOP_GROUND_MASK · (110, 0)</text>
+<rect x="429.01785714285717" y="300" width="566.9642857142858" height="24" fill="#5F748B" stroke="#344854"/>
+<text x="712.5" y="343" text-anchor="middle" font-size="13">width 22 · offset 0</text>
+</g>
+</svg>
+
+</svg>

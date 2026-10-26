@@ -1,0 +1,54 @@
+---
+title: "Interdigital capacitor"
+sidebar: api
+---
+
+`interdigital_capacitor` creates a pair of interleaved electrodes with CPW
+terminal extensions. Its public ports sit at the outer CPW cut planes.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("interdigital_capacitor")
+```
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `fingers` | 20 | Number of interleaved fingers. |
+| `finger_length` | 100 µm | Finger length. |
+| `finger_gap`, `finger_width` | 3.3 µm, 3.3 µm | Nominal finger spacing and width. |
+| `taper_length` | 150 µm | Terminal taper length. |
+| `terminal_extension_length_um` | 100 µm | Length of each CPW terminal extension. |
+| `capacitor_ground_gap` | 85 µm | Gap to the ground-mask contour. |
+| `cpw_xs` | `coplanar_waveguide` | CPW cross-section. |
+| `half` | `False` | Selects the full or half geometry. |
+| `corner_radius_um` | 0 µm | Fillet radius; zero keeps sharp corners. |
+
+## Ports and layers
+
+`o_capacitor_in` and `o_capacitor_out` are at the outer CPW cut planes.
+Standalone terminals remain open; assembled CPW routes connect at these planes.
+The factory creates DRAW, GROUND_MASK, and derived ETCH geometry.
+
+## Corner radius
+
+The default `corner_radius_um=0` keeps sharp contours. A positive radius rounds
+the merged electrode and ground-mask contours while preserving flat outer cut
+planes, ports, and nominal straight finger/end gaps. Tangent arcs that cannot
+fit raise `ValueError`; the requested radius is not reduced. Corner-local
+clearances can therefore differ from the nominal straight gaps. This geometry
+setting does not certify fabrication, design-rule compliance, or solver results.
+The radius must be finite and nonnegative. Outer and hole contours are rounded
+independently; arcs are sampled at no more than 5° per chord, then quantized to
+the existing PDK grid.
+
+![Default interdigital capacitor DRAW and ETCH layout.](../../_static/images/components/interdigital_capacitor.svg)
+
+See the [generated API reference](../../reference/cells.interdigital_capacitor.qmd#orcapen_sc_pdk.cells.interdigital_capacitor)
+and [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/capacitor.py).

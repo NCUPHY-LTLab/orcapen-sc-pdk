@@ -1,0 +1,29 @@
+---
+title: "常用元件"
+sidebar: get-started
+toc: true
+---
+
+使用本頁選擇常用佈局元件（cell）或已註冊的橫截面。
+
+| 從此開始 | 提供內容 |
+| --- | --- |
+| [發射器](#launcher){.text-nowrap} | 焊墊到共面波導（coplanar waveguide，CPW）的轉接結構。 |
+| [諧振器](#resonator){.text-nowrap} | CPW 懸掛式諧振器與蛇形佈局。 |
+| [橫截面](#cross-sections){.text-nowrap} | 路徑所用的已註冊寬度、偏移、圖層與連接埠配方。 |
+
+## Launcher
+
+`launcher` 將大型焊墊漸縮至 CPW 頸部，並標示焊墊側的模擬邊界。下方顯示預設佈局；設定與連接埠請見[發射器指引](../public-pdk-examples/components/launcher.qmd)。
+
+![預設發射器佈局，顯示焊墊、漸縮段與 CPW 頸部。](../_static/images/components/launcher.svg)
+
+## Resonator
+
+`resonator` 結合 CPW 懸掛式諧振器與蛇形走線，並可選擇尾端及量子位元區段幾何。[諧振器指引](../public-pdk-examples/components/resonator.qmd)說明設定與佈局介面。
+
+![預設諧振器佈局。](../_static/images/components/resonator.svg)
+
+## 橫截面 {#cross-sections}
+
+選擇已註冊的橫截面，以定義路徑的寬度、橫向偏移、圖層與連接埠。已註冊選項與預設預覽請見[橫截面指引](../public-pdk-examples/cross-sections.qmd)。

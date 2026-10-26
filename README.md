@@ -112,19 +112,20 @@ repository.
 
 ## Quick Start
 
-Install the reviewed local `0.1.0.dev2` candidate wheel in your existing Python
-3.12 or 3.13 environment, using the actual wheel path supplied by its owner:
+Use Python 3.12 or 3.13 with [uv](https://docs.astral.sh/uv/). In a new project,
+run `uv init --python 3.12` (or `--python 3.13`), then install the public source
+revision used by [Get Started](docs/getting-started.md):
 
 ```bash
-python -m pip install /path/to/orcapen_sc_pdk-0.1.0.dev2-py3-none-any.whl
+uv add "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@aee7f8b848895f2d107f6b086310e866e8381f73"
+uv run python -c "import importlib.metadata as m; print(m.version('orcapen-sc-pdk'))"
 ```
 
-This is a local rename candidate, not an uploaded registry or PyPI release.
-Record the wheel digest and version. Follow [Get Started](docs/getting-started.md)
-to activate OrcaPen and build a public cell; the [distribution guide](docs/distribution.md)
-describes reviewed wheel handoff and future organization-registry publication.
-The GitHub repository is [OrPenStrike/orcapen-sc-pdk](https://github.com/OrPenStrike/orcapen-sc-pdk);
-documentation is hosted at [OrcaPen SC PDK](https://orpenstrike.github.io/orcapen-sc-pdk/).
+Check: the command reports version `0.1.0.dev2`. Then follow [Get Started](docs/getting-started.md)
+to activate OrcaPen and build a public cell. The [distribution guide](docs/distribution.md)
+describes package identity and ordinary wheel consumption.
+The GitHub repository is [NCUPHY-LTLab/orcapen-sc-pdk](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk);
+documentation is hosted at [OrcaPen SC PDK](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/).
 
 ## Repository Boundaries
 

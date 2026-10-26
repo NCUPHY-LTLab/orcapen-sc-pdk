@@ -7,13 +7,14 @@ Children retain local Entities; callers, not these cells, assign final Nets.
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.airbridge import airbridge
 from orcapen_sc_pdk.cells.layout.indium import indium_bump
 from orcapen_sc_pdk.cells.simulation.scgsim.simple_pad import square_pad_capacitor
 from orcapen_sc_pdk.tech import LAYER
 
 
-@gf.cell(tags=["simulation", "chip", "simple_pad", "flip_chip", "bump"])
+@curves.sampled_cell(tags=["simulation", "chip", "simple_pad", "flip_chip", "bump"])
 def flip_chip_pad_coupon() -> gf.Component:
     """Compose the default lower pad, full upper plane and four Ground bump sites.
 
@@ -62,7 +63,7 @@ def flip_chip_pad_coupon() -> gf.Component:
     return c
 
 
-@gf.cell(tags=["simulation", "cpw", "single_die", "airbridge"])
+@curves.sampled_cell(tags=["simulation", "cpw", "single_die", "airbridge"])
 def cpw_airbridge_coupon() -> gf.Component:
     """Compose positive finite-ground Al CPW with the unchanged canonical bridge.
 

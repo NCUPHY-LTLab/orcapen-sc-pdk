@@ -5,18 +5,19 @@ from typing import Literal
 import gdsfactory as gf
 from gdsfactory.typings import CrossSectionSpec
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.ports import add_mesh_port
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@gf.cell(tags=["layout", "resonator", "hanger"])
+@curves.sampled_cell(tags=["layout", "resonator", "hanger"])
 def resonator_hanger(
     coupling_length: float = 200.0,
     straight_length: float = 160.0,
     # XS
     cpw_xs: CrossSectionSpec = "cpw_6_10_6",
     cpw_radius: float = 100.0,
-    bend_npoints: int | None = 16,
+    bend_npoints: int | None = None,
     bend_segment2_angle: Literal[-90, 90] = -90,
     # Layers
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
@@ -57,7 +58,7 @@ def resonator_hanger(
     }
     if bend_npoints is not None:
         bend_kwargs["npoints"] = bend_npoints
-    bend_segment1_component = gf.components.bend_euler(
+    bend_segment1_component = curves.bend_euler(
         angle=90,
         **bend_kwargs,
     )
@@ -65,7 +66,7 @@ def resonator_hanger(
         length=straight_length,
         cross_section=cpw_xs_instance,
     )
-    bend_segment2_component = gf.components.bend_euler(
+    bend_segment2_component = curves.bend_euler(
         angle=bend_segment2_angle,
         **bend_kwargs,
     )
@@ -132,8 +133,8 @@ def resonator_hanger(
     c.info["length"] = (
         coupling_length
         + straight_length
-        + float(bend_segment1_component.info["length"])
-        + float(bend_segment2_component.info["length"])
+        + curves.design_length(bend_segment1_component)
+        + curves.design_length(bend_segment2_component)
     )
 
     return c

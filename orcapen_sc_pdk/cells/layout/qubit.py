@@ -13,6 +13,7 @@ from math import cos, isfinite, radians, sin
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.indium import indium_bump
 from orcapen_sc_pdk.cells.layout.junction import manhattan_style_junction
 from orcapen_sc_pdk.helpers.layout import add_etch_for_component
@@ -24,7 +25,7 @@ def _check_positive(name: str, value: float) -> None:
         raise ValueError(f"{name} must be finite and positive, got {value!r}.")
 
 
-@gf.cell
+@curves.sampled_cell
 def _xmon_qubit_pad(
     length: float,
     width: float,
@@ -42,7 +43,7 @@ def _xmon_qubit_pad(
     return c
 
 
-@gf.cell
+@curves.sampled_cell
 def _xmon_coupling_electrode(
     qubit_pad_length: float,
     qubit_pad_width: float,
@@ -108,7 +109,7 @@ def _xmon_coupling_electrode(
     return c
 
 
-@gf.cell(tags=["layout", "qubit", "kosen2024", "flip_chip"])
+@curves.sampled_cell(tags=["layout", "qubit", "kosen2024", "flip_chip"])
 def kosen2024_flip_chip_xmon_qubit(
     qubit_pad_length: float = 309.5,
     qubit_pad_width: float = 24.65,
@@ -245,7 +246,7 @@ def kosen2024_flip_chip_xmon_qubit(
     c.add_port(name="o_junction_lumped", port=junction_ref.ports["o_junction_lumped"])
 
     up_arm_start = junction_ref.ports["o_arm2"].center
-    up_arm_head = c << gf.components.circle(
+    up_arm_head = c << curves.circle(
         radius=junction_arm_width / 2,
         layer=q_chip_draw_layer,
     )
@@ -261,7 +262,7 @@ def kosen2024_flip_chip_xmon_qubit(
         layer=q_chip_draw_layer,
     )
     lower_arm_start = junction_ref.ports["o_arm1"].center
-    lower_arm_head = c << gf.components.circle(
+    lower_arm_head = c << curves.circle(
         radius=junction_arm_width / 2,
         layer=q_chip_draw_layer,
     )

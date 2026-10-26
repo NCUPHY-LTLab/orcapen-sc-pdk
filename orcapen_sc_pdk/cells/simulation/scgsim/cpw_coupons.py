@@ -14,6 +14,7 @@ from typing import Any, Literal
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk import tech
 from orcapen_sc_pdk.cells.layout.airbridge import airbridge
 from orcapen_sc_pdk.cells.layout.cpw import launcher, n_trace_mtl_section
@@ -26,7 +27,7 @@ _BRIDGE_X = (-1600, -1400, -1200, -1000, -800, -600, 800, 1000, 1200, 1400, 1600
 _DOMAIN = (-2235.0, -560.0, 2235.0, 1531.5)
 
 
-@gf.cell(tags=["simulation", "cpw", "finite_ground"])
+@curves.sampled_cell(tags=["simulation", "cpw", "finite_ground"])
 def finite_ground_cpw_coupon(
     *,
     trace_length_um: float = 500.0,
@@ -212,13 +213,13 @@ def _meander_coupon(mode: Literal["lumped", "wave"]) -> gf.Component:
     return c
 
 
-@gf.cell(tags=["simulation", "cpw", "meander", "airbridge", "lumped"])
+@curves.sampled_cell(tags=["simulation", "cpw", "meander", "airbridge", "lumped"])
 def cpw_meander_airbridge_lumped_coupon() -> gf.Component:
     """Selected 17-bridge source with both launchers and actual 202/1 sheets."""
     return _meander_coupon("lumped")
 
 
-@gf.cell(tags=["simulation", "cpw", "meander", "airbridge", "wave"])
+@curves.sampled_cell(tags=["simulation", "cpw", "meander", "airbridge", "wave"])
 def cpw_meander_airbridge_wave_coupon() -> gf.Component:
     """Same selected core without launchers; through cuts at x = +/-2235 um."""
     return _meander_coupon("wave")

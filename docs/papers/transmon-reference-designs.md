@@ -1,8 +1,13 @@
-# Transmon Reference Designs
+---
+title: "Transmon Reference Designs"
+sidebar: research
+---
 
-**Design family:** qubit
+Use this topic to select public transmon designs with reproducible geometry,
+material assumptions, and circuit-model definitions.
 
-**Status:** source selection
+⏳ Reference selection is in progress. Keep the physical layout and the
+paper's electrical model together when choosing a reproduction target.
 
-Collect public transmon or related qubit papers where geometry, materials, and
-analysis assumptions are clear enough for a public reproduction workflow.
+The [existing Xmon examples](../simulation/notebooks.qmd#kosen2024-xmon)
+provide a separate starting point for the documented public geometry.

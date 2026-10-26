@@ -1,0 +1,37 @@
+---
+title: "Rounded rectangle"
+sidebar: api
+---
+
+`rounded_rectangle` creates a centered GDSFactory rounded rectangle and forwards its edge ports.
+
+## Build the default component
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("rounded_rectangle")
+~~~
+
+## Parameters
+
+| Argument | Default | Meaning |
+| --- | --- | --- |
+| `width` | 100 µm | Rectangle width. |
+| `height` | 50 µm | Rectangle height. |
+| `corner_radius` | 7 µm | Equal X and Y corner radii. |
+| `n_corner_points` | 20 | GDSFactory sampling points per corner. |
+| `ground_mask_margin` | 6 µm | Expand an optional mask outline. |
+| `draw_layer` | `LAYER.D0_TOP_M1_DRAW` | DRAW layer. |
+| `ground_mask_layer` | `None` | Optional mask layer. |
+| `port_type` | `"electrical"` | Port type forwarded to GDSFactory. |
+
+## Ports and layers
+
+The default DRAW is a rounded rectangle on the D0 top M1 layer. GDSFactory edge ports are forwarded: side ports span `height - 2*corner_radius`, and top/bottom ports span `width - 2*corner_radius`. Setting `port_type=None` supplies no ports. An optional mask is a separate rectangle expanded by the margin and has no ports. This factory does not generate ETCH.
+
+The radius must fit within half the smaller dimension. Each corner needs at least its two endpoints. The default margin is unused until a mask layer is supplied.
+
+The [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py) defines this factory.

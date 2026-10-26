@@ -1,0 +1,32 @@
+---
+title: "導線轉角（Wire corner）"
+sidebar: api
+---
+
+`wire_corner` 是選定 GDSFactory 橫截面（cross-section）的直角轉角介面。
+
+## 建立預設元件 {#build-the-default-component}
+
+~~~python
+import gdsfactory as gf
+import orcapen_sc_pdk
+
+orcapen_sc_pdk.activate()
+component = gf.get_component("wire_corner")
+~~~
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `cross_section` | `"cpw_6_7_6"` | 7 µm 導線、6 µm 間隙，以及 D0 頂面 M1 繪製／蝕刻／接地遮罩圖層。 |
+| `port_names` | `("e1", "e2")` | 兩個轉角連接埠的名稱。 |
+| `port_types` | `("electrical", "electrical")` | 連接埠類型。 |
+| `width` | `None` | 選用的橫截面寬度覆寫值。 |
+| `radius` | `None` | 傳給 GDSFactory；GF 9.48 會忽略此值。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+預設連接埠為 `e1` 與 `e2`，兩者皆為電氣類型。圖層幾何形狀來自選定的橫截面。在 GF 9.48 中轉角仍為尖角，半徑引數不會產生曲線。
+
+此工廠函式由[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/primitives.py)定義。

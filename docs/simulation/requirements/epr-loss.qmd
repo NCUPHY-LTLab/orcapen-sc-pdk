@@ -1,68 +1,46 @@
 ---
-title: "EPR and loss"
-description: "Relate selected LC mode fields to energy participation and explicit loss assumptions."
+title: "Participation & Surface Loss"
 sidebar: simulation
 ---
 
-## Purpose and selected system
+Calculate where a selected mode stores energy, then apply explicitly chosen
+material and interface loss assumptions. Use an LC/EPR tutorial rather than
+treating an unloaded frequency calculation as a participation result.
 
-Use the existing SimplePad LC examples to ask where a selected mode stores
-energy and what loss estimate follows from the stated assumptions. The system
-is a pad and surrounding Ground above a substrate, with an explicitly authored
-linear inductive/junction treatment. Reuse those notebooks rather than making
-an unloaded Eigenmode case appear to be an EPR example.
+## Model and prerequisites
 
-## Model and analysis choices
+Preserve conductor and junction/load definitions, stack, exterior, and the
+requested surfaces or volumes. MA, MS, and SA identify different interfaces;
+their thickness, permittivity, loss tangent, and field side are selected model inputs.
 
-Preserve the LC model's conductor ownership, load, stack, vacuum region and
-exterior treatment. Specify the requested bulk domains, surface interfaces
-and port/junction contributions. Metal–air, metal–substrate and substrate–air
-interfaces have distinct ownership and field-side meaning.
+Use the selected tutorial's Palace or AEDT environment and saved-field settings.
+Read [Materials & Interfaces](../../start/materials.qmd) before choosing a preset.
 
-Interface thickness, permittivity and loss tangent are explicit assumptions
-with provenance. Keep their selected representation separate from the bulk
-material model. State the energy denominator and the selected mode/pass before
-combining participation or loss quantities. Concrete properties, integration
-settings, mesh controls and field retention belong to the notebook.
+## Choose a tutorial
 
-::: {.callout-note}
-Participation, assumption-based loss and native Q are different outputs.
-Neither mode frequency nor successful execution supplies missing field energy
-or a measured lifetime.
-:::
+| Task | Tutorial |
+| --- | --- |
+| Pad LC mode and surface/bulk contributions | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Native HFSS field-integral evaluation | [SimplePad HFSS LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Explicit geometric bands and a local-interface correction | [SimplePad Palace surface bands](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) with [Q2D interface factors](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) |
 
-## Workflow
 
-::: {.panel-tabset}
+## Read participation and loss
 
-### Palace
+Read each contribution with its energy denominator, selected mode and pass,
+interface/field-side identity, and saved-field inputs. Keep signed junction
+contributions identifiable. Participation, assumption-based loss, native Q,
+and measured lifetime are different quantities.
 
-Use [SimplePad Palace LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb).
-Prepare the selected interface and port treatment, retain mesh/field provenance
-through the solve, and resolve the returned energy contributions for the
-requested mode. Keep bulk, surface and signed port views identifiable.
+For geometric correction, inspect the selected original-parent bands, sampled
+region, retained region, and returned Q2D factor together. The tutorial's
+straight-edge approximation does not establish corner equivalence.
 
-### AEDT
+## SurfaceBands downloads
 
-Use [SimplePad HFSS LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb).
-Inspect native interface and junction selections, solve with the requested
-saved fields, and evaluate the selected native field integrals. Resolve those
-observations with their mode/pass and normalization identity.
+| Tutorial | Downloads |
+| --- | --- |
+| Q2D local interfaces | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd" data-noresolveinput download>QMD</a> |
+| Palace surface bands | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd" data-noresolveinput download>QMD</a> |
 
-:::
-
-## Expected outputs
-
-Retain native selected surfaces/volumes, material and assumption provenance,
-saved fields and raw integral evidence. Report energy contributions,
-participations and any assumption-based loss estimate with units and
-normalization. Native Q, when requested and returned, is labeled separately.
-
-Compare backend results only with their actual representation and boundary
-choices visible. This requirement introduces no cross-backend agreement
-threshold or loss target.
-
-Continue with [materials and stack](../tools/materials-stack-z.qmd),
-[contacts](../tools/contacts-multilevel.qmd),
-[mesh and adaptation](../tools/mesh-fem-amr.qmd) and
-[handoff/reporting](../tools/handoff-resolve-report.qmd).
+Download the shared <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" download>model JSON</a> beside either notebook or QMD.

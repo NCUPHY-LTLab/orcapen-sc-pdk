@@ -5,6 +5,7 @@ from typing import Literal
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.helpers.layout.geometry import Point, rotate_point
 from orcapen_sc_pdk.ports import add_junction_lumped_port
 from orcapen_sc_pdk.tech import LAYER, Layer
@@ -14,7 +15,7 @@ def _path_orientation(start: Point, end: Point) -> float:
     return math.degrees(math.atan2(end[1] - start[1], end[0] - start[0])) % 360
 
 
-@gf.cell(tags=["layout", "junction", "manhattan"])
+@curves.sampled_cell(tags=["layout", "junction", "manhattan"])
 def manhattan_style_junction(
     width: float = 0.09,
     length: float = 5.0,

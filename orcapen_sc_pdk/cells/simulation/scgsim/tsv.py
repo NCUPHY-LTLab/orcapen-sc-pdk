@@ -12,6 +12,7 @@ from typing import Literal
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.materials import get_material_records
 from orcapen_sc_pdk.ports import add_junction_lumped_port
 from orcapen_sc_pdk.tech import LAYER, LAYER_STACK
@@ -32,7 +33,7 @@ def _circle_curves(radius_um: float, *, hole: bool = False) -> list[dict]:
     ]
 
 
-@gf.cell(tags=["simulation", "tsv", "ground", "hollow", "single_die"])
+@curves.sampled_cell(tags=["simulation", "tsv", "ground", "hollow", "single_die"])
 def tsv_ground_coupon(
     die: Literal["D0", "D1"] = "D0",
     die_side_um: float = 1000.0,
@@ -74,8 +75,8 @@ def tsv_ground_coupon(
     die_rectangle = gf.components.rectangle(
         size=(die_side_um, die_side_um), centered=True, layer=substrate_layer
     )
-    bore = gf.components.circle(radius=outer_radius, layer=wall_layer)
-    central_hole = gf.components.circle(radius=inner_radius, layer=wall_layer)
+    bore = curves.circle(radius=outer_radius, layer=wall_layer)
+    central_hole = curves.circle(radius=inner_radius, layer=wall_layer)
     silicon = gf.boolean(
         die_rectangle,
         bore,
@@ -95,7 +96,7 @@ def tsv_ground_coupon(
     c.add_ref(silicon, name="CUT_SI")
     c.add_ref(liner, name="HOLLOW_TIN_WALL")
     for name, layer in (("BOTTOM_LANDING", bottom_layer), ("TOP_LANDING", top_layer)):
-        landing_disk = gf.components.circle(radius=landing_outer_radius_um, layer=layer)
+        landing_disk = curves.circle(radius=landing_outer_radius_um, layer=layer)
         landing = gf.boolean(
             landing_disk,
             central_hole,
@@ -294,8 +295,8 @@ def _grounded_system(
         size=(die_side_um, die_side_um), centered=True, layer=substrate_layer
     )
     bores, holes = gf.Component(), gf.Component()
-    outer = gf.components.circle(radius=outer_radius, layer=wall_layer)
-    inner = gf.components.circle(radius=inner_radius, layer=wall_layer)
+    outer = curves.circle(radius=outer_radius, layer=wall_layer)
+    inner = curves.circle(radius=inner_radius, layer=wall_layer)
     liner = gf.boolean(outer, inner, operation="not", layer=wall_layer)
     for center in centers:
         bores.add_ref(outer).move(center)
@@ -491,7 +492,7 @@ def _grounded_system(
     return c
 
 
-@gf.cell(tags=["simulation", "tsv", "simple_pad", "single_die"])
+@curves.sampled_cell(tags=["simulation", "tsv", "simple_pad", "single_die"])
 def tsv_grounded_simple_pad(
     die: Literal["D0", "D1"] = "D0",
     pad_side_um: float = 200.0,
@@ -516,7 +517,7 @@ def tsv_grounded_simple_pad(
     )
 
 
-@gf.cell(tags=["simulation", "tsv", "cpw", "single_die"])
+@curves.sampled_cell(tags=["simulation", "tsv", "cpw", "single_die"])
 def tsv_grounded_cpw(
     die: Literal["D0", "D1"] = "D0",
     width_um: float = 10.0,
@@ -539,7 +540,7 @@ def tsv_grounded_cpw(
     )
 
 
-@gf.cell(tags=["simulation", "tsv", "cpw", "ground_stitching", "single_die"])
+@curves.sampled_cell(tags=["simulation", "tsv", "cpw", "ground_stitching", "single_die"])
 def tsv_ground_stitched_cpw(
     die: Literal["D0", "D1"] = "D0",
     width_um: float = 10.0,
@@ -588,7 +589,7 @@ def tsv_ground_stitched_cpw(
     return c
 
 
-@gf.cell(tags=["simulation", "tsv", "concentric", "through_signal", "single_die"])
+@curves.sampled_cell(tags=["simulation", "tsv", "concentric", "through_signal", "single_die"])
 def tsv_concentric_signal_coupon(
     die: Literal["D0", "D1"] = "D0",
     die_side_um: float = 1000.0,
@@ -627,8 +628,8 @@ def tsv_concentric_signal_coupon(
     rectangle = gf.components.rectangle(
         size=(die_side_um, die_side_um), centered=True, layer=substrate_layer
     )
-    outer = gf.components.circle(radius=outer_radius, layer=wall_layer)
-    inner = gf.components.circle(radius=inner_radius, layer=wall_layer)
+    outer = curves.circle(radius=outer_radius, layer=wall_layer)
+    inner = curves.circle(radius=inner_radius, layer=wall_layer)
     bores, ground_holes = gf.Component(), gf.Component()
     for center in centers:
         bores.add_ref(outer).move(center)
@@ -668,7 +669,7 @@ def tsv_concentric_signal_coupon(
             boundary["boundary_id"] = boundary["boundary_id"].replace("TSV_WALL", name)
             boundary["coordinate_frame"] = "source_occurrence_local_um"
         regions.append(region)
-    opening = gf.components.circle(radius=signal_outer_radius_um + gap_um, layer=wall_layer)
+    opening = curves.circle(radius=signal_outer_radius_um + gap_um, layer=wall_layer)
     cutouts = gf.Component()
     cutouts.add_ref(ground_holes)
     cutouts.add_ref(opening)

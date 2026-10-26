@@ -1,0 +1,28 @@
+---
+title: "漸變段（Taper）"
+sidebar: api
+---
+
+`taper` 建立兩組導體寬度與間隙之間的共面波導（coplanar waveguide，CPW）漸變段。預設間隙維持 6 µm，導體寬度則由 10 µm 變為 7 µm。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("taper")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `width1`, `width2` | 10 µm, 7 µm | 兩端的導體寬度。 |
+| `gap1`, `gap2` | 6 µm, 6 µm | 兩端的 CPW 間隙。 |
+| `length` | 100 µm | 過渡段長度。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+佈線連接埠為 `o_taper_in` 與 `o_taper_out`，皆位於 DRAW 導體。工廠函式建立 DRAW、GROUND_MASK 與衍生 ETCH 幾何形狀。圖層與連接埠定義請見[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/taper.py)。

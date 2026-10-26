@@ -1,0 +1,17 @@
+---
+title: "Components"
+sidebar: api
+---
+
+Choose a registered layout factory, then use its guide for default settings,
+ports, and layer roles. Geometry dimensions use micrometres.
+
+| Family | Component guides |
+| --- | --- |
+| CPW paths and resonators | [straight](straight.qmd), [taper](taper.qmd), [resonator](resonator.qmd), [resonator_hanger](resonator_hanger.qmd), [resonator_meander](resonator_meander.qmd) |
+| Capacitors | [interdigital_capacitor](interdigital_capacitor.qmd), [martinis2022_differential_ribbon_capacitor](martinis2022_differential_ribbon_capacitor.qmd) |
+| Launch and junction | [launcher](launcher.qmd), [cpw_t_junction](cpw_t_junction.qmd) |
+| Connections and primitives | [airbridge](airbridge.qmd), [indium_bump](indium_bump.qmd), [indium_ground](indium_ground.qmd), [cpw_handoff](cpw_handoff.qmd), [rounded_end_metal_segment](rounded_end_metal_segment.qmd), [rounded_rectangle](rounded_rectangle.qmd), [wire_corner](wire_corner.qmd) |
+
+For path widths, gaps, and section layers, see [Cross-sections](../cross-sections.qmd).
+For placement, connection, routing, and export, use the [GDSFactory guide](../component-authoring.md).

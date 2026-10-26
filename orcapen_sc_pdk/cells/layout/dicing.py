@@ -2,10 +2,11 @@
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER
 
 
-@gf.cell(tags=["layout", "dicing"])
+@curves.sampled_cell(tags=["layout", "dicing"])
 def dicing_edge(
     size: tuple[float, float] = (10000.0, 10000.0),
     width: float = 50.0,

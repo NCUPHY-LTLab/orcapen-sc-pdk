@@ -1,0 +1,32 @@
+---
+title: "Martinis 2022 差動帶狀電容"
+sidebar: api
+---
+
+`martinis2022_differential_ribbon_capacitor` 建立差動帶狀電容（differential ribbon capacitor）版圖。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("martinis2022_differential_ribbon_capacitor")
+```
+
+## 參數 {#parameters}
+
+| 引數 | 預設值 | 說明 |
+| --- | --- | --- |
+| `a_um` | 50 µm | 內電極偏移量。 |
+| `b_um` | 100 µm | 外電極偏移量，須大於 `a_um`。 |
+| `ell_r_um` | 1391 µm | 帶狀電極長度。 |
+
+## 連接埠與圖層 {#ports-and-layers}
+
+版圖包含兩個 DRAW 電極，不包含 ETCH 幾何形狀。`o_mesh_positive_electrode` 與 `o_mesh_negative_electrode` 是供網格生成識別兩個電極的具名連接埠，不是佈線連接埠。
+
+![預設 Martinis 帶狀電容的 DRAW 版圖。](../../_static/images/components/martinis2022_differential_ribbon_capacitor.svg)
+
+請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.martinis2022_differential_ribbon_capacitor.html#orcapen_sc_pdk.cells.martinis2022_differential_ribbon_capacitor)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/martinis.py)。

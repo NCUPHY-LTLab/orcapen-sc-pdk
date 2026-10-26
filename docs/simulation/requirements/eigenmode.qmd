@@ -1,66 +1,37 @@
 ---
-title: "Ordinary Eigenmode"
-description: "Find unloaded electromagnetic modes of the selected finite CPW model."
+title: "Resonance & Eigenmodes"
 sidebar: simulation
 ---
 
-## Purpose and selected system
+Find the frequencies and fields of a bounded electromagnetic model.
+Choose an unloaded, LC-loaded, or explicit RLC-loaded model according to the
+physical system you want to calculate.
 
-Find the natural electromagnetic frequencies and fields of the finite-ground
-CPW coupon. Use the notebook's straight Signal, two finite Ground conductors
-and substrate. This ordinary Eigenmode example has no driven excitation,
-lumped RLC load or automatic EPR request.
+## Choose the model
 
-The finite geometry and exterior treatment define the mode problem. It is
-not a claim that the coupon represents an infinite transmission line or a
-specified resonator frequency.
+| Model | Starting tutorial |
+| --- | --- |
+| Unloaded finite CPW | [Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> or [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Pad with an explicit linear inductive branch | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> or [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Curved pad boundary | [CircularPad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Closed TSV model | [TSV HFSS Eigenmode](../tsv-model-inspection.qmd) |
 
-## Model and boundary choices
+Use the selected tutorial's solver environment, conductor connectivity, stack,
+and exterior. Its search frequency and requested mode count select the
+calculation; mesh and adaptation settings control its discretization.
 
-Preserve conductor connectivity, dielectric extent, material records and
-physical Z. Distinguish a finite-thickness solid from a thin-film modeling
-choice. State the surrounding vacuum region and the actual exterior or
-enclosure treatment; neither an open CPW end nor an unspecified exterior
-should silently acquire a different electrical boundary.
+## Loaded modes {#loaded-modes}
 
-Mode count and search frequency tell the solver which modes to seek.
-Mesh, element order, adaptive controls and solver tolerance govern the
-calculation. Field retention determines which later observations are
-available. Their exact values belong to the notebook.
+The [CPW–meander RLC tutorial](../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.qmd" data-noresolveinput download>QMD</a>
+adds explicit linear loading on the selected assembly. Preserve its support
+sheet, enabled branches, topology, and contact directions.
+This model does not add Josephson nonlinearity automatically.
 
-::: {.callout-note}
-Ordinary modes are distinct from
-[lumped-loaded modes](lumped-rlc-eigenmode.qmd) and
-[EPR/loss analysis](epr-loss.qmd). Frequency alone is not native Q or lifetime.
-:::
+## Read the modes
 
-## Workflow
+Identify modes using their actual fields, not frequency order alone.
+Read frequency and adaptive history together; report native Q only when
+the selected loss model and returned output provide it.
 
-::: {.panel-tabset}
-
-### Palace
-
-Use [Finite CPW Palace Eigenmode](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb).
-Build the source and prescribed region, inspect the prepared model and mesh,
-then hand off the eigenmode solve. Resolve a returned run independently of
-source preparation.
-
-### AEDT
-
-Use [Finite CPW HFSS Eigenmode](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb).
-Inspect the native bodies, materials, metal representation and exterior before
-solving. Retain mode identities and saved fields with the applied adaptive setup.
-
-:::
-
-## Expected outputs
-
-Return mode frequencies and field distributions, together with model readback,
-mesh/setup information and adaptive history. Identify modes by their actual
-fields rather than frequency ordering alone. Report native Q only when the
-chosen physical loss model and returned native output provide it. Comparisons
-between Palace and HFSS must retain their distinct boundary/model choices.
-
-See [materials and Z](../tools/materials-stack-z.qmd),
-[mesh/FEM/AMR](../tools/mesh-fem-amr.qmd) and
-[handoff and reports](../tools/handoff-resolve-report.qmd).
+For interface or junction energy analysis, continue with
+[Participation & Surface Loss](epr-loss.qmd).

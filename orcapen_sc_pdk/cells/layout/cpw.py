@@ -7,6 +7,7 @@ from math import isfinite
 import gdsfactory as gf
 from gdsfactory.typings import CrossSectionSpec, Layer
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.helpers.layout import add_etch_for_component
 from orcapen_sc_pdk.ports import add_driven_lumped_port
 from orcapen_sc_pdk.tech import (
@@ -18,7 +19,7 @@ from orcapen_sc_pdk.tech import (
 )
 
 
-@gf.cell(tags=["layout", "cpw"])
+@curves.sampled_cell(tags=["layout", "cpw"])
 def cpw_t_junction(
     trunk_length: float = 200.0,
     branch_length: float = 100.0,
@@ -86,7 +87,7 @@ def cpw_t_junction(
     return component
 
 
-@gf.cell(tags=["layout", "cpw"])
+@curves.sampled_cell(tags=["layout", "cpw"])
 def n_trace_mtl_section(
     length: float = 500.0,
     cross_section: CrossSectionSpec = "coupled_cpw_w7_s6_d3",
@@ -154,7 +155,7 @@ def _coupled_mtl_cross_section(
     return xs, mtl_xs
 
 
-@gf.cell(tags=["layout", "cpw", "coupling_segment"])
+@curves.sampled_cell(tags=["layout", "cpw", "coupling_segment"])
 def mtl_bend_coupling_section(
     coupled_length: float = 500.0,
     inter_trace_ground_width: float = 3.0,
@@ -224,7 +225,7 @@ def mtl_bend_coupling_section(
     return component
 
 
-@gf.cell(tags=["layout", "cpw", "coupling_segment"])
+@curves.sampled_cell(tags=["layout", "cpw", "coupling_segment"])
 def mtl_straight_bend_coupling_section(
     coupled_length: float = 500.0,
     inter_trace_ground_width: float = 3.0,
@@ -302,7 +303,7 @@ def mtl_straight_bend_coupling_section(
     return component
 
 
-@gf.cell(tags=["layout", "cpw"])
+@curves.sampled_cell(tags=["layout", "cpw"])
 def mtl_straight_bend_transition(
     straight_length: float = 100.0,
     inter_trace_ground_width: float = 3.0,
@@ -346,7 +347,7 @@ def mtl_straight_bend_transition(
         cross_section=xs,
     )
     r_bend = component << gf.path.extrude(
-        gf.path.euler(radius=bend_radius, angle=90, use_eff=True),
+        curves.euler(radius=bend_radius, angle=90, use_eff=True),
         cross_section=xs,
     )
     p_straight.dmovey(seam.ports["p_o1"].center[1])
@@ -411,7 +412,7 @@ def mtl_straight_bend_transition(
     return component
 
 
-@gf.cell(tags=["layout", "cpw"])
+@curves.sampled_cell(tags=["layout", "cpw"])
 def mtl_bend_bend_transition(
     bend_radius: float = 100.0,
     inter_trace_ground_width: float = 3.0,
@@ -438,11 +439,11 @@ def mtl_bend_bend_transition(
     component = gf.Component()
 
     p_bend = component << gf.path.extrude(
-        gf.path.euler(radius=bend_radius, angle=-90, use_eff=True),
+        curves.euler(radius=bend_radius, angle=-90, use_eff=True),
         cross_section=xs,
     )
     r_bend = component << gf.path.extrude(
-        gf.path.euler(radius=bend_radius, angle=90, use_eff=True),
+        curves.euler(radius=bend_radius, angle=90, use_eff=True),
         cross_section=xs,
     )
     p_bend.dmovey(seam.ports["p_o1"].center[1])
@@ -506,7 +507,7 @@ def mtl_bend_bend_transition(
     return component
 
 
-@gf.cell(tags=["layout", "cpw"])
+@curves.sampled_cell(tags=["layout", "cpw"])
 def launcher(
     pad_width: float = 150.0,
     pad_length: float = 150.0,

@@ -1,0 +1,26 @@
+---
+title: "材料與介面"
+sidebar: get-started
+---
+
+為每個實體選擇材料紀錄，僅在模型需要時選擇介面預設值。請將選定 ID 與模擬輸入一併保存。
+
+## 材料紀錄
+
+`get_material_records()`、`get_material_alias_records()` 與 `get_interface_preset_records()` 會回傳 OrcaPen [公開材料資料庫](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/materials.json)中的分離紀錄。
+
+紀錄會識別材料種類、超導狀態、數值屬性與明確的 AEDT 資料庫名稱。別名選取既有識別，不會建立新的物理材料。
+
+函式簽章請見[產生的材料 API](/orcapen-sc-pdk/en/reference/index.html#materials)；如何同時指定材料與高度，請見[圖層與堆疊指引](layers.qmd)。
+
+## 表面介面
+
+| 介面 | 實體邊界 |
+| --- | --- |
+| MA | 金屬－空氣（Metal–Air） |
+| MS | 金屬－基板（Metal–Substrate） |
+| SA | 基板－空氣（Substrate–Air） |
+
+資料庫包含 Woods2019 Si 與 LiteratureCentral 介面預設值。其厚度、介電常數、損耗正切與來源都是需選擇的模型假設，不是自動製程預設值，也不代表每個元件的量測屬性。
+
+參與率計算時，請將預設值與場側選擇一併保留在回傳結果中。[參與率與表面損耗](../simulation/requirements/epr-loss.qmd)連結具體教學；[研究](../papers/surface-loss-participation.md)彙整相關文獻。

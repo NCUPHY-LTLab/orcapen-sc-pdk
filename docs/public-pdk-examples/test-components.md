@@ -1,4 +1,7 @@
-# Test Components Set
+---
+title: "Model Gallery"
+sidebar: simulation
+---
 
 These seven families are public source layouts for inspecting pads, curved
 strips, finite CPW and multi-level structures. The thumbnails show actual
@@ -8,15 +11,15 @@ and nonmetal locators; they are not solver results.
 
 | Family and source | Source-derived layout |
 | --- | --- |
-| **01 Square pad** — [`square_pad_capacitor()`](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py). Default 200 µm island and 20 µm opening gap, with a nonmetal junction locator. | ![Square pad: footprint and opening detail.](../_static/images/test-components/01-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/01-source.png" label="Image: 01 square pad" >}} |
-| **02 Circular disk** — [`circular_pad_capacitor()`](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py). Outer radius 100 µm, inner radius zero. | ![Circular disk: footprint and locator detail.](../_static/images/test-components/02-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/02-source.png" label="Image: 02 circular disk" >}} |
+| **01 Square pad** — [`square_pad_capacitor()`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py). Default 200 µm island and 20 µm opening gap, with a nonmetal junction locator. | ![Square pad: footprint and opening detail.](../_static/images/test-components/01-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/01-source.png" label="Image: 01 square pad" >}} |
+| **02 Circular disk** — [`circular_pad_capacitor()`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py). Outer radius 100 µm, inner radius zero. | ![Circular disk: footprint and locator detail.](../_static/images/test-components/02-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/02-source.png" label="Image: 02 circular disk" >}} |
 | **03 Annulus** — the same circular factory with `inner_radius_um=80`. The inner hole is nonmetal, not Ground. | ![Annulus: actual inner hole and outer opening.](../_static/images/test-components/03-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/03-source.png" label="Image: 03 annulus" >}} |
-| **04A Circular-arc strip** — [`straight_to_circular_strip()`](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py). Straight portions joined to the source circular arc; no background Ground or JJ. | ![Circular-arc strip: footprint and endpoint detail.](../_static/images/test-components/04a-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/04a-source.png" label="Image: 04A arc strip" >}} |
-| **04B Interpolation strip** — [`interpolation_spline_strip()`](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/simulation/scgsim/spline_strip.py). Piecewise cubic Hermite graph through the source points. | ![Interpolation strip: actual source polygon and ports.](../_static/images/test-components/04b-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/04b-source.png" label="Image: 04B interpolation strip" >}} |
-| **04C B-spline strip** — [`bspline_strip()`](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/simulation/scgsim/spline_strip.py). Degree-three rational B-spline with explicit controls, knots and weights. | ![B-spline strip: actual source polygon and ports.](../_static/images/test-components/04c-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/04c-source.png" label="Image: 04C B-spline strip" >}} |
-| **05 Finite CPW** — `finite_ground_cpw_coupon()` in the current local source candidate. Three conductor rectangles: length 500 µm, signal 10 µm, gaps 6 µm, grounds 80 µm, on the PDK substrate. | ![Finite CPW: source rectangles and substrate.](../_static/images/test-components/05-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/05-source.png" label="Image: 05 finite CPW" >}} |
-| **06 Flip-chip pad** — [`flip_chip_pad_coupon()`](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/simulation/scgsim/test_components.py). Lower pad, full upper bottom-face plane and four existing bumps at (±250, ±250) µm. | ![Flip-chip source: separate lower and upper faces plus bump detail.](../_static/images/test-components/06-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/06-source.png" label="Image: 06 flip-chip pad" >}} |
-| **07 CPW airbridge** — [`cpw_airbridge_coupon()`](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/simulation/scgsim/test_components.py). Positive CPW with the existing deck and two piers crossing above Signal. | ![Airbridge source: CPW crossing and actual pier overlap detail.](../_static/images/test-components/07-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/07-source.png" label="Image: 07 CPW airbridge" >}} |
+| **04A Circular-arc strip** — [`straight_to_circular_strip()`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/cells/simulation/scgsim/simple_pad.py). Straight portions joined to the source circular arc; no background Ground or JJ. | ![Circular-arc strip: footprint and endpoint detail.](../_static/images/test-components/04a-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/04a-source.png" label="Image: 04A arc strip" >}} |
+| **04B Interpolation strip** — [`interpolation_spline_strip()`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/cells/simulation/scgsim/spline_strip.py). Piecewise cubic Hermite graph through the source points. | ![Interpolation strip: actual source polygon and ports.](../_static/images/test-components/04b-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/04b-source.png" label="Image: 04B interpolation strip" >}} |
+| **04C B-spline strip** — [`bspline_strip()`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/cells/simulation/scgsim/spline_strip.py). Degree-three rational B-spline with explicit controls, knots and weights. | ![B-spline strip: actual source polygon and ports.](../_static/images/test-components/04c-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/04c-source.png" label="Image: 04C B-spline strip" >}} |
+| **05 Finite CPW** — `finite_ground_cpw_coupon()`. Three conductor rectangles: length 500 µm, signal 10 µm, gaps 6 µm, grounds 80 µm, on the PDK substrate. | ![Finite CPW: source rectangles and substrate.](../_static/images/test-components/05-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/05-source.png" label="Image: 05 finite CPW" >}} |
+| **06 Flip-chip pad** — [`flip_chip_pad_coupon()`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/cells/simulation/scgsim/test_components.py). Lower pad, full upper bottom-face plane and four existing bumps at (±250, ±250) µm. | ![Flip-chip source: separate lower and upper faces plus bump detail.](../_static/images/test-components/06-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/06-source.png" label="Image: 06 flip-chip pad" >}} |
+| **07 CPW airbridge** — [`cpw_airbridge_coupon()`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/cells/simulation/scgsim/test_components.py). Positive CPW with the existing deck and two piers crossing above Signal. | ![Airbridge source: CPW crossing and actual pier overlap detail.](../_static/images/test-components/07-source.png){width=220} {{< askr-image-view src="../_static/images/test-components/07-source.png" label="Image: 07 CPW airbridge" >}} |
 
 ## Driven Terminal: Lumped and Wave Port comparison
 
@@ -50,38 +53,25 @@ landings**, covering the existing 14 × 14 µm piers. The deck's overall span is
 98 µm. This assembly-owned shape differs from unchanged family 07 above,
 whose stock deck only partially covers each pier. The shared source stack is
 100 nm base M1, 3 µm post height above M1 and a 0.3 µm deck: posts Z =
-0.1–3.1 µm, deck Z = 3.1–3.4 µm. [Process](../materials-and-technology.md)
+0.1–3.1 µm, deck Z = 3.1–3.4 µm. [Layers & Stack](../start/layers.qmd)
 describes the physical layers and stack.
 
 The selected assembly from the
 [public PDK source](https://github.com/OrPenStrike/orcapen-sc-pdk/tree/7f89c3381097ac894705e8c54434ebfbfc758693)
-is now integrated into the local candidate as
+provides
 `cpw_meander_airbridge_lumped_coupon()` and
 `cpw_meander_airbridge_wave_coupon()`. Both use one shared source implementation
 and expose the complete body, occurrence and neutral support declarations.
 The [Notebook catalog](../simulation/notebooks.qmd) links the concrete RLC and
-Terminal authoring examples. This local source integration has not been published
-or executed as a new native observation.
+Terminal authoring examples. Use the selected tutorial's status when choosing a native calculation.
 The short–open topology does not establish a target frequency, exact
 quarter-wavelength design, native connectivity or Lumped/Wave equivalence.
 
 ## Build a registered source layout
 
-```python
-import gdsfactory as gf
-import orcapen_sc_pdk
-
-orcapen_sc_pdk.activate()
-component = gf.get_component("interpolation_spline_strip")
-component.write_gds("interpolation_spline_strip.gds")
-# component.show()  # optional, when a compatible viewer is available
-```
-
-Use [Build and compose components](component-authoring.md) for composition and
-[Process](../materials-and-technology.md) for layers, physical Z and materials.
-The figures use the current public source and its 100 nm base M1 default.
-Their full footprints and detail panels come from the same source polygons;
-view separation does not move or redesign the components.
+Start with [Install & Activate](../getting-started.md), then choose a factory
+from [Cells](index.md). Use [Layers & Stack](../start/layers.qmd) for physical
+heights and [Materials & Interfaces](../start/materials.qmd) for model properties.
 
 ## Reading the curved-strip variants
 

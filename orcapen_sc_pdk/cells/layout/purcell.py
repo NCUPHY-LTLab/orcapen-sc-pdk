@@ -7,6 +7,7 @@ from math import isfinite
 import gdsfactory as gf
 from gdsfactory.typings import CrossSectionSpec, Layer
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER, route_bundle_cpw
 
 
@@ -118,7 +119,18 @@ def _route_once(
 
 
 def _route_length_um(route: object, dbu: float) -> float:
-    return float(route.length) * dbu
+    """Nominal centerline length, independent of polygon/area sampling.
+
+    KFactory's default route.length is obtained from polygon area. It varies
+    with curve tessellation and must not drive a physical waypoint change.
+    Every native straight and PDK bend used here declares its own length.
+    """
+    # Routes and targets are quantized to this existing DBU. Sum integer grid
+    # lengths, rather than accumulating floating subtraction at the one-DBU
+    # comparison boundary.
+    return (
+        sum(round(curves.design_length(instance.cell) / dbu) for instance in route.instances) * dbu
+    )
 
 
 def _extract_backbone(route: object, dbu: float) -> list[tuple[float, float]]:
@@ -204,7 +216,7 @@ def _route_arm_with_length(
 
     base_route = _scratch_route(supplied_waypoints)
     base_length_um = _route_length_um(base_route, dbu)
-    if base_length_um > target_length_um + dbu:
+    if round(base_length_um / dbu) > round(target_length_um / dbu) + 1:
         raise ValueError(
             "Constrained base route exceeds target length. "
             f"base={base_length_um!r}um, target_grid={target_length_um!r}um."
@@ -222,7 +234,7 @@ def _route_arm_with_length(
     }
 
     extra_needed = target_length_um - base_length_um
-    if extra_needed > dbu:
+    if round(target_length_um / dbu) - round(base_length_um / dbu) > 1:
         selected_index, axis, p0, p1 = _pick_axis_aligned_candidate(
             supplied_waypoints,
             mtl_center=mtl_center,
@@ -286,7 +298,7 @@ def _route_arm_with_length(
             trial_length = _route_length_um(trial_route, dbu)
             tuning["solver_attempts"] = attempt
 
-            if abs(trial_length - target_length_um) <= dbu:
+            if abs(round(trial_length / dbu) - round(target_length_um / dbu)) <= 1:
                 routed_waypoints = tuple(trial)
                 tuning["enabled"] = True
                 tuning["dogleg"] = {
@@ -304,7 +316,7 @@ def _route_arm_with_length(
             error = target_length_um - trial_length
             h += error / 2.0
             h = round(max(h, 2 * cpw_radius) / dbu) * dbu
-            if attempt == 2 and abs(trial_length - target_length_um) > dbu:
+            if attempt == 2 and abs(round(trial_length / dbu) - round(target_length_um / dbu)) > 1:
                 raise ValueError(
                     "Unable to satisfy requested arm length with one rectangular dogleg tuning."
                 )
@@ -318,7 +330,7 @@ def _route_arm_with_length(
         cpw_radius=cpw_radius,
     )
     route_length_um = _route_length_um(route, dbu)
-    if abs(route_length_um - target_length_um) > dbu:
+    if abs(round(route_length_um / dbu) - round(target_length_um / dbu)) > 1:
         raise ValueError(
             "Final route for arm is outside 1-dbu tolerance. "
             f"target_grid={target_length_um!r}um, realized={route_length_um!r}um."
@@ -334,6 +346,8 @@ def _route_arm_with_length(
         "route_backbone": route_backbone,
         "base_length_um": base_length_um,
         "realized_length_um": route_length_um,
+        "length_basis": "sum of nominal straight/bend centerline lengths on the existing DBU grid",
+        "native_area_length_um": float(route.length) * dbu,
         "length_error_um": route_error,
         "tuning": tuning,
         "start_port": {
@@ -403,7 +417,7 @@ def _add_open_end_cap(
     return open_etch_ref, open_cap_port_name
 
 
-@gf.cell(tags=["layout", "resonator", "intrinsic_purcell"])
+@curves.sampled_cell(tags=["layout", "resonator", "intrinsic_purcell"])
 def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
     readout_open_length: float = 2539.512388,
     shared_short_length: float = 2270.302789,
