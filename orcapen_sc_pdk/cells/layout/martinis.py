@@ -2,6 +2,7 @@
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.ports import add_mesh_port
 from orcapen_sc_pdk.tech import LAYER, Layer
 
@@ -11,7 +12,7 @@ def _check_positive(name: str, value: float) -> None:
         raise ValueError(f"{name} must be positive, got {value!r}.")
 
 
-@gf.cell(tags=["layout", "capacitor", "martinis2022"])
+@curves.sampled_cell(tags=["layout", "capacitor", "martinis2022"])
 def martinis2022_differential_ribbon_capacitor(
     a_um: float = 50.0,
     b_um: float = 100.0,

@@ -2,13 +2,16 @@
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.indium import indium_ground
 from orcapen_sc_pdk.helpers.layout import get_keepout_region_from_targets
 from orcapen_sc_pdk.ports import SimulationPortType
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@gf.cell(tags=["simulation", "chip", "resonator", "resonator_with_indium_bumps", "bump"])
+@curves.sampled_cell(
+    tags=["simulation", "chip", "resonator", "resonator_with_indium_bumps", "bump"]
+)
 def resonator_with_indium_bumps(
     resonator_length: float = 4000.0,
     resonator_meanders: int = 6,

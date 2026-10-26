@@ -18,6 +18,8 @@ from gdsfactory.routing.route_astar import (
 )
 from gdsfactory.typings import ComponentSpec, CrossSectionSpec, LayerSpec, Port, Route
 
+import orcapen_sc_pdk.curve_sampling as curves
+
 Coordinate = tuple[float, float]
 RouteBbox = tuple[float, float, float, float]
 GridNode = tuple[int, int]
@@ -302,7 +304,7 @@ def _circular_bend_points(
 ) -> np.ndarray:
     signed_angle = angle
     angle = abs(angle)
-    sample_count = max(8, ceil(angle / angular_step))
+    sample_count = max(1, ceil(angle / angular_step))
     theta = np.linspace(0, radians(angle), sample_count + 1)
     points = np.column_stack(
         [
@@ -1308,7 +1310,7 @@ def _plan_route_candidate_8dir(
     min_straight_between_turns: float | None,
     bend_margin: float,
     bend_style: str,
-    euler_angular_step: float,
+    euler_angular_step: float | None,
     simplify: float | None,
     route_clearance: float,
 ) -> _RouteCandidate8Dir:
@@ -1330,7 +1332,11 @@ def _plan_route_candidate_8dir(
     if resolved_bend_style not in {"circular", "euler"}:
         raise ValueError(f"bend_style must be 'circular' or 'euler', got {resolved_bend_style!r}.")
 
-    resolved_euler_angular_step = pair.euler_angular_step or euler_angular_step
+    resolved_euler_angular_step = (
+        pair.euler_angular_step if pair.euler_angular_step is not None else euler_angular_step
+    )
+    if resolved_euler_angular_step is None:
+        resolved_euler_angular_step = 360 / curves.circle_segments(resolved_bend_radius)
     if resolved_euler_angular_step <= 0:
         raise ValueError(
             f"euler_angular_step must be positive, got {resolved_euler_angular_step!r}."
@@ -1468,7 +1474,7 @@ def route_bundle_8dir(
     min_straight_between_turns: float | None = None,
     bend_margin: float = 0.0,
     bend_style: str = "euler",
-    euler_angular_step: float = 4.0,
+    euler_angular_step: float | None = None,
     simplify: float | None = None,
     debug_plan_layer: LayerSpec | None = None,
     debug_path_layer: LayerSpec | None = None,
@@ -1502,6 +1508,8 @@ def route_bundle_8dir(
         raise ValueError(f"bend_margin must be non-negative, got {bend_margin!r}.")
     if debug_path_width <= 0:
         raise ValueError(f"debug_path_width must be positive, got {debug_path_width!r}.")
+    if euler_angular_step is None:
+        euler_angular_step = 360 / curves.circle_segments(bend_radius)
     if euler_angular_step <= 0:
         raise ValueError(f"euler_angular_step must be positive, got {euler_angular_step!r}.")
 
@@ -1643,7 +1651,7 @@ def route_bundle_8dir_global(
     min_straight_between_turns: float | None = None,
     bend_margin: float = 0.0,
     bend_style: str = "euler",
-    euler_angular_step: float = 4.0,
+    euler_angular_step: float | None = None,
     simplify: float | None = None,
     route_clearance: float = 0.0,
     max_search_nodes: int = 256,

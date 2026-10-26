@@ -5,6 +5,7 @@ from typing import Literal
 import gdsfactory as gf
 from gdsfactory.typings import ComponentSpec, CrossSectionSpec
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.resonator_hanger import resonator_hanger
 from orcapen_sc_pdk.cells.layout.resonator_meander import resonator_meander
 from orcapen_sc_pdk.helpers.layout.etch import add_etch_for_component
@@ -20,13 +21,13 @@ from orcapen_sc_pdk.tech import (
 def _component_length(component: gf.Component, name: str) -> float:
     """Read child centerline length metadata required by parent length budgeting."""
 
-    length = getattr(component.info, "length", None)
+    length = component.info.get("design_length_um", getattr(component.info, "length", None))
     if length is None:
         raise ValueError(f"{name} must provide a length in its component info.")
     return float(length)
 
 
-@gf.cell(tags=["layout", "resonator", "hanger", "meander"])
+@curves.sampled_cell(tags=["layout", "resonator", "hanger", "meander"])
 def resonator(
     length: float = 4000.0,
     meanders: int = 6,
@@ -46,7 +47,7 @@ def resonator(
     hanger_radius: float | None = None,
     meander_radius: float | None = None,
     tail_radius: float | None = None,
-    bend_npoints: int | None = 16,
+    bend_npoints: int | None = None,
     meander_bend_spec: ComponentSpec = "bend_euler",
     tail_bend_spec: ComponentSpec = "bend_euler",
     meander_straight_length_weights: tuple[float, ...] | None = None,
@@ -404,7 +405,7 @@ def _add_tail(
     return final_port
 
 
-@gf.cell
+@curves.sampled_cell
 def _qubit_resonator_segment(
     length: float,
     gap: float = 10.0,
@@ -443,7 +444,7 @@ def _qubit_resonator_segment(
     )
     rectangle_segment.move((-cpw_width / 2, -(length - radius)))
 
-    semicircle_segment = temp << gf.components.circle(
+    semicircle_segment = temp << curves.circle(
         radius=radius,
         layer=draw_layer,
     )

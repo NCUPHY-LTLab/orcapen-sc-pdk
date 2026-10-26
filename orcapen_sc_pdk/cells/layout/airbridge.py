@@ -4,10 +4,11 @@ from math import isfinite
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@gf.cell(tags=["layout", "airbridge"])
+@curves.sampled_cell(tags=["layout", "airbridge"])
 def airbridge(
     bridge_span: float = 84.0,
     bridge_width: float = 12.0,

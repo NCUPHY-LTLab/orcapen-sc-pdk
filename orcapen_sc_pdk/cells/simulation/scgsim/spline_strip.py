@@ -10,6 +10,7 @@ import math
 import gdsfactory as gf
 import numpy as np
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER
 
 
@@ -100,7 +101,9 @@ def _strip_component(
     return c
 
 
-@gf.cell(tags=["simulation", "primitive", "curved_strip", "single_die", "interpolation_spline"])
+@curves.sampled_cell(
+    tags=["simulation", "primitive", "curved_strip", "single_die", "interpolation_spline"]
+)
 def interpolation_spline_strip(
     through_points_um: tuple[tuple[float, float], ...] = (
         (-200.0, 0.0),
@@ -164,7 +167,7 @@ def interpolation_spline_strip(
     )
 
 
-@gf.cell(tags=["simulation", "primitive", "curved_strip", "single_die", "bspline"])
+@curves.sampled_cell(tags=["simulation", "primitive", "curved_strip", "single_die", "bspline"])
 def bspline_strip(
     control_points_um: tuple[tuple[float, float], ...] = (
         (-200.0, 0.0),

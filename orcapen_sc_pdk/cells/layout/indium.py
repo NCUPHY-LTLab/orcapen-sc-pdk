@@ -6,6 +6,7 @@ from typing import TypedDict
 
 import gdsfactory as gf
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import (
     INDIUM_BUMP_SIZE_UM,
     LAYER,
@@ -86,7 +87,7 @@ def get_indium_ground_bump_spec() -> IndiumGroundBumpSpec:
     }
 
 
-@gf.cell(tags=["layout", "bump", "indium"])
+@curves.sampled_cell(tags=["layout", "bump", "indium"])
 def indium_bump(
     indium_bump_size: float = INDIUM_BUMP_SIZE_UM,
     under_bump_size: float = UNDER_BUMP_SIZE_UM,
@@ -134,7 +135,7 @@ def indium_bump(
     return c
 
 
-@gf.cell(tags=["layout", "bump", "indium"])
+@curves.sampled_cell(tags=["layout", "bump", "indium"])
 def indium_ground(
     width: float = 9900.0,
     height: float = 9900.0,
