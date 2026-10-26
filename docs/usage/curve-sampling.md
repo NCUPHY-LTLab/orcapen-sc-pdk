@@ -9,7 +9,19 @@
 | 設定檔（profile） | 完整圓的基準線段數 | 預設用途 |
 | --- | ---: | --- |
 | `fabrication` | 256 | 預設製程版圖 |
-| `simulation` | 32 | 較粗的模擬幾何候選 |
+| `simulation` | 依直徑選擇 16、24 或 32 | 模擬幾何候選 |
+
+`simulation` 依每一個圓形邊界的直徑 D 分級；圓弧使用對應完整圓的直徑，並按角度分配線段。
+
+| 直徑 D（µm） | 完整圓基準線段數 |
+| --- | ---: |
+| D < 20 | 16 |
+| 20 ≤ D < 100 | 24 |
+| D ≥ 100 | 32 |
+
+W6/G7 圓頭金屬的直徑為 6 µm，因此半圓使用 8 段、9 個頂點；外圈開口的名義直徑為 20 µm，使用 12 段、13 個頂點。開口保留原本的多邊形偏移（polygon offset）形狀，不是重新擬合的理想圓。圓頭與圓角矩形的金屬及開口各自按半徑選級距；明確指定局部點數時仍沿用指定值。
+
+⚠️ 模擬效果尚待驗證；目前依 Human 肉眼判斷，預期不致對網格生成（meshing）造成過多負擔。
 
 ```python
 from orcapen_sc_pdk import activate
@@ -43,7 +55,7 @@ component = circular_pad_capacitor(
 
 點數須為至少 4 的四倍數，使圓在四個軸向都有頂點。數字指布林運算前完整圓不重複的頂點／線段數；資料庫單位（DBU）量化可能合併頂點，布林交點則可能增加頂點。
 
-分享設定時，一併記錄 PDK 的來源提交（source commit）、元件參數、取樣 tuple、明確的局部覆寫，以及匯出 GDS 的雜湊。`component.info["curve_sampling"]` 記錄的是基準設定，實際多邊形頂點數應由產出的 GDS 讀回。
+分享設定時，一併記錄 PDK 的來源提交（source commit）、元件參數、取樣 tuple、明確的局部覆寫，以及匯出 GDS 的雜湊。`component.info["curve_sampling"]` 記錄的是基準設定；依直徑分級時，`points_per_circle` 為 `None`，級距記錄在 `diameter_tiers_um`。實際多邊形頂點數應由產出的 GDS 讀回。
 
 ## 依半徑增加點數
 

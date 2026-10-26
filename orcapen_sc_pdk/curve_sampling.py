@@ -7,25 +7,30 @@ from contextvars import ContextVar
 from functools import wraps
 from inspect import Parameter, signature
 from math import asin, ceil, isfinite, pi, sqrt
+from typing import Literal
 
 import gdsfactory as gf
 
 # One edit point for shared project profiles. Counts are unique full-circle
 # segments before Boolean/grid quantization; fourfold grids preserve axes.
 FABRICATION = (256, None)
-SIMULATION = (32, None)
+type Sampling = tuple[int | Literal["diameter"], float | None]
+# 此直徑分級是否適合模擬尚待驗證；依 Human 肉眼判斷，預期不致對網格生成（meshing）造成過多負擔。
+SIMULATION = ("diameter", None)
 PROFILES = {"fabrication": FABRICATION, "simulation": SIMULATION}
 _current = ContextVar("orcapen_curve_sampling", default=FABRICATION)
 
 
-def resolve_sampling(value=None) -> tuple[int, float | None]:
+def resolve_sampling(value=None) -> Sampling:
     """Resolve a profile name or (full-circle count, optional sagitta in um)."""
     if value is None:
         value = _current.get()
     if isinstance(value, str):
         value = PROFILES[value]
     count, error = value
-    if isinstance(count, bool) or not isinstance(count, int) or count < 4 or count % 4:
+    if count != "diameter" and (
+        isinstance(count, bool) or not isinstance(count, int) or count < 4 or count % 4
+    ):
         raise ValueError("full-circle count must be an integer multiple of four, at least four")
     if error is not None and (not isfinite(error) or error <= 0):
         raise ValueError("max sagitta must be a positive finite length in um")
@@ -51,6 +56,9 @@ def circle_segments(radius: float, sampling=None) -> int:
     if not isfinite(radius) or radius <= 0:
         raise ValueError("radius must be positive and finite")
     count, error = resolve_sampling(sampling)
+    if count == "diameter":
+        diameter = 2 * radius
+        count = 16 if diameter < 20 else 24 if diameter < 100 else 32
     if error is not None and error < radius:
         # Equivalent to acos(1-e/R), avoiding cancellation for small e/R.
         needed = ceil(pi / (2 * asin(sqrt(error / (2 * radius)))))
@@ -82,7 +90,7 @@ def sampled_cell(function=None, **options):
             "curve_sampling",
             Parameter.KEYWORD_ONLY,
             default=FABRICATION,
-            annotation=tuple[int, float | None],
+            annotation=Sampling,
         )
         insertion = next(
             (i for i, p in enumerate(params) if p.kind == Parameter.VAR_KEYWORD), len(params)
@@ -98,9 +106,15 @@ def sampled_cell(function=None, **options):
             if result.locked:
                 result = result.copy()
             result.info["curve_sampling"] = {
-                "points_per_circle": selected[0],
+                "points_per_circle": None if selected[0] == "diameter" else selected[0],
                 "max_sagitta_um": selected[1],
             }
+            if selected[0] == "diameter":
+                result.info["curve_sampling"]["diameter_tiers_um"] = [
+                    {"below": 20, "points": 16},
+                    {"below": 100, "points": 24},
+                    {"below": None, "points": 32},
+                ]
             return result
 
         construct.__signature__ = original.replace(parameters=params)
