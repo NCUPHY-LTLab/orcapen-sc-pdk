@@ -16,7 +16,7 @@ sidebar: simulation
 | 任務 | 教學 |
 | --- | --- |
 | 焊墊 LC 模態及表面／塊材貢獻 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| HFSS 原生場積分評估 | [SimplePad HFSS 流程導覽](../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd) |
+| HFSS 原生場積分評估 | [準備交接（Prepare Handoff）→ 執行既有交接包（Run）→ 分析（Analyze）](../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd)，或[直接執行（Run Directly）](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.qmd" data-noresolveinput download>QMD</a> |
 | 明確幾何帶區與局部介面修正 | [SimplePad Palace 表面帶區](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) 搭配 [Q2D 介面因子](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) |
 
 ## 判讀參與率與損耗
@@ -25,7 +25,7 @@ sidebar: simulation
 
 幾何修正時，請同時檢查所選的原始母區帶、取樣區域、保留區域與回傳 Q2D 因子。教學中的直邊近似不能證明轉角等效。
 
-請使用三階段[SimplePad HFSS 流程導覽](eigenmode.qmd#simplepad-hfss-handoff-sequence)開啟「準備交接」、「執行」與「分析」筆記本。
+請由[SimplePad HFSS 路線](eigenmode.qmd#simplepad-hfss-handoff-sequence)選擇分開使用「準備交接（Prepare Handoff）→ 執行既有交接包（Run）」，或在一份筆記本中「直接執行（Run Directly）」。兩條路線都能接續共用的[分析（Analyze）筆記本](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.qmd" data-noresolveinput download>QMD</a>。
 
 「分析」也將兩項選用操作分開：儲存場評估需要 AEDT 授權，但不會求解；離線損耗重分析則直接讀取已儲存資料。只有需要這些額外分析時才執行。
 

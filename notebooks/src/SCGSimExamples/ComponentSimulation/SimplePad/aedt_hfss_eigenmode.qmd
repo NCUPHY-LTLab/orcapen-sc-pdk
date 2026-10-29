@@ -6,16 +6,15 @@ execute:
   enabled: false
 ---
 
-以正方形焊墊（SimplePad）示範 HFSS 本徵模態（Eigenmode）與表面能量參與率（Surface EPR）。依序使用三份獨立筆記本，每一步都能在全新核心（Kernel）開始。
+以正方形焊墊（SimplePad）示範 HFSS 本徵模態（Eigenmode）與表面能量參與率（Surface EPR）。可依執行方式選擇兩條路線，兩者都能接續使用 Analyze 檢視回傳結果。
 
-| 步驟 | 筆記本 | 輸入與輸出 |
+| 路線 | 步驟 | 適用情況 |
 | --- | --- | --- |
-| 1 | [準備交接包（Prepare Handoff）](aedt_hfss_eigenmode_prepare.qmd) | 版圖、堆疊、物理與數值設定 → 新交接包 |
-| 2 | [執行（Run）](aedt_hfss_eigenmode_run.qmd) | 已準備的交接包 → 原生求解與回傳檔案 |
-| 3 | [分析（Analyze）](aedt_hfss_eigenmode_analyze.qmd) | 明確指定的回傳資料夾 → 模態、原生回合、EPR 與計算成本 |
+| 準備後執行 | [準備交接包（Prepare Handoff）](aedt_hfss_eigenmode_prepare.qmd) → [執行已準備交接包（Run）](aedt_hfss_eigenmode_run.qmd) → [分析（Analyze）](aedt_hfss_eigenmode_analyze.qmd) | 分開建立交接包與執行，或將交接包交給另一台主機。 |
+| 直接執行（Run Directly） | [直接執行](aedt_hfss_eigenmode_run_directly.qmd) → [分析（Analyze）](aedt_hfss_eigenmode_analyze.qmd) | 在已授權 AEDT 的同一環境內準備並執行模型。 |
 
-第一步保留 200 µm 焊墊、20 µm 間隙、1000 µm 晶片、10 nH 線性接面，以及原本的模態搜尋與自適應設定。執行與分析不重新建立這些輸入。
+分開執行時，準備交接包（Prepare Handoff）建立模型並封裝設定；執行（Run）只使用既有交接包，不重建版圖或改變設定。直接執行（Run Directly）則在同一份筆記本中準備並執行模型，不需要先執行其他筆記本。
+
+兩條路線沿用 200 µm 焊墊、20 µm 間隙、1000 µm 晶片、10 nH 線性接面，以及相同的模態搜尋與自適應設定。執行與分析階段不重新建立模型輸入。
 
 安裝指令及公開版本見 Prepare Handoff。已保存場的授權 AEDT 評估與離線薄膜損耗重分析，分別列在 Analyze 的兩個選用章節；主分析流程不啟動它們。
-
-此頁保留既有教學連結，原本的 `WORKFLOW_ACTION` 分支已由三份筆記本取代。
