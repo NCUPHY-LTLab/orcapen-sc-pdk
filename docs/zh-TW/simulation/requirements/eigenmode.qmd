@@ -10,11 +10,23 @@ sidebar: simulation
 | 模型 | 起始教學 |
 | --- | --- |
 | 未負載有限 CPW | [Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> 或 [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| 帶明確線性電感支路的焊墊 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> 或 [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| 帶明確線性電感支路的焊墊 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a>；[SimplePad HFSS 流程](../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd) |
 | 曲面焊墊邊界 | [CircularPad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
 | 封閉 TSV 模型 | [TSV HFSS 本徵模態](../tsv-model-inspection.qmd) |
 
 依所選教學設定求解器環境、導體連通性、堆疊與外部區域。搜尋頻率與要求的模態數決定計算內容；網格與適應設定控制離散化方式。
+
+SimplePad HFSS 流程會先建立模型與設定，再由另一個筆記本執行交接內容，最後在全新核心中分析明確指定的回傳路徑。執行階段只讀取已準備的交接，不會重建幾何或重新宣告模型。
+
+## SimplePad HFSS 交接流程 {#simplepad-hfss-handoff-sequence}
+
+| 階段 | 用途 | 筆記本下載 |
+| --- | --- | --- |
+| 準備交接 | 設定幾何、堆疊、Net、接面、模態搜尋、適應、EPR、資源與全新輸出資料夾。 | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_prepare.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_prepare.qmd" data-noresolveinput download>QMD</a> |
+| 執行 | 使用已準備的設定，明確執行交接。 | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run.qmd" data-noresolveinput download>QMD</a> |
+| 分析 | 在全新核心中檢視明確指定的回傳路徑、實際模態／計算回合、報表與 EPR 圖。 | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.qmd" data-noresolveinput download>QMD</a> |
+
+[流程導覽](../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd)也列出選用的儲存場評估與離線損耗分析。
 
 ## 負載模態 {#loaded-modes}
 
