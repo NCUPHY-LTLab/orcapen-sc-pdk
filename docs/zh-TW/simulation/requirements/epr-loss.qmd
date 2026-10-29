@@ -16,7 +16,7 @@ sidebar: simulation
 | 任務 | 教學 |
 | --- | --- |
 | 焊墊 LC 模態及表面／塊材貢獻 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| HFSS 原生場積分評估 | [SimplePad HFSS LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| HFSS 原生場積分評估 | [SimplePad HFSS 流程導覽](../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd) |
 | 明確幾何帶區與局部介面修正 | [SimplePad Palace 表面帶區](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) 搭配 [Q2D 介面因子](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) |
 
 ## 判讀參與率與損耗
@@ -24,6 +24,10 @@ sidebar: simulation
 逐項閱讀貢獻時，請核對能量分母、所選模態與計算回合、介面／場側識別，以及儲存場輸入。保留帶正負號的接面貢獻以便識別。參與率、依假設估算的損耗、原生 Q 值與量測壽命是不同物理量。
 
 幾何修正時，請同時檢查所選的原始母區帶、取樣區域、保留區域與回傳 Q2D 因子。教學中的直邊近似不能證明轉角等效。
+
+請使用三階段[SimplePad HFSS 流程導覽](eigenmode.qmd#simplepad-hfss-handoff-sequence)開啟「準備交接」、「執行」與「分析」筆記本。
+
+「分析」也將兩項選用操作分開：儲存場評估需要 AEDT 授權，但不會求解；離線損耗重分析則直接讀取已儲存資料。只有需要這些額外分析時才執行。
 
 ## SurfaceBands 下載
 
