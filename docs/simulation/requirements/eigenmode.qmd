@@ -12,13 +12,29 @@ physical system you want to calculate.
 | Model | Starting tutorial |
 | --- | --- |
 | Unloaded finite CPW | [Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> or [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| Pad with an explicit linear inductive branch | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> or [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Pad with an explicit linear inductive branch | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> or [SimplePad HFSS routes](../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd) |
 | Curved pad boundary | [CircularPad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
 | Closed TSV model | [TSV HFSS Eigenmode](../tsv-model-inspection.qmd) |
 
 Use the selected tutorial's solver environment, conductor connectivity, stack,
 and exterior. Its search frequency and requested mode count select the
 calculation; mesh and adaptation settings control its discretization.
+
+For SimplePad HFSS, choose a separated Prepare Handoff → Run prepared package
+route, or prepare and execute in one Run Directly notebook. Both routes can
+continue to Analyze with an explicit returned run path in a fresh kernel.
+
+## SimplePad HFSS routes {#simplepad-hfss-handoff-sequence}
+
+| Stage | Purpose | Notebook downloads |
+| --- | --- | --- |
+| Prepare Handoff | Define geometry, stack, Nets, junction, mode search, adaptation, EPR, resources, and fresh output. | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_prepare.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_prepare.qmd" data-noresolveinput download>QMD</a> |
+| Run prepared package | Execute only the prepared handoff with its prepared settings. | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run.qmd" data-noresolveinput download>QMD</a> |
+| Analyze | In a fresh kernel, inspect an explicit returned path, actual mode/pass, reports, and EPR plots. | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.qmd" data-noresolveinput download>QMD</a> |
+| Run Directly | Prepare and execute this example in one AEDT-enabled notebook; continue with Analyze for returned results. | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.qmd" data-noresolveinput download>QMD</a> |
+
+The [workflow map](../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd)
+also links the optional saved-field and detached loss-analysis steps.
 
 ## Loaded modes {#loaded-modes}
 
