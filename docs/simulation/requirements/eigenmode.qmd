@@ -9,12 +9,14 @@ physical system you want to calculate.
 
 ## Choose the model
 
-| Model | Starting tutorial |
-| --- | --- |
-| Unloaded finite CPW | [Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> or [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| Pad with an explicit linear inductive branch | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> or [SimplePad HFSS routes](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) |
-| Curved pad boundary | [CircularPad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| Closed TSV model | [TSV HFSS Eigenmode](../tsv-model-inspection.qmd) |
+| Model | Tutorial | Downloads |
+| --- | --- | --- |
+| Unloaded finite CPW | [Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Unloaded finite CPW | [HFSS](../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Pad with an explicit linear inductive branch | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Pad with an explicit linear inductive branch | [SimplePad HFSS routes](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) | — |
+| Curved pad boundary | [CircularPad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Closed TSV model | [TSV HFSS Eigenmode](../tsv-model-inspection.qmd) | — |
 
 Use the selected tutorial's solver environment, conductor connectivity, stack,
 and exterior. Its search frequency and requested mode count select the

@@ -9,7 +9,7 @@ aliases:
 Choose a case and download its **input package (Handoff)** to rerun the recorded mesh and settings, or its **result package** to inspect saved results. This page brings the cases, downloads and usage instructions together.
 
 ::: {.callout-note title="Download status"}
-The `v1.0.0` packages are being prepared. Each table's Download column will link to the corresponding release when published. For now, review the cases and instructions; these assets are not yet available on [GitHub Releases](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases).
+The input and result packages have been assembled and are awaiting publication. Each table's Download column will link to the corresponding release after upload and download verification. These assets are not yet available on [GitHub Releases](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases).
 :::
 
 ## Choose a case
@@ -22,16 +22,16 @@ These four cases use **200 nm aluminum**, rather than the current 100 nm PDK def
 
 | Calculation | Status | Download |
 | --- | --- | --- |
-| Palace Electrostatic | ✅ completed | ⏳ preparing |
-| Palace Eigenmode | ✅ completed | ⏳ preparing |
-| AEDT Q3D capacitance extraction | ✅ completed | ⏳ preparing |
-| AEDT HFSS Eigenmode | ✅ completed | ⏳ preparing |
+| Palace Electrostatic | ✅ completed | ⏳ not published |
+| Palace Eigenmode | ✅ completed | ⏳ not published |
+| AEDT Q3D capacitance extraction | ✅ completed | ⏳ not published |
+| AEDT HFSS Eigenmode | ✅ completed | ⏳ not published |
 
 ### CircularPad
 
 | Calculation | Status | Download |
 | --- | --- | --- |
-| Palace Eigenmode, fresh08 | ✅ completed; PCG warnings | ⏳ preparing |
+| Palace Eigenmode, fresh08 | ✅ completed; PCG warnings | ⏳ not published |
 
 Before comparing results, inspect the original PCG warnings and convergence history.
 
@@ -41,20 +41,20 @@ The calculation, settings and date distinguish each case below. Full run IDs rem
 
 | Calculation | Settings | Status | Download |
 | --- | --- | --- | --- |
-| Palace Electrostatic | A′; arm length 300 µm; Aug 27 | ✅ completed | ⏳ preparing |
-| Palace Electrostatic | A′; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ preparing |
-| Palace Electrostatic | A; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ preparing |
-| Palace Electrostatic | B; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ preparing |
-| Palace Eigenmode | A′; junction inductance 11.89 nH; Aug 27 | ⚠️ failed | ⏳ preparing |
-| Palace Eigenmode | A′; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ preparing |
-| Palace Eigenmode | A; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ preparing |
-| Palace Eigenmode | B; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ preparing |
-| AEDT Q3D | Original boundaries; Aug 27 | ✅ completed | ⏳ preparing |
-| Palace Electrostatic | A′; updated grounding and vacuum region; Aug 29 | ⚠️ failed | ⏳ preparing |
-| Palace Electrostatic | A; updated grounding and vacuum region; Aug 29, attempt 1 | ⚠️ failed | ⏳ preparing |
-| Palace Electrostatic | A; updated grounding and vacuum region; Aug 29, attempt 2 | ⚠️ failed | ⏳ preparing |
-| Palace Electrostatic | B; updated grounding and vacuum region; Aug 29 | ⚠️ failed | ⏳ preparing |
-| AEDT Q3D | Updated grounding and vacuum region; Aug 29 | ✅ completed | ⏳ preparing |
+| Palace Electrostatic | A′; arm length 300 µm; Aug 27 | ✅ completed | ⏳ not published |
+| Palace Electrostatic | A′; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ not published |
+| Palace Electrostatic | A; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ not published |
+| Palace Electrostatic | B; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ not published |
+| Palace Eigenmode | A′; junction inductance 11.89 nH; Aug 27 | ⚠️ failed | ⏳ not published |
+| Palace Eigenmode | A′; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ not published |
+| Palace Eigenmode | A; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ not published |
+| Palace Eigenmode | B; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ not published |
+| AEDT Q3D | Original boundaries; Aug 27 | ✅ completed | ⏳ not published |
+| Palace Electrostatic | A′; updated grounding and vacuum region; Aug 29 | ⚠️ failed | ⏳ not published |
+| Palace Electrostatic | A; updated grounding and vacuum region; Aug 29, attempt 1 | ⚠️ failed | ⏳ not published |
+| Palace Electrostatic | A; updated grounding and vacuum region; Aug 29, attempt 2 | ⚠️ failed | ⏳ not published |
+| Palace Electrostatic | B; updated grounding and vacuum region; Aug 29 | ⚠️ failed | ⏳ not published |
+| AEDT Q3D | Updated grounding and vacuum region; Aug 29 | ✅ completed | ⏳ not published |
 
 Compare modeling routes, boundary settings and junction inductances separately. A failed run is not a converged solution.
 
