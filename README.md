@@ -47,7 +47,11 @@ use [Documentation & Website](docs/docs-publishing.md) to build the docs.
 
 - [Documentation site](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/)
 - [Simulation cases and downloads](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/simulation/recorded-cases.html)
+- [SimplePad simulation data](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1)
 - [GitHub repository](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk)
+
+Simulation data uses independent `data-YYYY.MM.DD-rN` releases. Each case keeps
+its recorded PDK, SCGSim and solver versions.
 
 ## Contributing and license
 

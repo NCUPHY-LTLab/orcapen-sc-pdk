@@ -1,98 +1,42 @@
 ---
-title: "Simulation cases and downloads"
+title: "SimplePad simulation data"
 sidebar: simulation
-toc-depth: 3
 aliases:
   - reproducibility.html
 ---
 
-Choose a case and download its **input package (Handoff)** to rerun the recorded mesh and settings, or its **result package** to inspect saved results. This page brings the cases, downloads and usage instructions together.
+This page provides four recorded SimplePad cases from the independent data snapshot `data-2026.11.01-r1`.
 
-::: {.callout-note title="Download status"}
-The input and result packages have been assembled and are awaiting publication. Each table's Download column will link to the corresponding release after upload and download verification. These assets are not yet available on [GitHub Releases](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases).
+::: {.callout-note title="Runtime verification"}
+Original simulation results are preserved; rerunning or analyzing them in a new environment is still pending verification.
 :::
 
-## Choose a case
+## Cases
 
-There are 19 recorded runs: 11 completed and 8 failed. Failed cases retain their inputs and available records for diagnosis and profiling.
+These cases use **200 nm aluminum**; the current PDK default is **100 nm**.
 
-### SimplePad
-
-These four cases use **200 nm aluminum**, rather than the current 100 nm PDK default.
-
-| Calculation | Status | Download |
+| Calculation | Inputs | Results |
 | --- | --- | --- |
-| Palace Electrostatic | ✅ completed | ⏳ not published |
-| Palace Eigenmode | ✅ completed | ⏳ not published |
-| AEDT Q3D capacitance extraction | ✅ completed | ⏳ not published |
-| AEDT HFSS Eigenmode | ✅ completed | ⏳ not published |
+| Palace Electrostatic | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_electrostatic_20261006_02--inputs.tar.gz) | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_electrostatic_20261006_02--results.tar.gz) |
+| Palace Eigenmode | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--inputs.tar.gz) | [Part 1](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--results.tar.gz.part001) · [Part 2](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--results.tar.gz.part002) |
+| AEDT Q3D capacitance extraction | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_q3d_20261006_02--inputs.tar.gz) | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_q3d_20261006_02--results.tar.gz) |
+| AEDT HFSS Eigenmode | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_hfss_eigenmode_20261006_02--inputs.tar.gz) | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_hfss_eigenmode_20261006_02--results.tar.gz) |
 
-### CircularPad
+: {tbl-colwidths="[40,30,30]"}
 
-| Calculation | Status | Download |
-| --- | --- | --- |
-| Palace Eigenmode, fresh08 | ✅ completed; PCG warnings | ⏳ not published |
+## Use the packages
 
-Before comparing results, inspect the original PCG warnings and convergence history.
+- **Inputs** contain the original mesh and configuration for rerunning or profiling.
+- **Results** contain the saved outputs for analysis.
 
-### Kosen2024 Xmon
-
-The calculation, settings and date distinguish each case below. Full run IDs remain in the packages and [source records](#source-records). A, A′ and B are the recorded modeling routes; A′ uses Route A's `substrate_face` thin-film option.
-
-| Calculation | Settings | Status | Download |
-| --- | --- | --- | --- |
-| Palace Electrostatic | A′; arm length 300 µm; Aug 27 | ✅ completed | ⏳ not published |
-| Palace Electrostatic | A′; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ not published |
-| Palace Electrostatic | A; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ not published |
-| Palace Electrostatic | B; arm length 309.5 µm; Aug 27 | ✅ completed | ⏳ not published |
-| Palace Eigenmode | A′; junction inductance 11.89 nH; Aug 27 | ⚠️ failed | ⏳ not published |
-| Palace Eigenmode | A′; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ not published |
-| Palace Eigenmode | A; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ not published |
-| Palace Eigenmode | B; junction inductance 11.78 nH; Aug 27 | ⚠️ failed | ⏳ not published |
-| AEDT Q3D | Original boundaries; Aug 27 | ✅ completed | ⏳ not published |
-| Palace Electrostatic | A′; updated grounding and vacuum region; Aug 29 | ⚠️ failed | ⏳ not published |
-| Palace Electrostatic | A; updated grounding and vacuum region; Aug 29, attempt 1 | ⚠️ failed | ⏳ not published |
-| Palace Electrostatic | A; updated grounding and vacuum region; Aug 29, attempt 2 | ⚠️ failed | ⏳ not published |
-| Palace Electrostatic | B; updated grounding and vacuum region; Aug 29 | ⚠️ failed | ⏳ not published |
-| AEDT Q3D | Updated grounding and vacuum region; Aug 29 | ✅ completed | ⏳ not published |
-
-Compare modeling routes, boundary settings and junction inductances separately. A failed run is not a converged solution.
-
-## Download and verify
-
-1. Once published, use the table's Download column to open the corresponding release and select that case's input or result package.
-2. Download the selected archive and `SHA256SUMS`. If the archive is split, download every numbered part.
-3. Verify the files before extracting them:
+Download each archive with `SHA256SUMS` from the [data release](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1), then verify it before extraction:
 
 ```bash
 sha256sum --ignore-missing -c SHA256SUMS
 ```
 
-Check: each downloaded asset reports `OK`. Keep the extracted directory structure and original receipts together.
+For Palace Eigenmode results, download both parts and follow the [Release instructions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1) to reassemble and verify the archive. Extract verified files into a fresh directory.
 
-| Package | Purpose and contents |
-| --- | --- |
-| Input | Rerun the simulation: recorded mesh or AEDT project/specification, numerical settings, model mapping, execution entry point and version instructions. |
-| Result | Analyze saved results: retained outputs and available fields, original receipts and file inventory. |
+## Source record {#source-records}
 
-## Rerun or analyze
-
-**Rerun:** use the PDK, SCGSim, solver versions and commands recorded in the package, in a fresh execution copy. Preserve the original mesh; regenerating it from a newer factory is a different experiment.
-
-Original records retain host names and local paths. In the execution copy, adjust the executable and environment-setup paths to your installation before using the runner. Keep the preserved result copy separate, because a runner may replace its outputs.
-
-**Analyze:** use the result package and the [matching tutorial's](notebooks.qmd) result reader. Palace field visualization requires the saved mesh and field files. Saved-field evaluation in AEDT requires a compatible licensed AEDT installation; reading exported CSV tables does not require another solve.
-
-An interrupted run can retain usable intermediate output. Profiling a newer solver with the same inputs is a new run; retain the original result for comparison.
-
-## Versions and source records {#source-records}
-
-✅ 2026-11-01: 212 declared hash checks matched.
-
-These records contain each case's versions, settings, full run IDs and original file hashes. The package release version does not replace a historical simulation's runtime versions.
-
-- [SimplePad original run records](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/SimplePad/evidence/run_set.json)
-- [CircularPad original run records](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/CircularPad/evidence/run_set.json)
-- [Kosen2024 Xmon original run records](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/Kosen2024_Xmon/evidence/run_set.json)
-
-Package checksums identify downloads; original input and result hashes remain in each case's records. Solver executables, license material and unrelated local environment files are not distributed.
+See the [SimplePad source run records](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/SimplePad/evidence/run_set.json) for historical run versions, settings and detailed file records.

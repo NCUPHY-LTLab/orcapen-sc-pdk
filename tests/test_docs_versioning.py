@@ -20,15 +20,20 @@ class DocsVersioningTests(unittest.TestCase):
             self.assertIn("reproducibility.html", metadata["aliases"])
             self.assertFalse((page.parent / "reproducibility.qmd").exists())
             rows = [line for line in text.splitlines() if line.startswith("| ")]
-            case_rows = [line for line in rows if "⏳" in line]
-            self.assertEqual(len(case_rows), 19)
-            self.assertEqual(sum("✅" in row for row in case_rows), 11)
-            self.assertEqual(sum("⚠️" in row for row in case_rows), 8)
+            case_rows = [line for line in rows if "/releases/download/data-" in line]
+            self.assertEqual(len(case_rows), 4)
             self.assertTrue(all("Run ID" not in row and "執行識別碼" not in row for row in rows))
-            self.assertTrue(all("⏳" in row.split("|")[-2] for row in case_rows))
+            self.assertTrue(
+                all("/releases/download/data-" in row.split("|")[-2] for row in case_rows)
+            )
+            self.assertEqual(sum(row.count("/releases/download/data-") for row in case_rows), 9)
+            widths = "[50,20,30]" if language else "[40,30,30]"
+            self.assertIn(f': {{tbl-colwidths="{widths}"}}', text)
+            self.assertIn("200 nm", text)
+            self.assertIn("100 nm", text)
             self.assertNotIn("/blob/v1.0.0/", text)
             self.assertNotIn("/releases/tag/v1.0.0", text)
-            self.assertEqual(text.count("/evidence/run_set.json)"), 3)
+            self.assertEqual(text.count("/evidence/run_set.json)"), 1)
 
     def test_authored_area_pages_are_in_their_page_lists(self):
         docs = ROOT / "docs"

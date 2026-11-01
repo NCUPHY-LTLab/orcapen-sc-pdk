@@ -11,4 +11,8 @@ The menu beside the site title selects the documentation version. This edition a
 
 See [distribution and installation](../distribution.md) for the package, or [simulation cases and downloads](../simulation/recorded-cases.qmd) for version-bound simulation inputs and results.
 
-Only actual published documentation snapshots appear in the version menu. When a newer release replaces the current site, this edition will be preserved under `/v1.0.0/`. Historical simulations keep their original PDK, SCGSim and solver versions; downloading them with a new OrcaPen release does not change their model.
+## Simulation-data snapshot
+
+Simulation data uses independent `data-YYYY.MM.DD-rN` releases. The [data-2026.11.01-r1 snapshot](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1) contains four SimplePad cases; each retains its recorded PDK, SCGSim and solver versions.
+
+Only actual published documentation snapshots appear in the version menu. When a newer release replaces the current site, this edition will be preserved under `/v1.0.0/`.
