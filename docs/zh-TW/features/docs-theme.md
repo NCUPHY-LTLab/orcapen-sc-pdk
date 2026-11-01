@@ -3,7 +3,7 @@ title: "主題與工具鏈"
 sidebar: development
 ---
 
-本網站使用公開的 `askr-html` 格式，來源為 [Askr v0.12.0 已發布版本](https://github.com/arfiligol/askr/tree/v0.12.0)。未修改的擴充功能置於 `docs/_extensions/arfiligol/askr`，包含 MIT 授權、第三方聲明及本機字型／圖示資源。擴充功能清單 `_extension.yml` 宣告版本 `0.12.0` 與 Quarto 相容範圍 `>=1.9.38 <1.11`。[已發布的擴充功能中繼資料](https://github.com/arfiligol/askr/blob/v0.12.0/_extensions/askr/_extension.yml)記錄格式及相容需求。
+本網站使用公開的 `askr-html` 格式，來源為 [Askr v0.13.3 已發布版本](https://github.com/arfiligol/askr/tree/v0.13.3)。未修改的擴充功能置於 `docs/_extensions/arfiligol/askr`，包含 MIT 授權、第三方聲明及本機字型／圖示資源。擴充功能清單 `_extension.yml` 宣告版本 `0.13.3` 與 Quarto 相容範圍 `>=1.9.38 <1.11`。[已發布的擴充功能中繼資料](https://github.com/arfiligol/askr/blob/v0.13.3/_extensions/askr/_extension.yml)記錄格式及相容需求。
 
 根目錄的 `_extensions` 符號連結指向 `docs/_extensions`，使渲染已儲存筆記本時，擴充功能的相對引用能透過既有的 `docs/notebooks` 符號連結解析。擴充功能只有一份 vendored 副本，沒有第二份；正式筆記本來源、配對方式與輸出均未變更。
 
@@ -11,10 +11,10 @@ sidebar: development
 
 ```bash
 cd docs
-quarto add arfiligol/askr@v0.12.0 --no-prompt
+quarto add arfiligol/askr@v0.13.3 --no-prompt
 ```
 
-審閱後以使用端檔案提交擴充功能更新；不要修改已安裝副本，也不要追蹤會移動的分支。`_quarto.yml` 選用 `askr-html`，不會替換其主題、閱讀版面寬度、字型、顏色或原生控制項。`styles.css` 僅保留本地表格溢位與圖表彈出行為。本地色彩別名遵循 Askr 的 `--qdk-border` 與 `--qdk-canvas` 設計代碼。[元件展示集](../public-pdk-examples/index.md#components-layout)使用內建行內 Image Viewer；舊版自訂 iframe 檢視器已退役。請參閱[已發布的檢視器用法](https://github.com/arfiligol/askr/blob/v0.12.0/usage/image-viewer.qmd)。
+審閱後以使用端檔案提交擴充功能更新；不要修改已安裝副本，也不要追蹤會移動的分支。`_quarto.yml` 選用 `askr-html`，不會替換其主題、閱讀版面寬度、字型、顏色或原生控制項。`styles.css` 僅保留本地表格溢位與圖表彈出行為。本地色彩別名遵循 Askr 的 `--qdk-border` 與 `--qdk-canvas` 設計代碼。[元件展示集](../public-pdk-examples/index.md#components-layout)使用內建行內 Image Viewer；舊版自訂 iframe 檢視器已退役。請參閱[v0.13.3 檢視器用法](https://github.com/arfiligol/askr/blob/v0.13.3/usage/image-viewer.qmd)。
 
 ## 語言版本與儲存庫連結
 

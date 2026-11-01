@@ -68,6 +68,7 @@ project:
     - "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json"
     - "notebooks/src/ComponentSimulation/Kosen2024_Xmon/**/*.qmd"
   pre-render:
+    - python3 ../scripts/build_overview_snippets.py
     - uv run --project .. --group docs quartodoc build
   post-render:
     - python3 ../scripts/copy_surface_band_sources.py
@@ -90,7 +91,6 @@ website:
   repo-url: https://github.com/NCUPHY-LTLab/orcapen-sc-pdk
   repo-actions: [edit, issue]
   navbar:
-    logo: assets/orcapen-mark.svg
     search: true
     tools-collapse: false
     tools:
@@ -99,6 +99,8 @@ website:
         text: GitHub repository
         aria-label: GitHub repository
     left:
+      - text: Overview
+        href: index.qmd
       - text: Get Started
         href: getting-started.md
       - text: Simulation
@@ -110,6 +112,13 @@ website:
       - text: Development
         href: developing-features.md
   sidebar:
+    - id: overview
+      collapse-level: 1
+      title: Overview
+      contents:
+        - text: OrcaPen at a glance
+          href: index.qmd
+        - home/versions.md
     - id: get-started
       collapse-level: 1
       title: Get Started
@@ -118,17 +127,44 @@ website:
         - start/common-cells.qmd
         - start/layers.qmd
         - start/materials.qmd
+        - section: Layout guides
+          contents:
+            - public-pdk-examples/cross-sections.qmd
+            - public-pdk-examples/component-authoring.md
+            - public-pdk-examples/shared-primitives.md
+        - section: Related process guides
+          contents:
+            - materials-and-technology.md
+            - simulation/tools/materials-stack-z.qmd
+            - start/cross-sections-ports.qmd
     - id: simulation
       collapse-level: 1
       title: Simulation
       contents:
         - notebooks.qmd
-        - simulation/requirements/electrostatic-capacitance.qmd
-        - simulation/requirements/eigenmode.qmd
-        - simulation/requirements/driven-terminal.qmd
-        - simulation/requirements/q2d-cross-section.qmd
-        - simulation/requirements/epr-loss.qmd
+        - section: Simulation tutorials
+          contents:
+            - simulation/requirements/electrostatic-capacitance.qmd
+            - simulation/requirements/eigenmode.qmd
+            - simulation/requirements/driven-terminal.qmd
+            - simulation/requirements/q2d-cross-section.qmd
+            - simulation/requirements/epr-loss.qmd
         - public-pdk-examples/test-components.md
+        - section: Reproduce and download
+          contents:
+            - simulation/recorded-cases.qmd
+            - simulation/notebooks.qmd
+        - section: Model variants
+          contents:
+            - simulation/requirements/driven-modal.qmd
+            - simulation/requirements/lumped-rlc-eigenmode.qmd
+            - simulation/requirements/q3d-acrl.qmd
+            - simulation/tsv-model-inspection.qmd
+        - section: Simulation concepts
+          contents:
+            - simulation/tools/mesh-fem-amr.qmd
+            - simulation/tools/curves-holes-transforms.qmd
+            - simulation/tools/contacts-multilevel.qmd
     - id: api
       collapse-level: 1
       title: API
@@ -204,8 +240,25 @@ website:
       title: Development
       contents:
         - developing-features.md
-        - home/ecosystem-workspace.md
-        - docs-publishing.md
+        - section: Package and integration
+          contents:
+            - home/pdk-responsibilities.md
+            - home/ecosystem-workspace.md
+            - features/scgsim-integration.md
+            - distribution.md
+            - models.md
+            - simulation/tools/source-ownership.qmd
+            - simulation/tools/handoff-resolve-report.qmd
+        - section: Documentation
+          contents:
+            - docs-publishing.md
+            - features/docs-theme.md
+        - section: Package usage resources
+          contents:
+            - usage/index.md
+            - usage/curve-sampling.md
+            - usage/semantic-inspection.md
+            - usage/component-simulation-notebooks.md
 
 format:
   askr-html:

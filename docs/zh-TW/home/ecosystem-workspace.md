@@ -9,7 +9,7 @@ sidebar: development
 | --- | --- |
 | [OrcaPen](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk) | 公開元件、橫截面、圖層、堆疊、材料與元件模擬範例 |
 | [GDSFactory](https://gdsfactory.github.io/gdsfactory/) | 元件建構、放置、連接、佈線與 GDS 匯出 |
-| [SCGSim](https://github.com/OrPenStrike/scgsim) | 幾何詮釋、Palace／AEDT 準備、交接與回傳結果分析 |
+| [SCGSim](https://github.com/NCUPHY-LTLab/scgsim) | 幾何詮釋、Palace／AEDT 準備、交接與回傳結果分析 |
 | 你的佈局專案 | 元件參數、晶片組裝、最終 Nets 與激發，以及私人結果 |
 
 ## 依任務選擇執行環境

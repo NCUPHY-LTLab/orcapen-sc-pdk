@@ -1,1 +1,6 @@
-{"versions": []}
+{
+  "mode": "title",
+  "versions": [
+    {"label": "1.0.0", "root": "/", "latest": true}
+  ]
+}

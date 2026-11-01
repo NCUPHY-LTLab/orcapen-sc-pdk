@@ -31,11 +31,11 @@ The QMD conversion command does not migrate or synchronize Python pairs.
 In a source checkout with Quarto and the docs environment installed:
 
 ```bash
-just check-notebooks
+uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
 ```
 
 This recursively verifies QMD/IPYNB parity without executing code or changing
-saved outputs. `just convert-notebooks` explicitly regenerates clean derived
+saved outputs. Adding `--generate` explicitly regenerates clean derived
 IPYNBs and therefore must not be used over Human-owned executed outputs.
 An output-preserving input edit requires coordinated publication ownership.
 Existing Python pairs use their configured Jupytext synchronization; inspect
@@ -44,8 +44,9 @@ the resulting source/metadata diff before retaining it.
 Pages builds verify and render saved notebooks with execution disabled. A clean
 checkout must render without raw run folders. See `docs/docs-publishing.md` for
 the repository build procedure. Saved outputs and derived evidence do not imply
-raw artifact publication. Manual re-analysis requires the exact sealed
-artifacts from their custodian and must fail clearly when they are missing.
+raw artifact publication. Use [simulation cases and downloads](../simulation/recorded-cases.qmd)
+to select the original input and result downloads; analysis needs those matching
+files rather than a regenerated model.
 
 ## Keep the ordinary workflow visible
 

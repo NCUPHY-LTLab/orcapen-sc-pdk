@@ -72,6 +72,59 @@
   else groupedTabs();
   window.addEventListener("pageshow", groupedTabs);
 
+  // Quarto owns announcement content, persistence, and document/sidebar offsets.
+  // Keep Askr's overlaid Pages control and Areas panel aligned to that header.
+  function announcements() {
+    var header = document.getElementById("quarto-header");
+    if (!header) return;
+    var navbar = header.querySelector(":scope > .navbar");
+    var frame;
+    function update() {
+      frame = null;
+      var bounds = header.getBoundingClientRect();
+      var top = navbar ? navbar.getBoundingClientRect().top - bounds.top : 0;
+      header.style.setProperty("--askr-navbar-top", top + "px");
+      header.style.setProperty("--askr-header-height", bounds.height + "px");
+    }
+    function schedule() {
+      if (!frame) frame = requestAnimationFrame(update);
+    }
+    if (window.ResizeObserver) new ResizeObserver(schedule).observe(header);
+    window.addEventListener("resize", schedule);
+    window.addEventListener("pageshow", schedule);
+    update();
+    var announcement = document.getElementById("quarto-announcement");
+    if (!announcement) return;
+    var chinese = /^zh(?:-|$)/i.test(document.documentElement.lang);
+    announcement.setAttribute("role", "region");
+    announcement.setAttribute("aria-label", chinese ? "網站公告" : "Site announcement");
+    var icon = announcement.querySelector(".quarto-announcement-icon");
+    if (icon) icon.setAttribute("aria-hidden", "true");
+    var action = announcement.querySelector(".quarto-announcement-action");
+    if (!action || action.closest("button")) return;
+    var close = document.createElement("button");
+    close.type = "button";
+    close.className = "askr-announcement-close";
+    close.setAttribute("aria-label", chinese ? "關閉公告" : "Close announcement");
+    close.title = close.getAttribute("aria-label");
+    action.setAttribute("aria-hidden", "true");
+    action.before(close);
+    close.appendChild(action);
+    close.addEventListener("click", function (event) {
+      var returnFocus = document.activeElement === close;
+      // Keep the original node: Quarto binds its click handler to this icon.
+      if (event.target !== action) action.click();
+      if (returnFocus && !announcement.isConnected) {
+        var entry = Array.from(header.querySelectorAll("a[href], button")).find(function (control) {
+          return !control.disabled && control.getClientRects().length && getComputedStyle(control).visibility !== "hidden";
+        });
+        if (entry) entry.focus();
+      }
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", announcements);
+  else announcements();
+
   function hideShown(selector) {
     document.querySelectorAll(selector).forEach(function (el) {
       if (!el.classList.contains("show") || !window.bootstrap) return;

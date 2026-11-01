@@ -27,10 +27,21 @@ LABELS = {
     "Package": "套件",
     "Cells": "元件",
     "Overview": "概覽",
+    "OrcaPen at a glance": "認識 OrcaPen",
+    "Documentation versions": "文件版本",
     "Components": "元件指南",
     "All components": "所有元件",
     "Function references": "函式參考",
     "Materials & Interfaces": "材料與介面",
+    "Layout guides": "版圖指南",
+    "Related process guides": "製程相關指南",
+    "Reproduce and download": "重現與下載",
+    "Model variants": "模型變體",
+    "Simulation tutorials": "模擬教學",
+    "Simulation concepts": "模擬概念",
+    "Package and integration": "套件與整合",
+    "Documentation": "文件維護",
+    "Package usage resources": "套件使用資源",
 }
 
 
@@ -46,14 +57,70 @@ def localize_labels(value: object) -> None:
             localize_labels(item)
 
 
+def route_untranslated_navigation(value: object, authored: Path, english: Path) -> None:
+    """Keep untranslated menu entries on the actual English edition."""
+
+    def route(target: str) -> dict[str, str] | None:
+        parsed = urlsplit(target)
+        if parsed.scheme or parsed.netloc or target.startswith(("/", "#")):
+            return None
+        source = english / parsed.path
+        if source.suffix not in {".md", ".qmd"} or (authored / parsed.path).is_file():
+            return None
+        # Shared generated API pages are copied into the child project.
+        if parsed.path.startswith("reference/") or not source.is_file():
+            return None
+        text = source.read_text()
+        if text.startswith("---\n"):
+            metadata = yaml.safe_load(text.split("---", 2)[1]) or {}
+            title = metadata.get("title", source.stem)
+        else:
+            title = next(
+                (line[2:].strip() for line in text.splitlines() if line.startswith("# ")),
+                source.stem,
+            )
+        href = "en/" + str(Path(parsed.path).with_suffix(".html"))
+        if parsed.query:
+            href += "?" + parsed.query
+        if parsed.fragment:
+            href += "#" + parsed.fragment
+        return {"text": str(title) + "（英文）", "href": href}
+
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            if isinstance(item, str):
+                replacement = route(item)
+                if replacement:
+                    value[index] = replacement
+            else:
+                route_untranslated_navigation(item, authored, english)
+    elif isinstance(value, dict):
+        if isinstance(value.get("href"), str):
+            replacement = route(value["href"])
+            if replacement:
+                value.update(replacement)
+        for key, item in value.items():
+            if key != "href":
+                route_untranslated_navigation(item, authored, english)
+
+
 def english_links(text: str, page: Path, authored: Path, base_path: str) -> str:
     """Send untranslated documentation links to the actual English edition."""
+
+    def relative_url(target: str) -> str:
+        # Quarto interprets project-root URLs as source paths. Relative URLs
+        # also work when the bilingual site is mounted below a project prefix.
+        return Path(os.path.relpath(authored / target, page.parent)).as_posix()
 
     def replace(match: re.Match[str], *, download: bool = False) -> str:
         target = match.group(2)
         parsed = urlsplit(target)
-        if target.startswith("/orcapen-sc-pdk/") and base_path == "/":
-            return match.group(1) + target.removeprefix("/orcapen-sc-pdk") + match.group(3)
+        if target.startswith("/orcapen-sc-pdk/"):
+            return (
+                match.group(1)
+                + relative_url(target.removeprefix("/orcapen-sc-pdk/"))
+                + match.group(3)
+            )
         if parsed.scheme or parsed.netloc or target.startswith(("/", "#")):
             return match.group(0)
         relative = parsed.path
@@ -74,7 +141,7 @@ def english_links(text: str, page: Path, authored: Path, base_path: str) -> str:
             output += "?" + parsed.query
         if parsed.fragment:
             output += "#" + parsed.fragment
-        return match.group(1) + base_path + "en/" + output + match.group(3)
+        return match.group(1) + relative_url("en/" + output) + match.group(3)
 
     # Leave code fences untouched; only reader-facing Markdown links are routed.
     chunks = re.split(r"(^```[^\n]*\n.*?^```\s*$)", text, flags=re.M | re.S)
@@ -108,6 +175,7 @@ def main() -> None:
         shutil.copytree(authored, staged, dirs_exist_ok=True)
         for name in (
             "_extensions",
+            "_includes",
             "assets",
             "_static",
             "reference",
@@ -144,6 +212,7 @@ def main() -> None:
             {"text": "GitHub 原始碼", "aria-label": "GitHub 原始碼"}
         )
         localize_labels(child["website"])
+        route_untranslated_navigation(child["website"], authored, docs)
         child["askr"]["languages"] = {
             "current": "zh-TW",
             "items": [

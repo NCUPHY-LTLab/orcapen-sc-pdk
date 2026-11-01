@@ -1,0 +1,98 @@
+---
+title: "模擬案例與下載"
+sidebar: simulation
+toc-depth: 3
+aliases:
+  - reproducibility.html
+---
+
+選擇案例，下載**輸入包（Handoff）**重跑相同網格與設定，或下載**結果包（Results）**讀取已保存的結果。本頁集中列出案例、下載方式與使用步驟。
+
+::: {.callout-note title="下載狀態"}
+`v1.0.0` 資料包正在準備，表格的下載欄會在發布後連到對應的 Release。目前可先查看案例與操作說明；[GitHub Releases](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases) 尚未提供這批附件。
+:::
+
+## 選擇案例
+
+共 19 次已記錄執行：11 次完成、8 次失敗。失敗的案例也保留輸入與可用紀錄，供排查與效能分析（Profiling）。
+
+### SimplePad
+
+這四個案例使用 **200 nm 鋁層**，與目前 PDK 預設的 100 nm 不同。
+
+| 計算 | 狀態 | 下載 |
+| --- | --- | --- |
+| Palace 靜電（Electrostatic） | ✅ 完成 | ⏳ 準備中 |
+| Palace 本徵模態（Eigenmode） | ✅ 完成 | ⏳ 準備中 |
+| AEDT Q3D 電容萃取 | ✅ 完成 | ⏳ 準備中 |
+| AEDT HFSS 本徵模態 | ✅ 完成 | ⏳ 準備中 |
+
+### CircularPad
+
+| 計算 | 狀態 | 下載 |
+| --- | --- | --- |
+| Palace 本徵模態，fresh08 | ✅ 完成；有 PCG 警告 | ⏳ 準備中 |
+
+比較結果前，請先檢視原始 PCG 警告與收斂歷程。
+
+### Kosen2024 Xmon
+
+以下用計算、設定差異與日期區分案例；完整執行識別碼（Run ID）保留在資料包與[來源紀錄](#source-records)中。A、A′、B 是原始案例的建模路線（Route），其中 A′ 使用 A 路線的基板表面薄膜選項（`substrate_face`）。
+
+| 計算 | 設定差異 | 狀態 | 下載 |
+| --- | --- | --- | --- |
+| Palace 靜電 | A′；臂長 300 µm；8/27 | ✅ 完成 | ⏳ 準備中 |
+| Palace 靜電 | A′；臂長 309.5 µm；8/27 | ✅ 完成 | ⏳ 準備中 |
+| Palace 靜電 | A；臂長 309.5 µm；8/27 | ✅ 完成 | ⏳ 準備中 |
+| Palace 靜電 | B；臂長 309.5 µm；8/27 | ✅ 完成 | ⏳ 準備中 |
+| Palace 本徵模態 | A′；接面電感 11.89 nH；8/27 | ⚠️ 失敗 | ⏳ 準備中 |
+| Palace 本徵模態 | A′；接面電感 11.78 nH；8/27 | ⚠️ 失敗 | ⏳ 準備中 |
+| Palace 本徵模態 | A；接面電感 11.78 nH；8/27 | ⚠️ 失敗 | ⏳ 準備中 |
+| Palace 本徵模態 | B；接面電感 11.78 nH；8/27 | ⚠️ 失敗 | ⏳ 準備中 |
+| AEDT Q3D | 原始邊界設定；8/27 | ✅ 完成 | ⏳ 準備中 |
+| Palace 靜電 | A′；更新接地與真空區域；8/29 | ⚠️ 失敗 | ⏳ 準備中 |
+| Palace 靜電 | A；更新接地與真空區域；8/29，第 1 次 | ⚠️ 失敗 | ⏳ 準備中 |
+| Palace 靜電 | A；更新接地與真空區域；8/29，第 2 次 | ⚠️ 失敗 | ⏳ 準備中 |
+| Palace 靜電 | B；更新接地與真空區域；8/29 | ⚠️ 失敗 | ⏳ 準備中 |
+| AEDT Q3D | 更新接地與真空區域；8/29 | ✅ 完成 | ⏳ 準備中 |
+
+不同建模路線、邊界設定與接面電感請分開比較；失敗不代表已收斂。
+
+## 下載與核對
+
+1. 發布後，從表格最後的「下載」欄開啟對應 Release，選擇該案例的輸入包或結果包。
+2. 下載所選壓縮檔及 `SHA256SUMS`；若壓縮檔分卷，請下載全部編號分卷。
+3. 解壓前核對檔案：
+
+```bash
+sha256sum --ignore-missing -c SHA256SUMS
+```
+
+確認：已下載的附件皆顯示 `OK`。解壓後保留原本的資料夾結構與執行收據（Receipt）。
+
+| 資料包 | 用途與內容 |
+| --- | --- |
+| 輸入包 | 重跑模擬：原始網格或 AEDT 專案／規格、數值設定、模型對照、執行入口與版本說明。 |
+| 結果包 | 分析既有結果：已保存的輸出及可用場資料、原始收據與檔案清單。 |
+
+## 重跑或分析
+
+**重跑模擬**：使用包內記錄的 PDK、SCGSim、求解器（Solver）版本與命令，另開執行副本。保留原始網格；從新版元件重新產生網格會成為另一個實驗。
+
+原始紀錄保留主機名稱與本機路徑。請在執行副本中依自己的安裝位置調整執行檔與環境載入路徑，再使用啟動腳本（Runner）；保存結果的副本另外保留，因為啟動腳本可能覆寫輸出。
+
+**分析既有結果**：使用結果包與[對應教學](notebooks.qmd)的讀取入口。Palace 場分布檢視需要已保存的網格及場資料；AEDT 已存場評估（Saved-field Evaluation）需要相容且有授權的 AEDT。讀取已匯出的 CSV 表格不需要再次求解。
+
+中止的執行可能留下可分析的中間結果。用相同輸入對新版求解器做效能分析時，請記為新的一次執行，保留原始結果供比較。
+
+## 版本與來源紀錄 {#source-records}
+
+✅ 2026-11-01：212 項宣告雜湊核對皆相符。
+
+各案例的版本、設定、完整識別碼與原始檔案雜湊可由以下紀錄查閱；套件版本不會取代歷史模擬使用的版本。
+
+- [SimplePad 原始執行紀錄](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/SimplePad/evidence/run_set.json)
+- [CircularPad 原始執行紀錄](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/CircularPad/evidence/run_set.json)
+- [Kosen2024 Xmon 原始執行紀錄](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/Kosen2024_Xmon/evidence/run_set.json)
+
+資料包雜湊值（Hash）用來核對下載檔；原始輸入與結果的雜湊保留在各案例紀錄中。求解器執行檔、授權資料及無關的本機環境檔案不隨包散布。

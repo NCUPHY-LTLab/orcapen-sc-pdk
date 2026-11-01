@@ -23,16 +23,21 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      - uses: extractions/setup-just@v3
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: 1.10.19
       - run: uv sync -p 3.12 --locked --group docs --extra dev
-      - run: just docs
+      - run: uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
+      - run: uv run --group docs quarto render docs --no-execute
+      - run: python scripts/check_docs_navigation.py docs/_site
+      - run: python scripts/fetch_previous_docs_release.py docs/releases-history.json "${RUNNER_TEMP}/docs-history-assets" --current-version "$(grep -m1 '^version = ' pyproject.toml | cut -d '"' -f2)" --output-manifest "${RUNNER_TEMP}/docs-history-manifest.json"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - run: python scripts/assemble_docs_release.py docs/_site docs/_release-site --version "$(grep -m1 '^version = ' pyproject.toml | cut -d '"' -f2)" --source-sha "${GITHUB_SHA}" --pages-run "${GITHUB_RUN_ID}" --history-manifest "${RUNNER_TEMP}/docs-history-manifest.json"
       - uses: actions/upload-artifact@v4
         with:
           name: docs-site
-          path: docs/_site
+          path: docs/_release-site
           if-no-files-found: error
 
   deploy:

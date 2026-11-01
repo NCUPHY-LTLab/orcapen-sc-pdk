@@ -1828,7 +1828,7 @@ wheels = [
 
 [[package]]
 name = "orcapen-sc-pdk"
-version = "0.1.0.dev2"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "doroutes" },

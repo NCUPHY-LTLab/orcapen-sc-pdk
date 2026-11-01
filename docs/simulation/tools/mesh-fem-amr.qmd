@@ -7,4 +7,4 @@ Read [Mesh and numerical controls](../../notebooks.qmd) for the current guide.
 Keep geometric mesh order, field order, and the requested physical quantity separate when reading adaptive history.
 
 Generic solver and result APIs belong to the selected version's
-[SCGSim documentation](https://github.com/OrPenStrike/scgsim/tree/develop/docs).
+[SCGSim documentation](https://github.com/NCUPHY-LTLab/scgsim/tree/develop/docs).

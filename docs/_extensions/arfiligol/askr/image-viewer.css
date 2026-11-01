@@ -30,8 +30,10 @@
 .askr-mermaid-control:focus-visible,.askr-mermaid-source summary:focus-visible { outline:2px solid var(--qdk-focus); outline-offset:2px; }
 .askr-mermaid-source { margin-block:.25rem 1rem; color:var(--qdk-text); }
 .askr-mermaid-source summary { width:max-content; max-width:100%; cursor:pointer; color:var(--qdk-link); }
-.askr-mermaid-source pre { max-height:24rem; overflow:auto; padding:.75rem; border:1px solid var(--qdk-border); border-radius:var(--qdk-control-radius); background:var(--qdk-code-background); color:var(--qdk-text); }
-.askr-mermaid-copy-status { margin-inline-start:.65rem; font-size:.875rem; }
+.askr-mermaid-source-frame { position:relative; border:1px solid var(--qdk-code-border); border-radius:var(--qdk-code-radius); background:var(--qdk-code-background); }
+.askr-mermaid-copy-row { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:.35rem; padding:.45rem .6rem 0; }
+.askr-mermaid-copy-row .askr-copy-button { margin:0; }
+.askr-mermaid-source pre { box-sizing:border-box; max-width:100%; max-height:24rem; overflow:auto; margin:0; padding:.5rem .75rem .75rem; border:0; border-radius:0; background:transparent; color:var(--qdk-text); }
 .askr-mermaid-status { margin-block:.6rem; color:var(--qdk-muted-text); }
 @media(max-width:600px) { .askr-viewer-stage { height:320px; } .askr-viewer-dialog { width:98vw; max-width:98vw; } .askr-viewer-caption { max-height:15dvh; } }
 @media(prefers-reduced-motion:reduce) { .askr-viewer * { transition:none; animation:none; } }

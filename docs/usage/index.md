@@ -52,9 +52,8 @@ numerical convergence, fabrication qualification or scientific acceptance.
 
 ## Installed offline bundle
 
-The renamed `0.1.0.dev2` distribution is currently a local candidate only. Its
-packaged resources describe available source behavior, not Human acceptance,
-registry publication or newly executed notebook evidence. See
+The `1.0.0` distribution packages the usage resources described here. Simulation
+results remain tied to their recorded model and runtime versions. See
 [Distribution and handoff](../distribution.md).
 
 Ordinary wheels and source distributions contain

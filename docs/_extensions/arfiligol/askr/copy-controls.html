@@ -1,0 +1,212 @@
+<script>
+(() => {
+  'use strict';
+
+  const timers = new WeakMap();
+  const attempts = new WeakMap();
+
+  function statusFor(button) {
+    if (button.dataset.askrCopyKind === 'math') {
+      return button.closest('.askr-copyable-math')?.querySelector(':scope > .askr-copy-status') || null;
+    }
+    const local = button.parentElement?.querySelector('.askr-copy-status');
+    if (local) return local;
+    const following = button.parentElement?.nextElementSibling;
+    return following?.classList.contains('askr-copy-status') ? following : null;
+  }
+
+  function begin(button) {
+    clearTimeout(timers.get(button));
+    timers.delete(button);
+    const attempt = (attempts.get(button) || 0) + 1;
+    attempts.set(button, attempt);
+    button.textContent = 'Copy';
+    button.classList.remove('is-copied');
+    button.setAttribute('aria-label', button.dataset.askrCopyLabel);
+    const status = statusFor(button);
+    if (status) {
+      status.classList.remove('askr-copy-status-success', 'askr-copy-status-error');
+      status.textContent = '';
+    }
+    return attempt;
+  }
+
+  function succeed(button, attempt) {
+    if (attempts.get(button) !== attempt) return;
+    button.textContent = 'Copied!';
+    button.classList.add('is-copied');
+    button.setAttribute('aria-label', `${button.dataset.askrCopyLabel} copied`);
+    const status = statusFor(button);
+    if (status) {
+      status.classList.add('askr-copy-status-success');
+      status.textContent = 'Copied to clipboard.';
+    }
+    timers.set(button, window.setTimeout(() => {
+      if (attempts.get(button) !== attempt) return;
+      button.textContent = 'Copy';
+      button.classList.remove('is-copied');
+      button.setAttribute('aria-label', button.dataset.askrCopyLabel);
+      if (status) {
+        status.classList.remove('askr-copy-status-success');
+        status.textContent = '';
+      }
+      timers.delete(button);
+    }, 2000));
+  }
+
+  function fail(button, attempt) {
+    if (attempts.get(button) !== attempt) return;
+    const status = statusFor(button);
+    if (status) {
+      status.classList.add('askr-copy-status-error');
+      const messages = {
+        code: 'Copy failed. Select the code above and copy it manually.',
+        math: 'Copy failed. Select the LaTeX source below and copy it manually.',
+        mermaid: 'Copy failed. Select the Mermaid source below and copy it manually.'
+      };
+      status.textContent = messages[button.dataset.askrCopyKind];
+    }
+  }
+
+  function codeText(button) {
+    const original = button.closest('.code-copy-outer-scaffold');
+    if (!original) throw new Error('The code block source is unavailable.');
+    const scaffold = original.cloneNode(true);
+    const code = scaffold.querySelector('code');
+    if (!code) throw new Error('The code block source is unavailable.');
+    for (const child of [...code.children]) {
+      const classes = [...child.classList];
+      if (classes.some(name => name.startsWith('code-annotation-') && name !== 'code-annotation-target')) child.remove();
+    }
+    return code.innerText;
+  }
+
+  function sourceFor(button) {
+    const kind = button.dataset.askrCopyKind;
+    if (kind === 'math') return button.closest('.askr-copyable-math')?.dataset.askrTex;
+    if (kind === 'mermaid') return button.closest('.askr-mermaid-view')?.dataset.askrMermaidSource;
+    if (kind === 'code') return codeText(button);
+    throw new Error('This copy control has no source.');
+  }
+
+  function legacyCodeCopy(text, button) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.readOnly = true;
+    textarea.tabIndex = -1;
+    textarea.setAttribute('aria-hidden', 'true');
+    textarea.style.position = 'fixed';
+    textarea.style.insetInlineStart = '-9999px';
+    document.body.append(textarea);
+    textarea.select();
+    let copied = false;
+    try { copied = document.execCommand('copy'); } catch (_) {}
+    textarea.remove();
+    button.focus({preventScroll:true});
+    if (!copied) throw new Error('The browser did not copy the code.');
+  }
+
+  async function copy(button) {
+    const attempt = begin(button);
+    let text;
+    try {
+      text = sourceFor(button);
+      if (typeof text !== 'string') throw new Error('The source is unavailable.');
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard access is unavailable.');
+      await navigator.clipboard.writeText(text);
+      succeed(button, attempt);
+    } catch (_) {
+      if (attempts.get(button) !== attempt) return;
+      if (button.dataset.askrCopyKind === 'code' && typeof text === 'string') {
+        try {
+          legacyCodeCopy(text, button);
+          succeed(button, attempt);
+          return;
+        } catch (_) {}
+      }
+      if (button.dataset.askrCopyKind === 'math') exposeMathSource(button);
+      fail(button, attempt);
+    }
+  }
+
+  function createButton(kind, label) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `askr-copy-button askr-copy-${kind}`;
+    button.dataset.askrCopyKind = kind;
+    button.dataset.askrCopyLabel = label;
+    button.textContent = 'Copy';
+    button.setAttribute('aria-label', label);
+    return button;
+  }
+
+  function createStatus() {
+    const status = document.createElement('span');
+    status.className = 'askr-copy-status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    return status;
+  }
+
+  function initializeMathCopy() {
+    document.querySelectorAll('.askr-copyable-math').forEach(component => {
+      if (component.closest('.no-math-copy') || component.querySelector('.no-math-copy') || component.querySelector(':scope > .askr-math-actions')) return;
+      const actions = document.createElement('div');
+      actions.className = 'askr-math-actions';
+      const button = createButton('math', 'Copy LaTeX');
+      const status = createStatus();
+      actions.append(button);
+      component.prepend(actions);
+      component.append(status);
+    });
+  }
+
+  function replaceNativeCodeButtons() {
+    document.querySelectorAll('.code-copy-outer-scaffold > .code-copy-button').forEach(nativeButton => {
+      const scaffold = nativeButton.parentElement;
+      const button = createButton('code', 'Copy code');
+      nativeButton.replaceWith(button);
+      scaffold.classList.add('askr-has-copy-control');
+      scaffold.after(createStatus());
+    });
+  }
+
+  function exposeMathSource(button) {
+    const component = button.closest('.askr-copyable-math');
+    if (!component) return;
+    let source = component.querySelector('.askr-math-source');
+    if (!source) {
+      source = document.createElement('div');
+      source.className = 'askr-math-source';
+      const textarea = document.createElement('textarea');
+      textarea.readOnly = true;
+      textarea.spellcheck = false;
+      textarea.setAttribute('aria-label', 'LaTeX source');
+      textarea.value = component.dataset.askrTex;
+      source.append(textarea);
+      component.append(source);
+    }
+    const textarea = source.querySelector('textarea');
+    textarea.focus();
+    textarea.select();
+  }
+
+  function initialize() {
+    if (document.documentElement.dataset.askrCopyBound) return;
+    document.documentElement.dataset.askrCopyBound = 'true';
+    replaceNativeCodeButtons();
+    initializeMathCopy();
+    document.addEventListener('click', event => {
+      if (!(event.target instanceof Element)) return;
+      const button = event.target.closest('.askr-copy-button');
+      if (button) void copy(button);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize, {once:true});
+  } else {
+    initialize();
+  }
+})();
+</script>

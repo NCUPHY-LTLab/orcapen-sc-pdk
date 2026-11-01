@@ -301,10 +301,10 @@ body { background: var(--qdk-canvas); color: var(--qdk-text); font-family: var(-
 #quarto-document-content { box-sizing: border-box; inline-size: min(calc(var(--qdk-body) * var(--_qdk-body-scale)), 100%); justify-self: center; margin-inline: auto; max-width: calc(var(--qdk-body) * var(--_qdk-body-scale)); min-width: 0; overflow-x: visible; font-size: var(--qdk-body-size); line-height: var(--qdk-line-height); }
 #quarto-document-content p, #quarto-document-content li, #quarto-document-content tbody td { line-height: var(--qdk-line-height); }
 #quarto-document-content p, #quarto-document-content ul, #quarto-document-content ol { margin-block: var(--qdk-space); }
-strong, #quarto-document-content a:not(:is(.btn, .nav-link, [role="tab"], [role="button"], [data-bs-toggle], .anchorjs-link, .quarto-anchor, .code-copy-button, .sidebar-link, .quarto-color-scheme-toggle, .askr-version-menu a)) { font-weight: var(--qdk-strong-weight); }
-#quarto-document-content a:not(:is(.btn, .nav-link, [role="tab"], [role="button"], [data-bs-toggle], .anchorjs-link, .quarto-anchor, .code-copy-button, .sidebar-link, .quarto-color-scheme-toggle, .askr-version-menu a)) { color: var(--qdk-link); text-decoration: none; transition: color .2s ease; }
-#quarto-document-content a:not(:is(.btn, .nav-link, [role="tab"], [role="button"], [data-bs-toggle], .anchorjs-link, .quarto-anchor, .code-copy-button, .sidebar-link, .quarto-color-scheme-toggle, .askr-version-menu a)):hover { color: var(--qdk-link-hover); }
-#quarto-document-content p a:not(:is(.btn, .nav-link, [role="tab"], [role="button"], [data-bs-toggle], .anchorjs-link, .quarto-anchor, .code-copy-button, .sidebar-link, .quarto-color-scheme-toggle, .askr-version-menu a)):not(:has(img)) { background: var(--qdk-link-background); border-radius: var(--qdk-inline-radius); padding-inline: .1rem; }
+strong, #quarto-document-content a:not(:is(.btn, .nav-link, [role="tab"], [role="button"], [data-bs-toggle], .anchorjs-link, .quarto-anchor, .sidebar-link, .quarto-color-scheme-toggle, .askr-version-menu a)) { font-weight: var(--qdk-strong-weight); }
+#quarto-document-content a:not(:is(.btn, .nav-link, [role="tab"], [role="button"], [data-bs-toggle], .anchorjs-link, .quarto-anchor, .sidebar-link, .quarto-color-scheme-toggle, .askr-version-menu a)) { color: var(--qdk-link); text-decoration: none; transition: color .2s ease; }
+#quarto-document-content a:not(:is(.btn, .nav-link, [role="tab"], [role="button"], [data-bs-toggle], .anchorjs-link, .quarto-anchor, .sidebar-link, .quarto-color-scheme-toggle, .askr-version-menu a)):hover { color: var(--qdk-link-hover); }
+#quarto-document-content p a:not(:is(.btn, .nav-link, [role="tab"], [role="button"], [data-bs-toggle], .anchorjs-link, .quarto-anchor, .sidebar-link, .quarto-color-scheme-toggle, .askr-version-menu a)):not(:has(img)) { background: var(--qdk-link-background); border-radius: var(--qdk-inline-radius); padding-inline: .1rem; }
 mark { background: var(--qdk-mark); border-radius: var(--qdk-inline-radius); color: inherit; padding-inline: .1rem; }
 ::selection { background: color-mix(in srgb, var(--qdk-tertiary) 60%, transparent); color: var(--qdk-heading); }
 :where(a, button, input, select, textarea, summary):focus-visible { outline: var(--qdk-focus-width) solid var(--qdk-focus); outline-offset: var(--qdk-focus-offset); border-radius: var(--qdk-focus-radius); }
@@ -820,6 +820,7 @@ footer.footer .nav-link .bi { line-height: 1; font-size: 1rem; }
   #quarto-header .quarto-btn-toggle .bi { font-size: calc(var(--qdk-version-size) * var(--qdk-ui) * var(--_qdk-ui-scale)); line-height: 1; }
 }
 .sidebar-navigation .sidebar-item a.sidebar-link, #TOC a { color: var(--qdk-text); font-size: calc(15px * var(--qdk-ui) * var(--_qdk-ui-scale) - 2px); font-weight: 400; line-height: 1.35; }
+.sidebar-navigation .sidebar-item a.sidebar-link { border-radius: var(--qdk-radius); padding: .2rem .45rem; }
 // Areas has one panel presentation, independent of the Pages breakpoint.
 #quarto-header .navbar-brand { display: block; min-width: 0; max-width: 100%; }
 #quarto-header .navbar-title { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -879,7 +880,12 @@ footer.footer .nav-link .bi { line-height: 1; font-size: 1rem; }
 @media (prefers-reduced-motion: reduce) {
   #quarto-header.askr-areas-collapsed .navbar-collapse, #qdk-area-glass { transition: none !important; }
 }
-.sidebar-navigation .sidebar-link.active, .navbar .nav-link.active, #TOC .active > a { color: var(--qdk-link); font-weight: 600; }
+.sidebar-navigation .sidebar-item a.sidebar-link.active {
+  background-color: color-mix(in srgb, var(--qdk-link) 10%, transparent);
+  color: var(--qdk-link);
+  font-weight: 600;
+}
+.navbar .nav-link.active, #TOC .active > a { color: var(--qdk-link); font-weight: 600; }
 #TOC { color: var(--qdk-muted); }
 
 h1, h2, h3, h4, h5, h6, .quarto-title .title { color: var(--qdk-heading); font-family: var(--qdk-heading-font); font-weight: var(--qdk-heading-weight); letter-spacing: -.018em; scroll-margin-top: 5rem; }
@@ -947,12 +953,47 @@ pre code { background: transparent; border-radius: 0; color: var(--qdk-code-colo
 div.sourceCode > pre.sourceCode { padding: var(--qdk-code-padding); }
 div.sourceCode > pre.sourceCode, div.sourceCode > pre.sourceCode > code.sourceCode { background: transparent; border: 0; border-radius: 0; box-shadow: none; }
 .sourceCode .highlight, .sourceCode .code-annotation-line-highlight { background: var(--qdk-highlight); border-inline-start: 3px solid var(--qdk-link); }
-.code-with-filename .code-with-filename-file { border: 1px solid var(--qdk-code-border); border-bottom: 0; border-radius: var(--qdk-code-radius) var(--qdk-code-radius) 0 0; font-family: var(--qdk-mono-font); font-size: .9rem; margin-bottom: 0; padding: 0 .75rem; }
-.code-with-filename .code-with-filename-file pre { border: 0; border-radius: 0; margin: 0; padding: 0; }
-.code-with-filename div.sourceCode { border-top-left-radius: 0; border-top-right-radius: 0; margin-top: 0; }
-.code-copy-button { opacity: 0; background: var(--qdk-code-copy-background); color: var(--qdk-code-copy-color); }
-.code-copy-button:hover, .code-copy-button:focus-visible, .code-copy-button-checked { background: var(--qdk-code-copy-hover-background); color: var(--qdk-code-copy-hover-color); }
-.code-copy-outer-scaffold:hover .code-copy-button, .code-copy-button:focus-visible { opacity: 1; }
+// A filename and its source share one frame, including inside native callouts.
+.code-with-filename { background: var(--qdk-code-background); border: 1px solid var(--qdk-code-border); border-radius: var(--qdk-code-radius); margin-block: 0 1rem; min-inline-size: 0; padding: 0; position: relative; }
+.code-with-filename .code-with-filename-file,
+.quarto-dark .code-with-filename .code-with-filename-file {
+  background: var(--qdk-highlight);
+  border: 0;
+  border-bottom: 1px solid var(--qdk-code-border);
+  border-radius: var(--qdk-code-radius) var(--qdk-code-radius) 0 0;
+  color: var(--qdk-text);
+  font-family: var(--qdk-mono-font);
+  margin: 0;
+  padding: .4rem 1rem;
+}
+.code-with-filename .code-with-filename-file pre { background: transparent; border: 0; border-radius: 0; color: inherit; font-size: var(--qdk-code-size); line-height: 1.4; margin: 0; overflow-wrap: anywhere; padding: 0; white-space: pre-wrap; }
+.code-with-filename > .code-copy-outer-scaffold > div.sourceCode,
+.code-with-filename > div.sourceCode,
+.code-with-filename > pre { background: transparent; border: 0; border-radius: 0; margin: 0; }
+.askr-copy-button { align-items: center; background: var(--qdk-code-copy-background); border: 1px solid var(--qdk-code-border); border-radius: var(--qdk-inline-radius); color: var(--qdk-code-copy-color); cursor: pointer; display: inline-flex; font: inherit; font-size: .7rem; justify-content: center; line-height: 1.2; padding: .1rem .3rem; transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+.askr-copy-button:hover, .askr-copy-button:focus-visible { background: var(--qdk-code-copy-hover-background); color: var(--qdk-code-copy-hover-color); }
+.askr-copy-button.is-copied { border-color: var(--qdk-tertiary); color: var(--qdk-tertiary); }
+.askr-copy-code { opacity: 0; position: absolute; right: 5px; top: 5px; z-index: 3; }
+// Keep the normal vertical padding; reserve a side lane outside the code scrollport.
+.code-copy-outer-scaffold.askr-has-copy-control .sourceCode > pre.sourceCode { margin-inline-end: 4rem; padding-inline-end: .5rem; }
+// Named blocks place Copy in the label row, leaving the source its full width.
+.code-with-filename:has(> .askr-has-copy-control) .code-with-filename-file { padding-inline-end: 5rem; }
+.code-with-filename > .code-copy-outer-scaffold { position: static; }
+.code-with-filename > .askr-has-copy-control .sourceCode > pre.sourceCode { margin-inline-end: 0; padding-inline-end: var(--qdk-code-padding); }
+.code-with-filename .askr-copy-code { top: .35rem; right: .5rem; }
+.code-with-filename .sourceCode { overflow: visible; }
+.code-with-filename pre.sourceCode { overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: var(--qdk-muted-decoration) transparent; }
+// Quarto pads a callout's final child; keep that spacing outside the code frame.
+#quarto-document-content .callout.callout-titled .callout-body > .code-with-filename:last-child,
+#quarto-document-content .callout.callout-titled .callout-body > div > .code-with-filename:last-child { margin-block-end: calc(var(--qdk-callout-padding) * var(--_qdk-callout-scale)); padding-block-end: 0; }
+.code-copy-outer-scaffold:hover .askr-copy-code, .askr-copy-code:focus-visible { opacity: 1; }
+.code-copy-outer-scaffold + .askr-copy-status:not(:empty), .askr-copyable-math > .askr-copy-status:not(:empty) { display: block; margin-block: .25rem .5rem; }
+.askr-copy-status { color: var(--qdk-text); font-size: .7rem; }
+.askr-copy-status:empty { display: none; }
+.askr-copy-status-success { clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
+.askr-copy-status-error { color: var(--qdk-text); }
+@media (hover: none), (pointer: coarse) { .code-copy-outer-scaffold .askr-copy-code { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .askr-copy-button { transition: none; } }
 
 .table-responsive, .cell-output, .cell-output-display, .quarto-embedded-source-code, .sourceCode, pre { max-width: 100%; overflow-x: auto; }
 .table-responsive { min-width: 0; }
@@ -989,15 +1030,9 @@ mjx-container[display="true"] mjx-labels, .katex-display .tag { color: var(--qdk
 .askr-copyable-math { margin-block: 1rem; min-width: 0; position: relative; }
 .askr-math-actions { align-items: center; display: flex; flex-wrap: wrap; font-size: .7rem; gap: .35rem; inset-block-start: -1rem; inset-inline-end: .25rem; justify-content: flex-end; line-height: 1.2; max-inline-size: 100%; opacity: 0; padding: 0; pointer-events: none; position: absolute; transition: opacity .15s ease; z-index: 1; }
 .askr-copyable-math:is(:hover, :focus-within) .askr-math-actions { opacity: 1; pointer-events: auto; }
-.askr-math-copy { background: transparent; border: 1px solid var(--qdk-border); border-radius: var(--qdk-inline-radius); color: var(--qdk-text); cursor: pointer; font: inherit; font-size: .7rem; padding: .1rem .3rem; }
-.askr-math-copy:hover { background: var(--qdk-highlight); }
-.askr-math-copy { transition: border-color .2s ease, color .2s ease, background-color .2s ease; }
-.askr-math-copy.is-copied { border-color: var(--qdk-tertiary); color: var(--qdk-tertiary); }
-.askr-math-status-success { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-@media (prefers-reduced-motion: reduce) { .askr-math-copy { transition: none; } }
 @media (prefers-reduced-motion: reduce) { .askr-math-actions { transition: none; } }
 @media (hover: none), (pointer: coarse) { .askr-math-actions { opacity: 1; pointer-events: auto; } }
-.askr-math-copy:focus-visible, .askr-math-source textarea:focus-visible { outline: 2px solid var(--qdk-focus); outline-offset: 2px; }
+.askr-copy-button:focus-visible, .askr-math-source textarea:focus-visible { outline: 2px solid var(--qdk-focus); outline-offset: 2px; }
 
 // Entry links stay usable without JavaScript; viewer chrome is image-viewer.css.
 .askr-image-source { display: none; }
@@ -1016,7 +1051,6 @@ mjx-container[display="true"] mjx-labels, .katex-display .tag { color: var(--qdk
   line-height: 1.3;
 }
 .askr-image-view:hover { border-color: var(--qdk-control-hover); color: var(--qdk-control-hover); }
-.askr-math-status { color: var(--qdk-text); font-size: .7rem; }
 .askr-math-source textarea { background: var(--qdk-code-background); border: 1px solid var(--qdk-border); color: var(--qdk-text); display: block; font-family: var(--qdk-mono-font); min-height: 5rem; padding: .5rem; resize: vertical; width: 100%; }
 
 @media (max-width: 991.98px) {
@@ -1134,4 +1168,87 @@ section.askr-card-title { font-size: inherit; margin: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .askr-card { transition: none; }
+}
+
+/* Native site announcements */
+#quarto-announcement {
+  --askr-announcement-accent: var(--qdk-callout-note);
+  align-items: center;
+  gap: .65rem;
+  padding: .55rem .85rem;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--askr-announcement-accent) 30%, var(--qdk-border));
+  border-radius: 0;
+  background: color-mix(in srgb, var(--askr-announcement-accent) 8%, var(--qdk-canvas));
+  color: var(--qdk-text);
+  font-family: var(--qdk-body-font);
+  font-size: .9rem;
+  line-height: 1.45;
+}
+#quarto-announcement.alert-secondary { --askr-announcement-accent: var(--qdk-muted); }
+#quarto-announcement.alert-success { --askr-announcement-accent: var(--qdk-callout-tip); }
+#quarto-announcement.alert-danger { --askr-announcement-accent: var(--qdk-callout-caution); }
+#quarto-announcement.alert-warning { --askr-announcement-accent: var(--qdk-callout-warning); }
+#quarto-announcement.alert-light { --askr-announcement-accent: var(--qdk-muted-decoration); }
+#quarto-announcement.alert-dark { --askr-announcement-accent: var(--qdk-heading); }
+#quarto-announcement .quarto-announcement-content {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+#quarto-announcement .quarto-announcement-content > :first-child { margin-block-start: 0; }
+#quarto-announcement .quarto-announcement-content > :last-child { margin-block-end: 0; }
+#quarto-announcement .quarto-announcement-content a { color: var(--qdk-link); text-decoration: underline; text-underline-offset: .15em; }
+#quarto-announcement .quarto-announcement-icon {
+  flex: none;
+  margin: 0;
+  color: var(--askr-announcement-accent);
+  font-size: 1.15em;
+  line-height: 1;
+}
+#quarto-announcement .askr-announcement-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--qdk-control-radius);
+  background: transparent;
+  color: var(--qdk-control-color);
+  font: inherit;
+  cursor: pointer;
+}
+#quarto-announcement .askr-announcement-close:hover { border-color: var(--qdk-control-hover); color: var(--qdk-control-hover); }
+#quarto-announcement .askr-announcement-close:focus-visible { outline: var(--qdk-focus-width) solid var(--qdk-focus); outline-offset: var(--qdk-focus-offset); }
+#quarto-announcement .askr-announcement-close .quarto-announcement-action { line-height: 1; }
+@media (max-width: 991.98px) {
+  #quarto-header .quarto-secondary-nav { top: var(--askr-navbar-top, 0px); }
+}
+#quarto-header.askr-areas-collapsed .navbar-collapse {
+  top: var(--askr-header-height, var(--qdk-nav-height));
+  height: calc(100dvh - var(--askr-header-height, var(--qdk-nav-height))) !important;
+}
+
+/* Shared header control transitions */
+// Icon wrappers inherit the control color so its transition reaches the SVG.
+#quarto-header #quarto-search.type-overlay .aa-DetachedSearchButtonIcon,
+#quarto-header #quarto-search.type-overlay .aa-Form :is(.aa-InputWrapperPrefix, .aa-SubmitButton, .aa-Label, .aa-LoadingIndicator) {
+  color: inherit;
+}
+#quarto-header :is(.quarto-btn-toggle, .navbar-toggler, .quarto-navigation-tool, .quarto-color-scheme-toggle, .askr-version-button, .askr-language-toggle, .askr-logout, .nav-link),
+#quarto-header #quarto-search :is(.aa-DetachedSearchButton, .aa-Form),
+#quarto-announcement,
+#quarto-announcement .askr-announcement-close {
+  transition: color 150ms ease-in-out, background-color 150ms ease-in-out, border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  #quarto-header :is(.quarto-btn-toggle, .navbar-toggler, .quarto-navigation-tool, .quarto-color-scheme-toggle, .askr-version-button, .askr-language-toggle, .askr-logout, .nav-link),
+  #quarto-header #quarto-search :is(.aa-DetachedSearchButton, .aa-Form),
+  #quarto-announcement,
+  #quarto-announcement .askr-announcement-close { transition: none; }
 }

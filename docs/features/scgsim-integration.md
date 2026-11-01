@@ -16,14 +16,14 @@ identify interfaces rather than adding metal or assigning solver terminals.
 The technology source exposes physical declarations through
 `LayerLevel.info["physical_layer"]`. Selected component getters add source-owned
 records without changing the global material or stack definitions.
-Read the [technology source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/tech.py)
+Read the [technology source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/v1.0.0/orcapen_sc_pdk/tech.py)
 and the selected tutorial's getter for exact record fields.
 
 ## Use one runtime for the selected calculation
 
 Follow a tutorial from [Choose a Simulation](../notebooks.qmd).
 For generic backend APIs, use the
-[SCGSim documentation](https://github.com/OrPenStrike/scgsim/tree/develop/docs)
+[SCGSim documentation](https://github.com/NCUPHY-LTLab/scgsim/tree/main/docs)
 at the version selected by that tutorial.
 
 Keep source preparation, native execution, and returned-run analysis as
