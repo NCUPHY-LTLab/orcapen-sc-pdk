@@ -184,7 +184,7 @@ def main() -> None:
             source = docs / name
             if source.exists():
                 shutil.copytree(source, staged / name, dirs_exist_ok=True)
-        for name in ("styles.css", "askr-versions.json", "public-pdk-examples/cross-sections.svg"):
+        for name in ("askr-versions.json", "public-pdk-examples/cross-sections.svg"):
             shutil.copyfile(docs / name, staged / name)
 
         child = copy.deepcopy(config)

@@ -14,7 +14,7 @@ cd docs
 quarto add arfiligol/askr@v0.13.3 --no-prompt
 ```
 
-審閱後以使用端檔案提交擴充功能更新；不要修改已安裝副本，也不要追蹤會移動的分支。`_quarto.yml` 選用 `askr-html`，不會替換其主題、閱讀版面寬度、字型、顏色或原生控制項。`styles.css` 僅保留本地表格溢位與圖表彈出行為。本地色彩別名遵循 Askr 的 `--qdk-border` 與 `--qdk-canvas` 設計代碼。[元件展示集](../public-pdk-examples/index.md#components-layout)使用內建行內 Image Viewer；舊版自訂 iframe 檢視器已退役。請參閱[v0.13.3 檢視器用法](https://github.com/arfiligol/askr/blob/v0.13.3/usage/image-viewer.qmd)。
+審閱後以使用端檔案提交擴充功能更新；不要修改已安裝副本，也不要追蹤會移動的分支。`_quarto.yml` 選用 `askr-html`，不會替換其主題、閱讀版面寬度、字型、顏色或原生控制項。網站使用 Askr 原生的表格捲動與檢視器，不載入使用端樣式表。[元件展示集](../public-pdk-examples/index.md#components-layout)使用內建行內 Image Viewer；舊版自訂 iframe 檢視器已退役。請參閱[v0.13.3 檢視器用法](https://github.com/arfiligol/askr/blob/v0.13.3/usage/image-viewer.qmd)。
 
 ## 語言版本與儲存庫連結
 

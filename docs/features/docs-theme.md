@@ -29,9 +29,8 @@ quarto add arfiligol/askr@v0.13.3 --no-prompt
 Commit reviewed extension updates as consumer bytes; do not edit the installed
 copy or track a moving branch. `_quarto.yml` selects `askr-html` without
 replacing its themes, reading measure, fonts, colors or native controls.
-`styles.css` retains only local table overflow and diagram popout behavior.
-Its consumer-only color aliases follow Askr's `--qdk-border` and `--qdk-canvas`
-tokens. The [Cells gallery](../public-pdk-examples/index.md#components-layout)
+The site uses Askr's native table scrolling and viewers without a consumer
+stylesheet. The [Cells gallery](../public-pdk-examples/index.md#components-layout)
 uses the stock inline Image Viewer; the previous custom iframe viewer is retired.
 See the [v0.13.3 viewer usage](https://github.com/arfiligol/askr/blob/v0.13.3/usage/image-viewer.qmd).
 

@@ -262,7 +262,6 @@ website:
 
 format:
   askr-html:
-    css: [styles.css]
     html-math-method: mathjax
     code-copy: true
     respect-user-color-scheme: true
