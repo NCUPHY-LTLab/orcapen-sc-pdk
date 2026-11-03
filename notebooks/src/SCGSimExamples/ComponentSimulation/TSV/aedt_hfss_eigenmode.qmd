@@ -19,8 +19,13 @@ The default full-run flow searches three modes above 1 GHz, with at most three
 adaptive passes and 1% delta-frequency convergence. These Human-confirmed
 first-trial controls are not an accuracy or scientific-success criterion.
 This example has no junction, lumped load, drive port or EPR request; it is not
-a qubit-frequency calculation. Native execution and shared-runtime admission
-remain pending; this source authoring is not a solved result.
+a qubit-frequency calculation.
+
+::: {.callout-warning title="Source example; native execution is pending"}
+Native execution and shared-runtime admission remain pending. This source
+example is not a solved result.
+:::
+
 See the [TSV guide](../../../../simulation/tsv-model-inspection.qmd) and
 [Eigenmode requirement](../../../../simulation/requirements/eigenmode.qmd).
 

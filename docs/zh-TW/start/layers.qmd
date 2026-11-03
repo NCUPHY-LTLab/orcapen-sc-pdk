@@ -173,7 +173,11 @@ D1–D2 凸塊名稱保留圖層配對；此堆疊沒有定義 D2 基板、表�
 | `D1_SUBSTRATE` | 8.2 至 508.2 | 500 | `Si` |
 | `OUTER_VACUUM` | 508.2 至 1508.2 | 1000 | `vacuum` |
 
-基板與間隙宣告 `simulation_role="solution_region"` 及 `include_in_component_simulation=True`。`OUTER_VACUUM` 標為 `is_airbox=True`，但 `include_in_component_simulation=False`；這個具名層不是完整的模擬外圍區域。
+基板與間隙宣告 `simulation_role="solution_region"` 及 `include_in_component_simulation=True`。
+
+::: {.callout-warning title="OUTER_VACUUM 不是完整外圍區域"}
+`OUTER_VACUUM` 標為 `is_airbox=True`，但 `include_in_component_simulation=False`。這個具名層不是完整的模擬外圍區域。
+:::
 
 ### 表面金屬、空橋與定位薄片
 

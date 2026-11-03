@@ -215,9 +215,13 @@ interval collapses to a plane. These are nominal PDK dimensions.
 | `OUTER_VACUUM` | 508.2 to 1508.2 | 1000 | `vacuum` |
 
 The substrates and gap declare `simulation_role="solution_region"` and
-`include_in_component_simulation=True`. `OUTER_VACUUM` is marked `is_airbox=True`
-but `include_in_component_simulation=False`; its named level is not a complete
+`include_in_component_simulation=True`.
+
+::: {.callout-warning title="OUTER_VACUUM is not a complete envelope"}
+`OUTER_VACUUM` is marked `is_airbox=True` but
+`include_in_component_simulation=False`. Its named level is not a complete
 surrounding simulation envelope.
+:::
 
 ### Face metal, airbridges, and locator sheets
 

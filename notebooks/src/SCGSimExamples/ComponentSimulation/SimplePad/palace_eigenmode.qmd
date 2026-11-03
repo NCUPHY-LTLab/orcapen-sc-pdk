@@ -242,9 +242,12 @@ if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
 Preparation performs real local geometry and meshing, but does not start
 Palace. Only the explicit `run` action invokes the generated handoff script.
 Retain its handoff ID independently of the returned package.
+
+::: {.callout-warning title="Prepare the required Palace wrapper before running"}
 Select an actual MPI wrapper, not a direct ELF: the generated script supplies
 `-np 8 -nt 1`. The native executable must include corrected Palace source
 `4e9e1b7232b4c8ca8b964be7e70f1848f578de37`; this notebook does not install it.
+:::
 
 ```{python}
 #| id: pem-handoff

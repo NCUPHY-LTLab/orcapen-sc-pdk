@@ -162,8 +162,8 @@ if WORKFLOW_ACTION in {"prepare_handoff", "prepare_only", "run"}:
 ```
 
 Source and effective sheet Z remain distinct. Review the explicit physical
-contact association and enabled port settings in the handoff. Preparation and
-native execution are not performed in this documentation round.
+contact association and enabled port settings in the handoff. This notebook
+does not include a newly prepared handoff or a solved result.
 
 ## Run: explicit native transaction
 

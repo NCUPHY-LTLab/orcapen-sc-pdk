@@ -7,7 +7,13 @@ These seven families are public source layouts for inspecting pads, curved
 strips, finite CPW and multi-level structures. The thumbnails show actual
 source polygons; **Image** opens the full view and detail panels. Axes are in
 micrometres. Colours distinguish positive metal, substrate footprints, masks
-and nonmetal locators; they are not solver results.
+and nonmetal locators.
+
+::: {.callout-note title="Source layout inspection, not solver results"}
+These images show source geometry, not solver results. They do not establish
+native geometry conversion, contact conformity, mesh quality, or a successful
+solve.
+:::
 
 | Model and source | Layout |
 | --- | --- |
@@ -49,8 +55,12 @@ Each layout has **17 airbridges**: 11 on constant-width through leads and six
 at the canonical meander's straight-section centres. The lowest meander row
 is omitted because the same bridge span would also cross the through TL.
 The through bridges stay outside the coupling and adjacent-turn exclusion;
-there are no bridges on launchers, tapers, bends or the open cap. Placement and
-pitch are preview settings, not fabrication rules or slotline-suppression proof.
+there are no bridges on launchers, tapers, bends or the open cap.
+
+::: {.callout-important title="Preview placement is not a design rule"}
+Placement and pitch are preview settings, not fabrication rules or proof of
+slotline suppression.
+:::
 
 These assemblies use a 12 µm-wide central deck with **14 × 14 µm full end
 landings**, covering the existing 14 × 14 µm piers. The deck's overall span is
@@ -68,8 +78,11 @@ provides
 and expose the complete body, occurrence and neutral support declarations.
 The [Notebook catalog](../simulation/notebooks.qmd) links the concrete RLC and
 Terminal authoring examples. Use the selected tutorial's status when choosing a native calculation.
+
+::: {.callout-note title="Topology does not establish mode equivalence"}
 The short–open topology does not establish a target frequency, exact
 quarter-wavelength design, native connectivity or Lumped/Wave equivalence.
+:::
 
 ## Build a registered source layout
 
@@ -92,8 +105,10 @@ samples per knot span plus the final endpoint; no fitting is performed.
 
 Both spline strips have boundary graphs separated by 10 µm in Y, not constant
 normal width. The end caps close the actual metal polygon; `o1` and `o2` follow
-the endpoint tangents. The full 110/0 mask declares no background Ground.
-No final electrical Nets, Ground or JJ are assigned by these strip factories.
+the endpoint tangents.
+
+The full 110/0 mask declares no background Ground; these strip factories do
+not assign final electrical Nets, Ground or JJ.
 
 ## Reading the multi-level views
 
@@ -106,15 +121,15 @@ The lower child's unused nonmetal locator is not forwarded by this assembly.
 07 separates Signal, the two grounds, deck 10/0 and piers 10/1 by layer. Piers
 span Z = 0.1–3.1 µm and the deck 3.1–3.4 µm. Its actual deck is 12 × 84 µm
 and piers are 14 × 14 µm at Y = ±42 µm: each deck/pier overlap is 12 × 7 µm,
-not full pier coverage. Source contact intent is not native connectivity proof.
+not full pier coverage.
+
+Source contact intent is not native connectivity proof.
 
 ## Simulation scope
 
 The [Notebook catalog](../simulation/notebooks.qmd) connects requirements to
 version-bound pad/CPW authoring and source geometry observations for 04A/B/C,
 06 and 07. Their current clean notebooks have no attached execution output.
-These source images do not demonstrate native lowering, contact conformity,
-mesh quality or solver success.
 
 05 retains the existing rectangles and substrate. Current 3D examples use the
 PDK Al stack; historical Nb/sheet outputs retain their original model. The

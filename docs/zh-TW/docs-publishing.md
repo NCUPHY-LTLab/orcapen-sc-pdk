@@ -31,6 +31,14 @@ python -m http.server --directory docs/_site 8000 --bind 127.0.0.1
 
 可審閱的拉取請求會建置網站供審閱；`main` 分支成功建置後會發布至 [GitHub Pages](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/)。網站使用 Quarto 原生導覽與 Askr 主題，詳見[主題與工具鏈](features/docs-theme.md)。
 
+保留舊主題網址以支援既有引用，但不將它們加回參考資料的核心路徑。
+
+::: {.callout-note title="舊主題網址" collapse="true"}
+- [CPW 諧振器參考資料](papers/cpw-resonator-references.md)
+- [Transmon 參考設計](papers/transmon-reference-designs.md)
+- [覆晶與 3D 整合](papers/flip-chip-3d-integration.md)
+:::
+
 ## 保存已發布文件
 
 準備後續版本時，將各舊版本的 `docs-site.tar.gz` 加入 `docs/releases-history.json`，填入版本、標籤及該次 `SHA256SUMS` 記錄的 SHA-256。Pages 只下載清單指定的封存檔，並保存在 `vVERSION/`；Askr 版本選單會列出實際存在的文件版本。首次發布的歷史清單為空。

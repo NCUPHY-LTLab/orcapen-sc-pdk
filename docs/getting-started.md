@@ -4,9 +4,8 @@ sidebar: get-started
 ---
 
 Install the public source preview, activate its GDSFactory process design kit
-(PDK), and build a registered resonator. The preview's package metadata reports
-`1.0.0`; this is not a published `v1.0.0` release. Layout creation does not
-require a solver.
+(PDK), and build a registered resonator. Layout creation does not require a
+solver.
 
 ## Install
 
@@ -21,7 +20,10 @@ uv add "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@
 uv run python -c "import importlib.metadata as m; print(m.version('orcapen-sc-pdk'))"
 ```
 
-The version command reports `1.0.0`, the package metadata in this preview source.
+::: {.callout-note title="Package metadata is not a published release"}
+The version command reports `1.0.0`, the package metadata in this preview
+source. This does not mean `v1.0.0` has been published.
+:::
 
 ## Activate and build {#activate-and-see-a-cell}
 

@@ -7,6 +7,10 @@ Calculate where a selected mode stores energy, then apply explicitly chosen
 material and interface loss assumptions. Use an LC/EPR tutorial rather than
 treating an unloaded frequency calculation as a participation result.
 
+Reader question from [Choose a Simulation](../../notebooks.qmd):
+
+> Where is field energy stored, and how do interface assumptions affect loss?
+
 ## Model and prerequisites
 
 Preserve conductor and junction/load definitions, stack, exterior, and the
@@ -37,14 +41,23 @@ contributions identifiable. Participation, assumption-based loss, native Q,
 and measured lifetime are different quantities.
 
 For geometric correction, inspect the selected original-parent bands, sampled
-region, retained region, and returned Q2D factor together. The tutorial's
-straight-edge approximation does not establish corner equivalence.
+region, retained region, and returned Q2D factor together.
+
+::: {.callout-warning title="Straight edges do not establish corner equivalence"}
+The tutorial's straight-edge approximation does not establish corner
+equivalence.
+:::
 
 Use [SimplePad HFSS routes](eigenmode.qmd#simplepad-hfss-handoff-sequence) to choose the separated Prepare Handoff → Run prepared package path or the single-notebook Run Directly path. Both can continue to the shared [Analyze notebook](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.qmd" data-noresolveinput download>QMD</a>.
 
-Analyze keeps two optional operations separate: saved-field evaluation uses an
-AEDT license but does not solve, while detached loss reanalysis reads saved
-data offline. Choose either only when that additional analysis is needed.
+Analyze keeps two optional operations separate. Choose either only when that
+additional analysis is needed.
+
+Saved-field evaluation
+: Uses an AEDT license but does not solve.
+
+Detached loss reanalysis
+: Reads saved data offline.
 
 ## SurfaceBands downloads
 

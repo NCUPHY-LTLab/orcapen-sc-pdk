@@ -21,6 +21,10 @@ sidebar: get-started
 | MS | 金屬－基板（Metal–Substrate） |
 | SA | 基板－空氣（Substrate–Air） |
 
-資料庫包含 Woods2019 Si 與 LiteratureCentral 介面預設值。請將各紀錄的 `source` 與 `description` 和參數一併保留：數值可能是直接量測、由擬合推得，或作為模型假設採用。Woods2019 Si 紀錄標示為擬合損耗候選值；LiteratureCentral 紀錄則是依文獻合成的模型預設值，不是量測材料屬性。兩組預設值皆非所有元件通用的自動製程值，也不代表每個元件都曾量測。其研究背景請見參考資料中的[Woods et al. 2019 引用](../papers/surface-loss-participation.md)。
+::: {.callout-important title="量測、擬合與假設不可混為一談"}
+資料庫包含 Woods2019 Si 與 LiteratureCentral 介面預設值。請將各紀錄的 `source` 與 `description` 和參數一併保留：數值可能是直接量測、由擬合推得，或作為模型假設採用。Woods2019 Si 紀錄標示為擬合損耗候選值；LiteratureCentral 紀錄則是依文獻合成的模型預設值，不是量測材料屬性。兩組預設值皆非所有元件通用的自動製程值，也不代表每個元件都曾量測。
+:::
+
+其研究背景請見參考資料中的[Woods et al. 2019 引用](../papers/surface-loss-participation.md)。
 
 參與率計算時，請將預設值與場側選擇一併保留在回傳結果中。[參與率與表面損耗](../simulation/requirements/epr-loss.qmd)連結具體教學；[參考資料](../paper-review.md)彙整相關文獻。

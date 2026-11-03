@@ -3,7 +3,7 @@ title: "安裝與入門"
 sidebar: get-started
 ---
 
-安裝公開原始碼預覽版，啟用其 GDSFactory 製程設計套件（Process Design Kit，PDK），並建立已註冊的諧振器。預覽版的套件中繼資料（metadata）回報 `1.0.0`；這不代表 `v1.0.0` 已正式發布。建立佈局不需要求解器。
+安裝公開原始碼預覽版，啟用其 GDSFactory 製程設計套件（Process Design Kit，PDK），並建立已註冊的諧振器。建立佈局不需要求解器。
 
 ## 安裝
 
@@ -18,7 +18,9 @@ uv add "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@
 uv run python -c "import importlib.metadata as m; print(m.version('orcapen-sc-pdk'))"
 ```
 
-版本命令會回報 `1.0.0`，也就是此預覽原始碼中的套件中繼資料版本。
+::: {.callout-note title="套件中繼資料不代表正式發布"}
+版本命令會回報 `1.0.0`，也就是此預覽原始碼中的套件中繼資料版本；這不代表 `v1.0.0` 已正式發布。
+:::
 
 ## 啟用並建立元件 {#activate-and-see-a-cell}
 

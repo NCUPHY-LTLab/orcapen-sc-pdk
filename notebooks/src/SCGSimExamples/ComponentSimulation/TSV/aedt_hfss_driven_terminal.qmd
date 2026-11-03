@@ -19,10 +19,14 @@ Wave ports. This 3D example makes the TSV distance/placement and Ground paths
 inspectable; it does not predict their optimum density, impedance or slotline
 suppression. A Q2D slice cannot represent the discrete TSV array.
 The default full-run flow uses Broadband adaptation over 3–8 GHz and a Fast
-11-point sweep, with at most three adaptive passes and delta-S 0.02. These
-Human-confirmed first-trial controls are not an accuracy or scientific-success
-criterion. Native execution and shared-runtime admission remain pending;
-this source authoring is not a solved result.
+11-point sweep, with at most three adaptive passes and delta-S 0.02.
+
+::: {.callout-warning title="Source example; native execution is pending"}
+These Human-confirmed first-trial controls are not an accuracy or scientific-success
+criterion. Native execution and shared-runtime admission remain pending; this
+source example is not a solved result.
+:::
+
 See the [TSV guide](../../../../simulation/tsv-model-inspection.qmd) and
 [Driven Terminal requirement](../../../../simulation/requirements/driven-terminal.qmd).
 
@@ -268,12 +272,18 @@ elif WORKFLOW_ACTION in {"build_model", "inspect_model"}:
 ### Physics Analysis Results
 
 Display the actual Terminal network response with its ordered terminals,
-frequency grid, units and reference-plane provenance. Terminal Touchstone port
-impedance or terminal/derived impedance is not modal Wave Port Zo; do not
-substitute it for a separate Modal Solution Data `Port Zo` extraction. This
-source does not invent a load, a characteristic-impedance result or a new
-extraction API. Model-only readback instead inspects Wave assignments, face
-sheets, walls and cut Silicon; missing boundary queries remain unknown.
+frequency grid, units and reference-plane provenance.
+
+::: {.callout-important title="Terminal impedance is not modal Wave Port Zo"}
+Terminal Touchstone port impedance or terminal/derived impedance is not modal
+Wave Port Zo; do not substitute it for a separate Modal Solution Data `Port Zo`
+extraction. This source does not invent a load, a characteristic-impedance
+result or a new extraction API.
+:::
+
+
+Model-only readback instead inspects Wave assignments, face sheets, walls and
+cut Silicon; missing boundary queries remain unknown.
 
 ```{python}
 #| id: tsv-terminal-readback

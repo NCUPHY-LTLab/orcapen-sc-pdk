@@ -38,6 +38,15 @@ publishes to [GitHub Pages](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/).
 The site uses native Quarto navigation and the Askr theme; see
 [theme and toolchain](features/docs-theme.md).
 
+Keep the older topic URLs available for existing references without restoring
+them to the core References route.
+
+::: {.callout-note title="Older topic URLs" collapse="true"}
+- [CPW Resonator References](papers/cpw-resonator-references.md)
+- [Transmon Reference Designs](papers/transmon-reference-designs.md)
+- [Flip-Chip and 3D Integration](papers/flip-chip-3d-integration.md)
+:::
+
 ## Preserve released documentation
 
 Before preparing a later release, add each earlier release's `docs-site.tar.gz`
