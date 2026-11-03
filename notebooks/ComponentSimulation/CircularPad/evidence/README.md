@@ -94,7 +94,8 @@ The native CLI version remains unknown; source/binary hashes identify it.
 
 The canonical QMD and derived clean IPYNB default to read-only fresh08
 analysis with its retained handoff ID. Returned artifacts must already exist
-locally and are not distributed here. New preparation/run actions require a
+locally; the [reproducibility guide](../../../../docs/simulation/reproducibility.qmd)
+identifies the fresh08 input and result downloads. New preparation/run actions require a
 distinct fresh run ID. Historical `_04`/`_05`/`_06`/`_07` attempts remain in
 Git and original artifact custody, not as parallel current lessons. This
 presentation is a CONVERGING candidate, not Human scientific acceptance.

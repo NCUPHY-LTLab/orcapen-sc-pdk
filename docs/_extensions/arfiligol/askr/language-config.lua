@@ -14,6 +14,16 @@ local function scalar(value)
   return nil
 end
 
+local function language_code(value)
+  local code = scalar(value)
+  if code and code:match('^%.%./') then
+    -- Quarto may treat a BCP 47 code matching an existing directory as a
+    -- resource path while resolving metadata. Recover the final tag segment.
+    code = code:match('([^/]+)$') or code
+  end
+  return code
+end
+
 local function escape(value)
   return value:gsub('&', '&amp;')
     :gsub('<', '&lt;')
@@ -43,7 +53,7 @@ function Pandoc(doc)
   if type(languages) ~= 'table' or languages.t ~= nil then
     fail('askr.languages: use a mapping with current and items.')
   end
-  local current = scalar(languages.current)
+  local current = language_code(languages.current)
   if not current or current == '' then
     fail('askr.languages.current: expected a nonempty scalar language code.')
   end
@@ -59,7 +69,7 @@ function Pandoc(doc)
     if type(item) ~= 'table' or item.t ~= nil then
       fail('askr.languages.items: each entry must be a mapping.')
     end
-    local code, label, href = scalar(item.code), scalar(item.label), scalar(item.href)
+    local code, label, href = language_code(item.code), scalar(item.label), scalar(item.href)
     if not code or code == '' then
       fail('askr.languages.items: each code must be a nonempty scalar.')
     end

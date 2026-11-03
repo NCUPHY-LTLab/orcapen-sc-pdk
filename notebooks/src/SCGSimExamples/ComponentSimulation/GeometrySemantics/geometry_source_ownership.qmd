@@ -21,15 +21,11 @@ the caller assigns final Nets, and SCGSim prepares the geometry.
 Read the [source-ownership tool requirements](../../../../simulation/tools/source-ownership.qmd).
 This notebook owns the concrete case settings, not a second semantic schema.
 
-Fresh construction uses the local shared-physical candidate, not a
-published wheel. Retained results keep their original runtime identities.
-
-Historical source-observation cohort: [SCGSim v2 RC1][scgsim-rc1], OrPen suite base `f4f5098`.
-Use the selected local shared-physical candidate runtime; the linked checkpoint
-attributes historical observations only. Ordinary environment pins are unchanged.
-Execution is disabled; no notebook kernel run or saved output is attached.
-Bounded isolated source construction was observed separately. Historical output
-is not evidence for these cells.
+Fresh construction uses the shared SCGSim source environment associated with
+these calls; no released wheel is claimed to provide the same APIs. A prior
+bounded source-only observation used the pinned [SCGSim v2 RC1 checkpoint][scgsim-rc1];
+that historical observation does not establish this notebook's behavior. No
+notebook run or saved output is attached.
 
 ## Environment and observation identity
 

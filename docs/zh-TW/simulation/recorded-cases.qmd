@@ -1,0 +1,42 @@
+---
+title: "SimplePad 模擬資料"
+sidebar: simulation
+aliases:
+  - reproducibility.html
+---
+
+本頁提供獨立資料快照 `data-2026.11.01-r1` 中四個已記錄的 SimplePad 案例。
+
+::: {.callout-note title="執行驗證狀態"}
+原始模擬結果已保存；在新環境重跑或分析仍待驗證。
+:::
+
+## 案例
+
+這些案例使用 **200 nm 鋁層**；目前 PDK 預設值為 **100 nm**。
+
+| 計算 | 輸入 | 結果 |
+| --- | --- | --- |
+| Palace 靜電（Electrostatic） | [下載](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_electrostatic_20261006_02--inputs.tar.gz) | [下載](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_electrostatic_20261006_02--results.tar.gz) |
+| Palace 本徵模態（Eigenmode） | [下載](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--inputs.tar.gz) | [第 1 卷](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--results.tar.gz.part001) · [第 2 卷](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--results.tar.gz.part002) |
+| AEDT Q3D 電容萃取 | [下載](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_q3d_20261006_02--inputs.tar.gz) | [下載](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_q3d_20261006_02--results.tar.gz) |
+| AEDT HFSS 本徵模態 | [下載](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_hfss_eigenmode_20261006_02--inputs.tar.gz) | [下載](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_hfss_eigenmode_20261006_02--results.tar.gz) |
+
+: {tbl-colwidths="[50,20,30]"}
+
+## 使用資料包
+
+- **輸入**包含原始網格與設定，可供重跑或效能分析。
+- **結果**包含已保存的輸出，可供分析。
+
+從[資料發布頁](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1)下載各壓縮檔與 `SHA256SUMS`，解壓前先核對：
+
+```bash
+sha256sum --ignore-missing -c SHA256SUMS
+```
+
+Palace 本徵模態結果請下載兩個分卷，並依[Release 說明](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1)重組與核對。將已核對的檔案解壓至全新資料夾。
+
+## 來源紀錄 {#source-records}
+
+各次執行的歷史版本、設定與詳細檔案紀錄，請見 [SimplePad 原始執行紀錄](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/SimplePad/evidence/run_set.json)。

@@ -7,7 +7,7 @@ sidebar: get-started
 
 ## 材料紀錄
 
-`get_material_records()`、`get_material_alias_records()` 與 `get_interface_preset_records()` 會回傳 OrcaPen [公開材料資料庫](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/materials.json)中的分離紀錄。
+`get_material_records()`、`get_material_alias_records()` 與 `get_interface_preset_records()` 會回傳 OrcaPen [公開材料資料庫](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/aee7f8b848895f2d107f6b086310e866e8381f73/orcapen_sc_pdk/materials.json)中的獨立紀錄副本。
 
 紀錄會識別材料種類、超導狀態、數值屬性與明確的 AEDT 資料庫名稱。別名選取既有識別，不會建立新的物理材料。
 
@@ -21,6 +21,10 @@ sidebar: get-started
 | MS | 金屬－基板（Metal–Substrate） |
 | SA | 基板－空氣（Substrate–Air） |
 
-資料庫包含 Woods2019 Si 與 LiteratureCentral 介面預設值。其厚度、介電常數、損耗正切與來源都是需選擇的模型假設，不是自動製程預設值，也不代表每個元件的量測屬性。
+::: {.callout-important title="量測、擬合與假設不可混為一談"}
+資料庫包含 Woods2019 Si 與 LiteratureCentral 介面預設值。請將各紀錄的 `source` 與 `description` 和參數一併保留：數值可能是直接量測、由擬合推得，或作為模型假設採用。Woods2019 Si 紀錄標示為擬合損耗候選值；LiteratureCentral 紀錄則是依文獻合成的模型預設值，不是量測材料屬性。兩組預設值皆非所有元件通用的自動製程值，也不代表每個元件都曾量測。
+:::
 
-參與率計算時，請將預設值與場側選擇一併保留在回傳結果中。[參與率與表面損耗](../simulation/requirements/epr-loss.qmd)連結具體教學；[研究](../papers/surface-loss-participation.md)彙整相關文獻。
+其研究背景請見參考資料中的[Woods et al. 2019 引用](../papers/surface-loss-participation.md)。
+
+參與率計算時，請將預設值與場側選擇一併保留在回傳結果中。[參與率與表面損耗](../simulation/requirements/epr-loss.qmd)連結具體教學；[參考資料](../paper-review.md)彙整相關文獻。

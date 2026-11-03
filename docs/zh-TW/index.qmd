@@ -1,17 +1,55 @@
 ---
 title: "OrcaPen SC PDK"
-description: "適用於 GDSFactory 的超導與射頻佈局、製程紀錄及模擬範例。"
+description: "超導晶片版圖、實體圖層堆疊，以及公開模擬測試元件。"
 sidebar: false
+toc: true
+toc-depth: 2
 ---
 
-OrcaPen 是超導與射頻（Radio Frequency，RF）的製程設計套件（Process Design Kit，PDK），提供可重用的元件（Cell）、共面波導（Coplanar Waveguide，CPW）橫截面（Cross-section）、圖層、堆疊與材料。先建立版圖，再依需求選擇要計算的物理量。
+[![Python 3.12 或 3.13](assets/badges/python.svg)](getting-started.md)
+[![MIT 授權](assets/badges/license.svg)](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/71d60ca03831580866cac139e337146fdb17a66c/LICENSE)
+[![文件版本 1.0.0](assets/badges/docs.svg)](home/versions.md)
 
-![OrcaPen CPW 諧振器：DRAW 與 ETCH 幾何。](_static/images/components/resonator.svg){#fig-home-resonator width=85%}
+![OrcaPen 品牌插圖：虎鯨與企鵝，搭配量子位元、讀出共振器及實體堆疊意象。](assets/orcapen-overview-banner-qubit.png){fig-alt="虎鯨與企鵝陪伴著示意超導晶片及圖層堆疊。"}
 
-{{< askr-image-view target="fig-home-resonator" label="檢視諧振器佈局" >}}
+OrcaPen 是以 GDSFactory 設計超導量子與射頻（Radio Frequency，RF）電路的製程設計套件（Process Design Kit，PDK）。它把具名圖層與實體堆疊連在一起，也提供電磁與電路模型範例使用的公開元件。
 
-- [入門](getting-started.md)：安裝 OrcaPen、啟用 PDK，並建立第一個元件。
-- [模擬](notebooks.qmd)：選擇電容、模態、S 參數、橫截面或參與率分析。
-- [API](api.qmd)：查閱產生的函式參考與技術定義。
+## 圖層與實體堆疊
 
-前往[研究](paper-review.md)查看公開設計參考，或到[開發](developing-features.md)參與程式與文件貢獻。
+圖層名稱直接標示晶片（Die）、表面（Face）與金屬層，方便進行三維整合（3D Integration）及版圖模擬整合（Layout Simulation Integration）。例如，`D0_TOP_M1_DRAW` 是 D0 晶片上表面的 M1 繪圖層；`D0_D1_INDIUM_BUMP` 則是連接兩顆晶片的銦凸塊（Indium bump）。
+
+以下直接節錄 [`tech.py` 的圖層定義](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/71d60ca03831580866cac139e337146fdb17a66c/orcapen_sc_pdk/tech.py)：
+
+```python
+{{< include _includes/_layer-map.py >}}
+```
+
+圖層堆疊（Layer Stack）進一步提供高度、厚度、材料與模擬屬性。預設 D0 上表面的 M1 金屬從 z = 0 開始，厚度為 0.1 µm；可選用單晶片或雙晶片覆晶（Flip-chip）堆疊，空氣橋（Airbridge）與銦凸塊各有獨立的實體層。完整定義見[圖層與堆疊](start/layers.qmd)及[材料與介面](start/materials.qmd)。
+
+## SCGSim 與 SCNSim 的公開元件平台
+
+:::: {.askr-card}
+::: {.askr-card-body}
+### [公開元件圖集](public-pdk-examples/index.md#components-layout) {.askr-card-title .unlisted}
+
+用同一個公開測試元件，對照版圖、電磁模型與電路模型。OrcaPen 提供元件幾何及堆疊；[SCGSim](https://ncuphy-ltlab.github.io/scgsim/) 處理電磁建模與參數提取，[SCNSim](https://ncuphy-ltlab.github.io/scnsim/) 提供電路網路（Circuit network）建模與響應分析。
+:::
+::::
+
+## 安裝
+
+新專案可用以下指令，以 Python 3.12 建立環境。也支援 Python 3.13；若已有 uv 專案，從 `uv add` 開始即可。
+
+{{< include _includes/_readme-install.md >}}
+
+本站介紹的是公開原始碼預覽版，其套件中繼資料回報 `1.0.0`；這不是已發布的穩定版本。請依[安裝與入門](getting-started.md)中的固定來源指令安裝，再[啟用 OrcaPen 並查看元件](getting-started.md#activate-and-see-a-cell)。
+
+## 從版圖到模擬
+
+先從[常用元件](start/common-cells.qmd)或[元件圖集](public-pdk-examples/index.md#components-layout)選擇幾何，
+再參閱[圖層與堆疊](start/layers.qmd)及[材料與介面](start/materials.qmd)，了解對應的實體模型。
+接著依照想回答的問題選擇[模擬指南](notebooks.qmd)，並搭配[已記錄案例](simulation/recorded-cases.qmd)
+及結果解讀說明，理解輸出的意義。
+
+元件參數與連接埠（Port）定義請見[程式介面（API）參考](api.qmd)；
+選定假設與相關文獻來源則收錄於[參考資料](paper-review.md)。

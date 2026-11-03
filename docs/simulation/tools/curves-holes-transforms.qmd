@@ -7,4 +7,4 @@ Read [Curves, holes and transforms](../../public-pdk-examples/test-components.md
 Inspect the original loops and placed occurrences in the linked model descriptions.
 
 Generic solver and result APIs belong to the selected version's
-[SCGSim documentation](https://github.com/OrPenStrike/scgsim/tree/develop/docs).
+[SCGSim documentation](https://github.com/NCUPHY-LTLab/scgsim/tree/develop/docs).

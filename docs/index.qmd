@@ -1,20 +1,60 @@
 ---
 title: "OrcaPen SC PDK"
-description: "Superconducting and RF layouts, process records, and simulation examples for GDSFactory."
+description: "Superconducting chip layouts, physical layer stacks, and public simulation specimens."
 sidebar: false
+toc: true
+toc-depth: 2
 ---
 
-Design superconducting and RF layouts with reusable cells, CPW cross-sections,
-layers, stacks, and materials. Start with a layout, then choose a simulation
-when you need a physical quantity.
+[![Python 3.12 or 3.13](assets/badges/python.svg)](getting-started.md)
+[![MIT license](assets/badges/license.svg)](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/71d60ca03831580866cac139e337146fdb17a66c/LICENSE)
+[![Documentation version 1.0.0](assets/badges/docs.svg)](home/versions.md)
 
-![An OrcaPen CPW resonator: DRAW and ETCH geometry.](_static/images/components/resonator.svg){#fig-home-resonator width=85%}
+![OrcaPen branding: an orca and penguin beside an illustrative qubit, readout resonator and physical stack.](assets/orcapen-overview-banner-qubit.png){fig-alt="An orca and penguin accompany a stylized superconducting chip and layer stack."}
 
-{{< askr-image-view target="fig-home-resonator" label="Explore the resonator layout" >}}
+OrcaPen is a GDSFactory PDK for superconducting quantum and RF circuits. It pairs named layout layers with physical stacks, and provides public components for electromagnetic and circuit-model examples.
 
-- [Get Started](getting-started.md): Install OrcaPen, activate the PDK, and build your first cell.
-- [Simulation](notebooks.qmd): Choose capacitance, modes, S-parameters, cross-sections, or participation analysis.
-- [API](api.qmd): Find generated function references and technology definitions.
+## Layers and physical stacks
 
-Explore [Research](paper-review.md) for public design references, or
-[Development](developing-features.md) to contribute and work on the documentation.
+Layer names identify the die, face and metal level, making it easier to connect layouts with 3D integration and layout simulation. For example, `D0_TOP_M1_DRAW` identifies the top-face M1 drawing layer on die D0; `D0_D1_INDIUM_BUMP` identifies an interconnect between the two dies.
+
+The following definitions are excerpted directly from [`tech.py`](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/71d60ca03831580866cac139e337146fdb17a66c/orcapen_sc_pdk/tech.py):
+
+```python
+{{< include _includes/_layer-map.py >}}
+```
+
+The layer stack supplies height, thickness, material and simulation attributes for these layers. The default D0 top-face M1 starts at z = 0 and is 0.1 µm thick. Single-die and two-die flip-chip stacks are available, with separate airbridge and indium-bump levels. See [Layers & Stack](start/layers.qmd) and [Materials & Interfaces](start/materials.qmd).
+
+## Public components for SCGSim and SCNSim
+
+:::: {.askr-card}
+::: {.askr-card-body}
+### [Public component gallery](public-pdk-examples/index.md#components-layout) {.askr-card-title .unlisted}
+
+Use a common public specimen to connect a layout question with an electromagnetic or circuit-model question. OrcaPen supplies the component geometry and stack; [SCGSim](https://ncuphy-ltlab.github.io/scgsim/) handles electromagnetic modeling and extraction, while [SCNSim](https://ncuphy-ltlab.github.io/scnsim/) provides circuit-network modeling and response analysis.
+:::
+::::
+
+## Install
+
+For a new project, use the commands below with Python 3.12. Python 3.13 is also supported; in an existing uv project, start at `uv add`.
+
+{{< include _includes/_readme-install.md >}}
+
+This site documents a public source preview whose package metadata reports
+`1.0.0`; it is not a published stable release. Follow [Install & Get Started](getting-started.md)
+for the exact pinned source command, then [activate OrcaPen and view a cell](getting-started.md#activate-and-see-a-cell).
+
+## From layout to simulation
+
+Start with the [common cells](start/common-cells.qmd) or the [component gallery](public-pdk-examples/index.md#components-layout)
+to choose a geometry, then use [Layers & Stack](start/layers.qmd) and
+[Materials & Interfaces](start/materials.qmd) to understand its physical model.
+Choose a [simulation guide](notebooks.qmd) for the question you want
+to answer, and use its [recorded cases](simulation/recorded-cases.qmd) and result
+interpretation guidance to understand what the outputs mean.
+
+Component settings and port definitions are in the [API reference](api.qmd).
+Background literature and the sources behind selected assumptions are collected
+in [References](paper-review.md).

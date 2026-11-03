@@ -2,13 +2,14 @@
 (() => {
   function mount() {
     const template = document.getElementById('askr-language-config');
-    if (!template) return;
+    if (!template || template.dataset.mounted === 'true') return;
     const tools = document.querySelector('#quarto-header .quarto-navbar-tools');
-    if (!tools) throw new Error('Askr language selector requires a website Header with navbar tools.');
+    if (!tools) return;
     tools.append(template.content.cloneNode(true));
+    template.dataset.mounted = 'true';
     document.getElementById('quarto-header').classList.add('askr-has-language');
   }
-  if (document.readyState === 'complete') mount();
-  else window.addEventListener('load', mount, {once: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, {once: true});
+  else mount();
 })();
 </script>

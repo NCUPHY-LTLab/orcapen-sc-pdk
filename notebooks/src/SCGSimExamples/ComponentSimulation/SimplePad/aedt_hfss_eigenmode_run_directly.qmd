@@ -1,0 +1,279 @@
+---
+title: "SimplePad HFSS：直接執行（Run Directly）"
+lang: zh-TW
+jupyter: python3
+execute:
+  enabled: false
+---
+
+在已授權 AEDT 的同一台主機，從全新核心（Kernel）建立正方形焊墊（SimplePad）模型、準備交接包並立即執行 HFSS 本徵模態（Eigenmode）與表面能量參與率（Surface EPR）求解。所有設定都在這份筆記本中，不需要先執行其他筆記本。
+
+若要先準備再搬移到另一台主機，使用 [Prepare Handoff](aedt_hfss_eigenmode_prepare.qmd) → [執行既有交接包（Run）](aedt_hfss_eigenmode_run.qmd)；兩條路線都可使用 [Analyze](aedt_hfss_eigenmode_analyze.qmd) 深入分析回傳結果。
+
+![SimplePad：200 µm 焊墊、20 µm 間隙及 1000 µm 晶片。](../../_images/square-pad.png)
+
+## 環境與公開版本
+
+本教學選用 [OrcaPen 公開來源](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/tree/71d60ca03831580866cac139e337146fdb17a66c)及 [SCGSim 公開來源](https://github.com/NCUPHY-LTLab/scgsim/tree/0f6b4e5c54aff4891492976a5dd58387cc1a1787)。建立獨立 Python 3.12 環境，避免專案的舊 SCGSim 相依設定覆蓋教學版本：
+
+```bash
+uv venv --python 3.12 .venv-hfss
+uv pip install --python .venv-hfss/bin/python "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@71d60ca03831580866cac139e337146fdb17a66c" "scgsim[aedt-epr] @ git+https://github.com/NCUPHY-LTLab/scgsim.git@0f6b4e5c54aff4891492976a5dd58387cc1a1787" ipykernel
+.venv-hfss/bin/python -m ipykernel install --user --name simplepad-hfss --display-name "SimplePad HFSS"
+```
+
+在 Jupyter 選擇「SimplePad HFSS」核心（Kernel）。Windows 的環境執行檔位於 `.venv-hfss\Scripts\python.exe`；原生求解另需已授權的 AEDT。本例選用 AEDT 2024.2、PyAEDT 1.3.0；SCGSim 同時支援明確選用 AEDT 2023.2。
+
+確認：以下儲存格列出已安裝套件版本。SCGSim 的版本號為 `2.0.0rc15`，精確來源以上方安裝指令為準。
+
+```{python}
+#| id: hem-direct-imports
+from importlib.metadata import version
+from pathlib import Path
+from uuid import uuid4
+
+import gdsfactory as gf
+from IPython.display import display
+from scgsim.aedt import (
+    AedtResources,
+    EigenmodeRunControl,
+    EigenmodeSim,
+    EprAnalysisRequest,
+    SurfaceEprSpec,
+    planar_junction_from_port,
+    prepare_planar_geometry_input,
+)
+from scgsim.geometry import GeometryPlan
+
+import orcapen_sc_pdk
+from orcapen_sc_pdk import (
+    get_interface_preset_records,
+    get_material_records,
+    validate_interface_preset_records,
+)
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
+
+display({name: version(name) for name in ("orcapen-sc-pdk", "scgsim", "pyaedt")})
+```
+
+## 版圖、堆疊與導體網路
+
+保留 200 µm 焊墊、20 µm 間隙及 1000 µm 晶片。預設堆疊為 100 nm 鋁膜與 500 µm 矽基板；焊墊及接地（Ground）分別指定為兩個導體網路（Net）。
+
+```{python}
+#| id: hem-direct-geometry
+PAD_SIDE_UM = 200.0
+GAP_UM = 20.0
+DIE_SIDE_UM = 1000.0
+JUNCTION_WIDTH_UM = 2.0
+VACUUM_PADDING_UM = (250.0, 250.0, 1000.0)
+
+orcapen_sc_pdk.activate()
+gf.clear_cache()
+component = gf.get_component(
+    "square_pad_capacitor",
+    pad_side_um=PAD_SIDE_UM,
+    gap_um=GAP_UM,
+    die_side_um=DIE_SIDE_UM,
+    junction_width_um=JUNCTION_WIDTH_UM,
+)
+plan = GeometryPlan(
+    component=component,
+    root_id="chip",
+    layer_stack=get_single_die_layer_stack(),
+    material_records=get_material_records(),
+    coupon_padding_um=0.0,
+)
+plan.set_nets({"pad": ("chip/PAD",), "ground": ("chip/GROUND",)})
+plan.set_vacuum_region(padding=VACUUM_PADDING_UM)
+snapshot = plan.prepare()
+display(component)
+display({"bbox_um": str(component.dbbox()), "ports": component.ports})
+```
+
+## 實體近似與線性接面
+
+選用實體金屬（`solid`）；另一個公開近似為薄膜（`thin_film`）。本例維持東側接面由焊墊沿 +X 指向 Ground，電感為 10 nH、電容為 0；它是線性負載，不包含 Josephson 非線性。
+
+版圖的非金屬定位片（Locator）以一個 0.001 µm 資料庫單位接觸兩端，實體間隙維持 20 µm。外部區域維持 HFSS 原生處理，不額外指定 Region PerfectE、Radiation 或 PML。
+
+```{python}
+#| id: hem-direct-model
+MODELING = "solid"
+AEDT_VERSION = "2024.2"
+PORT_NAME = "chip/o_junction_lumped"
+JUNCTION_ID = "jj"
+PORT_INDUCTANCE_H = 10e-9
+PORT_CAPACITANCE_F = 0.0
+
+junction = planar_junction_from_port(
+    snapshot.geometry_input,
+    port_name=PORT_NAME,
+    junction_id=JUNCTION_ID,
+    terminal_a_net="pad",
+    terminal_b_net="ground",
+    inductance_h=PORT_INDUCTANCE_H,
+    capacitance_f=PORT_CAPACITANCE_F,
+)
+prepared = prepare_planar_geometry_input(
+    snapshot.geometry_input,
+    prepared_stack=snapshot.stack,
+    modeling=MODELING,
+    junctions=(junction,),
+)
+catalogue = prepared.contribution_catalog
+sim = EigenmodeSim(modeling=MODELING, aedt_version=AEDT_VERSION)
+sim.set_plan(snapshot)
+sim.add_junction(junction)
+display(catalogue)
+```
+
+## 模態搜尋與自適應設定
+
+搜尋下限為 1 GHz，要求一個模態，最多 10 個自適應網格回合（Adaptive pass），頻率變化目標為 1%。保留既有最少回合、連續收斂回合及網格細化比例；實際是否收斂由回傳紀錄判讀。
+
+```{python}
+#| id: hem-direct-numerics
+run_control = EigenmodeRunControl(
+    setup_name="Setup1",
+    minimum_frequency_ghz=1.0,
+    num_modes=1,
+    maximum_passes=10,
+    maximum_delta_frequency_percent=1.0,
+    minimum_passes=1,
+    minimum_converged_passes=1,
+    percent_refinement=30.0,
+)
+```
+
+## 表面介面、薄膜與退縮距離
+
+選用金屬－空氣（MA）、金屬－基板（MS）及基板－空氣（SA）的 `LiteratureCentral` 介面預設。薄膜厚度、相對介電常數與損耗角正切來自 PDK 記錄，退縮距離（Margin）維持 0 µm；這些是文獻假設，不是量測損耗。
+
+本例沿用水平表面選擇，排除側壁（Sidewall）。介面與作用側由實際來源目錄選取，不從圖層名稱猜測。
+
+```{python}
+#| id: hem-direct-surfaces
+EPR_MARGINS_UM = (0.0,)
+PRESET_NAMES = {kind: f"LiteratureCentral_{kind}" for kind in ("MA", "MS", "SA")}
+presets = validate_interface_preset_records(get_interface_preset_records())
+surface_specs = []
+for record in catalogue:
+    kind = record["interface_kind"]
+    if kind not in PRESET_NAMES or record["field_side"] == "sidewall":
+        continue
+    preset_name = PRESET_NAMES[kind]
+    preset = presets[preset_name]
+    surface_specs.append(
+        SurfaceEprSpec(
+            contribution_id=record["contribution_id"],
+            source_polygon_id=record["source_polygon_ids"][0],
+            interface_kind=kind,
+            field_side=record["field_side"],
+            margins_um=EPR_MARGINS_UM,
+            film_thickness_m=preset["thickness"] * 1e-6,
+            film_relative_permittivity=preset["permittivity"],
+            loss_tangent=preset["loss_tangent"],
+            source=preset["source"],
+            preset=preset_name,
+        )
+    )
+sim.set_surface_epr(contributions=surface_specs)
+sim.set_epr_request(
+    EprAnalysisRequest(
+        mode_indices=(1,),
+        surface_contribution_ids=tuple(item.contribution_id for item in surface_specs),
+        junction_ids=(JUNCTION_ID,),
+        bulk_domain_ids=None,
+    )
+)
+display(surface_specs)
+```
+
+`bulk_domain_ids=None` 納入已設定的全部原生體域，包括 Region。
+
+## 執行身分、資源與新輸出位置
+
+在準備交接包前選定求解資源。本例保留 4 核心、30% 記憶體的請求值；實際執行前，請由執行主機分配可用資源。
+
+```{python}
+#| id: hem-direct-identity
+RUN_ID = f"simple_pad_aedt_hfss_eigenmode_{uuid4().hex}"
+OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SCGSimExamples" / "SimplePad"
+RUN_DIR = OUTPUT_ROOT / RUN_ID
+RESOURCES = AedtResources(cores=4, ram_limit_percent=30)
+
+sim.set_output_dir(RUN_DIR)
+sim.set_eigenmode(
+    project_name=RUN_ID,
+    design_name="SimplePadEigenmode",
+    run_control=run_control,
+    resources=RESOURCES,
+)
+display(sim.input_summary())
+```
+
+## 準備這次執行的交接包
+
+SCGSim 要求全新的輸出資料夾。這一步將目前設定寫入交接包；下一格直接執行同一份包，不重建幾何或重新準備。封存檔位置以實際顯示的 `archive_path` 為準。
+
+```{python}
+#| id: hem-direct-handoff
+handoff = sim.prepare_handoff()
+display({
+    "run_dir": handoff.run_dir,
+    "script_path": handoff.script_path,
+    "spec_path": handoff.spec_path,
+    "metadata_path": handoff.metadata_path,
+    "receipt_path": handoff.receipt_path,
+    "manifest_path": handoff.manifest_path,
+    "archive_path": handoff.archive_path,
+})
+```
+
+確認：交接包包含這次的規格、來源幾何、執行腳本與中繼資料。先確認 AEDT 授權與主機資源，再執行下一格。
+
+## 在本機直接執行
+
+下列儲存格會啟動 AEDT，依包內設定完成原生建模、求解、匯出、儲存與釋放。執行器（Runner）讀取剛準備好的包，不重新準備；新的求解請從全新核心開始，產生另一個 `RUN_ID` 與輸出資料夾。
+
+```{python}
+#| id: hem-direct-execute
+import subprocess
+import sys
+
+subprocess.run(
+    [
+        sys.executable,
+        "-m",
+        "scgsim.aedt.run",
+        "--handoff",
+        str(handoff.metadata_path),
+        "--execute",
+    ],
+    check=True,
+)
+```
+
+確認：檢查這次回傳的執行紀錄與收斂狀態。若執行失敗，保留原始紀錄及錯誤，不自動重跑。
+
+## 讀取執行結果
+
+### 物理分析結果（Physics）
+
+以下讀取同一個新輸出資料夾；若沒有完整結果，保留 SCGSim 的錯誤，不自動求解。模態、原生回合與 EPR 圖的完整判讀見 [Analyze](aedt_hfss_eigenmode_analyze.qmd)。
+
+```{python}
+#| id: hem-direct-results
+result = sim.resolve_results(handoff.run_dir)
+display({"returned_run_dir": handoff.run_dir})
+result.show_all_results(show_details=True)
+display(result.physics_results())
+```
+
+### 計算成本（Performance）
+
+```{python}
+#| id: hem-direct-performance
+display(result.simulation_benchmark())
+```

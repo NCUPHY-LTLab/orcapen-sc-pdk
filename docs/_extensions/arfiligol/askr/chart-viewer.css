@@ -1,0 +1,67 @@
+/* The shell follows Askr; chart colors remain authored inside the iframe. */
+.askr-chart-view { min-inline-size: 0; }
+.askr-chart-view[data-askr-chart-mode="inline"] {
+  border: 1px solid var(--qdk-border);
+  border-radius: var(--qdk-control-radius);
+  margin-block: 1rem;
+  overflow: hidden;
+}
+.askr-chart-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; padding: .6rem .75rem; background: var(--qdk-canvas); color: var(--qdk-text); }
+.askr-chart-toolbar .askr-chart-source { margin-inline-start: auto; }
+.askr-chart-toolbar button,
+.askr-chart-view > .askr-chart-open,
+.askr-chart-view > .askr-chart-open-button,
+.askr-chart-status button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  border: 1px solid var(--qdk-control-border);
+  border-radius: var(--qdk-control-radius);
+  background: var(--qdk-canvas);
+  color: var(--qdk-control-color);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.35;
+  padding: .4rem .65rem;
+  text-decoration: none;
+  transition: color 150ms ease-in-out, border-color 150ms ease-in-out, background-color 150ms ease-in-out;
+}
+.askr-chart-toolbar button:hover,
+.askr-chart-open-button:hover,
+.askr-chart-status button:hover { border-color: var(--qdk-control-hover); color: var(--qdk-control-hover); }
+.askr-chart-toolbar button:focus-visible,
+.askr-chart-open-button:focus-visible,
+.askr-chart-status button:focus-visible { outline: var(--qdk-focus-width) solid var(--qdk-focus); outline-offset: var(--qdk-focus-offset); }
+.askr-chart-frame-wrap { position: relative; min-inline-size: 0; background: var(--qdk-canvas); }
+.askr-chart-frame { display: block; border: 0; inline-size: 100%; block-size: 420px; background: transparent; }
+.askr-chart-status { margin: 0; padding: .65rem .75rem; color: var(--qdk-text); background: var(--qdk-canvas); font-size: .9rem; }
+.askr-chart-status[hidden], .askr-chart-frame[hidden] { display: none; }
+.askr-chart-status button { margin-inline-start: .6rem; }
+.askr-chart-dialog {
+  padding: 0;
+  inline-size: min(96vw, 1440px);
+  max-inline-size: 96vw;
+  max-block-size: 94dvh;
+  block-size: min(90dvh, 980px);
+  border: 1px solid var(--qdk-border);
+  border-radius: var(--qdk-control-radius);
+  background: var(--qdk-canvas);
+  color: var(--qdk-text);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.askr-chart-dialog[open] { display: flex; flex-direction: column; }
+.askr-chart-dialog::backdrop { background: rgb(0 0 0 / .6); }
+.askr-chart-dialog .askr-chart-toolbar { flex: none; border-block-end: 1px solid var(--qdk-border); }
+.askr-chart-dialog-title { font: inherit; font-weight: 600; margin: 0 auto 0 0; min-inline-size: 0; overflow-wrap: anywhere; }
+.askr-chart-dialog .askr-chart-frame-wrap { flex: 1; min-block-size: 0; }
+.askr-chart-dialog .askr-chart-frame { block-size: 100%; }
+@media (max-width: 575.98px) {
+  .askr-chart-frame { block-size: 320px; }
+  .askr-chart-dialog { inline-size: 100%; max-inline-size: 100%; block-size: 100dvh; max-block-size: 100dvh; border-radius: 0; }
+  .askr-chart-dialog .askr-chart-toolbar { gap: .4rem; padding: .5rem; }
+  .askr-chart-dialog-title { flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .askr-chart-toolbar button, .askr-chart-open-button, .askr-chart-status button { transition: none; }
+}

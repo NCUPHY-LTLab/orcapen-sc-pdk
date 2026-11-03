@@ -80,4 +80,4 @@ __all__ = [
     "validate_interface_preset_records",
 ]
 
-__version__ = "0.1.0.dev2"
+__version__ = "1.0.0"

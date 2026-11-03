@@ -3,6 +3,8 @@ title: "Driven Modal"
 sidebar: simulation
 ---
 
-Read the Modal section for its current authoring-note status and the distinction from Terminal excitation.
-
-Continue with [the main guide](driven-terminal.qmd#modal-port-models).
+The [Modal port models section](driven-terminal.qmd#modal-port-models) links a
+finite-CPW note that describes its intended model, but it is not a runnable
+solver tutorial. Terminal and Modal are different solution interpretations;
+Wave is a port kind. For the available full workflow, see
+[Terminal excitation](driven-terminal.qmd#terminal-excitation).

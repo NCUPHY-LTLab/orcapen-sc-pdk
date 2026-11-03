@@ -21,8 +21,9 @@ die. The current PDK supplies 100 nm Al above 500 µm Si. The authored
 20.002 × 2 µm east locator is nonmetal and adds no L/C branch here.
 The exterior remains natural, not grounded.
 
-Fresh construction uses the local shared-physical candidate, not a
-published wheel. Retained results keep their original runtime identities.
+Fresh construction requires the shared SCGSim source environment associated
+with this example; no released wheel is claimed to provide these APIs.
+Retained results keep their recorded runtime identities.
 
 Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
@@ -210,9 +211,12 @@ if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
 Preparation performs real local geometry and meshing, but does not start
 Palace. Only the explicit `run` action invokes the generated handoff script.
 Retain its handoff ID independently of the returned package.
+
+::: {.callout-warning title="Prepare the required Palace wrapper before running"}
 Select an actual MPI wrapper, not a direct ELF: the generated script supplies
 `-np 8 -nt 1`. The native executable must include the corrected Palace
 `4e9e1b7232b4c8ca8b964be7e70f1848f578de37` source; this notebook does not install it.
+:::
 
 ```{python}
 #| id: pes-handoff

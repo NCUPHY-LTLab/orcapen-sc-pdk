@@ -7,4 +7,4 @@ Read [Source identity](../../home/ecosystem-workspace.md) for the current guide.
 For the public source-observation notebook, use the [tutorial library](../notebooks.qmd).
 
 Generic solver and result APIs belong to the selected version's
-[SCGSim documentation](https://github.com/OrPenStrike/scgsim/tree/develop/docs).
+[SCGSim documentation](https://github.com/NCUPHY-LTLab/scgsim/tree/develop/docs).

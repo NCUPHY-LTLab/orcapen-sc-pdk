@@ -1,0 +1,65 @@
+---
+title: "SimplePad HFSS：執行交接包（Run）"
+lang: zh-TW
+jupyter: python3
+execute:
+  enabled: false
+---
+
+在已授權 AEDT 的主機，執行 [Prepare Handoff](aedt_hfss_eigenmode_prepare.qmd) 產生的既有交接包。本筆記本不建立版圖、不重新設定物理參數，也不重新準備交接包。
+
+## 環境與輸入
+
+沿用 Prepare Handoff 的精確 SCGSim 安裝版本及 Python 核心。使用包內指定的 AEDT 版本；資源已存入交接包，需改資源時，回到 Prepare Handoff 產生另一份新包。
+
+在下方直接填入 Prepare Handoff 顯示的 `run_dir` 絕對路徑，取代範例路徑。搬移時保留完整交接包，封存檔位置以 Prepare Handoff 顯示的 `archive_path` 為準。
+
+```{python}
+#| id: hem-run-input
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+from IPython.display import display
+
+HANDOFF_RUN_DIR = Path("/absolute/path/from/prepare/run_dir").expanduser().resolve()
+HANDOFF_METADATA = HANDOFF_RUN_DIR / "metadata" / "aedt_handoff_metadata.json"
+display({"run_dir": HANDOFF_RUN_DIR, "metadata": HANDOFF_METADATA})
+display(json.loads(HANDOFF_METADATA.read_text()))
+```
+
+確認：顯示的是要執行的既有交接包。先確認執行主機、AEDT 授權與包內資源配置，再執行下一格。
+
+## 明確執行原生工作
+
+以下呼叫 SCGSim 公開執行器（Runner），使用包內已保存的設定完成建模、求解、匯出、儲存及釋放。若發生錯誤，保留原始回傳紀錄及錯誤，不自動重跑。
+
+```{python}
+#| id: hem-run-execute
+subprocess.run(
+    [
+        sys.executable,
+        "-m",
+        "scgsim.aedt.run",
+        "--handoff",
+        str(HANDOFF_METADATA),
+        "--execute",
+    ],
+    cwd=HANDOFF_RUN_DIR,
+    check=True,
+)
+```
+
+在終端機也可執行包內 `bash run_aedt.sh`；這是同一次工作的另一個入口，擇一執行即可。
+
+## 交回結果
+
+保留完整輸出資料夾、專案及結果伴隨檔，再用全新核心開啟 [Analyze](aedt_hfss_eigenmode_analyze.qmd)。程序結束碼與實際收斂紀錄需分開判讀。
+
+```{python}
+#| id: hem-run-return
+display({"returned_run_dir": HANDOFF_RUN_DIR})
+```
+
+若只需原生建模檢視，可對另一份新準備的交接包，單獨使用公開 CLI 的 `--execute --prepare-only`。這仍會開啟 AEDT，但不求解；不把這種輸出當成 Analyze 的已求解資料。

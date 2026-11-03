@@ -5,25 +5,45 @@ sidebar: simulation
 
 計算所選模態的能量儲存位置，再套用明確選擇的材料與介面損耗假設。請使用 LC/EPR 教學，不要將未負載頻率計算當成參與率結果。
 
+此指南要回答的讀者問題（摘自[選擇模擬](../../notebooks.qmd)）：
+
+> 場能儲存於何處？介面假設如何影響損耗？
+
 ## 模型與前置條件
 
 請保留導體與接面／負載定義、堆疊、外部區域，以及指定的表面或體積。MA、MS 與 SA 代表不同介面；其厚度、介電常數、損耗正切及場側都是所選模型輸入。
 
 依教學指定的 Palace 或 AEDT 環境及儲存場設定操作。選擇預設值前，請閱讀[材料與介面](../../start/materials.qmd)。
+套用文獻假設前，可先閱讀[參考資料：表面損耗與參與率研究](../../papers/surface-loss-participation.md)，核對研究中的幾何、材料假設與擷取方法。
 
 ## 選擇教學
 
-| 任務 | 教學 |
-| --- | --- |
-| 焊墊 LC 模態及表面／塊材貢獻 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| HFSS 原生場積分評估 | [SimplePad HFSS LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| 明確幾何帶區與局部介面修正 | [SimplePad Palace 表面帶區](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) 搭配 [Q2D 介面因子](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) |
+| 任務 | 教學／路線 | 下載 |
+| --- | --- | --- |
+| 焊墊 LC 模態及表面／塊材貢獻 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| HFSS 原生場積分評估 | [準備交接（Prepare Handoff）→ 執行既有交接包（Run）→ 分析（Analyze）](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) | — |
+| HFSS 原生場積分評估 | [直接執行（Run Directly）](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.qmd" data-noresolveinput download>QMD</a> |
+| 明確幾何帶區與局部介面修正 | [SimplePad Palace 表面帶區](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) · [Q2D 介面因子](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) | — |
 
 ## 判讀參與率與損耗
 
 逐項閱讀貢獻時，請核對能量分母、所選模態與計算回合、介面／場側識別，以及儲存場輸入。保留帶正負號的接面貢獻以便識別。參與率、依假設估算的損耗、原生 Q 值與量測壽命是不同物理量。
 
-幾何修正時，請同時檢查所選的原始母區帶、取樣區域、保留區域與回傳 Q2D 因子。教學中的直邊近似不能證明轉角等效。
+幾何修正時，請同時檢查所選的原始母區帶、取樣區域、保留區域與回傳 Q2D 因子。
+
+::: {.callout-warning title="直邊近似不代表轉角等效"}
+教學中的直邊近似不能證明轉角等效。
+:::
+
+請由[SimplePad HFSS 路線](eigenmode.qmd#simplepad-hfss-handoff-sequence)選擇分開使用「準備交接（Prepare Handoff）→ 執行既有交接包（Run）」，或在一份筆記本中「直接執行（Run Directly）」。兩條路線都能接續共用的[分析（Analyze）筆記本](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.qmd" data-noresolveinput download>QMD</a>。
+
+「分析」也將兩項選用操作分開；只有需要這些額外分析時才執行。
+
+儲存場評估
+: 需要 AEDT 授權，但不會求解。
+
+離線損耗重分析
+: 直接讀取已儲存資料。
 
 ## SurfaceBands 下載
 

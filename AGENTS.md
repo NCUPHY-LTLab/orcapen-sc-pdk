@@ -15,6 +15,7 @@ Read only the sources relevant to the task:
 - `orcapen_sc_pdk/tech.py` for layers or stack definitions.
 - `docs/home/pdk-responsibilities.md` for package boundaries.
 - `docs/features/scgsim-integration.md` for SCGSim integration or notebook work.
+- `LESSONS.md` for cross-repository documentation links and SCGSim handoffs.
 
 Package usage starts at `docs/usage/index.md`.
 

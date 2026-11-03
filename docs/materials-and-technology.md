@@ -8,17 +8,17 @@ quantity you need.
 
 ## Pick the layer by purpose
 
-Read [Layers & Stack](start/layers.qmd#pick-the-layer-by-purpose) for named layers,
+Read [Layers & Stack](start/layers.qmd#complete-layer-map) for named layers,
 GDS pairs, and display settings.
 
 ### DRAW, masks and holes
 
-Read [DRAW, masks and holes](start/layers.qmd#draw-masks-and-holes) before assigning
+Read [DRAW, masks and holes](start/layers.qmd#face-m1-geometry) before assigning
 conductor geometry or interpreting an opening.
 
 ## Select the physical stack
 
-Read [physical stack selection](start/layers.qmd#select-the-physical-stack) for
+Read [physical stack selection](start/layers.qmd#select-a-stack) for
 single-die, flip-chip, and airbridge levels.
 
 ## Material records and presets

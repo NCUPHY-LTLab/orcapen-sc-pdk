@@ -1,6 +1,6 @@
 ---
 title: "Surface Loss and Participation Studies"
-sidebar: research
+sidebar: development
 ---
 
 Read these references when selecting surface-interface assumptions or

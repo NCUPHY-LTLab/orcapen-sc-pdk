@@ -17,3 +17,6 @@ batch.log
 notebooks/*.ipynb
 orcapen_sc_pdk/cells/privates/*
 !orcapen_sc_pdk/cells/privates/.gitkeep
+# Generated from README.md and tech.py by the docs pre-render hook.
+/docs/_includes/_readme-install.md
+/docs/_includes/_layer-map.py

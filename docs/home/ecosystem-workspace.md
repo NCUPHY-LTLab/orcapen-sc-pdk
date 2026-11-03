@@ -10,7 +10,7 @@ and SCGSim for simulation. Keep each package's version with the project that use
 | --- | --- |
 | [OrcaPen](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk) | Public cells, cross-sections, layers, stacks, materials, and component simulation examples |
 | [GDSFactory](https://gdsfactory.github.io/gdsfactory/) | Component construction, placement, connections, routing, and GDS export |
-| [SCGSim](https://github.com/OrPenStrike/scgsim) | Geometry interpretation, Palace/AEDT preparation, handoff, and returned-result analysis |
+| [SCGSim](https://github.com/NCUPHY-LTLab/scgsim) | Geometry interpretation, Palace/AEDT preparation, handoff, and returned-result analysis |
 | Your layout project | Device parameters, chip assemblies, final Nets and excitations, and private results |
 
 ## Select the environment by task

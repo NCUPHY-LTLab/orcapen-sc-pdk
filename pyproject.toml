@@ -5,7 +5,7 @@ backend-path = ["."]
 
 [project]
 name = "orcapen-sc-pdk"
-version = "0.1.0.dev2"
+version = "1.0.0"
 description = "OrcaPen superconducting quantum/RF public PDK for GDSFactory"
 readme = "README.md"
 license = "MIT"
@@ -31,8 +31,8 @@ dependencies = [
 ]
 
 [project.urls]
-documentation = "https://orpenstrike.github.io/orcapen-sc-pdk/"
-repository = "https://github.com/OrPenStrike/orcapen-sc-pdk/"
+documentation = "https://ncuphy-ltlab.github.io/orcapen-sc-pdk/"
+repository = "https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/"
 
 [project.optional-dependencies]
 dev = [

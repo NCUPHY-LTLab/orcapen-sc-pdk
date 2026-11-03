@@ -17,12 +17,14 @@ an open/infinite Region and a finite grounded Region enclosure. The Xmon pad
 is the sole Signal; all physical grounds, couplers, and bumps share one Ground
 net. The comparison records evidence only and defines no solver-agreement gate.
 
+::: {.callout-warning title="Historical runs use a noncanonical bump identity"}
 The sealed 20260829 runs analyzed by default are immutable historical evidence:
 their eight `QGB` objects were bound to the superconducting `Al` record instead
 of the PDK-authored `In` record. SCGSim lowered both records to native Q3D PEC,
 so their ideal-conductor boundary behavior is retained, but their bump material
 identity and provenance are not canonical. Newly prepared runs derive the QGB
 material identity from `D0_D1_INDIUM_BUMP`; no historical receipt is relabeled.
+:::
 
 
 ## Setup and Imports

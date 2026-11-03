@@ -160,21 +160,3 @@ code.sourceCode > span > a:first-child {
   border-color: var(--qdk-code-border);
   color: #8b949e;
 }
-
-.code-copy-button {
-  background-color: var(--qdk-code-copy-background);
-  border: 1px solid var(--qdk-code-border);
-  color: var(--qdk-code-copy-color);
-}
-
-.code-copy-button > .bi::before {
-  /* Quarto supplies this icon as an embedded SVG; neutralize its source hue. */
-  filter: grayscale(1) brightness(1.3);
-}
-
-.code-copy-button:hover,
-.code-copy-button:focus-visible,
-.code-copy-button-checked {
-  background-color: var(--qdk-code-copy-hover-background);
-  color: var(--qdk-code-copy-hover-color);
-}

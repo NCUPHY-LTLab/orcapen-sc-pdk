@@ -1,0 +1,42 @@
+---
+title: "SimplePad simulation data"
+sidebar: simulation
+aliases:
+  - reproducibility.html
+---
+
+This page provides four recorded SimplePad cases from the independent data snapshot `data-2026.11.01-r1`.
+
+::: {.callout-note title="Runtime verification"}
+Original simulation results are preserved; rerunning or analyzing them in a new environment is still pending verification.
+:::
+
+## Cases
+
+These cases use **200 nm aluminum**; the current PDK default is **100 nm**.
+
+| Calculation | Inputs | Results |
+| --- | --- | --- |
+| Palace Electrostatic | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_electrostatic_20261006_02--inputs.tar.gz) | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_electrostatic_20261006_02--results.tar.gz) |
+| Palace Eigenmode | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--inputs.tar.gz) | [Part 1](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--results.tar.gz.part001) · [Part 2](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_palace_eigenmode_20261006_02--results.tar.gz.part002) |
+| AEDT Q3D capacitance extraction | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_q3d_20261006_02--inputs.tar.gz) | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_q3d_20261006_02--results.tar.gz) |
+| AEDT HFSS Eigenmode | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_hfss_eigenmode_20261006_02--inputs.tar.gz) | [Download](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/download/data-2026.11.01-r1/orcapen-examples--simple_pad_aedt_hfss_eigenmode_20261006_02--results.tar.gz) |
+
+: {tbl-colwidths="[40,30,30]"}
+
+## Use the packages
+
+- **Inputs** contain the original mesh and configuration for rerunning or profiling.
+- **Results** contain the saved outputs for analysis.
+
+Download each archive with `SHA256SUMS` from the [data release](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1), then verify it before extraction:
+
+```bash
+sha256sum --ignore-missing -c SHA256SUMS
+```
+
+For Palace Eigenmode results, download both parts and follow the [Release instructions](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1) to reassemble and verify the archive. Extract verified files into a fresh directory.
+
+## Source record {#source-records}
+
+See the [SimplePad source run records](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/15083c730d0a7ba925f18818e0b7206bb28c9e8e/notebooks/ComponentSimulation/SimplePad/evidence/run_set.json) for historical run versions, settings and detailed file records.

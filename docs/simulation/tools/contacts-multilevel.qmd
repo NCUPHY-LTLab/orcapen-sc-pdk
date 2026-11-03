@@ -7,4 +7,4 @@ Read [Contacts and multilevel layouts](../../public-pdk-examples/test-components
 Use the selected simulation tutorial to inspect native contact and Net assignments.
 
 Generic solver and result APIs belong to the selected version's
-[SCGSim documentation](https://github.com/OrPenStrike/scgsim/tree/develop/docs).
+[SCGSim documentation](https://github.com/NCUPHY-LTLab/scgsim/tree/develop/docs).

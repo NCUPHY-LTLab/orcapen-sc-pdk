@@ -3,7 +3,7 @@ title: "共振器（Resonator）"
 sidebar: api
 ---
 
-`resonator` 結合共面波導（coplanar waveguide，CPW）的懸掛段與蛇形段（meander），並可加入尾段與量子位元區段。`length` 是整體中心線目標長度；扣除其他區段後，剩餘長度分配給蛇形段。
+`resonator` 結合共面波導（coplanar waveguide，CPW）的懸掛段與蛇形段（meander），並可加入尾段與量子位元區段。`length` 是整個元件的中心線目標長度，不只是蛇形段；扣除其他區段後，剩餘長度才分配給蛇形段。`cpw_xs` 選定的 CPW 橫截面會定義佈線區段的導線與間隙幾何。
 
 ## 建立預設元件 {#build-the-default-component}
 
@@ -29,7 +29,7 @@ component = gf.get_component("resonator")
 
 ## 連接埠與圖層 {#ports-and-layers}
 
-`o1` 標記懸掛段起點，`o_hanger_center` 是放置錨點，`o_hanger_end` 連接蛇形段。元件也提供讀出耦合錨點。DRAW、ETCH 與 GROUND_MASK 圖層皆可設定。預設版圖預覽請見[元件圖集](../index.md#components-layout)。
+`o1` 標記懸掛段起點，`o_hanger_center` 是放置錨點，`o_hanger_end` 連接蛇形段。元件也提供讀出耦合錨點。這些版圖錨點用來定位或連接幾何，本身並非電磁求解器的端子。DRAW、ETCH 與 GROUND_MASK 圖層皆可設定。預設版圖預覽請見[元件圖集](../index.md#components-layout)。
 
 ![預設共振器的 DRAW 與 ETCH 版圖。](../../_static/images/components/resonator.svg)
 
