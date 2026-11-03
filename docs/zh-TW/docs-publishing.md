@@ -7,9 +7,12 @@ sidebar: development
 
 ## 本機建置
 
+請先產生 README 與圖層片段；Quarto 會在執行 pre-render hook 前掃描這些納入的檔案。
+
 ```bash
 uv sync -p 3.12 --locked --group docs --extra dev
 uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
+uv run --group docs python scripts/build_overview_snippets.py
 uv run --group docs quarto render docs --no-execute
 uv run python scripts/check_docs_navigation.py docs/_site
 ```

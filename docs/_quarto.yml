@@ -107,8 +107,6 @@ website:
         href: notebooks.qmd
       - text: API
         href: api.qmd
-      - text: Research
-        href: paper-review.md
       - text: Development
         href: developing-features.md
   sidebar:
@@ -226,20 +224,15 @@ website:
             - reference/materials.validate_material_alias_records.qmd
             - reference/materials.validate_interface_preset_records.qmd
             - reference/materials.validate_aedt_material_records.qmd
-    - id: research
-      collapse-level: 1
-      title: Research
-      contents:
-        - paper-review.md
-        - papers/transmon-reference-designs.md
-        - papers/cpw-resonator-references.md
-        - papers/flip-chip-3d-integration.md
-        - papers/surface-loss-participation.md
     - id: development
       collapse-level: 1
       title: Development
       contents:
         - developing-features.md
+        - section: References
+          contents:
+            - paper-review.md
+            - papers/surface-loss-participation.md
         - section: Package and integration
           contents:
             - home/pdk-responsibilities.md

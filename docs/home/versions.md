@@ -3,11 +3,13 @@ title: "Documentation versions"
 sidebar: overview
 ---
 
-The menu beside the site title selects the documentation version. This edition accompanies OrcaPen SC PDK **1.0.0**.
+This site is a [public source preview](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/tree/947a216d295d3ceadd1dc06bcd34e8aebf61ff0c).
+Its package metadata reports **1.0.0**, but neither a `v1.0.0` nor `v1.0.1`
+release tag exists; the metadata value is not a published package release.
 
 | Version | Installation | Documentation |
 | --- | --- | --- |
-| 1.0.0 | Source tag `v1.0.0` and matching GitHub Release assets | Current edition |
+| Preview (metadata 1.0.0) | Public source preview | Preview edition |
 
 See [distribution and installation](../distribution.md) for the package, or [simulation cases and downloads](../simulation/recorded-cases.qmd) for version-bound simulation inputs and results.
 
@@ -15,4 +17,6 @@ See [distribution and installation](../distribution.md) for the package, or [sim
 
 Simulation data uses independent `data-YYYY.MM.DD-rN` releases. The [data-2026.11.01-r1 snapshot](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/releases/tag/data-2026.11.01-r1) contains four SimplePad cases; each retains its recorded PDK, SCGSim and solver versions.
 
-Only actual published documentation snapshots appear in the version menu. When a newer release replaces the current site, this edition will be preserved under `/v1.0.0/`.
+The preview is not a published, versioned documentation snapshot. Use the pinned
+source in [distribution and installation](../distribution.md) when following
+its installation instructions.

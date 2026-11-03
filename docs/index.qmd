@@ -30,7 +30,7 @@ The layer stack supplies height, thickness, material and simulation attributes f
 
 :::: {.askr-card}
 ::: {.askr-card-body}
-### [Public test components and simulation examples](notebooks.qmd) {.askr-card-title .unlisted}
+### [Public component gallery](public-pdk-examples/index.md#components-layout) {.askr-card-title .unlisted}
 
 Use a common public specimen to connect a layout question with an electromagnetic or circuit-model question. OrcaPen supplies the component geometry and stack; [SCGSim](https://ncuphy-ltlab.github.io/scgsim/) handles electromagnetic modeling and extraction, while [SCNSim](https://ncuphy-ltlab.github.io/scnsim/) provides circuit-network modeling and response analysis.
 :::
@@ -42,6 +42,19 @@ For a new project, use the commands below with Python 3.12. Python 3.13 is also 
 
 {{< include _includes/_readme-install.md >}}
 
-Check: the version command reports `1.0.0` after the source tag is published.
+This site documents a public source preview whose package metadata reports
+`1.0.0`; it is not a published stable release. Follow [Install & Get Started](getting-started.md)
+for the exact pinned source command, then [activate OrcaPen and view a cell](getting-started.md#activate-and-see-a-cell).
 
-[Activate OrcaPen and view a cell](getting-started.md#activate-and-see-a-cell), inspect the [common cells](start/common-cells.qmd), or explore the [CPW cross-sections](public-pdk-examples/cross-sections.qmd). Component settings and port definitions are listed in the [API reference](api.qmd).
+## From layout to simulation
+
+Start with the [common cells](start/common-cells.qmd) or the [component gallery](public-pdk-examples/index.md#components-layout)
+to choose a geometry, then use [Layers & Stack](start/layers.qmd) and
+[Materials & Interfaces](start/materials.qmd) to understand its physical model.
+Choose a [simulation guide](notebooks.qmd) for the question you want
+to answer, and use its [recorded cases](simulation/recorded-cases.qmd) and result
+interpretation guidance to understand what the outputs mean.
+
+Component settings and port definitions are in the [API reference](api.qmd).
+Background literature and the sources behind selected assumptions are collected
+in [References](paper-review.md).

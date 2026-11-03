@@ -20,7 +20,7 @@ import yaml
 LABELS = {
     "Get Started": "入門",
     "Simulation": "模擬",
-    "Research": "研究",
+    "References": "參考文獻",
     "Development": "開發",
     "API overview": "API 概覽",
     "Function index": "函式索引",

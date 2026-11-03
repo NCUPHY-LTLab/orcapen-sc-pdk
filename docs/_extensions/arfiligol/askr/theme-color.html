@@ -1,6 +1,195 @@
 <meta name="theme-color" content="#faf8f8">
 <script>
 (function () {
+  var drawerCoordinator;
+  var layoutGateActive = !!document.documentElement;
+  var layoutGateReleased = false;
+  var layoutDomReady = document.readyState !== "loading";
+  var layoutFontsReady = !document.fonts;
+  var adaptiveAreasReady = false;
+  var versionManifestReady = true;
+  var layoutFrame = 0;
+  var stableLayoutFrames = 0;
+  var previousLayoutGeometry = null;
+  var layoutStatus;
+  var layoutObserversStarted = false;
+  var layoutSizeObserver;
+  var layoutHeaderObserver;
+  var onLayoutResize;
+  var onLayoutFontLoading;
+  var onLayoutFontLoaded;
+  var onLayoutFontError;
+  var onLayoutPagehide;
+  var onLayoutPageshow;
+  if (layoutGateActive) {
+    document.documentElement.classList.add("askr-layout-pending");
+    window.setTimeout(showLayoutStatus, 180);
+    window.setTimeout(function () { releaseLayoutGate("timeout"); }, 1800);
+    document.addEventListener("DOMContentLoaded", function () {
+      layoutDomReady = true;
+      startLayoutObservers();
+      scheduleLayoutCheck();
+    }, {once: true});
+    if (layoutDomReady) {
+      startLayoutObservers();
+      scheduleLayoutCheck();
+    }
+    if (document.fonts) {
+      document.fonts.ready.then(function () {
+        layoutFontsReady = document.fonts.status !== "loading";
+        if (layoutFontsReady) scheduleLayoutCheck();
+      }, function () {
+        layoutFontsReady = document.fonts.status !== "loading";
+        if (layoutFontsReady) scheduleLayoutCheck();
+      });
+      onLayoutFontLoading = function () {
+        layoutFontsReady = false;
+        resetLayoutStability();
+      };
+      onLayoutFontLoaded = function () {
+        layoutFontsReady = document.fonts.status === "loaded";
+        resetLayoutStability();
+      };
+      onLayoutFontError = function () {
+        layoutFontsReady = document.fonts.status !== "loading";
+        resetLayoutStability();
+      };
+      document.fonts.addEventListener("loading", onLayoutFontLoading);
+      document.fonts.addEventListener("loadingdone", onLayoutFontLoaded);
+      document.fonts.addEventListener("loadingerror", onLayoutFontError);
+    }
+    onLayoutResize = resetLayoutStability;
+    onLayoutPagehide = function () { releaseLayoutGate("pagehide"); };
+    onLayoutPageshow = function (event) {
+      if (event.persisted) releaseLayoutGate("bfcache");
+    };
+    window.addEventListener("resize", onLayoutResize);
+    window.addEventListener("pagehide", onLayoutPagehide, {once: true});
+    window.addEventListener("pageshow", onLayoutPageshow);
+  }
+  function showLayoutStatus() {
+    if (layoutGateReleased) return;
+    if (!document.body) {
+      window.setTimeout(showLayoutStatus, 50);
+      return;
+    }
+    if (layoutStatus) return;
+    layoutStatus = document.createElement("div");
+    layoutStatus.id = "askr-layout-status";
+    layoutStatus.setAttribute("role", "status");
+    layoutStatus.setAttribute("aria-live", "polite");
+    layoutStatus.setAttribute("aria-atomic", "true");
+    layoutStatus.textContent = /^zh(?:-|$)/i.test(document.documentElement.lang) ? "載入頁面中…" : "Loading page…";
+    document.body.appendChild(layoutStatus);
+  }
+  function startLayoutObservers() {
+    if (layoutGateReleased || layoutObserversStarted || !document.body) return;
+    layoutObserversStarted = true;
+    if (window.ResizeObserver) {
+      layoutSizeObserver = new ResizeObserver(resetLayoutStability);
+      [document.body, document.querySelector("header.fixed-top"), document.querySelector("#quarto-content")].forEach(function (element) {
+        if (element) layoutSizeObserver.observe(element);
+      });
+    }
+    var header = document.querySelector("#quarto-header");
+    if (header) {
+      layoutHeaderObserver = new MutationObserver(resetLayoutStability);
+      layoutHeaderObserver.observe(header, {attributes: true, childList: true, subtree: true, characterData: true});
+    }
+  }
+  function resetLayoutStability() {
+    stableLayoutFrames = 0;
+    previousLayoutGeometry = null;
+    scheduleLayoutCheck();
+  }
+  function scheduleLayoutCheck() {
+    if (!layoutGateActive || layoutGateReleased || !layoutDomReady || !layoutFontsReady || !adaptiveAreasReady || !versionManifestReady || layoutFrame) return;
+    layoutFrame = requestAnimationFrame(checkLayoutReadiness);
+  }
+  function headerOffsetIsCoherent() {
+    var header = document.querySelector("header.fixed-top");
+    if (!header) return true;
+    var padding = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+    return Math.abs(padding - header.clientHeight) <= 1.5;
+  }
+  function layoutGeometry() {
+    var header = document.querySelector("header.fixed-top");
+    var main = document.querySelector("#quarto-content") || document.querySelector("main");
+    var title = document.querySelector("#title-block-header");
+    var sidebar = document.querySelector("#quarto-sidebar");
+    var announcement = document.querySelector("#quarto-announcement");
+    function values(element) {
+      if (!element) return [];
+      var rect = element.getBoundingClientRect();
+      return [rect.top, rect.height, rect.bottom].map(function (value) { return Math.round(value * 10) / 10; });
+    }
+    return JSON.stringify([
+      header && header.clientHeight,
+      getComputedStyle(document.body).paddingTop,
+      values(header), values(main), values(title), values(sidebar), values(announcement)
+    ]);
+  }
+  function checkLayoutReadiness() {
+    layoutFrame = 0;
+    if (layoutGateReleased) return;
+    if (!layoutDomReady || !layoutFontsReady || !adaptiveAreasReady || !versionManifestReady) {
+      stableLayoutFrames = 0;
+      previousLayoutGeometry = null;
+      return;
+    }
+    if (!headerOffsetIsCoherent()) {
+      stableLayoutFrames = 0;
+      previousLayoutGeometry = null;
+      layoutFrame = requestAnimationFrame(checkLayoutReadiness);
+      return;
+    }
+    var geometry = layoutGeometry();
+    if (geometry === previousLayoutGeometry) stableLayoutFrames += 1;
+    else stableLayoutFrames = 0;
+    previousLayoutGeometry = geometry;
+    if (stableLayoutFrames >= 2) releaseLayoutGate("stable");
+    else layoutFrame = requestAnimationFrame(checkLayoutReadiness);
+  }
+  function markAdaptiveAreasReady() {
+    adaptiveAreasReady = true;
+    scheduleLayoutCheck();
+  }
+  function releaseLayoutGate(reason) {
+    if (!layoutGateActive || layoutGateReleased) return;
+    layoutGateReleased = true;
+    if (layoutFrame) cancelAnimationFrame(layoutFrame);
+    if (layoutSizeObserver) layoutSizeObserver.disconnect();
+    if (layoutHeaderObserver) layoutHeaderObserver.disconnect();
+    window.removeEventListener("resize", onLayoutResize);
+    window.removeEventListener("pagehide", onLayoutPagehide);
+    window.removeEventListener("pageshow", onLayoutPageshow);
+    if (document.fonts) {
+      document.fonts.removeEventListener("loading", onLayoutFontLoading);
+      document.fonts.removeEventListener("loadingdone", onLayoutFontLoaded);
+      document.fonts.removeEventListener("loadingerror", onLayoutFontError);
+    }
+    document.documentElement.classList.remove("askr-layout-pending");
+    document.documentElement.dataset.askrLayoutReadyReason = reason;
+    if (layoutStatus) layoutStatus.remove();
+    layoutStatus = null;
+  }
+  window.addEventListener("click", coordinateDrawerClick, true);
+  function coordinateDrawerClick(event) {
+    if (!event.target.closest) return;
+    var areaButton = event.target.closest("#quarto-header .navbar-toggler");
+    var pagesButton = event.target.closest('[data-bs-toggle="collapse"][data-bs-target=".quarto-sidebar-collapse-item"]:not(#quarto-sidebar-glass)');
+    var backdrop = event.target.closest("#qdk-area-glass, #quarto-sidebar-glass");
+    if (!drawerCoordinator || !(areaButton || pagesButton || backdrop)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (areaButton || pagesButton) {
+      if (window.quartoToggleHeadroom) window.quartoToggleHeadroom();
+      var target = areaButton ? "area" : "pages";
+      drawerCoordinator.request(drawerCoordinator.isRequested(target) ? null : target);
+    } else {
+      drawerCoordinator.closeWithoutControl(true);
+    }
+  }
   function paint() {
     var link = document.querySelector("link#quarto-bootstrap.quarto-color-alternate");
     var on = link && link.getAttribute("rel") === "stylesheet";
@@ -125,12 +314,6 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", announcements);
   else announcements();
 
-  function hideShown(selector) {
-    document.querySelectorAll(selector).forEach(function (el) {
-      if (!el.classList.contains("show") || !window.bootstrap) return;
-      window.bootstrap.Collapse.getOrCreateInstance(el, { toggle: false }).hide();
-    });
-  }
   // Measure the existing inline layout, not a second navigation tree. Quarto /
   // Bootstrap remain the owners of disclosure state and navigation links.
   function adaptiveAreas() {
@@ -139,7 +322,10 @@
     var area = header && header.querySelector("#navbarCollapse");
     var button = header && header.querySelector(".navbar-toggler");
     var brand = header && header.querySelector(".navbar-brand-container");
-    if (!container || !area || !button || !brand) return;
+    if (!container || !area || !button || !brand) {
+      markAdaptiveAreasReady();
+      return;
+    }
     var tools = container.querySelector('.quarto-navbar-tools');
     var collapseTools = tools && area.contains(tools);
     var authoredTools = tools ? Array.from(tools.children).filter(function (el) {
@@ -159,6 +345,7 @@
     button.title = "Areas";
     var frame;
     var compact;
+    var mobileState;
     function update() {
       frame = null;
       // Moving native nodes is presentation only, not a new navigation authority.
@@ -167,9 +354,11 @@
       if (tools) container.style.setProperty('--askr-tools-width', tools.getBoundingClientRect().width + 'px');
       var active = document.activeElement;
       var previous = compact;
+      var previousMobile = mobileState;
       header.classList.add("askr-areas-measuring");
       header.classList.remove("askr-areas-collapsed");
       var mobile = window.matchMedia("(max-width: 991.98px)").matches;
+      mobileState = mobile;
       var list = area.querySelector(".navbar-nav");
       var title = brand.querySelector(".askr-version-title") || brand.querySelector(".navbar-title");
       if (title) title.title = title.textContent.trim();
@@ -202,20 +391,15 @@
         header.style.setProperty("--askr-brand-right", (container.getBoundingClientRect().right - right + gap) + "px");
       }
       observe();
-      if (previous !== undefined && previous !== compact) {
-        // Complete any in-flight Bootstrap animation before resetting state.
-        if (area.classList.contains("collapsing")) area.dispatchEvent(new Event("transitionend"));
-        hideShown("#navbarCollapse.show");
-        if (area.classList.contains("collapsing")) area.dispatchEvent(new Event("transitionend"));
-        area.classList.remove("qdk-open");
-        document.querySelector("#qdk-area-glass").classList.remove("qdk-glass-in");
-        button.setAttribute("aria-expanded", "false");
+      if ((previous !== undefined && previous !== compact) || (previousMobile !== undefined && previousMobile !== mobile)) {
+        if (drawerCoordinator) drawerCoordinator.closeForBreakpoint(active);
         if (compact && area.contains(active)) button.focus();
         else if (!compact && active === button) {
           var link = area.querySelector("a.nav-link");
           if (link) link.focus();
         }
       }
+      markAdaptiveAreasReady();
     }
     function schedule() {
       if (!frame) frame = requestAnimationFrame(update);
@@ -243,18 +427,26 @@
     var pages = document.querySelector("#quarto-sidebar");
     var areaGlass = document.querySelector("#qdk-area-glass");
     var pagesGlass = document.querySelector("#quarto-sidebar-glass");
+    var areaButton = document.querySelector("#quarto-header .navbar-toggler");
+    var pagesControls = Array.from(document.querySelectorAll('[data-bs-toggle="collapse"][data-bs-target=".quarto-sidebar-collapse-item"]:not(#quarto-sidebar-glass)'));
+    var pagesButton = pagesControls.find(function (control) { return control.tagName === "BUTTON"; }) || pagesControls[0];
+    pagesControls.forEach(function (control) {
+      control.setAttribute("aria-label", "Pages");
+      control.title = "Pages";
+    });
+    drawerCoordinator = createDrawerCoordinator(area, pages, areaButton, pagesButton, areaGlass, pagesGlass);
     if (area) {
       area.addEventListener("show.bs.collapse", function (event) {
         if (event.target !== area) return;
         area.classList.add("qdk-open");
         areaGlass.classList.add("qdk-glass-in");
+        if (areaButton) areaButton.setAttribute("aria-expanded", "true");
       });
       area.addEventListener("hide.bs.collapse", function (event) {
         if (event.target !== area) return;
         area.classList.remove("qdk-open");
         areaGlass.classList.remove("qdk-glass-in");
-        var header = document.querySelector("#quarto-header");
-        if (header.classList.contains("headroom--frozen") && !(pages && pages.classList.contains("qdk-open")) && window.quartoToggleHeadroom) window.quartoToggleHeadroom();
+        if (areaButton) areaButton.setAttribute("aria-expanded", "false");
       });
     }
     if (pages && pagesGlass) {
@@ -262,63 +454,201 @@
         if (event.target !== pages) return;
         pages.classList.add("qdk-open");
         pagesGlass.classList.add("qdk-glass-in");
+        syncPagesGlass(true);
+        pagesControls.forEach(function (control) { control.setAttribute("aria-expanded", "true"); });
       });
       pages.addEventListener("hide.bs.collapse", function (event) {
         if (event.target !== pages) return;
         pages.classList.remove("qdk-open");
         pagesGlass.classList.remove("qdk-glass-in");
+        syncPagesGlass(false);
+        pagesControls.forEach(function (control) { control.setAttribute("aria-expanded", "false"); });
       });
       pages.addEventListener("click", function (event) {
         if (event.target.closest("a, button, .sidebar-item-toggle")) return;
-        hideShown(".quarto-sidebar-collapse-item.show");
+        drawerCoordinator.closeWithoutControl(false);
       });
     }
-    var areaButton = document.querySelector("#quarto-header .navbar-toggler");
-    var pagesButton = document.querySelector("#quarto-header .quarto-btn-toggle");
-    if (areaButton) areaButton.addEventListener("click", function () {
-      hideShown(".quarto-sidebar-collapse-item.show");
-    });
     if (area) area.addEventListener("click", function (event) {
-      if (event.target.closest("a.nav-link") && document.querySelector("#quarto-header.askr-areas-collapsed")) hideShown("#navbarCollapse.show");
-    });
-    if (pagesButton) pagesButton.addEventListener("click", function () {
-      hideShown("#navbarCollapse.show");
+      if (event.target.closest("a.nav-link") && document.querySelector("#quarto-header.askr-areas-collapsed")) drawerCoordinator.request(null);
     });
     document.addEventListener("click", function (event) {
-      var area = document.querySelector("#navbarCollapse");
-      if (!area || !area.classList.contains("show")) return;
-      if (area.contains(event.target) || (areaButton && areaButton.contains(event.target))) return;
-      hideShown("#navbarCollapse.show");
+      if (!drawerCoordinator.isOpen()) return;
+      if (event.target.closest && event.target.closest(".askr-language-toggle")) {
+        drawerCoordinator.closeWithoutControl(false);
+        return;
+      }
+      if ((area && area.contains(event.target)) || (pages && pages.contains(event.target)) ||
+          (areaButton && areaButton.contains(event.target)) || pagesControls.some(function (control) { return control.contains(event.target); }) ||
+          (areaGlass && areaGlass.contains(event.target)) || (pagesGlass && pagesGlass.contains(event.target))) return;
+      drawerCoordinator.closeWithoutControl(false);
     });
     document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape" && area && area.classList.contains("show")) {
+      if (event.key === "Escape" && drawerCoordinator.isOpen()) {
         event.preventDefault();
-        hideShown("#navbarCollapse.show");
-        areaButton.focus();
+        drawerCoordinator.closeAndRestoreFocus();
       }
     });
-    versions(hideShown);
+    calloutControls();
+    versions();
     adaptiveAreas();
   }
-  function versions(hideShown) {
+  function syncPagesGlass(open) {
+    var glass = document.querySelector("#quarto-sidebar-glass");
+    if (!glass) return;
+    glass.classList.toggle("show", open);
+    glass.classList.remove("collapse", "collapsing");
+    glass.classList.toggle("collapsed", !open);
+    glass.style.removeProperty("height");
+    glass.style.removeProperty("overflow");
+  }
+  function createDrawerCoordinator(area, pages, areaButton, pagesButton, areaGlass, pagesGlass) {
+    var desired = null;
+    var reconciling = false;
+    var lastOpened = null;
+    var pendingFocus = null;
+    var collapse = {
+      area: area && window.bootstrap && window.bootstrap.Collapse.getOrCreateInstance(area, {toggle: false}),
+      pages: pages && window.bootstrap && window.bootstrap.Collapse.getOrCreateInstance(pages, {toggle: false})
+    };
+    function current() {
+      if (area && (area.classList.contains("show") || area.classList.contains("collapsing") && desired === "area")) return "area";
+      if (pages && (pages.classList.contains("show") || pages.classList.contains("collapsing") && desired === "pages")) return "pages";
+      return null;
+    }
+    function reconcile() {
+      if (reconciling) return;
+      var underway = [area, pages].some(function (el) { return el && el.classList.contains("collapsing"); });
+      if (underway) return;
+      var open = current();
+      if (open && open !== desired) {
+        reconciling = true;
+        collapse[open].hide();
+        reconciling = false;
+        return;
+      }
+      if (desired && !open && collapse[desired]) {
+        reconciling = true;
+        collapse[desired].show();
+        reconciling = false;
+      }
+    }
+    function restoreFocusWhenClosed() {
+      if (!pendingFocus || [area, pages].some(function (el) {
+        return el && (el.classList.contains("show") || el.classList.contains("collapsing"));
+      })) return;
+      var control = pendingFocus;
+      pendingFocus = null;
+      if (control.isConnected) control.focus();
+    }
+    [area, pages].forEach(function (el) {
+      if (!el) return;
+      el.addEventListener("shown.bs.collapse", function () {
+        reconcile();
+        restoreFocusWhenClosed();
+      });
+      el.addEventListener("hidden.bs.collapse", function () {
+        reconcile();
+        restoreFocusWhenClosed();
+      });
+    });
+    function request(next) {
+      if (next) {
+        lastOpened = next;
+        pendingFocus = null;
+      }
+      desired = next;
+      reconcile();
+    }
+    return {
+      request: request,
+      isOpen: function () {
+        return !!current() || !!desired || [area, pages].some(function (el) { return el && el.classList.contains("collapsing"); });
+      },
+      isRequested: function (target) { return desired === target || (!desired && current() === target); },
+      closeAndRestoreFocus: function () {
+        closeWithoutControl(true);
+      },
+      closeForBreakpoint: function (active) {
+        closeWithoutControl(false);
+        if (area && area.contains(active) && areaButton) areaButton.focus();
+        else if (pages && pages.contains(active) && pagesButton) pagesButton.focus();
+      },
+      closeWithoutControl: closeWithoutControl
+    };
+    function closeWithoutControl(restoreFocus) {
+      var open = current() || desired ||
+        (area && area.classList.contains("collapsing") ? "area" : null) ||
+        (pages && pages.classList.contains("collapsing") ? "pages" : null) || lastOpened;
+      var transitioning = [area, pages].some(function (el) { return el && el.classList.contains("collapsing"); });
+      if (!open || !(current() || desired || transitioning)) return;
+      if (restoreFocus) pendingFocus = open === "pages" ? pagesButton : areaButton;
+      request(null);
+      var header = document.querySelector("#quarto-header");
+      if (header && header.classList.contains("headroom--frozen") && window.quartoToggleHeadroom) window.quartoToggleHeadroom();
+      restoreFocusWhenClosed();
+    }
+  }
+  function calloutControls() {
+    document.querySelectorAll('.callout-header[data-bs-toggle="collapse"]').forEach(function (header) {
+      if (header.dataset.askrKeyboardBound === "true") return;
+      header.dataset.askrKeyboardBound = "true";
+      var callout = header.closest(".callout");
+      var label = callout && callout.getAttribute("title");
+      if (!label) {
+        var title = header.querySelector(".callout-title-container");
+        if (title) {
+          var visibleTitle = title.cloneNode(true);
+          visibleTitle.querySelectorAll(".screen-reader-only, .visually-hidden").forEach(function (el) { el.remove(); });
+          label = visibleTitle.textContent.trim();
+        }
+      }
+      header.setAttribute("role", "button");
+      header.setAttribute("tabindex", "0");
+      if (label) {
+        header.title = label;
+        header.setAttribute("aria-label", label);
+      }
+      header.addEventListener("keydown", function (event) {
+        if (event.target !== header || event.repeat || !["Enter", " "].includes(event.key)) return;
+        event.preventDefault();
+        header.click();
+      });
+    });
+  }
+  function versions() {
     var brand = document.querySelector("#quarto-header .navbar-brand");
     var slot = document.querySelector("#quarto-header .navbar-brand-container");
-    if (!brand || !slot || slot.querySelector(".askr-version")) return;
+    if (!brand || !slot) return;
+    if (!window.fetch) return;
+    versionManifestReady = false;
     var offset = document.querySelector('meta[name="quarto:offset"]');
     var manifest = new URL((offset ? offset.getAttribute("content") : "./") + "askr-versions.json", location.href);
+    var local = document.getElementById("askr-versions-local");
+    if (local) {
+      try { mountVersions(JSON.parse(local.textContent), brand, slot, new URL("./", manifest)); } catch (error) { /* unusable local manifest */ }
+    }
     fetch(manifest.href).then(function (response) {
       if (!response.ok) throw new Error("missing");
       return response.json();
     }).then(function (data) {
-      mountVersions(data, hideShown, brand, slot, new URL("./", manifest));
+      mountVersions(data, brand, slot, new URL("./", manifest));
     }).catch(function () {
+      if (slot.querySelector(".askr-version")) return;
       var dataEl = document.getElementById("askr-versions");
       if (!dataEl) return;
-      try { mountVersions(JSON.parse(dataEl.textContent), hideShown, brand, slot, new URL("./", manifest)); } catch (error) { return; }
+      try { mountVersions(JSON.parse(dataEl.textContent), brand, slot, new URL("./", manifest)); } catch (error) { return; }
+    }).then(function () {
+      versionManifestReady = true;
+      scheduleLayoutCheck();
     });
   }
-  function mountVersions(data, hideShown, brand, slot, siteRoot) {
-    if (!data.versions || !data.versions.length || slot.querySelector(".askr-version")) return;
+  function mountVersions(data, brand, slot, siteRoot) {
+    if (!data || !Array.isArray(data.versions) || !data.versions.length) return;
+    var signature = JSON.stringify(data);
+    var existing = slot.querySelector(".askr-version");
+    if (existing && existing.dataset.manifest === signature) return;
+    if (existing) existing.remove();
     var params = new URLSearchParams(location.search);
     var mode = params.get("askr-version-mode") === "title" ? "title" : (data.mode === "title" ? "title" : "inline");
     var title = brand.textContent.trim();
@@ -361,6 +691,7 @@
     var root = document.createElement("div");
     root.className = "askr-version";
     root.dataset.mode = mode;
+    root.dataset.manifest = signature;
     var button = document.createElement("button");
     button.type = "button";
     button.className = "askr-version-button";
@@ -410,7 +741,7 @@
       menu.appendChild(link);
     });
     function setOpen(open) {
-      if (open) hideShown(".quarto-sidebar-collapse-item.show, #navbarCollapse.show");
+      if (open && drawerCoordinator) drawerCoordinator.closeWithoutControl(false);
       menu.hidden = !open;
       button.setAttribute("aria-expanded", open ? "true" : "false");
     }

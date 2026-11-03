@@ -3,15 +3,16 @@
 (() => {
   function setup() {
     const template = document.getElementById('askr-logout-config');
-    if (template) {
+    if (template && template.dataset.mounted !== 'true') {
       const tools = document.querySelector('#quarto-header .quarto-navbar-tools');
-      if (!tools) throw new Error('Askr Logout requires a website Header with navbar tools.');
+      if (!tools) return;
       tools.append(template.content.cloneNode(true));
+      template.dataset.mounted = 'true';
       document.getElementById('quarto-header').classList.add('askr-has-logout');
     }
 
   }
-  if (document.readyState === 'complete') setup();
-  else window.addEventListener('load', setup, {once: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup, {once: true});
+  else setup();
 })();
 </script>

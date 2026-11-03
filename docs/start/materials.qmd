@@ -28,10 +28,15 @@ and the [Layers & Stack guide](layers.qmd) for assigning material and height tog
 | SA | Substrate–air |
 
 The database includes Woods2019 Si and LiteratureCentral interface presets.
-Their thickness, permittivity, loss tangent, and source are model assumptions
-you select, not automatic process defaults or measured properties for every device.
+Keep each record's `source` and `description` with its parameters: values may be
+directly measured, inferred by fitting, or assumed for a model. The Woods2019 Si
+records are identified as fitted-loss candidates; LiteratureCentral records are
+synthetic literature-based model presets, not measured material properties.
+Neither preset set is an automatic process default or a measurement for every
+device. See the [Woods et al. 2019 citation](../papers/surface-loss-participation.md)
+in References for its study context.
 
 For participation calculations, preserve the preset and field-side choice with
 the returned result. [Participation & Surface Loss](../simulation/requirements/epr-loss.qmd)
-links the concrete tutorials. [Research](../papers/surface-loss-participation.md)
-collects the source literature.
+links the concrete tutorials. [References](../paper-review.md) collects the
+source literature.

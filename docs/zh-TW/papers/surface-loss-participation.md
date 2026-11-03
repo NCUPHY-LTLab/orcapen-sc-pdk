@@ -1,6 +1,6 @@
 ---
 title: "表面損耗與參與率研究"
-sidebar: research
+sidebar: development
 ---
 
 選擇表面介面假設或詮釋參與率（participation）計算時，請閱讀這些參考資料。應使論文的幾何、材料與擷取方法符合所用模型。

@@ -54,17 +54,22 @@
     }, 2000));
   }
 
-  function fail(button, attempt) {
+  function fail(button, attempt, reason, hasSource) {
     if (attempts.get(button) !== attempt) return;
     const status = statusFor(button);
     if (status) {
       status.classList.add('askr-copy-status-error');
+      const zh = document.documentElement.lang.toLowerCase().startsWith('zh-tw');
+      const kind = button.dataset.askrCopyKind;
+      const source = kind === 'code' ? (zh ? '上方程式碼' : 'the code above') : kind === 'math' ? (zh ? '公式下方的 LaTeX 原始碼' : 'the LaTeX source below') : (zh ? 'Mermaid 原始碼' : 'the Mermaid source');
       const messages = {
-        code: 'Copy failed. Select the code above and copy it manually.',
-        math: 'Copy failed. Select the LaTeX source below and copy it manually.',
-        mermaid: 'Copy failed. Select the Mermaid source below and copy it manually.'
+        insecure: zh ? '此 HTTP 頁面不屬於安全環境，瀏覽器無法使用剪貼簿。請改用 HTTPS。' : 'This HTTP page is not a secure context, so the browser cannot access the clipboard. Use HTTPS.',
+        unavailable: zh ? '此瀏覽器未提供剪貼簿功能。' : 'Clipboard access is unavailable in this browser.',
+        denied: zh ? '瀏覽器拒絕剪貼簿存取，請檢查網站權限。' : 'The browser denied clipboard access. Check the site permissions.',
+        missing: zh ? '找不到可複製的原始內容。' : 'The source text is unavailable.',
+        failed: zh ? '無法複製。' : 'Copy failed.'
       };
-      status.textContent = messages[button.dataset.askrCopyKind];
+      status.textContent = `${messages[reason] || messages.failed}${hasSource ? ` ${zh ? `請選取${source}並手動複製。` : `Select ${source} and copy it manually.`}` : ''}`;
     }
   }
 
@@ -111,11 +116,15 @@
     let text;
     try {
       text = sourceFor(button);
-      if (typeof text !== 'string') throw new Error('The source is unavailable.');
-      if (!navigator.clipboard?.writeText) throw new Error('Clipboard access is unavailable.');
+      if (typeof text !== 'string' || !text.trim()) { fail(button, attempt, 'missing', false); return; }
+      if (!navigator.clipboard?.writeText) {
+        const error = new Error('Clipboard API is unavailable.');
+        error.name = 'ClipboardUnavailableError';
+        throw error;
+      }
       await navigator.clipboard.writeText(text);
       succeed(button, attempt);
-    } catch (_) {
+    } catch (error) {
       if (attempts.get(button) !== attempt) return;
       if (button.dataset.askrCopyKind === 'code' && typeof text === 'string') {
         try {
@@ -124,8 +133,9 @@
           return;
         } catch (_) {}
       }
-      if (button.dataset.askrCopyKind === 'math') exposeMathSource(button);
-      fail(button, attempt);
+      if (button.dataset.askrCopyKind === 'math' && typeof text === 'string' && text.trim()) exposeMathSource(button, text);
+      const reason = typeof text !== 'string' || !text.trim() ? 'missing' : error?.name === 'NotAllowedError' ? 'denied' : !window.isSecureContext && location.protocol === 'http:' ? 'insecure' : error?.name === 'ClipboardUnavailableError' ? 'unavailable' : 'failed';
+      fail(button, attempt, reason, typeof text === 'string' && !!text.trim());
     }
   }
 
@@ -171,7 +181,7 @@
     });
   }
 
-  function exposeMathSource(button) {
+  function exposeMathSource(button, text) {
     const component = button.closest('.askr-copyable-math');
     if (!component) return;
     let source = component.querySelector('.askr-math-source');
@@ -182,7 +192,7 @@
       textarea.readOnly = true;
       textarea.spellcheck = false;
       textarea.setAttribute('aria-label', 'LaTeX source');
-      textarea.value = component.dataset.askrTex;
+      textarea.value = text;
       source.append(textarea);
       component.append(source);
     }

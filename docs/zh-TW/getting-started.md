@@ -3,7 +3,7 @@ title: "安裝與入門"
 sidebar: get-started
 ---
 
-安裝 OrcaPen SC PDK 1.0.0，啟用其 GDSFactory 製程設計套件（Process Design Kit，PDK），並建立已註冊的諧振器。建立佈局不需要求解器。
+安裝公開原始碼預覽版，啟用其 GDSFactory 製程設計套件（Process Design Kit，PDK），並建立已註冊的諧振器。預覽版的套件中繼資料（metadata）回報 `1.0.0`；這不代表 `v1.0.0` 已正式發布。建立佈局不需要求解器。
 
 ## 安裝
 
@@ -14,13 +14,13 @@ sidebar: get-started
 若使用既有專案，請執行：
 
 ```bash
-uv add "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@v1.0.0"
+uv add "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@947a216d295d3ceadd1dc06bcd34e8aebf61ff0c"
 uv run python -c "import importlib.metadata as m; print(m.version('orcapen-sc-pdk'))"
 ```
 
-確認：`v1.0.0` 原始碼標籤可用後，版本命令會回報 `1.0.0`。
+版本命令會回報 `1.0.0`，也就是此預覽原始碼中的套件中繼資料版本。
 
-## 啟用並建立元件
+## 啟用並建立元件 {#activate-and-see-a-cell}
 
 ```python
 import gdsfactory as gf
@@ -32,7 +32,7 @@ print(component.name, component.dbbox())
 component.plot()
 ```
 
-確認：輸出包含諧振器名稱與邊界框，並顯示 2D 佈局。實體尺寸單位為微米。
+輸出會包含諧振器名稱與邊界框，並顯示 2D 佈局。實體尺寸單位為微米。
 
 ## 接續閱讀
 

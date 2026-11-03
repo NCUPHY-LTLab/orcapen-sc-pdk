@@ -1,6 +1,6 @@
 {
   "mode": "title",
   "versions": [
-    {"label": "1.0.0", "root": "/", "latest": true}
+    {"label": "1.0.0 preview", "root": "/", "latest": true}
   ]
 }

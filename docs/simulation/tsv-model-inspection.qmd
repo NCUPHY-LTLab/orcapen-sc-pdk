@@ -31,13 +31,13 @@ Net membership and enclosure controls live in each notebook.
 
 | Example | Assignment to inspect | View / download |
 | --- | --- | --- |
-| Concentric Q3D | Signal/Ground Nets; face sheets, hollow wall solids and cut Si | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.qmd" download>QMD</a> |
-| Concentric Eigenmode | Closed 3D model, without ports, loads or junctions | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.qmd" download>QMD</a> |
-| TSV-grounded CPW Terminal | Exterior Wave cuts, Signal/reference membership and terminal order | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.qmd" download>QMD</a> |
+| Concentric Q3D | Signal/Ground Nets; face sheets, hollow wall solids and cut Si | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.qmd" data-noresolveinput download>QMD</a> |
+| Concentric Eigenmode | Closed 3D model, without ports, loads or junctions | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| TSV-grounded CPW Terminal | Exterior Wave cuts, Signal/reference membership and terminal order | [Notebook](../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb) · <a href="../notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.qmd" data-noresolveinput download>QMD</a> |
 
 
 The QMDs also need the shared
-<a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/_source_input.qmd" download>source-input companion</a>
+<a href="../notebooks/src/SCGSimExamples/ComponentSimulation/TSV/_source_input.qmd" data-noresolveinput download>source-input companion</a>
 beside them. Generated IPYNBs already contain those cells.
 
 ## Use the workflow actions

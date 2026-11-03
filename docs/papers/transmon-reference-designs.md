@@ -1,13 +1,13 @@
 ---
 title: "Transmon Reference Designs"
-sidebar: research
+sidebar: false
+search: false
 ---
 
-Use this topic to select public transmon designs with reproducible geometry,
-material assumptions, and circuit-model definitions.
+This archived topic page points to current guides for transmon-related public
+examples and model assumptions.
 
-⏳ Reference selection is in progress. Keep the physical layout and the
-paper's electrical model together when choosing a reproduction target.
-
-The [existing Xmon examples](../simulation/notebooks.qmd#kosen2024-xmon)
-provide a separate starting point for the documented public geometry.
+The [Xmon example index](../simulation/notebooks.qmd#kosen2024-xmon) describes
+the available public geometry and its separate electromagnetic and circuit
+models. Review the assumptions in [Materials & Interfaces](../start/materials.qmd)
+and the cited work in [References](../paper-review.md) before comparing results.

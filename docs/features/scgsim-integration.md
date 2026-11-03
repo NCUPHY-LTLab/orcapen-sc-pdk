@@ -16,7 +16,7 @@ identify interfaces rather than adding metal or assigning solver terminals.
 The technology source exposes physical declarations through
 `LayerLevel.info["physical_layer"]`. Selected component getters add source-owned
 records without changing the global material or stack definitions.
-Read the [technology source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/v1.0.0/orcapen_sc_pdk/tech.py)
+Read the [technology source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/947a216d295d3ceadd1dc06bcd34e8aebf61ff0c/orcapen_sc_pdk/tech.py)
 and the selected tutorial's getter for exact record fields.
 
 ## Use one runtime for the selected calculation

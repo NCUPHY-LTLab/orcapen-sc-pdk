@@ -1,14 +1,13 @@
 ---
 title: "CPW Resonator References"
-sidebar: research
+sidebar: false
+search: false
 ---
 
-Use this topic to select public CPW resonator designs for layout reproduction
-and electromagnetic comparison.
+This archived topic page points to the current reader guides for CPW resonators.
 
-⏳ Reference selection is in progress. Look for an explicit geometry,
-material stack, boundary treatment, and frequency or field result before
-choosing a reproduction target.
-
-For existing layouts, see [Cells](../public-pdk-examples/index.md#resonator).
-For calculations, see [Resonance & Eigenmodes](../simulation/requirements/eigenmode.qmd).
+Choose a geometry in [common cells](../start/common-cells.qmd), review its
+cross-section and physical stack in [Layers & Stack](../start/layers.qmd), then
+select a model in [Resonance & Eigenmodes](../simulation/requirements/eigenmode.qmd).
+The [References](../paper-review.md) page links the literature relevant to
+geometry, boundaries and interpretation.

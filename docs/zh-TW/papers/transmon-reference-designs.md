@@ -1,10 +1,9 @@
 ---
 title: "Transmon 參考設計"
-sidebar: research
+sidebar: false
+search: false
 ---
 
-使用本主題挑選具有可重現幾何、材料假設與電路模型定義的公開 transmon 設計。
+此保留頁面連結至 transmon 相關公開範例與模型假設的現行指南。
 
-⏳ 參考資料選擇仍在進行。選擇重現目標時，請將實體佈局與論文中的電氣模型一併考量。
-
-[既有 Xmon 範例](/orcapen-sc-pdk/en/simulation/notebooks.html#kosen2024-xmon)另提供已記載公開幾何的起點（英文）。
+[Xmon 範例索引](../simulation/notebooks.qmd#kosen2024-xmon)說明可用的公開幾何，以及各自獨立的電磁與電路模型。比較結果前，請先檢視[材料與介面](../start/materials.qmd)中的假設及[參考資料](../paper-review.md)所引研究。

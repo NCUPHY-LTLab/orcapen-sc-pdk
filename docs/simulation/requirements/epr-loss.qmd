@@ -15,6 +15,9 @@ their thickness, permittivity, loss tangent, and field side are selected model i
 
 Use the selected tutorial's Palace or AEDT environment and saved-field settings.
 Read [Materials & Interfaces](../../start/materials.qmd) before choosing a preset.
+Then review the literature's geometry, material assumptions, and extraction
+methods in [References: Surface Loss and Participation Studies](../../papers/surface-loss-participation.md)
+before applying those assumptions to a calculation.
 
 ## Choose a tutorial
 

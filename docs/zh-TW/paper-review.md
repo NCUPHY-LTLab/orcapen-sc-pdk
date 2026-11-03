@@ -1,15 +1,27 @@
 ---
-title: "研究"
-sidebar: research
+title: "參考資料"
+sidebar: development
 ---
 
-依設計類型或分析方法探索公開文獻。這些筆記可協助選擇佈局重現與模型比較所需的參考資料。
+本頁將 OrcaPen 現行幾何與模擬指南，連接至介面及表面損耗建模所引用的文獻。
 
-| 主題 | 閱讀重點 |
+## 實際引用的文獻
+
+[表面損耗與參與率研究目錄](papers/surface-loss-participation.md)是本文件中介面及參與率主題實際引用的四篇論文清單，並列出各篇的閱讀重點。請比對模型的幾何、材料與擷取方法，判斷引用內容是否適用；論文參數不會自動成為製程預設值。
+
+## OrcaPen 現行指南
+
+| 問題 | 指南 |
 | --- | --- |
-| [共面波導（coplanar waveguide，CPW）諧振器](papers/cpw-resonator-references.md) | 幾何、邊界、共振模態與降階模型 |
-| [Transmon 設計](papers/transmon-reference-designs.md) | 公開尺寸、材料與電路假設 |
-| [覆晶（flip-chip）與 3D 整合](papers/flip-chip-3d-integration.md) | 晶粒面、凸塊、介面與封裝模型 |
-| [表面損耗與參與率](papers/surface-loss-participation.md) | 介面定義、材料假設與損耗詮釋 |
+| 哪些圖層、橫截面與實體堆疊描述此幾何？ | [圖層與堆疊](start/layers.qmd) · [橫截面](public-pdk-examples/cross-sections.qmd) |
+| 模型應使用哪筆材料紀錄或介面預設值？ | [材料與介面](start/materials.qmd) |
+| 如何解讀參與率及表面損耗輸出？ | [參與率與表面損耗](simulation/requirements/epr-loss.qmd) |
 
-目前資料庫請見[材料與介面](start/materials.qmd)；既有計算請見[模擬](notebooks.qmd)。
+## 閱讀來源與模型選擇
+
+| 指南中的內容 | 提供給讀者的資訊 |
+| --- | --- |
+| 直接引文或來源節錄 | 引用來源，並標示頁碼、章節或表格等定位資訊。 |
+| 整理改寫的說明 | 引用支持該說明的來源。 |
+| 自行推導 | 列出來源輸入與起始假設，再呈現推導步驟。 |
+| 工程或模型選擇 | 說明所選做法及其假設，並與來源報告的事實區分。 |

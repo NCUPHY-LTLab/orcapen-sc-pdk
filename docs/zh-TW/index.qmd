@@ -30,7 +30,7 @@ OrcaPen 是以 GDSFactory 設計超導量子與射頻（Radio Frequency，RF）�
 
 :::: {.askr-card}
 ::: {.askr-card-body}
-### [公開測試元件與模擬範例](notebooks.qmd) {.askr-card-title .unlisted}
+### [公開元件圖集](public-pdk-examples/index.md#components-layout) {.askr-card-title .unlisted}
 
 用同一個公開測試元件，對照版圖、電磁模型與電路模型。OrcaPen 提供元件幾何及堆疊；[SCGSim](https://ncuphy-ltlab.github.io/scgsim/) 處理電磁建模與參數提取，[SCNSim](https://ncuphy-ltlab.github.io/scnsim/) 提供電路網路（Circuit network）建模與響應分析。
 :::
@@ -42,6 +42,14 @@ OrcaPen 是以 GDSFactory 設計超導量子與射頻（Radio Frequency，RF）�
 
 {{< include _includes/_readme-install.md >}}
 
-確認：來源標籤發布後，版本命令應回報 `1.0.0`。
+本站介紹的是公開原始碼預覽版，其套件中繼資料回報 `1.0.0`；這不是已發布的穩定版本。請依[安裝與入門](getting-started.md)中的固定來源指令安裝，再[啟用 OrcaPen 並查看元件](getting-started.md#activate-and-see-a-cell)。
 
-[安裝並啟用 OrcaPen](getting-started.md)，查看[常用元件](start/common-cells.qmd)，或瀏覽 [CPW 橫截面（Cross-section）](public-pdk-examples/cross-sections.qmd)。元件參數與連接埠（Port）定義可在[程式介面（API）參考](api.qmd)中查閱。
+## 從版圖到模擬
+
+先從[常用元件](start/common-cells.qmd)或[元件圖集](public-pdk-examples/index.md#components-layout)選擇幾何，
+再參閱[圖層與堆疊](start/layers.qmd)及[材料與介面](start/materials.qmd)，了解對應的實體模型。
+接著依照想回答的問題選擇[模擬指南](notebooks.qmd)，並搭配[已記錄案例](simulation/recorded-cases.qmd)
+及結果解讀說明，理解輸出的意義。
+
+元件參數與連接埠（Port）定義請見[程式介面（API）參考](api.qmd)；
+選定假設與相關文獻來源則收錄於[參考資料](paper-review.md)。

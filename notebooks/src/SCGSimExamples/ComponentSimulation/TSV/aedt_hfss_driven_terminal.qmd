@@ -26,8 +26,9 @@ this source authoring is not a solved result.
 See the [TSV guide](../../../../simulation/tsv-model-inspection.qmd) and
 [Driven Terminal requirement](../../../../simulation/requirements/driven-terminal.qmd).
 
-Fresh construction uses the local shared-physical candidate, not a
-published wheel. Retained results keep their original runtime identities.
+Fresh construction requires the shared SCGSim source environment associated
+with this example; no released wheel is claimed to provide these APIs.
+Retained results keep their recorded runtime identities.
 
 Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 

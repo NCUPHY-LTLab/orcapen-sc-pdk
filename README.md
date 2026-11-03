@@ -10,7 +10,7 @@
 ![OrcaPen superconducting layout and physical stack illustration.](docs/assets/orcapen-overview-banner-qubit.png)
 
 OrcaPen SC PDK is a public superconducting quantum/RF process design kit for
-[GDSFactory](https://gdsfactory.github.io/gdsfactory/). Version 1.0.0 provides
+[GDSFactory](https://gdsfactory.github.io/gdsfactory/). It provides
 reusable process layers, stack semantics, layout cells and integration points
 for [SCGSim](https://github.com/NCUPHY-LTLab/scgsim). Its 3D workflow keeps
 source geometry and fabrication meaning available to downstream simulation,
@@ -20,10 +20,14 @@ with public examples that make handoff and inspection easier.
 
 Use Python 3.12 or 3.13 with [uv](https://docs.astral.sh/uv/).
 
+The commands below install the public **1.0.0 source preview**, not a stable
+release. The `v1.0.0` tag has not been published; this preview selects an exact
+available source revision.
+
 <!-- overview-install:start -->
 ```bash
 uv init --python 3.12
-uv add "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@v1.0.0"
+uv add "orcapen-sc-pdk @ git+https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git@947a216d295d3ceadd1dc06bcd34e8aebf61ff0c"
 uv run python -c "import importlib.metadata as m; print(m.version('orcapen-sc-pdk'))"
 ```
 <!-- overview-install:end -->
@@ -39,8 +43,8 @@ component = gf.get_component("resonator")
 component.plot()
 ```
 
-Check: the version command reports `1.0.0` after the `v1.0.0` source tag is
-available. See [Get Started](docs/getting-started.md) for setup details. Contributors can
+The version command reports the preview's package metadata, `1.0.0`; that
+number does not indicate a published stable release. See [Get Started](docs/getting-started.md) for setup details. Contributors can
 use [Documentation & Website](docs/docs-publishing.md) to build the docs.
 
 ## Documentation and downloads

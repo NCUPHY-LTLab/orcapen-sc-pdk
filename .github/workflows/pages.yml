@@ -28,6 +28,7 @@ jobs:
           version: 1.10.19
       - run: uv sync -p 3.12 --locked --group docs --extra dev
       - run: uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
+      - run: uv run --group docs python scripts/build_overview_snippets.py
       - run: uv run --group docs quarto render docs --no-execute
       - run: python scripts/check_docs_navigation.py docs/_site
       - run: python scripts/fetch_previous_docs_release.py docs/releases-history.json "${RUNNER_TEMP}/docs-history-assets" --current-version "$(grep -m1 '^version = ' pyproject.toml | cut -d '"' -f2)" --output-manifest "${RUNNER_TEMP}/docs-history-manifest.json"

@@ -22,8 +22,9 @@ Nb 200 nm above a 200 µm wide, 500 µm deep Si substrate. It is not a
 3D coupon slice or the current-PDK Al model. Native rectangles and conductor
 assignments define the case; no GDS is imported.
 
-Fresh construction uses the local shared-physical candidate, not a
-published wheel. Retained results keep their original runtime identities.
+Fresh construction requires the shared SCGSim source environment associated
+with this example; no released wheel is claimed to provide these APIs.
+Retained results keep their recorded runtime identities.
 
 Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 

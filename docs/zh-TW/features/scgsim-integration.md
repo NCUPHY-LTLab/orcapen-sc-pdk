@@ -9,7 +9,7 @@ sidebar: development
 
 幾何應保留實體圖層識別、晶粒表面、原始厚度、孔洞、放置位置與導體歸屬。非金屬定位薄片用來識別介面，不會新增金屬或指派求解器端點。
 
-技術來源透過 `LayerLevel.info["physical_layer"]` 提供實體宣告。所選元件的取得器會新增來源所屬紀錄，但不會改變全域材料或堆疊定義。精確紀錄欄位請查閱[技術來源](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/v1.0.0/orcapen_sc_pdk/tech.py)及所選教學的取得器。
+技術來源透過 `LayerLevel.info["physical_layer"]` 提供實體宣告。所選元件的取得器會新增來源所屬紀錄，但不會改變全域材料或堆疊定義。精確紀錄欄位請查閱[技術來源](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/947a216d295d3ceadd1dc06bcd34e8aebf61ff0c/orcapen_sc_pdk/tech.py)及所選教學的取得器。
 
 ## 為所選計算使用同一執行環境
 
