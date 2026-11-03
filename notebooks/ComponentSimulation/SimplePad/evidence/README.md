@@ -3,8 +3,10 @@
 These are public synthetic, owner-derived observations from the four canonical
 SimplePad workflows, not measured device properties. `run_set.json` binds the
 native receipts and exact runtime identities; `results.csv` contains scalar
-quantities. Raw sealed run folders are retained by their custodian and are not
-published here. Manual re-analysis requires obtaining those exact artifacts.
+quantities. Input and returned-result packages are selected by the original run
+IDs in this manifest; see the [reproducibility guide](../../../../docs/simulation/reproducibility.qmd)
+for release downloads and matching-version instructions. Reading the plots does
+not require a solver; re-analysis uses the corresponding original result package.
 
 | Branch | Observed quantity | Result reading |
 | --- | --- | --- |

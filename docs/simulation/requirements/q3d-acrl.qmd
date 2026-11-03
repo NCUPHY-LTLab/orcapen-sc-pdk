@@ -3,6 +3,10 @@ title: "Q3D and AC/RL"
 sidebar: simulation
 ---
 
-AC/RL loop and mutual-inductance workflows are not completed. For the existing finite-conductor capacitance tutorials, use [Capacitance](electrostatic-capacitance.qmd).
+::: {.callout-warning title="AC/RL workflows are not complete"}
+AC/RL loop and mutual-inductance workflows are not completed.
+:::
+
+For the existing finite-conductor capacitance tutorials, use [Capacitance](electrostatic-capacitance.qmd).
 
 Continue with [Upcoming workflows](../../notebooks.qmd#upcoming-workflows).

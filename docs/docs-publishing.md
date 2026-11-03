@@ -3,59 +3,54 @@ title: "Documentation & Website"
 sidebar: development
 ---
 
-Edit English reader pages in `docs/`, their Traditional Chinese translations in
-`docs/zh-TW/`, and canonical tutorial sources in `notebooks/src/`. Build with
-Quarto 1.10.19; the site keeps notebook execution disabled.
+Build the documentation site from `docs/` and the paired notebook sources with
+the pinned docs environment. The build does not execute notebooks or launch a solver.
 
 ## Build locally
 
+Generate the README and layer snippets first; Quarto scans those included files
+before pre-render hooks run.
+
 ```bash
 uv sync -p 3.12 --locked --group docs --extra dev
-just docs
+uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
+uv run --group docs python scripts/build_overview_snippets.py
+uv run --group docs quarto render docs --no-execute
+uv run python scripts/check_docs_navigation.py docs/_site
 ```
 
-Check: generated notebook inputs match their QMD sources, and the site appears
-in `docs/_site/`. Traditional Chinese is the default homepage; English is in
-`docs/_site/en/`. The pre-render step generates the API reference with quartodoc.
+Run the notebook synchronization command as a check; it must report no drift.
+The rendered site is in `docs/_site/`. For a local static preview, serve that
+built directory on loopback with `python -m http.server --directory docs/_site
+8000 --bind 127.0.0.1`.
 
-For a local preview:
+## Edit notebook guides
 
-```bash
-just serve-docs
-```
+Canonical tutorial sources live in `notebooks/src/`; distributed notebooks live
+in `notebooks/`. Generate a changed pair only with the synchronization tool's
+explicit `--generate` option. Review the matching SCGSim version and usage
+instructions before changing executable examples.
 
-Check: open `http://127.0.0.1:8000`. Inspect the desktop navigation and the
-collapsed menu at narrow widths.
-The command builds both editions with local language links before starting the
-static server. Rebuild with `quarto render docs --profile preview --no-execute`
-after editing; refresh the browser to see the new pages.
+## Pages and publication
 
-## Edit notebooks without changing their results
+Ready pull requests build the site for review. A successful build on `main`
+publishes to [GitHub Pages](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/).
+The site uses native Quarto navigation and the Askr theme; see
+[theme and toolchain](features/docs-theme.md).
 
-QMD files own the tutorial text, executable cells, settings, and stable code-cell IDs.
-Their IPYNB counterparts are generated downloads. After editing a QMD, regenerate
-the corresponding notebook with the existing pairing tool; use
-`just convert-notebooks` for the repository-wide conversion.
+Keep the older topic URLs available for existing references without restoring
+them to the core References route.
 
-`just check-notebooks` compares source structure without running cells.
-Keep simulation execution separate from site generation.
+::: {.callout-note title="Older topic URLs" collapse="true"}
+- [CPW Resonator References](papers/cpw-resonator-references.md)
+- [Transmon Reference Designs](papers/transmon-reference-designs.md)
+- [Flip-Chip and 3D Integration](papers/flip-chip-3d-integration.md)
+:::
 
-## Pages and downloads
+## Preserve released documentation
 
-Ready pull requests build the site for review; Draft builds are skipped. A successful build on `main`
-deploys to [GitHub Pages](https://ncuphy-ltlab.github.io/orcapen-sc-pdk/).
-
-The SurfaceBands examples render from their canonical QMD paths so sibling
-HTML links and the model JSON stay together. Their IPYNBs remain separate
-downloads. The existing post-render helper copies the two raw QMD sources
-byte-for-byte into site output; raw download anchors use `data-noresolveinput`.
-
-## Theme and site structure
-
-The site uses the unchanged Askr extension and native Quarto navigation.
-See [theme and toolchain](features/docs-theme.md) for its selected versions.
-Place pages in one of Get Started, Simulation, API, Research, or Development;
-the logo returns to the home page.
-
-Use [public package source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk) for API
-definitions and [Research](paper-review.md) for literature notes.
+Before preparing a later release, add each earlier release's `docs-site.tar.gz`
+to `docs/releases-history.json` with its version, tag and SHA-256 from that
+release's `SHA256SUMS`. Pages downloads only these named archives and retains
+them under `vVERSION/`; Askr lists the real editions in its version menu.
+The history list is empty for the first release.

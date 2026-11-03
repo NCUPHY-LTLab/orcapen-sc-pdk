@@ -17,6 +17,18 @@ class NotebookPairError(RuntimeError):
     """Raised when a canonical QMD and its derived notebook disagree."""
 
 
+def _canonicalize_kernel_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
+    result = dict(metadata)
+    kernelspec = result.get("kernelspec")
+    if isinstance(kernelspec, dict):
+        kernelspec = dict(kernelspec)
+        kernelspec.pop("path", None)
+        if kernelspec.get("name") == "python3" and kernelspec.get("language") == "python":
+            kernelspec["display_name"] = "Python 3"
+        result["kernelspec"] = kernelspec
+    return result
+
+
 _PYTHON_FENCE = re.compile(r"^```\{python(?:\s+[^}]*)?\}\s*$")
 _CELL_ID = re.compile(r"^#\|\s*id:\s*['\"]?([A-Za-z0-9_-]{1,64})['\"]?\s*$")
 
@@ -112,6 +124,9 @@ def _canonicalize_ids(notebook: dict[str, Any], label: str) -> None:
         if cell_id in seen:
             raise NotebookPairError(f"{label}: duplicate cell id {cell_id!r}")
         seen.add(cell_id)
+    metadata = notebook.get("metadata", {})
+    if isinstance(metadata, dict):
+        notebook["metadata"] = _canonicalize_kernel_metadata(metadata)
 
 
 def _source_text(value: Any, label: str) -> str:
@@ -156,6 +171,7 @@ def _normalized_inputs(notebook: dict[str, Any], label: str) -> dict[str, Any]:
     if not isinstance(metadata, dict):
         raise NotebookPairError(f"{label}: notebook metadata is not an object")
     normalized_notebook = dict(notebook)
+    normalized_notebook["metadata"] = _canonicalize_kernel_metadata(metadata)
     normalized_notebook["cells"] = normalized_cells
     return normalized_notebook
 

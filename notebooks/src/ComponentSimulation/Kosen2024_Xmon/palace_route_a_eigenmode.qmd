@@ -82,12 +82,14 @@ if WORKFLOW_ACTION == "prepare_handoff":
 
 ## Configure EPR / Problem
 
+::: {.callout-note title="Material presets are modeling assumptions"}
 The MA/MS/SA inputs use OrcaPen's synthetic literature-central presets; they are
 modeling inputs, not measured process data or material properties. Each preset
 records the
 ordinary-median epsilon_r and thickness, the log-space-median loss tangent,
 the excluded assumed-typical and censored-upper-bound rows, and the 2 nm
 thickness modeling convention in its PDK provenance.
+:::
 
 ```{python}
 #| id: '6456e222'

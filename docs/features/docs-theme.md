@@ -4,12 +4,12 @@ sidebar: development
 ---
 
 This site uses the public `askr-html` format from
-[Askr v0.12.0 released source](https://github.com/arfiligol/askr/tree/v0.12.0).
+[Askr v0.14.0 released source](https://github.com/arfiligol/askr/tree/v0.14.0).
 The unchanged extension is
 vendored at `docs/_extensions/arfiligol/askr`, including its MIT license,
 third-party notices and local font/icon assets. The extension manifest
-`_extension.yml` declares version `0.12.0` and Quarto `>=1.9.38 <1.11`.
-The [released extension metadata](https://github.com/arfiligol/askr/blob/v0.12.0/_extensions/askr/_extension.yml)
+`_extension.yml` declares version `0.14.0` and Quarto `>=1.9.38 <1.11`.
+The [released extension metadata](https://github.com/arfiligol/askr/blob/v0.14.0/_extensions/askr/_extension.yml)
 records the format and compatibility requirements.
 
 The root `_extensions` symlink points to `docs/_extensions`. It lets relative
@@ -23,17 +23,16 @@ then check `quarto --version`. To reproduce the extension installation:
 
 ```bash
 cd docs
-quarto add arfiligol/askr@v0.12.0 --no-prompt
+quarto add arfiligol/askr@v0.14.0 --no-prompt
 ```
 
 Commit reviewed extension updates as consumer bytes; do not edit the installed
 copy or track a moving branch. `_quarto.yml` selects `askr-html` without
 replacing its themes, reading measure, fonts, colors or native controls.
-`styles.css` retains only local table overflow and diagram popout behavior.
-Its consumer-only color aliases follow Askr's `--qdk-border` and `--qdk-canvas`
-tokens. The [Cells gallery](../public-pdk-examples/index.md#components-layout)
+The site uses Askr's native table scrolling and viewers without a consumer
+stylesheet. The [Cells gallery](../public-pdk-examples/index.md#components-layout)
 uses the stock inline Image Viewer; the previous custom iframe viewer is retired.
-See the [released viewer usage](https://github.com/arfiligol/askr/blob/v0.12.0/usage/image-viewer.qmd).
+Reader Mode stays disabled. See the [v0.14.0 viewer usage](https://github.com/arfiligol/askr/blob/v0.14.0/usage/image-viewer.qmd).
 
 ## Languages and repository link
 

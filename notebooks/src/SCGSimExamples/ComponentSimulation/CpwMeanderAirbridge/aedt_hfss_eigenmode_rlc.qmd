@@ -20,8 +20,9 @@ does not irrevocably select a solver treatment. Read the
 [Lumped RLC requirement](../../../../simulation/requirements/lumped-rlc-eigenmode.qmd)
 for the system and expected outputs.
 
-Fresh construction uses the local shared-physical candidate, not a
-published wheel. Retained results keep their original runtime identities.
+Fresh construction requires the shared SCGSim source environment associated
+with this example; no released wheel is claimed to provide these APIs.
+Retained results keep their recorded runtime identities.
 
 Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
@@ -139,7 +140,8 @@ if WORKFLOW_ACTION != "analyze":
 Preparation is a separate explicit action. Review its source/effective Z,
 support membership, enclosure and enabled load components before any later
 native run. The resource request is not a host-wide hard RAM cap or a reserved
-license. This publication round does not execute the following preparation.
+license. This notebook does not include a newly prepared handoff or solved
+result.
 
 ```{python}
 #| id: meander-rlc-prepare

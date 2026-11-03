@@ -7,4 +7,4 @@ Read [Materials, stack and height](../../start/layers.qmd) for the current guide
 [Materials & Interfaces](../../start/materials.qmd) covers record selection.
 
 Generic solver and result APIs belong to the selected version's
-[SCGSim documentation](https://github.com/OrPenStrike/scgsim/tree/develop/docs).
+[SCGSim documentation](https://github.com/NCUPHY-LTLab/scgsim/tree/develop/docs).

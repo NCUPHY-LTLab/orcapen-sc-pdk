@@ -16,6 +16,32 @@ OrcaPen 將 XY 圖層（Layer）名稱與實體高度、材料、顯示方式及
 
 現有 LayerViews 顯示群組為 `Metal`、`Airbridge`、`Junction`、`DesignIntent`、`Integration`、`Alignment`、`Admin`、`gdsfactory` 與 `Simulation`。下表依用途整理圖層；群組名稱只控制顯示分類，不代表實體材料。完整定義請見[技術來源](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/tech.py)及[圖層視圖](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/layers.yaml)。以下座標與厚度皆為微米（µm）；圖層配對表示為 `(layer, datatype)`。
 
+先依模型選擇單晶粒堆疊，或包含完整雙晶粒組裝的雙晶粒覆晶堆疊。選擇會決定元件模擬使用哪些實體層；不會替你選擇 Nets、端點、激發或求解器邊界。
+
+## 選擇堆疊
+
+| 取得器 | 回傳層級 |
+| --- | --- |
+| `get_layer_stack()` | 完整雙晶粒堆疊：下方列出的全部 24 層。 |
+| `get_two_die_flip_chip_layer_stack()` | 完整 `LAYER_STACK`。 |
+| `get_single_die_layer_stack()` | `D0_SUBSTRATE`、`D0_TOP_M1` 與 `D0_TOP_SIM_BOUNDARY` 的分離副本。這是預設單晶粒選擇。 |
+| `get_single_die_layer_stack(include_airbridges=True)` | 三個單晶粒層，加上 `D0_TOP_AIRBRIDGE_VIA` 與 `D0_TOP_AIRBRIDGE`。 |
+
+單晶粒取得器會移除頂部 M1 的晶粒間宿主空隙參考。它保留 PDK 實體尺寸與材料，但不含上層晶粒或晶粒間空腔；該模型的周圍真空區域由 SCGSim 提供。
+
+## 從圖層名稱到模擬輸入
+
+下圖顯示具有實體堆疊來源之幾何的主要對應關係：
+
+```{mermaid}
+flowchart TB
+  N["圖層名稱與 GDS 配對"] --> G["XY 版圖幾何"]
+  G --> S["選定的實體堆疊"]
+  S --> I["元件模擬輸入"]
+```
+
+圖層名稱識別 XY 繪圖；有宣告來源的堆疊層則補上高度、厚度與材料等實體屬性。並非每個圖層都有實體層：遮罩、標籤與對準幾何也可能服務於其他用途。堆疊只是模擬輸入之一部分；各模擬流程另行指定 Nets、端點、激發與邊界。
+
 ## 晶粒、表面與 Z 座標系
 
 `D0` 與 `D1` 分別代表下層及上層晶粒。`TOP` 與 `BOTTOM` 是共用堆疊座標系中的晶粒表面。預設堆疊將 D0 頂部基板表面設於 `z = 0`；這是選定的原點，不是所有堆疊都必須採用的原點。
@@ -147,7 +173,11 @@ D1–D2 凸塊名稱保留圖層配對；此堆疊沒有定義 D2 基板、表�
 | `D1_SUBSTRATE` | 8.2 至 508.2 | 500 | `Si` |
 | `OUTER_VACUUM` | 508.2 至 1508.2 | 1000 | `vacuum` |
 
-基板與間隙宣告 `simulation_role="solution_region"` 及 `include_in_component_simulation=True`。`OUTER_VACUUM` 標為 `is_airbox=True`，但 `include_in_component_simulation=False`；這個具名層不是完整的模擬外圍區域。
+基板與間隙宣告 `simulation_role="solution_region"` 及 `include_in_component_simulation=True`。
+
+::: {.callout-warning title="OUTER_VACUUM 不是完整外圍區域"}
+`OUTER_VACUUM` 標為 `is_airbox=True`，但 `include_in_component_simulation=False`。這個具名層不是完整的模擬外圍區域。
+:::
 
 ### 表面金屬、空橋與定位薄片
 
@@ -176,17 +206,6 @@ D0 TOP 與 D1 BOTTOM M1 也宣告導體角色及上述表面接地遮罩配方�
 | `D0_D1_UNDER_BUMP` | 0 至 0.1 | 0.1 | `In` | UBM 來源層，設為 `exclude_from_simulation=True`；不納入模擬幾何。 |
 
 公開接地凸塊填充規格使用置中的 20 × 20 µm 凸塊本體及 40 × 40 µm 接觸範圍，格點原點為 `(0, 0)`。其禁佈區類別列於上方圖層對照；放置位置由元件選擇。
-
-## 選擇堆疊
-
-| 取得器 | 回傳層級 |
-| --- | --- |
-| `get_layer_stack()` | 完整雙晶粒堆疊：上列全部 24 層。 |
-| `get_two_die_flip_chip_layer_stack()` | 完整 `LAYER_STACK`。 |
-| `get_single_die_layer_stack()` | `D0_SUBSTRATE`、`D0_TOP_M1` 與 `D0_TOP_SIM_BOUNDARY` 的分離副本。這是預設單晶粒選擇。 |
-| `get_single_die_layer_stack(include_airbridges=True)` | 三個單晶粒層，加上 `D0_TOP_AIRBRIDGE_VIA` 與 `D0_TOP_AIRBRIDGE`。 |
-
-單晶粒取得器會移除頂部 M1 的晶粒間宿主空隙參考。它保留 PDK 實體尺寸與材料，但不含上層晶粒或晶粒間空腔；該模型的周圍真空區域由 SCGSim 提供。
 
 ## 宣告的圖層連通性
 

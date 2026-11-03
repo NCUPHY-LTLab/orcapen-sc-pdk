@@ -4,8 +4,10 @@ sidebar: api
 ---
 
 `resonator` combines a CPW hanger and meander, with optional tail and qubit
-segment geometry. Its `length` is the full centerline target; the meander takes
-the remaining length after the other sections are accounted for.
+segment geometry. The `length` parameter is the target for the complete
+centerline, not just the meander; the meander uses the length left after the
+other sections are accounted for. The CPW cross-section selected by `cpw_xs`
+defines the trace and gap geometry used by routed sections.
 
 ## Build the default component
 
@@ -33,8 +35,9 @@ component = gf.get_component("resonator")
 
 `o1` marks the hanger start, `o_hanger_center` is a placement anchor, and
 `o_hanger_end` joins the meander. The component also provides readout coupling
-anchors. DRAW, ETCH, and GROUND_MASK layers are configurable. The default
-layout preview is in the [Cells gallery](../index.md#components-layout).
+anchors. These layout anchors locate or join geometry; they are not by
+themselves electromagnetic solver terminals. DRAW, ETCH, and GROUND_MASK layers
+are configurable. The default layout preview is in the [Cells gallery](../index.md#components-layout).
 
 ![Default resonator DRAW and ETCH layout.](../../_static/images/components/resonator.svg)
 

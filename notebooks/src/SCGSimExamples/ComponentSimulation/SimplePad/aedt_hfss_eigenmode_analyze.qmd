@@ -1,0 +1,127 @@
+---
+title: "SimplePad HFSS：分析回傳結果（Analyze）"
+lang: zh-TW
+jupyter: python3
+execute:
+  enabled: false
+---
+
+以全新 Python 核心讀取既有回傳資料夾，查看模態、原生自適應回合與表面能量參與率（Surface EPR）。主流程為離線讀取，不建立版圖、不開啟 AEDT，也不求解。
+
+## 明確選擇回傳資料夾
+
+沿用 [Prepare Handoff](aedt_hfss_eigenmode_prepare.qmd) 指定的 SCGSim 公開來源。在下方直接填入完整回傳資料夾的絕對路徑，取代範例路徑。
+
+```{python}
+#| id: hem-analyze-input
+from pathlib import Path
+
+from IPython.display import display
+from scgsim.aedt import plot_epr_result, resolve_results, show_epr
+
+RETURNED_RUN_DIR = Path("/absolute/path/to/returned/run_dir").expanduser().resolve()
+result = resolve_results(RETURNED_RUN_DIR)
+display({"project": result.project_path, "receipt": result.receipt_path})
+```
+
+## 原生紀錄與收斂
+
+先查看回傳身分與實際數值紀錄，再判讀物理結果。達到回合上限不等於滿足頻率收斂目標；保留報告呈現的缺失、警告與未收斂狀態。
+
+```{python}
+#| id: hem-analyze-report
+result.show_all_results(show_details=True)
+epr = result.epr_result()
+if epr is None:
+    raise RuntimeError("This tutorial requires the returned EPR result.")
+display([
+    {"mode": row["mode"], "native_pass": row.get("native_pass"), "status": row["status"]}
+    for row in epr.rows
+])
+```
+
+## 物理分析結果（Physics）
+
+查看上方實際回傳列，再於下一格直接修改 `MODE` 與 `NATIVE_PASS`。下方的 `1` 是可編輯的選擇值，不代表最後一回合或已收斂；請填入回傳列中存在的模態與原生回合編號。
+
+```{python}
+#| id: hem-analyze-physics
+MODE = 1
+NATIVE_PASS = 1
+display(result.physics_results())
+display(show_epr(epr, mode=MODE, native_pass=NATIVE_PASS))
+display(plot_epr_result(epr, mode=MODE, native_pass=NATIVE_PASS, show_convergence=True))
+```
+
+表面參與率、文獻薄膜假設推估的損耗與原生 Q 值分開閱讀。原始模態資料與指定回合的 EPR 具有各自的選擇範圍。
+
+## 計算成本（Performance）
+
+```{python}
+#| id: hem-analyze-performance
+display(result.simulation_benchmark())
+```
+
+## 選用：重新評估已保存場
+
+這項操作需要已授權的 AEDT 主機，會開啟已保存專案的工作副本並評估場積分，但不呼叫原生求解。請在另一份筆記本使用以下範例；它是文件程式碼，不會隨本筆記本的「全部執行」啟動。
+
+在範例中直接填入原始已求解資料夾及已保存解清單的絕對路徑，並選擇新的分析輸出位置。使用原始已求解資料的規格、幾何、模態請求及薄膜設定。
+
+```python
+import json
+from pathlib import Path
+from uuid import uuid4
+
+from scgsim.aedt import (
+    analyze_epr,
+    parse_aedt_spec,
+    resolve_results,
+    resolve_saved_solution,
+)
+
+original_dir = Path("/absolute/path/to/original/solved_run").resolve()
+saved_solution_manifest = Path("/absolute/path/to/saved-solution-manifest.json")
+output_root = Path.cwd() / ".artifacts" / "saved-field-epr"
+original_result = resolve_results(original_dir)
+original_spec = parse_aedt_spec(
+    json.loads((original_dir / "aedt_spec.json").read_text()),
+    base_dir=original_dir,
+)
+saved_solution = resolve_saved_solution(
+    saved_solution_manifest
+)
+output_dir = (
+    output_root.resolve()
+    / f"saved_epr_{uuid4().hex}"
+)
+saved_epr = analyze_epr(
+    saved_solution=saved_solution,
+    aedt_version=original_spec.aedt_version,
+    geometry=original_spec.geometry,
+    project_name=original_spec.project_name,
+    design_name=original_spec.design_name,
+    run_control=original_spec.run_control,
+    epr_request=original_spec.epr_request,
+    output_dir=output_dir,
+    geometry_workers=1,
+)
+display(saved_epr)
+```
+
+## 選用：離線重算薄膜損耗
+
+離線重分析只讀取獨立 EPR 結果 JSON，重用既有場積分；不開啟 AEDT，也不重新評估場。直接填入要讀取的結果檔案路徑，在另一個離線核心執行以下範例。
+
+```python
+from pathlib import Path
+
+from scgsim.aedt import reanalyze_epr, resolve_epr_result
+
+DETACHED_EPR_RESULT_PATH = Path("/absolute/path/to/epr-result.json")
+detached = resolve_epr_result(DETACHED_EPR_RESULT_PATH)
+display(detached)
+display(reanalyze_epr(detached))
+```
+
+如需比較另一組文獻損耗假設，可明確傳入 `surface_defaults` 或 `group_overrides`；欄位與作用範圍見 [SCGSim 原始 API](https://github.com/NCUPHY-LTLab/scgsim/blob/0f6b4e5c54aff4891492976a5dd58387cc1a1787/src/scgsim/aedt/epr/analysis.py)。輸出保留為另一份分析，不覆寫原始結果。

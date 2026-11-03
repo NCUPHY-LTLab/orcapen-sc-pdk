@@ -279,17 +279,19 @@
         if(!details.open||populated) return;
         populated=true;
         const source=wrapper.dataset.askrMermaidSource || '';
+        const frame=document.createElement('div'); frame.className='askr-mermaid-source-frame';
+        const copyRow=document.createElement('div'); copyRow.className='askr-mermaid-copy-row';
         const pre=document.createElement('pre'), code=document.createElement('code');
         code.textContent=source; pre.append(code);
-        const status=document.createElement('span'); status.className='askr-mermaid-copy-status';
-        status.setAttribute('role','status');
-        const copy=mermaidButton('Copy Mermaid source','Copy',async()=>{
-          try {
-            if(!navigator.clipboard?.writeText) throw new Error('Clipboard access is unavailable.');
-            await navigator.clipboard.writeText(source); status.textContent='Copied.';
-          } catch (_) { status.textContent='Copy unavailable; select the source to copy it.'; }
-        });
-        details.append(pre,copy,status);
+        const status=document.createElement('span'); status.className='askr-copy-status';
+        status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
+        const copy=document.createElement('button'); copy.type='button';
+        copy.className='askr-copy-button askr-copy-mermaid';
+        copy.dataset.askrCopyKind='mermaid'; copy.dataset.askrCopyLabel='Copy Mermaid source';
+        copy.textContent='Copy'; copy.setAttribute('aria-label','Copy Mermaid source');
+        copyRow.append(status,copy);
+        frame.append(copyRow,pre);
+        details.append(frame);
       });
       return details;
     }

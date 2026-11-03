@@ -26,15 +26,12 @@ OrcaPen owns canonical curve laws and sampled source polygons; SCGSim owns
 their source binding and any later native representation. This notebook owns
 concrete inputs and displays real records rather than a second normalizer.
 
-Fresh construction uses the local shared-physical candidate, not a
-published wheel. Retained results keep their original runtime identities.
-
-Historical source-observation cohort: [SCGSim v2 RC1][scgsim-rc1], OrPen suite base `f4f5098`.
-Use the selected local shared-physical candidate runtime; the linked checkpoint is
-historical attribution. Ordinary environment pins stay unchanged. Execution is disabled; bounded isolated
-source construction was observed separately, without a notebook kernel run or
-saved output. Native conformity is
-UNOBSERVED, including OCC interpolation versus the authored Hermite law.
+Fresh construction uses the shared SCGSim source environment associated with
+these calls; no released wheel is claimed to provide the same APIs. A prior
+bounded source-only observation used the pinned [SCGSim v2 RC1 checkpoint][scgsim-rc1];
+that historical observation does not establish this notebook's behavior.
+Native conformity remains unobserved, including OCC interpolation versus the
+authored Hermite law. No notebook run or saved output is attached.
 
 ## Environment and observation identity
 

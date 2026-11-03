@@ -7,6 +7,10 @@ Calculate where a selected mode stores energy, then apply explicitly chosen
 material and interface loss assumptions. Use an LC/EPR tutorial rather than
 treating an unloaded frequency calculation as a participation result.
 
+Reader question from [Choose a Simulation](../../notebooks.qmd):
+
+> Where is field energy stored, and how do interface assumptions affect loss?
+
 ## Model and prerequisites
 
 Preserve conductor and junction/load definitions, stack, exterior, and the
@@ -15,14 +19,18 @@ their thickness, permittivity, loss tangent, and field side are selected model i
 
 Use the selected tutorial's Palace or AEDT environment and saved-field settings.
 Read [Materials & Interfaces](../../start/materials.qmd) before choosing a preset.
+Then review the literature's geometry, material assumptions, and extraction
+methods in [References: Surface Loss and Participation Studies](../../papers/surface-loss-participation.md)
+before applying those assumptions to a calculation.
 
 ## Choose a tutorial
 
-| Task | Tutorial |
-| --- | --- |
-| Pad LC mode and surface/bulk contributions | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| Native HFSS field-integral evaluation | [SimplePad HFSS LC/EPR](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.qmd" data-noresolveinput download>QMD</a> |
-| Explicit geometric bands and a local-interface correction | [SimplePad Palace surface bands](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) with [Q2D interface factors](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) |
+| Task | Tutorial / route | Downloads |
+| --- | --- | --- |
+| Pad LC mode and surface/bulk contributions | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
+| Native HFSS field-integral evaluation | [Prepare → Run → Analyze](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) | — |
+| Native HFSS field-integral evaluation | [Run Directly](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.qmd" data-noresolveinput download>QMD</a> |
+| Explicit geometric bands and a local-interface correction | [SimplePad Palace surface bands](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) · [Q2D interface factors](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) | — |
 
 
 ## Read participation and loss
@@ -33,8 +41,23 @@ contributions identifiable. Participation, assumption-based loss, native Q,
 and measured lifetime are different quantities.
 
 For geometric correction, inspect the selected original-parent bands, sampled
-region, retained region, and returned Q2D factor together. The tutorial's
-straight-edge approximation does not establish corner equivalence.
+region, retained region, and returned Q2D factor together.
+
+::: {.callout-warning title="Straight edges do not establish corner equivalence"}
+The tutorial's straight-edge approximation does not establish corner
+equivalence.
+:::
+
+Use [SimplePad HFSS routes](eigenmode.qmd#simplepad-hfss-handoff-sequence) to choose the separated Prepare Handoff → Run prepared package path or the single-notebook Run Directly path. Both can continue to the shared [Analyze notebook](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb) · <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.qmd" data-noresolveinput download>QMD</a>.
+
+Analyze keeps two optional operations separate. Choose either only when that
+additional analysis is needed.
+
+Saved-field evaluation
+: Uses an AEDT license but does not solve.
+
+Detached loss reanalysis
+: Reads saved data offline.
 
 ## SurfaceBands downloads
 

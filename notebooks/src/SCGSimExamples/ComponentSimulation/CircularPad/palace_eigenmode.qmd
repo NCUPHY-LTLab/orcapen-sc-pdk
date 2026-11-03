@@ -24,18 +24,21 @@ measured device. Component source owns curved boundary chains and local
 PAD/GROUND facts; this notebook owns final Nets.
 Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
-Fresh construction uses the local shared-physical candidate, not a
-published wheel. Retained results keep their original runtime identities.
+Fresh construction requires the shared SCGSim source environment associated
+with this example; no released wheel is claimed to provide these APIs.
+Retained results keep their recorded runtime identities.
 
 The default `run` action builds, prepares and solves this case, then reads its returned
 results. Choose `AUTHORING_ONLY` for non-solving inputs or `prepare_handoff`
 for a portable run package. Documentation rendering executes no code.
 LiteratureCentral MA/MS/SA films are model assumptions, not measured loss.
 
-Historical evidence is separate: the original `circular_pad_palace_eigenmode_20261007_08`
+::: {.callout-warning title="Historical run only; not evidence for this source"}
+The original `circular_pad_palace_eigenmode_20261007_08`
 cohort used SCGSim 1.1.0rc1 and reported 5.573354161115 GHz with retained
 PCG warnings. Those results do not execute or validate this source; see the
 [original evidence and identity manifest](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/notebooks/ComponentSimulation/CircularPad/evidence/README.md).
+:::
 
 
 ```{python}
@@ -255,10 +258,15 @@ Only `run` invokes the generated script. Use a fresh RUN_ID for each new
 preparation; existing destinations fail rather than being overwritten. Exact
 host executable/setup provenance belongs in the owner's execution receipt,
 not a machine-local public default. There is no automatic retry or fallback.
+
+::: {.callout-warning title="The generated script requires a Palace MPI wrapper"}
 `PALACE_EXECUTABLE` must select an actual Palace MPI wrapper: the generated
 script supplies `-np 8 -nt 1` through `resources["command_style"] = "wrapper"`.
-A direct ELF is not a wrapper. Select a fresh RUN_ID before changing the action
-to `prepare_handoff` or `run`; the fresh RUN_ID never names historical evidence.
+A direct ELF is not a wrapper.
+:::
+
+Select a fresh RUN_ID before changing the action to `prepare_handoff` or `run`;
+the fresh RUN_ID never names historical evidence.
 
 ```{python}
 #| id: cpe-handoff

@@ -13,9 +13,20 @@ execute:
 
 Build the public SimplePad, inspect its actual source catalogue, and select original-parent surface-distance bands before applying the [Q2D example's](aedt_q2d_interfaces.qmd) returned factors. Edit numeric geometry and controls in [the companion model](simplepad_interface_model.json); the catalogue supplies actual source identities and field sides during authoring.
 
-⏳ Execution pending — use the separately provisioned CPython 3.12.14 / GDSFactory 9.48.0 environment, an ordinary OrcaPen wheel built from pinned public source `c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c`, and the selected SCGSim candidate. The execution owner supplies the official Palace 0.18.1 executable binding and the separate serial, MPI, and nonconformal stages; this page prepares one explicitly selected run.
+::: {.callout-warning title="Execution prerequisites"}
+Execution is pending. Use the separately provisioned CPython 3.12.14 /
+GDSFactory 9.48.0 environment, an ordinary OrcaPen wheel built from [pinned
+public source at revision `c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c`](https://github.com/OrPenStrike/orcapen-sc-pdk/tree/c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c),
+and the selected SCGSim candidate. The execution owner supplies the official
+Palace 0.18.1 executable binding and separate serial, MPI, and nonconformal
+stages; this page prepares one explicitly selected run.
+:::
 
-The field correction uses one illustrative straight-edge factor per interface across all selected parents. Corner, hole, and outer-edge equivalence remains unverified.
+::: {.callout-caution title="Correction is illustrative outside straight edges"}
+The field correction uses one illustrative straight-edge factor per interface
+across all selected parents. Equivalence for corners, holes, and outer edges
+remains unverified.
+:::
 
 ## Setup and Imports
 

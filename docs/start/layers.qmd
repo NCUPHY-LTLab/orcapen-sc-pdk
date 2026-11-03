@@ -24,6 +24,42 @@ control their display organization, not their physical material.
 The complete definitions are in
 [technology source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/tech.py)
 and [layer views](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/c4dbf7a88166f5817ffbac5fc4182a7a429ae69b/orcapen_sc_pdk/layers.yaml).
+Choose the single-die stack for a model without an upper die, or the two-die
+flip-chip stack for the complete two-die assembly. The selection controls which
+physical levels are supplied to a component simulation; it does not select
+nets, terminals, excitations, or solver boundaries.
+
+## Select a stack
+
+| Getter | Returned levels |
+| --- | --- |
+| `get_layer_stack()` | Full two-die stack: all 24 levels listed below. |
+| `get_two_die_flip_chip_layer_stack()` | The full `LAYER_STACK`. |
+| `get_single_die_layer_stack()` | Detached copies of `D0_SUBSTRATE`, `D0_TOP_M1`, and `D0_TOP_SIM_BOUNDARY`. This is the default single-die selection. |
+| `get_single_die_layer_stack(include_airbridges=True)` | The three single-die levels plus `D0_TOP_AIRBRIDGE_VIA` and `D0_TOP_AIRBRIDGE`. |
+
+The single-die getter removes the top M1 interdie host-void reference. It retains
+the PDK's physical dimensions and materials, without an upper die or interdie
+cavity; SCGSim supplies the surrounding vacuum envelope for that model.
+
+## From layer name to simulation input
+
+The diagram shows the main mapping for geometry that has a declared physical
+stack source:
+
+```{mermaid}
+flowchart TB
+  N["Layer name and GDS pair"] --> G["XY layout geometry"]
+  G --> S["Selected physical stack"]
+  S --> I["Component simulation input"]
+```
+
+The layer name identifies an XY drawing; a declared stack level adds physical
+attributes such as height, thickness, and material. Not every layer has a
+physical level: masks, labels, and alignment geometry can serve other roles.
+The stack is one part of simulation input; the simulation workflow supplies its
+own nets, terminals, excitation, and boundaries.
+
 All coordinates and thicknesses below are in micrometres (µm); layer pairs are
 written as `(layer, datatype)`.
 
@@ -179,9 +215,13 @@ interval collapses to a plane. These are nominal PDK dimensions.
 | `OUTER_VACUUM` | 508.2 to 1508.2 | 1000 | `vacuum` |
 
 The substrates and gap declare `simulation_role="solution_region"` and
-`include_in_component_simulation=True`. `OUTER_VACUUM` is marked `is_airbox=True`
-but `include_in_component_simulation=False`; its named level is not a complete
+`include_in_component_simulation=True`.
+
+::: {.callout-warning title="OUTER_VACUUM is not a complete envelope"}
+`OUTER_VACUUM` is marked `is_airbox=True` but
+`include_in_component_simulation=False`. Its named level is not a complete
 surrounding simulation envelope.
+:::
 
 ### Face metal, airbridges, and locator sheets
 
@@ -221,19 +261,6 @@ are chosen by the simulation problem.
 The public ground-bump-fill specification uses a centered 20 × 20 µm bump body
 and 40 × 40 µm contact footprint, with lattice origin `(0, 0)`. Its keepout
 classes are listed in the layer map above; the component selects placement.
-
-## Select a stack
-
-| Getter | Returned levels |
-| --- | --- |
-| `get_layer_stack()` | Full two-die stack: all 24 levels listed above. |
-| `get_two_die_flip_chip_layer_stack()` | The full `LAYER_STACK`. |
-| `get_single_die_layer_stack()` | Detached copies of `D0_SUBSTRATE`, `D0_TOP_M1`, and `D0_TOP_SIM_BOUNDARY`. This is the default single-die selection. |
-| `get_single_die_layer_stack(include_airbridges=True)` | The three single-die levels plus `D0_TOP_AIRBRIDGE_VIA` and `D0_TOP_AIRBRIDGE`. |
-
-The single-die getter removes the top M1 interdie host-void reference. It retains
-the PDK's physical dimensions and materials, without an upper die or interdie
-cavity; SCGSim supplies the surrounding vacuum envelope for that model.
 
 ## Declared layer connectivity
 
