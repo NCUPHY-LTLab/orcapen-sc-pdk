@@ -1,9 +1,9 @@
 # OrcaPen SC PDK Agent Instructions
 
-This is the public `NCUPHY-LTLab/orcapen-sc-pdk` repository. The OrcaPen Repo
-Lead owns product source, documentation and the documentation Preview. Private
-layouts, parameters, notebooks and evidence stay private. QPDK is reference
-material; SCGSim owns reusable solver, runtime and result behavior.
+This public `NCUPHY-LTLab/orcapen-sc-pdk` repository owns product source and
+documentation. Private layouts, parameters, notebooks and evidence stay
+private. QPDK is reference material; SCGSim owns reusable solver, runtime and
+result behavior.
 
 ## Task-Scoped Reading
 
@@ -15,16 +15,11 @@ Read only the sources relevant to the task:
 - `orcapen_sc_pdk/tech.py` for layers or stack definitions.
 - `docs/home/pdk-responsibilities.md` for package boundaries.
 - `docs/features/scgsim-integration.md` for SCGSim integration or notebook work.
-- `LESSONS.md` for cross-repository documentation links and SCGSim handoffs.
+- `LESSONS.md` for cross-repository documentation links and SCGSim integration references.
 
 Package usage starts at `docs/usage/index.md`.
 
 ## Implementation and Documentation
-
-The Repo Lead handles small, tightly coupled changes directly. Delegate larger
-implementation, documentation-site or noisy work as needed within the existing
-two-worker limit. Use a team `docs_writer` for substantial writing; there is no
-separate Documentation Lead or recurring prose-approval handoff.
 
 Keep one writer per overlapping path or hunk. Preserve existing work, valid
 results and the running Preview. A change includes its directly related
@@ -37,13 +32,7 @@ than skipping checks or weakening assertions or coverage.
 Use `$v1-lifecycle` for lifecycle and Human research decisions,
 `$scq-collaboration-roles` for relevant ownership and Git routing, and
 `$model-routing` when assigning work. Use `$scq-gdsfactory-layout` for layout,
-component or geometry work. These shared Skills remain the policy authority;
-do not duplicate their forms or checklists here.
-
-The original Git owner serializes ordinary commit, push and remote readback,
-preserving unrelated WIP. Integration retains its assigned CI and protected
-delivery work. Publication, merge, release, deployment and consumer pin changes
-follow their separate Human authority.
+component or geometry work. Use `$github-flow` for branches, allowed paths, CI, PRs, review and delivery; squash after CI and `cross-review-gate` pass. These Skills govern their topics; do not duplicate their forms or checklists here.
 
 ## Code Review Rules
 
