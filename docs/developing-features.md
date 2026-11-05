@@ -9,15 +9,65 @@ Start with the part of the PDK your change affects.
 
 ## Set up a development checkout
 
+GDSFactory+ is optional and needs a paid subscription. Pick one setup.
+
+**Without GDSFactory+** (KLayout for viewing):
+
 ```bash
 git clone https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git
 cd orcapen-sc-pdk
 uv sync -p 3.12
 ```
 
+This installs the PDK plus the development tools, pytest and Ruff. To view
+layouts, install [KLayout](https://www.klayout.de/) and its klive plugin.
+
+**With GDSFactory+** (the VS Code extension):
+
+```bash
+git clone https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git
+cd orcapen-sc-pdk
+uv sync -p 3.12 --all-extras
+```
+
+`--all-extras` adds the `gdsfactoryplus` extra, which holds the packages
+GDSFactory+ Worker Health requires, including the SPICE packages InSpice and
+vacask. It is the same command the extension's **Setup Automatically** runs.
+Keep using `--all-extras` afterwards: a plain `uv sync` removes these packages,
+and the extension then shows no components. GDSFactory+ requires Python 3.12.
+
 Check: `uv run python --version` reports a supported Python version.
 For documentation dependencies and preview, use
 [Documentation & Website](docs-publishing.md).
+
+## Preview a component
+
+Every cell module ends with a preview block. Run the file directly, for example
+with **Run Python File** in VS Code:
+
+```bash
+uv run python orcapen_sc_pdk/cells/layout/resonator.py
+```
+
+To preview any registered cell by name:
+
+```bash
+uv run python -m orcapen_sc_pdk.preview resonator
+```
+
+Both write `build/gds/<cell>.gds` and open it. Inside a VS Code terminal with
+GDSFactory+ installed, the file opens in the GDSFactory+ Layout Viewer.
+Otherwise it is sent to KLayout through klive. Pass `--viewer klayout` or
+`--viewer gdsfactoryplus` to choose explicitly. In a new cell module, end with
+the same block:
+
+```python
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(my_cell)
+```
 
 ## Keep changes focused
 

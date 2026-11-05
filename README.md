@@ -43,6 +43,12 @@ component = gf.get_component("resonator")
 component.plot()
 ```
 
+To open a cell in a layout viewer instead, run
+`uv run python -m orcapen_sc_pdk.preview resonator`. It uses the GDSFactory+
+Layout Viewer inside VS Code when the extension is installed, and KLayout
+(through klive) otherwise. GDSFactory+ is optional; see
+[Contributing](docs/developing-features.md) for both environment setups.
+
 The version command reports the preview's package metadata, `1.0.0`; that
 number does not indicate a published stable release. See [Get Started](docs/getting-started.md) for setup details. Contributors can
 use [Documentation & Website](docs/docs-publishing.md) to build the docs.
