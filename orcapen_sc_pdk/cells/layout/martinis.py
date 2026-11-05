@@ -72,3 +72,10 @@ def martinis2022_differential_ribbon_capacitor(
 
 
 __all__ = ["martinis2022_differential_ribbon_capacitor"]
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(martinis2022_differential_ribbon_capacitor)

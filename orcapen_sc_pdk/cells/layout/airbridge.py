@@ -95,3 +95,10 @@ def airbridge(
             }
             break
     return c
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(airbridge)

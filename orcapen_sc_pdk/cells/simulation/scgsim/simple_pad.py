@@ -380,3 +380,10 @@ def straight_to_circular_strip(
 
 
 __all__ = ["square_pad_capacitor", "circular_pad_capacitor", "straight_to_circular_strip"]
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(circular_pad_capacitor)

@@ -112,9 +112,7 @@ def manhattan_style_junction(
 
 
 if __name__ == "__main__":
-    from orcapen_sc_pdk.pdk import PDK
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
 
-    PDK.activate()
-
-    c = manhattan_style_junction()
-    c.show()
+    show(manhattan_style_junction)

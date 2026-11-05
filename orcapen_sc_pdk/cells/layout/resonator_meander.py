@@ -236,3 +236,10 @@ def resonator_meander(
     c.info["meanders"] = meanders
 
     return c
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(resonator_meander)

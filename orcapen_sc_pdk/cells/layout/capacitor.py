@@ -265,3 +265,10 @@ def interdigital_capacitor(
     )
     result.info["cpw_gap_um"] = float(cpw_gap)
     return result
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(interdigital_capacitor)

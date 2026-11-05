@@ -109,3 +109,10 @@ def cpw_airbridge_coupon() -> gf.Component:
         "ports": "none; no GF or native port invented",
     }
     return c
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(cpw_airbridge_coupon)

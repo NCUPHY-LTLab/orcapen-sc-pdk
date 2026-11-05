@@ -837,3 +837,10 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
 __all__ = [
     "capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators",
 ]
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators)

@@ -413,3 +413,10 @@ def get_cpw_meander_airbridge_source_records(
                 }
             )
     return record
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(finite_ground_cpw_coupon)

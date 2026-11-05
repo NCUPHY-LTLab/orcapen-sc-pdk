@@ -523,3 +523,10 @@ def _add_open_end(component: gf.Component, port: gf.Port, cross_section: gf.Cros
         allow_layer_mismatch=True,
     )
     component.add_port("o2", port=open_etch.ports["o2"], port_type="placement")
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(resonator)
