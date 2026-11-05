@@ -12,7 +12,7 @@ Generate the README and layer snippets first; Quarto scans those included files
 before pre-render hooks run.
 
 ```bash
-uv sync -p 3.12 --locked --group docs --extra dev
+uv sync -p 3.12 --locked --group docs
 uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
 uv run --group docs python scripts/build_overview_snippets.py
 uv run --group docs quarto render docs --no-execute

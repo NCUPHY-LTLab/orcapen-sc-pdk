@@ -35,13 +35,15 @@ documentation = "https://ncuphy-ltlab.github.io/orcapen-sc-pdk/"
 repository = "https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/"
 
 [project.optional-dependencies]
+circuit-runtime = ["superconducting-circuits-runtime"]
+
+[dependency-groups]
 dev = [
   "pytest>=9.0.0",
   "ruff>=0.15.11",
 ]
-circuit-runtime = ["superconducting-circuits-runtime"]
-
-[dependency-groups]
+# The GDSFactory+ VS Code extension runs its server from this environment.
+gdsfactoryplus = ["gdsfactoryplus>=2.3.516"]
 docs = [
   "griffe<2",
   "ipykernel",
@@ -56,6 +58,9 @@ ecosystem-dev = [
   "pandas>=2.0",
   "plotly>=6.0.0",
 ]
+
+[tool.uv]
+default-groups = ["dev", "gdsfactoryplus"]
 
 [tool.uv.sources]
 scgsim = { git = "https://github.com/OrPenStrike/scgsim.git", rev = "0051d6e8924d8e79c0e03b560592ec65fe5659a1" }

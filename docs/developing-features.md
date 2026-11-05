@@ -12,7 +12,7 @@ Start with the part of the PDK your change affects.
 ```bash
 git clone https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git
 cd orcapen-sc-pdk
-uv sync -p 3.12 --extra dev
+uv sync -p 3.12
 ```
 
 Check: `uv run python --version` reports a supported Python version.
