@@ -197,12 +197,8 @@ def rounded_end_metal_segment(
     if automatic_cap and curves.resolve_sampling()[0] == "diameter":
         # The opening has its own radius; do not inherit the metal's tier.
         mask_count = curves.arc_points(radius + ground_mask_margin, 90)
-        mask_angles = [
-            -pi / 2 + i * pi / (2 * (mask_count - 1)) for i in range(mask_count)
-        ]
-        mask_angles += [
-            i * pi / (2 * (mask_count - 1)) for i in range(1, mask_count)
-        ]
+        mask_angles = [-pi / 2 + i * pi / (2 * (mask_count - 1)) for i in range(mask_count)]
+        mask_angles += [i * pi / (2 * (mask_count - 1)) for i in range(1, mask_count)]
         mask_points = [
             (0.0, -radius),
             *[(center_x + radius * cos(a), radius * sin(a)) for a in mask_angles],
