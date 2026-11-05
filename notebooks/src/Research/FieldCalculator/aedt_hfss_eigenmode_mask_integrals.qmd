@@ -1,0 +1,1162 @@
+---
+title: "Native HFSS Eigenmode: masked surface integrals"
+jupyter: python3
+format: ipynb
+execute:
+  enabled: false
+---
+
+## 1. Question, scope, and reading map
+
+Does HFSS's native Field Calculator resolve a shrinking rectangular mask on
+an unchanged solved cavity face? This is a **CONVERGING, public generic research
+experiment**, not a reusable solver runtime or a validated accuracy guarantee.
+The Human-defined native vacuum box deliberately bypasses GDS, PDK and SGB.
+OrcaPen owns this QMD and its clean derived IPYNB; SCGSim's production ownership
+is unchanged. No durable tests or scientific acceptance thresholds are added.
+
+Read stages 4–13 for the cavity and adaptive solve; 14–19 for native Calculator
+measurements; 20–22 for costs, preservation checks and limitations. All integrals
+are native scalar exports. Python performs ratios, closed-form analytic
+comparisons and plots, **never integration of exported field samples**.
+
+`run` creates one project and makes exactly one Analyze request. Its saved
+solution is sealed before field-source or expression changes.
+`postprocess_saved` copies that sealed solution into a fresh analysis directory,
+opens only the copy, and never solves. `analyze_saved` verifies saved hashes,
+reads existing measurements and regenerates plots without importing AEDT.
+It writes only fresh derived analysis artifacts under `ANALYSIS_ID`; the
+selected historical raw files, source context and receipts are never changed.
+Use a clean kernel and run cells in order. A cell error preserves separate solve
+and analysis status and releases only the Desktop this notebook created.
+
+## 2. Imports and version provenance
+
+The plotting-only path needs no AEDT installation or license. AEDT imports are
+deferred to stage 5. The exact native execution profile is AEDT 2024.2 and
+PyAEDT 1.3.0; a different installed version is not silently substituted.
+
+```{python}
+#| id: imports
+import hashlib
+import importlib.metadata
+import json
+import math
+import re
+import shutil
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+from IPython import get_ipython
+from IPython.display import display
+
+print(
+    {
+        "python_packages": {
+            p: importlib.metadata.version(p) for p in ("numpy", "matplotlib", "ipython")
+        }
+    }
+)
+```
+
+## 3. Setup and run controls — edit before creating any project
+
+Give every artifact-producing attempt an explicit new ID. Existing destinations
+raise an error; there is no overwrite, retry, continuation or automatic ID.
+For saved actions, `SAVED_RUN_ID` selects a sealed run; `SAVED_ANALYSIS_ID`
+additionally selects measurements for `analyze_saved`. Receipts are local
+experimental records, not a package schema. All artifacts stay under this
+notebook family's `.artifacts/` directory, including logs and analysis copies.
+
+```{python}
+#| id: controls
+WORKFLOW_ACTION = "run"  # run | postprocess_saved | analyze_saved
+RUN_ID = "run_20260909_01"  # Change explicitly before a second run.
+ANALYSIS_ID = "analysis_20260909_01"  # Change explicitly before every new analysis.
+SAVED_RUN_ID = ""
+SAVED_ANALYSIS_ID = ""
+
+AEDT_VERSION = "2024.2"
+PYAEDT_VERSION = "1.3.0"
+PROJECT_NAME = "AdaptiveMask"
+DESIGN_NAME = "Cavity"
+BOX_NAME = "VacuumCavity"
+SETUP_NAME = "ProbeSetup"
+ORIGIN_MM = [0, 0, 0]
+SIZE_MM = [50, 40, 30]
+MATERIAL = "vacuum"
+SETUP_REQUEST = {
+    "MinimumFrequency": "4GHz",
+    "NumModes": 1,
+    "MaxDeltaFreq": 1,
+    "MinimumConvergedPasses": 2,
+    "MaximumPasses": 99,
+    "MinimumPasses": 1,
+}
+CORES, TASKS, GPUS, MAX_SOLVE_SECONDS = 4, 1, 0, 900
+MODE, SOURCE_MAGNITUDE, PHASE = "1", "1", "0deg"
+MARGINS_UM = sorted(
+    set([100.0 * i for i in range(201)] + [0.01, 0.05, 0.1, 0.2, 0.5, 1.0, 21000.0])
+)
+SHAPE_POINTS_MM = [[0.5 + n * 0.5, 20.0, 30.0] for n in range(99)] + [
+    [25.0, 0.5 + n * 0.5, 30.0] for n in range(79)
+]
+PLOT_DPI = 160
+
+# Find the consumer repository from its notebook or repository working directory.
+REPO = next(p for p in (Path.cwd(), *Path.cwd().parents) if (p / "orcapen_sc_pdk/pdk.py").is_file())
+FAMILY = REPO / "notebooks/Research/FieldCalculator"
+ARTIFACTS = FAMILY / ".artifacts"
+SOURCE_QMD = REPO / "notebooks/src/Research/FieldCalculator/aedt_hfss_eigenmode_mask_integrals.qmd"
+if WORKFLOW_ACTION not in {"run", "postprocess_saved", "analyze_saved"}:
+    raise ValueError("Unknown WORKFLOW_ACTION")
+for label, value in {
+    "ANALYSIS_ID": ANALYSIS_ID,
+    "run identity": RUN_ID if WORKFLOW_ACTION == "run" else SAVED_RUN_ID,
+    **({"SAVED_ANALYSIS_ID": SAVED_ANALYSIS_ID} if WORKFLOW_ACTION == "analyze_saved" else {}),
+}.items():
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", value):
+        raise ValueError(f"Set an explicit safe {label}; got {value!r}")
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def inventory(root):
+    return {
+        p.relative_to(root).as_posix(): {"bytes": p.stat().st_size, "sha256": sha256(p)}
+        for p in sorted(root.rglob("*"))
+        if p.is_file() and not p.name.endswith(".lock") and p.name != "batch.log"
+    }
+
+
+def checked_inventory(root, expected):
+    for name, record in expected.items():
+        path = (root / name).resolve()
+        if path.name == "batch.log":
+            raise ValueError("batch.log is excluded from this research evidence reader")
+        if not path.is_relative_to(root.resolve()):
+            raise ValueError("Receipt path escapes its artifact directory")
+        if path.stat().st_size != record["bytes"] or sha256(path) != record["sha256"]:
+            raise ValueError(f"Artifact changed: {name}")
+
+
+def save_json(path, value):
+    path.write_text(json.dumps(value, indent=2, allow_nan=False, default=str) + "\n")
+
+
+run_dir = ARTIFACTS / (RUN_ID if WORKFLOW_ACTION == "run" else SAVED_RUN_ID)
+if WORKFLOW_ACTION == "run":
+    run_dir.mkdir(parents=True, exist_ok=False)
+    solve_receipt = {
+        "run_id": RUN_ID,
+        "status": "preparing",
+        "solve_invocations": 0,
+        "source_sha256": sha256(SOURCE_QMD),
+        "requested_setup": SETUP_REQUEST,
+        "semantic_state": "CONVERGING",
+        "classification": "PUBLIC_GENERIC_DIAGNOSTIC_ONLY",
+        "aedt_version": AEDT_VERSION,
+        "pyaedt_version": PYAEDT_VERSION,
+    }
+else:
+    solve_receipt = json.loads((run_dir / "solve_receipt.json").read_text())
+    checked_inventory(run_dir / "sealed_solution", solve_receipt["sealed_manifest"])
+    checked_inventory(run_dir / "native", solve_receipt["native_manifest"])
+
+analysis_dir = run_dir / "analyses" / ANALYSIS_ID
+analysis_dir.mkdir(parents=True, exist_ok=False)
+native_dir = run_dir / "native"
+sealed_dir = run_dir / "sealed_solution"
+work_dir = run_dir / "work" if WORKFLOW_ACTION == "run" else analysis_dir / "project"
+analysis_receipt = {
+    "analysis_id": ANALYSIS_ID,
+    "action": WORKFLOW_ACTION,
+    "classification": "PUBLIC_GENERIC_DIAGNOSTIC_ONLY",
+    "semantic_state": "CONVERGING",
+    "source_sha256": sha256(SOURCE_QMD),
+    "status": "preparing",
+    "new_solve_invocations": 0,
+    "native_scalar_count": 0,
+    "started_utc": datetime.now(UTC).isoformat(),
+}
+desktop = None
+app = None
+action_started = time.monotonic()
+analysis_started = action_started
+active_phase = "preparation"
+
+
+def checkpoint():
+    if WORKFLOW_ACTION == "run":
+        save_json(run_dir / "solve_receipt.json", solve_receipt)
+    save_json(analysis_dir / "analysis_receipt.json", analysis_receipt)
+
+
+def release_owned():
+    global desktop
+    if desktop is not None:
+        owned = desktop
+        desktop = None
+        try:
+            if owned.are_there_simulations_running:
+                analysis_receipt["cleanup_stop_return"] = owned.stop_simulations(clean_stop=False)
+        finally:
+            analysis_receipt["release_return"] = owned.release_desktop(
+                close_projects=True, close_on_exit=True
+            )
+            if analysis_receipt["release_return"] is not True:
+                raise RuntimeError(
+                    "Owned Desktop release did not confirm success; inspect recorded PID"
+                )
+
+
+def cell_failure_cleanup(result):
+    error = result.error_before_exec or result.error_in_exec
+    if error is None:
+        return
+    analysis_receipt.update(
+        status="failed",
+        failed_phase=active_phase,
+        error={"type": type(error).__name__, "message": str(error)},
+    )
+    if WORKFLOW_ACTION == "run" and solve_receipt["status"] not in {
+        "solved",
+        "solver_returned",
+        "time_budget_reached",
+    }:
+        solve_receipt.update(status="failed", error=str(error))
+    elif WORKFLOW_ACTION == "run" and solve_receipt["status"] == "solver_returned":
+        solve_receipt.update(evidence_status="failed", evidence_error=str(error))
+    try:
+        release_owned()
+    except Exception as cleanup_error:
+        analysis_receipt["cleanup_error"] = repr(cleanup_error)
+    finally:
+        checkpoint()
+        shell.events.unregister("post_run_cell", cell_failure_cleanup)
+
+
+shell = get_ipython()
+if shell is None:
+    raise RuntimeError("Execute in a Jupyter/IPython kernel for cell-failure cleanup")
+shell.events.register("post_run_cell", cell_failure_cleanup)
+checkpoint()
+
+if WORKFLOW_ACTION == "analyze_saved":
+    previous_dir = run_dir / "analyses" / SAVED_ANALYSIS_ID
+    previous_receipt = json.loads((previous_dir / "analysis_receipt.json").read_text())
+    checked_inventory(previous_dir, previous_receipt["artifact_manifest"])
+    analysis_data = json.loads((previous_dir / "analysis_data.json").read_text())
+    analysis_receipt["saved_analysis_receipt_sha256"] = sha256(
+        previous_dir / "analysis_receipt.json"
+    )
+    for filename in [row["raw_file"] for row in analysis_data["measurements"]] + [
+        "field_shape.fld"
+    ]:
+        source = previous_dir / filename
+        if not source.resolve().is_relative_to(previous_dir.resolve()):
+            raise ValueError("Saved measurement path escapes analysis directory")
+        destination = analysis_dir / filename
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+else:
+    analysis_data = {"measurements": [], "expressions": [], "context": {}}
+display(
+    {
+        "action": WORKFLOW_ACTION,
+        "run": str(run_dir),
+        "analysis": str(analysis_dir),
+        "margin_count": len(MARGINS_UM),
+        "scope": "CONVERGING / LOCAL CANDIDATE",
+    }
+)
+```
+
+## 4. Cavity and analytic reference
+
+The vacuum box occupies $[0,50]\times[0,40]\times[0,30]$ mm. All six faces
+are PEC; there are no ports, junctions, dielectrics or losses. The lowest
+reference mode has $E_z\propto\sin(\pi x/50)\sin(\pi y/40)$, uniform in $z$.
+Its frequency is $f=c\sqrt{1/(0.05)^2+1/(0.04)^2}/2$. This closed-form
+reference is **not** HFSS's convergence criterion.
+
+```{python}
+#| id: analytic-cavity
+analytic_frequency_ghz = 299792458 / 2 * math.sqrt(1 / 0.05**2 + 1 / 0.04**2) / 1e9
+print(f"Analytic reference: {analytic_frequency_ghz:.12g} GHz")
+```
+
+## 5. Create one owned Desktop / attach HFSS, or open an analysis copy
+
+Only the two native actions enter this cell's AEDT branch. Saved postprocessing
+copies both `.aedt` and `.aedtresults` before opening the project. It never
+opens the sealed original. The failure hook already owns cleanup.
+
+```{python}
+#| id: owned-desktop
+active_phase = "desktop"
+if WORKFLOW_ACTION != "analyze_saved":
+    if importlib.metadata.version("pyaedt") != PYAEDT_VERSION:
+        raise RuntimeError("This experiment requires PyAEDT 1.3.0")
+    from ansys.aedt.core import Desktop, Hfss
+    from ansys.aedt.core.generic.settings import settings
+
+    settings.enable_error_handler = False
+    settings.enable_global_log_file = False
+    settings.logger_file_path = str(analysis_dir / "pyaedt.log")
+    if WORKFLOW_ACTION == "postprocess_saved":
+        shutil.copytree(sealed_dir, work_dir, ignore=shutil.ignore_patterns("*.lock"))
+    else:
+        work_dir.mkdir()
+        native_dir.mkdir()
+    project_path = work_dir / (PROJECT_NAME + ".aedt")
+    desktop = Desktop(
+        version=AEDT_VERSION, non_graphical=True, new_desktop=True, close_on_exit=False
+    )
+    analysis_receipt["owned_desktop"] = {
+        "pid": desktop.aedt_process_id,
+        "port": desktop.port,
+        "version": desktop.aedt_version_id,
+    }
+    checkpoint()
+    app = Hfss(
+        project=str(project_path),
+        design=DESIGN_NAME,
+        solution_type="Eigenmode",
+        version=AEDT_VERSION,
+        new_desktop=False,
+        close_on_exit=False,
+        port=desktop.port,
+        aedt_process_id=desktop.aedt_process_id,
+    )
+    if desktop.aedt_version_id != AEDT_VERSION or app.solution_type != "Eigenmode":
+        raise RuntimeError("Native application identity differs")
+```
+
+## 6. Create the simulation box visibly
+
+This is the entire native geometry construction, not a wrapper or imported
+fixture. Saved actions do not rebuild geometry.
+
+```{python}
+#| id: native-box
+active_phase = "geometry"
+if WORKFLOW_ACTION == "run":
+    app.modeler.model_units = "mm"
+    box = app.modeler.create_box(ORIGIN_MM, SIZE_MM, name=BOX_NAME, material=MATERIAL)
+    if not box:
+        raise RuntimeError("create_box failed")
+    box.solve_inside = True
+elif WORKFLOW_ACTION == "postprocess_saved":
+    box = app.modeler[BOX_NAME]
+```
+
+## 7. Native object, face IDs, centers, areas and bounds
+
+Select the top face from its native vertex bounds, not from the string
+`Face7`, a presumed ID, or a displayed name. IDs are read afresh. No physical
+mask geometry is added.
+
+```{python}
+#| id: geometry-readback
+def native_geometry():
+    objects = []
+    for name in app.modeler.object_names:
+        obj = app.modeler[name]
+        faces = []
+        for face in obj.faces:
+            vertices = np.asarray([v.position for v in face.vertices], dtype=float)
+            faces.append(
+                {
+                    "id": face.id,
+                    "center_mm": list(face.center),
+                    "area_mm2": face.area,
+                    "bounds_mm": [*vertices.min(axis=0), *vertices.max(axis=0)],
+                }
+            )
+        objects.append(
+            {
+                "name": name,
+                "id": obj.id,
+                "material": obj.material_name,
+                "solve_inside": obj.solve_inside,
+                "faces": faces,
+            }
+        )
+    return {
+        "units": app.modeler.model_units,
+        "objects": objects,
+        "boundaries": [
+            {"name": b.name, "type": b.type, "props": dict(b.props)} for b in app.boundaries
+        ],
+    }
+
+
+if WORKFLOW_ACTION != "analyze_saved":
+    geometry = native_geometry()
+    cavity = next(obj for obj in geometry["objects"] if obj["name"] == BOX_NAME)
+    candidates = [f for f in cavity["faces"] if f["bounds_mm"] == [0, 0, 30, 50, 40, 30]]
+    if len(candidates) != 1 or len(cavity["faces"]) != 6:
+        raise RuntimeError("Native six-face box/top-face identity differs")
+    selected_face = candidates[0]
+    analysis_data["context"]["selected_face"] = selected_face
+    display(geometry)
+else:
+    display(analysis_data["context"]["selected_face"])
+```
+
+## 8. Vacuum and six explicit Perfect E assignments / readback
+
+The six native faces are assigned individually and read back. Saved projects
+may represent the same six-face PEC set with a grouped assignment; inspection
+checks the face union and does not rewrite their boundaries.
+
+```{python}
+#| id: pec-readback
+if WORKFLOW_ACTION == "run":
+    for face in cavity["faces"]:
+        if not app.assign_perfect_e([face["id"]], name=f"PEC_{face['id']}"):
+            raise RuntimeError("Native Perfect E assignment failed")
+if WORKFLOW_ACTION != "analyze_saved":
+    geometry = native_geometry()
+    boundaries = geometry["boundaries"]
+    pec_faces = [f for b in boundaries if b["type"] == "Perfect E" for f in b["props"]["Faces"]]
+    if (
+        geometry["units"] != "mm"
+        or cavity["material"] != "vacuum"
+        or not cavity["solve_inside"]
+        or len(geometry["objects"]) != 1
+        or len(pec_faces) != 6
+        or set(pec_faces) != {f["id"] for f in cavity["faces"]}
+        or any(b["type"] != "Perfect E" for b in boundaries)
+    ):
+        raise RuntimeError("Native vacuum / six PEC face assignment differs")
+    display(boundaries)
+```
+
+## 9. Eigenmode setup and native readback
+
+HFSS adapts its own mesh: no artificial length-mesh operation is assigned.
+The Human stopping controls are 1% maximum frequency change for two consecutive
+passes, at most 99 passes and at least one pass. Start at 4 GHz and solve one mode.
+
+```{python}
+#| id: setup-readback
+active_phase = "setup"
+if WORKFLOW_ACTION == "run":
+    setup = app.create_setup(SETUP_NAME)
+    setup.auto_update = False
+    for key, value in SETUP_REQUEST.items():
+        setup.props[key] = value
+    if not setup.update():
+        raise RuntimeError("Native setup update failed")
+if WORKFLOW_ACTION != "analyze_saved":
+    setup_readback = dict(app.get_setup(SETUP_NAME).props)
+    for key, requested in SETUP_REQUEST.items():
+        if str(setup_readback[key]) != str(requested):
+            raise RuntimeError(f"Native setup mismatch: {key}")
+    if app.mesh.meshoperations:
+        raise RuntimeError("Unexpected manually assigned mesh operations")
+    analysis_data["context"].update(geometry=geometry, setup=setup_readback, mesh_operations=[])
+    display(setup_readback)
+```
+
+## 10. ValidateDesign and save before solving
+
+Native validation is a technical check, not a new scientific accuracy Gate.
+Postprocessing does not invoke validation that might alter saved solver state.
+
+```{python}
+#| id: validate-save
+if WORKFLOW_ACTION == "run":
+    solve_receipt["native_validation"] = int(app.odesign.ValidateDesign())
+    if solve_receipt["native_validation"] != 1:
+        raise RuntimeError("Native ValidateDesign failed")
+    if not app.save_project():
+        raise RuntimeError("Pre-solve save failed")
+    checkpoint()
+```
+
+## 11. Solve — the only Analyze call, with owned 900-second monitoring
+
+One session, four cores, one task, zero GPUs. The timer measures the entire
+Analyze request plus monitored solver time. Hitting the Human budget stops
+only this owned session; it does not retry or create an analysis success.
+
+```{python}
+#| id: single-analyze
+active_phase = "solve"
+if WORKFLOW_ACTION == "run":
+    if solve_receipt["solve_invocations"] != 0:
+        raise RuntimeError("This attempt has already consumed its one Analyze request")
+    solve_receipt.update(
+        status="solving",
+        solve_invocations=1,
+        cores=CORES,
+        tasks=TASKS,
+        sessions=1,
+        max_seconds=MAX_SOLVE_SECONDS,
+    )
+    checkpoint()
+    solve_started = time.monotonic()
+    accepted = app.analyze_setup(
+        SETUP_NAME, cores=CORES, tasks=TASKS, gpus=GPUS, use_auto_settings=False, blocking=False
+    )
+    if not accepted:
+        raise RuntimeError("Native Analyze request rejected")
+    while desktop.are_there_simulations_running:
+        elapsed = time.monotonic() - solve_started
+        solve_receipt["elapsed_seconds"] = elapsed
+        if elapsed >= MAX_SOLVE_SECONDS:
+            solve_receipt["stop_return"] = desktop.stop_simulations(clean_stop=False)
+            solve_receipt["status"] = "time_budget_reached"
+            checkpoint()
+            raise TimeoutError("900-second owned solve budget reached; no retry")
+        time.sleep(1)
+    solve_receipt["elapsed_seconds"] = time.monotonic() - solve_started
+    if solve_receipt["elapsed_seconds"] >= MAX_SOLVE_SECONDS:
+        solve_receipt["status"] = "time_budget_reached"
+        raise TimeoutError("Analyze returned after the 900-second budget")
+    solve_receipt["status"] = "solver_returned"
+    checkpoint()
+```
+
+## 12. Export solver evidence; seal `.aedt` and `.aedtresults`
+
+The sealed directory is an immutable copy of the saved project and results,
+made **before** any source normalization or named expression work. Native
+eigenmodes, convergence, profile and mesh statistics remain separate exports.
+An export failure does not pretend that the solver itself failed.
+
+```{python}
+#| id: seal-solution
+active_phase = "solver_exports"
+if WORKFLOW_ACTION == "run":
+    if not app.save_project():
+        raise RuntimeError("Post-solve save failed")
+    app.osolution.ExportEigenmodes(
+        SETUP_NAME + " : LastAdaptive", "", str(native_dir / "eigenmodes.eig")
+    )
+    for filename, export in [
+        ("convergence.conv", app.export_convergence),
+        ("profile.prof", app.export_profile),
+        ("mesh_stats.txt", app.export_mesh_stats),
+    ]:
+        export(SETUP_NAME, output_file=str(native_dir / filename))
+    for filename in ("eigenmodes.eig", "convergence.conv", "profile.prof", "mesh_stats.txt"):
+        if not (native_dir / filename).is_file() or not (native_dir / filename).stat().st_size:
+            raise RuntimeError(f"Missing native solver export: {filename}")
+    if not (work_dir / (PROJECT_NAME + ".aedtresults")).is_dir():
+        raise RuntimeError("Saved native results are absent")
+    shutil.copytree(work_dir, sealed_dir, ignore=shutil.ignore_patterns("*.lock"))
+    solve_receipt.update(
+        status="solved",
+        sealed_manifest=inventory(sealed_dir),
+        native_manifest=inventory(native_dir),
+        geometry=geometry,
+        setup=setup_readback,
+    )
+    checkpoint()
+if WORKFLOW_ACTION != "analyze_saved":
+    working_before = inventory(work_dir)
+if WORKFLOW_ACTION == "run":
+    analysis_started = time.monotonic()
+```
+
+## 13. Native per-pass frequencies, frequency change and mesh count
+
+Read the selected design's `.asol` metadata to find the setup's EMConvData and
+AdaptivePass solution files. Do not guess DV numbers, file names, or pass count.
+Each `.sd` supplies its own pass number and mode frequency in Hz. Pass 1 has
+no preceding frequency change: retain `None`, not zero. Missing or ambiguous
+identity is an extraction error, not a guessed measurement.
+
+```{python}
+#| id: native-pass-table
+active_phase = "native_pass_analysis"
+
+
+def blocks(text, name_pattern):
+    return [
+        m.group(2) for m in re.finditer(rf"\$begin '({name_pattern})'(.*?)\$end '\1'", text, re.S)
+    ]
+
+
+results_dir = sealed_dir / (PROJECT_NAME + ".aedtresults")
+asol_path = results_dir / (DESIGN_NAME + ".asol")
+asol = asol_path.read_text()
+solution_blocks = blocks(asol, r"SolutionBlock\d+")
+if f"CircuitName='{DESIGN_NAME}'" not in asol:
+    raise RuntimeError("Native solution design identity missing")
+setup_blocks = [b for b in solution_blocks if f"SimSetupName='{SETUP_NAME}'" in b]
+adaptive_blocks = [b for b in solution_blocks if "SolutionName='AdaptivePass'" in b]
+last_blocks = [b for b in solution_blocks if "SolutionName='LastAdaptive'" in b]
+if len(setup_blocks) != 1 or len(adaptive_blocks) != 1 or len(last_blocks) != 1:
+    raise RuntimeError("Native setup / solution mapping is missing or ambiguous")
+conv_names = re.findall(r"EmConv\([^\n]*EmConv='([^']+)'", setup_blocks[0])
+if len(conv_names) != 1:
+    raise RuntimeError("Expected this experiment's one native variation")
+design_results = results_dir / (DESIGN_NAME + ".results")
+conv_text = (design_results / conv_names[0]).read_text()
+native_controls = {
+    key: float(re.search(rf"\b{key}='([^']+)'", conv_text)[1])
+    for key in (
+        "MaxPasses",
+        "MinPasses",
+        "ConvTarget",
+        "ConvTargetConsecPasses",
+        "ConvCurrentConsecPasses",
+    )
+}
+for key, requested in {
+    "MaxPasses": SETUP_REQUEST["MaximumPasses"],
+    "MinPasses": SETUP_REQUEST["MinimumPasses"],
+    "ConvTarget": SETUP_REQUEST["MaxDeltaFreq"],
+    "ConvTargetConsecPasses": SETUP_REQUEST["MinimumConvergedPasses"],
+}.items():
+    if native_controls[key] != requested:
+        raise RuntimeError(f"Saved native convergence control differs: {key}")
+analysis_data["native_convergence_controls"] = native_controls
+sd_names = re.findall(r"\bM\([^\n]*File='([^']+\.sd)'", adaptive_blocks[0])
+native_modes = {}
+for filename in sd_names:
+    sd_text = (design_results / filename).read_text()
+    number = int(re.search(r"AdaptivePass=(\d+)", sd_text)[1])
+    modes = re.findall(r"Modes\(([^,]+), ([^)]+)\)", sd_text)
+    if len(modes) != 1 or number in native_modes:
+        raise RuntimeError("Ambiguous native mode or adaptive pass")
+    real_hz, imag_hz = map(float, modes[0])
+    native_modes[number] = (real_hz, imag_hz, filename)
+pass_rows = []
+for block in blocks(conv_text, "QuantityValues"):
+    number = int(re.search(r"PassNo=(\d+)", block)[1])
+    delta = re.search(r"MaxDeltaFreq\(([^,]+), ([^)]+)\)", block)
+    elements = re.search(r"SolvedElements\(([^,]+), ([^)]+)\)", block)
+    real_hz, imag_hz, filename = native_modes[number]
+    pass_rows.append(
+        {
+            "pass": number,
+            "frequency_ghz": real_hz / 1e9,
+            "imaginary_frequency_hz": imag_hz,
+            "max_delta_frequency_percent": float(delta[1]) if delta else None,
+            "solved_elements": int(float(elements[1])),
+            "native_sd": filename,
+        }
+    )
+pass_rows.sort(key=lambda row: row["pass"])
+if not pass_rows or {r["pass"] for r in pass_rows} != set(native_modes):
+    raise RuntimeError("Native convergence and adaptive solution inventories differ")
+last_files = re.findall(r"\bM\([^\n]*File='([^']+\.sd)'", last_blocks[0])
+if len(last_files) != 1:
+    raise RuntimeError("Native LastAdaptive file identity is ambiguous")
+last_text = (design_results / last_files[0]).read_text()
+last_number = int(re.search(r"AdaptivePass=(\d+)", last_text)[1])
+last_modes = re.findall(r"Modes\(([^,]+), ([^)]+)\)", last_text)
+if (
+    last_number != pass_rows[-1]["pass"]
+    or len(last_modes) != 1
+    or tuple(map(float, last_modes[0])) != native_modes[last_number][:2]
+):
+    raise RuntimeError("Native LastAdaptive identity differs from final adaptive pass")
+export_conv = (native_dir / "convergence.conv").read_text()
+export_fields = dict(line.split(":", 1) for line in export_conv.splitlines() if ":" in line)
+export_fields = {key.strip(): value.strip() for key, value in export_fields.items()}
+if export_fields["Setup"] != SETUP_NAME or int(export_fields["Completed"]) != len(pass_rows):
+    raise RuntimeError("Native exported convergence setup / pass inventory differs")
+exported_modes = [
+    line.split()
+    for line in (native_dir / "eigenmodes.eig").read_text().splitlines()
+    if re.match(r"^\s*1\s", line)
+]
+if len(exported_modes) != 1:
+    raise RuntimeError("Native final mode-1 export is unavailable")
+if f"{pass_rows[-1]['frequency_ghz']:.12g}" != exported_modes[0][1]:
+    raise RuntimeError("Last native pass and exported final mode differ at export precision")
+analysis_data["passes"] = pass_rows
+analysis_data["native_converged"] = bool(re.search(r"^\s*IsConverged=true\s*$", conv_text, re.M))
+if (export_fields["Converged"] == "Yes") != analysis_data["native_converged"]:
+    raise RuntimeError("Native convergence exports disagree")
+analysis_data["analytic_frequency_ghz"] = analytic_frequency_ghz
+display({"native_controls": native_controls, "native_converged": analysis_data["native_converged"]})
+display(pass_rows)
+fig, axes = plt.subplots(1, 2, figsize=(11, 4), constrained_layout=True)
+axes[0].plot([r["pass"] for r in pass_rows], [r["frequency_ghz"] for r in pass_rows], "o-")
+axes[0].axhline(analytic_frequency_ghz, linestyle="--", color="gray", label="analytic reference")
+axes[0].set(xlabel="Adaptive pass", ylabel="Mode 1 [GHz]")
+axes[0].legend()
+available = [r for r in pass_rows if r["max_delta_frequency_percent"] is not None]
+axes[1].plot(
+    [r["pass"] for r in available], [r["max_delta_frequency_percent"] for r in available], "o-"
+)
+axes[1].axhline(native_controls["ConvTarget"], linestyle="--", color="gray", label="Native target")
+axes[1].set(xlabel="Adaptive pass", ylabel="Native Max Delta Frequency [%]")
+axes[1].legend()
+fig.savefig(analysis_dir / "frequency_convergence.png", dpi=PLOT_DPI)
+plt.show()
+```
+
+## 14. Bind solution, mode, source normalization, phase and native face list
+
+Mode 1 is selected with **unitless** amplitude `1`, not `1V/M`, and phase 0°.
+Native eigenmode peak-electric-field source state is read back from the saved
+working project's selected design `Solutions` block. The sealed project is
+untouched. The exact-one-face named selection is the Calculator domain.
+
+```{python}
+#| id: native-field-context
+active_phase = "calculator_context"
+if WORKFLOW_ACTION != "analyze_saved":
+    if (
+        app.edit_sources({MODE: (SOURCE_MAGNITUDE, PHASE)}, eigenmode_stored_energy=False)
+        is not True
+    ):
+        raise RuntimeError("Native source selection failed")
+    if not app.save_project():
+        raise RuntimeError("Source-state save failed")
+    project_text = project_path.read_text(errors="strict")
+    design_blocks = [
+        b
+        for b in blocks(project_text, "HFSSModel")
+        if re.search(rf"^\s*Name='{re.escape(DESIGN_NAME)}'\s*$", b, re.M)
+    ]
+    if len(design_blocks) != 1:
+        raise RuntimeError("Exact saved HFSS design source readback unavailable")
+    sources = blocks(design_blocks[0], "Solutions")
+    if len(sources) != 1:
+        raise RuntimeError("Native Solutions source block unavailable")
+    entries = re.findall(r"SourceEntry\(([^\n]+)\)", sources[0])
+    if (
+        "FieldType='EigenPeakElectricField'" not in sources[0]
+        or len(entries) != 1
+        or not re.search(r"\bIndex=0(?:,|$)", entries[0])
+        or "Magnitude='1'" not in entries[0]
+        or "Phase='0deg'" not in entries[0]
+    ):
+        raise RuntimeError("Native source normalization / mode / phase readback differs")
+    selection = app.modeler.create_face_list([selected_face["id"]], name="MaskTop_" + ANALYSIS_ID)
+    if (
+        not selection
+        or dict(selection.props).get("List") != [selected_face["id"]]
+        or dict(selection.props).get("Type") != "Face"
+        or dict(selection.props).get("ID") is None
+    ):
+        raise RuntimeError("Native exact-one-face selection readback failed")
+    analysis_data["context"].update(
+        design=DESIGN_NAME,
+        setup_name=SETUP_NAME,
+        solution=SETUP_NAME + " : LastAdaptive",
+        mode=1,
+        phase=PHASE,
+        source_readback=sources[0],
+        face_selection={"name": selection.name, "props": dict(selection.props)},
+    )
+display(analysis_data["context"])
+```
+
+## 15. Named scalar-one and complex $|E|^2$ unmasked integrals
+
+Define $|E|^2=\Re(E)\cdot\Re(E)+\Im(E)\cdot\Im(E)$ without a phase
+projection or smoothing. The native surface integral of scalar 1 should be
+interpreted in m²; the $|E|^2$ surface integral in V². The file's final line
+is the scalar result, never an exported-grid integral computed in Python.
+
+```{python}
+#| id: native-baselines
+active_phase = "native_scalar_integrals"
+
+
+def native_scalar(label, expression, kind, margin=None):
+    name = "Mask_" + ANALYSIS_ID + "_" + label
+    expression.verify()
+    if expression.add(name) != name or calc.is_expression_defined(name) is not True:
+        raise RuntimeError(f"Native named-expression readback failed: {name}")
+    analysis_data["expressions"].append(expression.to_dict(name))
+    path = analysis_dir / (label + ".fld")
+    if path.exists():
+        raise FileExistsError(path)
+    if (
+        calc.write(
+            name, str(path), setup=SETUP_NAME + " : LastAdaptive", intrinsics={"Phase": PHASE}
+        )
+        is not True
+    ):
+        raise RuntimeError(f"Native CalculatorWrite failed: {name}")
+    value = float(path.read_text().splitlines()[-1].strip().replace("D", "E").replace("d", "e"))
+    if not math.isfinite(value):
+        raise ValueError("Nonfinite native scalar")
+    row = {
+        "label": label,
+        "margin_um": margin,
+        "kind": kind,
+        "value": value,
+        "expression_name": name,
+        "raw_file": path.name,
+        "units_expected": "m^2" if kind == "area" else "V^2",
+    }
+    analysis_data["measurements"].append(row)
+    analysis_receipt["native_scalar_count"] += 1
+    save_json(analysis_dir / "analysis_data.json", analysis_data)
+    checkpoint()
+    return value
+
+
+if WORKFLOW_ACTION != "analyze_saved":
+    from ansys.aedt.core.visualization.post.field_calculator_expressions import Surface, dot
+
+    native_integrals_started = time.monotonic()
+    calc = app.post.fields_calculator
+    fx = calc.expressions
+    face_domain = Surface(selection.name)
+    e = fx.vector("E")
+    norm = dot(e.real(), e.real()) + dot(e.imaginary(), e.imaginary())
+    one = fx.scalar_constant(1)
+    for label, expr in (("scalar_one", one), ("complex_e2", norm)):
+        name = "Mask_" + ANALYSIS_ID + "_" + label
+        expr.verify()
+        if expr.add(name) != name or calc.is_expression_defined(name) is not True:
+            raise RuntimeError("Native scalar-field expression registration failed")
+        analysis_data["expressions"].append(expr.to_dict(name))
+    native_scalar("baseline_area", one.integrate(face_domain), "area")
+    native_scalar("baseline_e2", norm.integrate(face_domain), "e2_surface")
+display([r for r in analysis_data["measurements"] if r["margin_um"] is None])
+```
+
+## 16. Explain and display the named inline mask
+
+For margin $d$, the Calculator evaluates
+`if(min(min(X,50mm-X),min(Y,40mm-Y)) < d,0,1)` directly on the selected
+top face. Coordinates and units belong to AEDT. This is a piecewise field
+expression, not a new rectangle or a mesh refinement. No design variable or
+unsolved variation is introduced. Stage 17 registers each named mask before
+integrating it; this display shows the exact function source.
+
+```{python}
+#| id: mask-definition
+mask_sources = [f"if(min(min(X,50mm-X),min(Y,40mm-Y)) < {d:.17g}um,0,1)" for d in MARGINS_UM]
+display(
+    {
+        "first_masks": mask_sources[:8],
+        "last_mask": mask_sources[-1],
+        "count": len(mask_sources),
+        "domain": analysis_data["context"]["face_selection"],
+    }
+)
+```
+
+## 17. Evaluate all 208 native margins and retain every scalar file
+
+The 0–20,000 µm grid has 100 µm spacing, plus 0.01, 0.05, 0.1, 0.2, 0.5,
+1 and 21,000 µm. Each margin produces separate native area and $|E|^2$
+integrals on the same solution and face. No solve exists in this loop.
+
+```{python}
+#| id: native-mask-sweep
+if WORKFLOW_ACTION != "analyze_saved":
+    norm_ref = fx.named_expression(
+        "Mask_" + ANALYSIS_ID + "_complex_e2", is_vector=False, is_complex=False
+    )
+    for index, (margin, source) in enumerate(zip(MARGINS_UM, mask_sources, strict=True)):
+        label = f"margin_{index:04d}"
+        mask_name = "Mask_" + ANALYSIS_ID + "_" + label + "_mask"
+        mask_expr = fx.function(source)
+        mask_expr.verify()
+        if (
+            mask_expr.add(mask_name) != mask_name
+            or calc.is_expression_defined(mask_name) is not True
+        ):
+            raise RuntimeError("Native named mask readback failed")
+        analysis_data["expressions"].append(mask_expr.to_dict(mask_name))
+        mask = fx.named_expression(mask_name, is_vector=False, is_complex=False)
+        native_scalar(label + "_area", mask.integrate(face_domain), "area", margin)
+        native_scalar(label + "_e2", (norm_ref * mask).integrate(face_domain), "e2_surface", margin)
+    analysis_receipt["native_integrals_seconds"] = time.monotonic() - native_integrals_started
+else:
+    # Reparse raw scalar exports instead of trusting copied numbers alone.
+    for row in analysis_data["measurements"]:
+        raw = (analysis_dir / row["raw_file"]).read_text().splitlines()[-1]
+        if float(raw.replace("D", "E").replace("d", "e")) != row["value"]:
+            raise ValueError("Saved native scalar and measurement record differ")
+display(
+    {
+        "native_measurements": len(analysis_data["measurements"]),
+        "new_native_scalar_calls": analysis_receipt["native_scalar_count"],
+    }
+)
+```
+
+## 18. Native centerline vector samples and analytic shape
+
+Export complex E on the two top-face centerlines. The native file columns are
+`x y z ReEx ImEx ReEy ImEy ReEz ImEz`, with positions in mm. Normalize each
+measured $|E_z|$ centerline by its sampled maximum for shape comparison.
+Sampling diagnoses mode shape; it does not replace any native integral.
+
+```{python}
+#| id: field-shape
+active_phase = "shape_analysis"
+if WORKFLOW_ACTION != "analyze_saved":
+    exported = calc.export(
+        quantity="E",
+        solution=SETUP_NAME + " : LastAdaptive",
+        output_file=str(analysis_dir / "field_shape.fld"),
+        sample_points=SHAPE_POINTS_MM,
+        intrinsics={"Phase": PHASE},
+        reference_coordinate_system="Global",
+        export_in_si_system=False,
+    )
+    if not exported:
+        raise RuntimeError("Native vector sample export failed")
+shape_rows = []
+for line in (analysis_dir / "field_shape.fld").read_text().splitlines():
+    cells = line.split()
+    if len(cells) == 9:
+        shape_rows.append([float(v.replace("D", "E")) for v in cells])
+shape = np.asarray(shape_rows)
+if shape.shape != (len(SHAPE_POINTS_MM), 9):
+    raise ValueError("Native vector sample inventory differs")
+if not np.allclose(shape[:, :3], SHAPE_POINTS_MM, rtol=0, atol=1e-12):
+    raise ValueError("Native sample coordinates differ from requested centerlines")
+fig, axes = plt.subplots(1, 2, figsize=(11, 4), constrained_layout=True)
+for axis, subset, coordinate, length in (
+    (axes[0], shape[:99], 0, 50),
+    (axes[1], shape[99:], 1, 40),
+):
+    ez = np.hypot(subset[:, 7], subset[:, 8])
+    if not np.isfinite(ez).all() or ez.max() == 0:
+        raise ValueError("Native centerline Ez cannot be normalized")
+    axis.plot(subset[:, coordinate], ez / ez.max(), ".", label="native |Ez| / sampled max")
+    axis.plot(
+        subset[:, coordinate],
+        np.sin(np.pi * subset[:, coordinate] / length),
+        label="analytic shape",
+    )
+    axis.set(xlabel=("x" if coordinate == 0 else "y") + " [mm]", ylabel="Normalized |Ez|")
+    axis.legend()
+fig.savefig(analysis_dir / "field_shape.png", dpi=PLOT_DPI)
+plt.show()
+```
+
+## 19. Physics analysis results — ratios, tiny margins and analytic residuals
+
+Let $u=d/L$. The exact retained one-dimensional $\sin^2$ fraction is
+$1-2u+\sin(2\pi u)/\pi$ until the interval vanishes at $d\ge L/2$.
+Multiply the x and y fractions for the analytic retained $|E|^2$ ratio.
+The exact retained area is $(50-2d)_+(40-2d)_+$ with consistent units.
+These are closed-form references, not quadrature of exported fields.
+
+Keep raw overshoot, plateaus, jumps and signed residuals. No smoothing,
+monotonicity enforcement or clipping of measured ratios is applied.
+
+```{python}
+#| id: ratio-analysis
+measurements = analysis_data["measurements"]
+baseline_area = next(r["value"] for r in measurements if r["label"] == "baseline_area")
+baseline_e2 = next(r["value"] for r in measurements if r["label"] == "baseline_e2")
+if baseline_area == 0 or baseline_e2 == 0:
+    raise ZeroDivisionError("Cannot form retained ratios from zero native baseline")
+area_rows = sorted(
+    (r for r in measurements if r["kind"] == "area" and r["margin_um"] is not None),
+    key=lambda r: r["margin_um"],
+)
+e2_rows = sorted(
+    (r for r in measurements if r["kind"] == "e2_surface" and r["margin_um"] is not None),
+    key=lambda r: r["margin_um"],
+)
+if [r["margin_um"] for r in area_rows] != MARGINS_UM or [
+    r["margin_um"] for r in e2_rows
+] != MARGINS_UM:
+    raise ValueError("Saved measurement inventory is not the requested 208 margins")
+d = np.asarray(MARGINS_UM)
+area_ratio = np.asarray([r["value"] for r in area_rows]) / baseline_area
+e2_ratio = np.asarray([r["value"] for r in e2_rows]) / baseline_e2
+analytic_area = np.maximum(50 - 2 * d / 1000, 0) * np.maximum(40 - 2 * d / 1000, 0) / 2000
+u_x, u_y = d / 50000, d / 40000
+analytic_e2 = np.where(u_x < 0.5, 1 - 2 * u_x + np.sin(2 * np.pi * u_x) / np.pi, 0) * np.where(
+    u_y < 0.5, 1 - 2 * u_y + np.sin(2 * np.pi * u_y) / np.pi, 0
+)
+fig, axes = plt.subplots(2, 2, figsize=(12, 8), constrained_layout=True)
+axes[0, 0].plot(d, area_ratio, ".-", label="native area")
+axes[0, 0].plot(d, analytic_area, "--", label="analytic area")
+axes[0, 0].plot(d, e2_ratio, ".-", label="native E2")
+axes[0, 0].plot(d, analytic_e2, "--", label="analytic E2")
+axes[0, 0].set(ylabel="Retained fraction (raw)")
+tiny = d <= 1
+axes[0, 1].plot(d[tiny], area_ratio[tiny] - 1, "o-", label="native area − 1")
+axes[0, 1].plot(d[tiny], e2_ratio[tiny] - 1, "o-", label="native E2 − 1")
+axes[0, 1].set(xscale="symlog", ylabel="Tiny-margin deviation from 1")
+axes[1, 0].plot(d, area_ratio - analytic_area, ".-", label="area residual")
+axes[1, 0].plot(d, e2_ratio - analytic_e2, ".-", label="E2 residual")
+axes[1, 0].set(ylabel="Native − analytic retained fraction")
+axes[1, 1].plot(d[1:], np.diff(e2_ratio), ".-", label="native successive E2 change")
+axes[1, 1].set(ylabel="Successive raw ratio change")
+for axis in axes.flat:
+    axis.set_xlabel("Margin [µm]")
+    axis.legend()
+    axis.grid(alpha=0.2)
+fig.savefig(analysis_dir / "mask_ratios.png", dpi=PLOT_DPI)
+plt.show()
+analysis_data["ratios"] = [
+    {
+        "margin_um": float(d[i]),
+        "native_area": float(area_ratio[i]),
+        "native_e2": float(e2_ratio[i]),
+        "analytic_area": float(analytic_area[i]),
+        "analytic_e2": float(analytic_e2[i]),
+    }
+    for i in range(len(d))
+]
+```
+
+## 20. Simulation performance / benchmarks — separate solve and analysis costs
+
+Adaptive passes belong to one Analyze request; Calculator measurements are
+not solves. Saved plotting consumes zero native Calculator calls and zero
+solver calls. Historical solver cost is displayed separately from this attempt.
+
+```{python}
+#| id: performance
+analysis_receipt["elapsed_seconds_before_release"] = time.monotonic() - analysis_started
+display(
+    {
+        "solve_status": solve_receipt["status"],
+        "original_solve_invocations": solve_receipt["solve_invocations"],
+        "original_solve_seconds": solve_receipt.get("elapsed_seconds"),
+        "native_adaptive_passes": len(pass_rows),
+        "last_solved_elements": pass_rows[-1]["solved_elements"],
+        "this_action": WORKFLOW_ACTION,
+        "this_action_solve_invocations": solve_receipt["solve_invocations"]
+        if WORKFLOW_ACTION == "run"
+        else 0,
+        "new_native_scalar_calls": analysis_receipt["native_scalar_count"],
+        "total_action_seconds_before_release": time.monotonic() - action_started,
+        "analysis_seconds_before_release": analysis_receipt["elapsed_seconds_before_release"],
+    }
+)
+```
+
+## 21. Save analysis project, release owned session, verify sealed solution
+
+Save expressions only in the working/analysis project. After release, hash
+the sealed original and compare saved field and mesh files in the working
+copy. Geometry, setup and manual mesh assignments must be unchanged during
+analysis. Separate receipts retain a successful solve even if analysis fails.
+The cell hook is bounded to this attempt and removed after normal cleanup.
+
+```{python}
+#| id: finalize-receipts
+active_phase = "preservation_and_release"
+if WORKFLOW_ACTION != "analyze_saved":
+    geometry_after = native_geometry()
+    setup_after = dict(app.get_setup(SETUP_NAME).props)
+    mesh_after = [{"name": op.name, "props": dict(op.props)} for op in app.mesh.meshoperations]
+    analysis_receipt["geometry_unchanged"] = geometry_after == analysis_data["context"]["geometry"]
+    analysis_receipt["setup_unchanged"] = setup_after == analysis_data["context"]["setup"]
+    analysis_receipt["mesh_operations_unchanged"] = (
+        mesh_after == analysis_data["context"]["mesh_operations"]
+    )
+    if not app.save_project():
+        raise RuntimeError("Analysis project save failed")
+    release_owned()
+    working_after = inventory(work_dir)
+    core = [name for name in working_before if name.endswith(".ngmesh") or "/fields." in name]
+    analysis_receipt["saved_field_mesh_count"] = len(core)
+    analysis_receipt["saved_field_mesh_unchanged"] = bool(core) and all(
+        working_after.get(name) == working_before[name] for name in core
+    )
+    if not all(
+        analysis_receipt[key]
+        for key in (
+            "geometry_unchanged",
+            "setup_unchanged",
+            "mesh_operations_unchanged",
+            "saved_field_mesh_unchanged",
+        )
+    ):
+        raise RuntimeError("Analysis changed native geometry, setup, field or mesh state")
+checked_inventory(sealed_dir, solve_receipt["sealed_manifest"])
+if inventory(sealed_dir) != solve_receipt["sealed_manifest"]:
+    raise RuntimeError("Sealed solution inventory changed")
+analysis_receipt["sealed_solution_unchanged"] = True
+save_json(analysis_dir / "analysis_data.json", analysis_data)
+analysis_receipt["artifact_manifest"] = {
+    name: record
+    for name, record in inventory(analysis_dir).items()
+    if name != "analysis_receipt.json" and not name.startswith("project/")
+}
+analysis_receipt.update(
+    status="analysis_complete",
+    elapsed_seconds=time.monotonic() - analysis_started,
+    total_action_elapsed_seconds=time.monotonic() - action_started,
+    finished_utc=datetime.now(UTC).isoformat(),
+    solve_receipt_sha256=sha256(run_dir / "solve_receipt.json"),
+)
+checkpoint()
+shell.events.unregister("post_run_cell", cell_failure_cleanup)
+display(
+    {
+        "solve_receipt": str(run_dir / "solve_receipt.json"),
+        "analysis_receipt": str(analysis_dir / "analysis_receipt.json"),
+        "sealed_solution_unchanged": analysis_receipt["sealed_solution_unchanged"],
+    }
+)
+```
+
+## 22. Measured limitations and interpretation
+
+The following observations summarize this selected evidence, without an
+accuracy pass/fail label. Exact floating-point equality in the plateau count
+describes the exported values; it is not a tolerance or an acceptance rule.
+
+```{python}
+#| id: measured-limitations
+observations = {
+    "native_converged": analysis_data["native_converged"],
+    "native_pass_count": len(pass_rows),
+    "final_frequency_ghz": pass_rows[-1]["frequency_ghz"],
+    "frequency_minus_analytic_ghz": pass_rows[-1]["frequency_ghz"] - analytic_frequency_ghz,
+    "native_convergence_controls": analysis_data["native_convergence_controls"],
+}
+for label, values, reference in (
+    ("area", area_ratio, analytic_area),
+    ("e2", e2_ratio, analytic_e2),
+):
+    residual = values - reference
+    observations[label] = {
+        "maximum_raw_ratio": float(values.max()),
+        "overshoot_above_one_count": int(np.count_nonzero(values > 1)),
+        "equal_successive_ratio_count": int(np.count_nonzero(np.diff(values) == 0)),
+        "successive_increase_count": int(np.count_nonzero(np.diff(values) > 0)),
+        "minimum_signed_analytic_residual": float(residual.min()),
+        "maximum_signed_analytic_residual": float(residual.max()),
+        "maximum_absolute_analytic_residual": float(np.abs(residual).max()),
+    }
+display(observations)
+```
+
+Frequency convergence does not demonstrate discontinuous-mask quadrature
+accuracy. Inspect the measured raw ratios, tiny-margin deviations and signed
+analytic residuals above; retain overshoot, plateaus and discontinuities as
+observations, not automatically rejected data. No additional solve, mesh
+refinement, smoothing or hidden accuracy threshold is authorized here.
+
+This ideal vacuum PEC cavity has no junction, dissipative interface or material
+loss model. These surface ratios are **not EPR, Q, T1 or device predictions**.
+Centerline samples check shape only; they are not a volumetric mode proof.
+The source readback and native metadata reader are deliberately bounded to
+the stated AEDT version and this single-design, single-setup, single-mode
+experiment. Missing native identity raises an extraction error. A kernel or
+process crash can bypass an IPython hook: inspect its receipt and owned PID
+before manual recovery; never terminate unrelated AEDT sessions.
+
+The canonical QMD and derived notebook are delivered unexecuted. Any saved
+historical evidence must preserve its actual source hashes and provenance;
+plotting it does not claim execution of this notebook or Human acceptance.
