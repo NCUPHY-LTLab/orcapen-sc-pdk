@@ -191,6 +191,7 @@ website:
                 - public-pdk-examples/components/resonator_meander.qmd
                 - public-pdk-examples/components/interdigital_capacitor.qmd
                 - public-pdk-examples/components/martinis2022_differential_ribbon_capacitor.qmd
+                - public-pdk-examples/components/disk_flip_chip_qubit.qmd
                 - public-pdk-examples/components/launcher.qmd
                 - public-pdk-examples/components/cpw_t_junction.qmd
                 - public-pdk-examples/components/airbridge.qmd
