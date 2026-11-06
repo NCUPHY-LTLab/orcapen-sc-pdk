@@ -15,7 +15,7 @@ def _path_orientation(start: Point, end: Point) -> float:
     return math.degrees(math.atan2(end[1] - start[1], end[0] - start[0])) % 360
 
 
-@curves.sampled_cell(tags=["layout", "junction", "manhattan"])
+@gf.cell(tags=["layout", "junction", "manhattan"])
 def manhattan_style_junction(
     width: float = 0.09,
     length: float = 5.0,
@@ -26,6 +26,7 @@ def manhattan_style_junction(
     draw_layer: Layer = LAYER.D0_TOP_JJ_DRAW,
     sim_port_layer: Layer = LAYER.D0_TOP_SIM_BOUNDARY,
     with_fabrication_geometry: bool = True,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a Manhattan junction plus a straight FEM lumped-port surrogate.
 
@@ -108,13 +109,12 @@ def manhattan_style_junction(
         layer=draw_layer,
     )
 
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
 if __name__ == "__main__":
-    from orcapen_sc_pdk.pdk import PDK
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
 
-    PDK.activate()
-
-    c = manhattan_style_junction()
-    c.show()
+    show(manhattan_style_junction)

@@ -13,7 +13,7 @@ from orcapen_sc_pdk.ports import add_mesh_port
 from orcapen_sc_pdk.tech import LAYER, coplanar_waveguide
 
 
-@curves.sampled_cell(tags=["layout", "primitive", "bend_circular", "circular_arc"])
+@gf.cell(tags=["layout", "primitive", "bend_circular", "circular_arc"])
 def bend_circular(
     radius: float | None = None,
     angle: float = 90.0,
@@ -23,10 +23,12 @@ def bend_circular(
     width: float | None = None,
     cross_section: CrossSectionSpec = "cpw_6_7_6",
     allow_min_radius_violation: bool = False,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a GF circular bend with a project CPW default cross-section."""
 
-    return curves.bend_circular(
+    c = curves.bend_circular(
+        sampling=curve_sampling,
         radius=radius,
         angle=angle,
         npoints=npoints,
@@ -36,9 +38,11 @@ def bend_circular(
         cross_section=cross_section,
         allow_min_radius_violation=allow_min_radius_violation,
     )
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
-@curves.sampled_cell(tags=["layout", "primitive", "bend_euler"])
+@gf.cell(tags=["layout", "primitive", "bend_euler"])
 def bend_euler(
     radius: float | None = None,
     angle: float = 90.0,
@@ -50,10 +54,12 @@ def bend_euler(
     width: float | None = None,
     cross_section: CrossSectionSpec = "cpw_6_7_6",
     allow_min_radius_violation: bool = False,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a GF Euler bend with a project CPW default cross-section."""
 
-    return curves.bend_euler(
+    c = curves.bend_euler(
+        sampling=curve_sampling,
         radius=radius,
         angle=angle,
         p=p,
@@ -65,26 +71,31 @@ def bend_euler(
         cross_section=cross_section,
         allow_min_radius_violation=allow_min_radius_violation,
     )
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
-@curves.sampled_cell(tags=["layout", "primitive", "straight"])
+@gf.cell(tags=["layout", "primitive", "straight"])
 def straight(
     length: float = 10.0,
     npoints: int = 2,
     cross_section: CrossSectionSpec = "cpw_6_7_6",
     width: float | None = None,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a GF straight with a project CPW default cross-section."""
 
-    return gf.components.straight(
+    c = gf.components.straight(
         length=length,
         npoints=npoints,
         cross_section=cross_section,
         width=width,
-    )
+    ).copy()
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
-@curves.sampled_cell(tags=["layout", "primitive", "cpw", "taper"])
+@gf.cell(tags=["layout", "primitive", "cpw", "taper"])
 def cpw_handoff(
     length: float = 200.0,
     taper_length: float = 50.0,
@@ -96,6 +107,7 @@ def cpw_handoff(
     draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
     etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Join public CPW dimensions along X; total length includes taper once.
 
@@ -126,7 +138,11 @@ def cpw_handoff(
     c = gf.Component()
     straight_length = length - taper_length
     if straight_length > 0:
-        lead = c << straight(length=straight_length, cross_section=native_xs)
+        lead = c << straight(
+            length=straight_length,
+            cross_section=native_xs,
+            curve_sampling=curve_sampling,
+        )
         c.add_port("o1", port=lead.ports["o1"])
     if taper_length > 0:
         transition = c << taper(
@@ -138,6 +154,7 @@ def cpw_handoff(
             draw_layer=draw_layer,
             etch_layer=etch_layer,
             ground_mask_layer=ground_mask_layer,
+            curve_sampling=curve_sampling,
         )
         if straight_length > 0:
             transition.connect("o_taper_in", lead.ports["o2"])
@@ -149,10 +166,11 @@ def cpw_handoff(
     c.info["length"] = length
     c.info["taper_length"] = taper_length
     c.info["radius"] = radius
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
-@curves.sampled_cell(tags=["layout", "primitive", "metal", "rounded_end"])
+@gf.cell(tags=["layout", "primitive", "metal", "rounded_end"])
 def rounded_end_metal_segment(
     length: float = 100.0,
     width: float = 10.0,
@@ -161,6 +179,7 @@ def rounded_end_metal_segment(
     draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
     etch_layer: LayerSpec = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: LayerSpec = LAYER.D0_TOP_GROUND_MASK,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Flat X=0 face and width/2 cap ending at X=length, counted once.
 
@@ -176,7 +195,7 @@ def rounded_end_metal_segment(
         raise ValueError("ground_mask_margin must be nonnegative for expansion")
     automatic_cap = n_cap_points is None
     if automatic_cap:
-        n_cap_points = curves.arc_points(width / 2, 90)
+        n_cap_points = curves.arc_points(width / 2, 90, curve_sampling)
     if n_cap_points < 2:
         raise ValueError("each cap quarter needs its two endpoints")
     radius = width / 2
@@ -194,9 +213,9 @@ def rounded_end_metal_segment(
     c << draw
     mask = gf.Component()
     mask_points = points
-    if automatic_cap and curves.resolve_sampling()[0] == "diameter":
+    if automatic_cap and curves.resolve_sampling(curve_sampling)[0] == "diameter":
         # The opening has its own radius; do not inherit the metal's tier.
-        mask_count = curves.arc_points(radius + ground_mask_margin, 90)
+        mask_count = curves.arc_points(radius + ground_mask_margin, 90, curve_sampling)
         mask_angles = [-pi / 2 + i * pi / (2 * (mask_count - 1)) for i in range(mask_count)]
         mask_angles += [i * pi / (2 * (mask_count - 1)) for i in range(1, mask_count)]
         mask_points = [
@@ -219,10 +238,11 @@ def rounded_end_metal_segment(
     add_mesh_port(
         c, name="o_mesh", center=(center_x, 0.0), width=width, orientation=0.0, layer=draw_layer
     )
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
-@curves.sampled_cell(tags=["layout", "primitive", "rounded_rectangle"])
+@gf.cell(tags=["layout", "primitive", "rounded_rectangle"])
 def rounded_rectangle(
     width: float = 100.0,
     height: float = 50.0,
@@ -232,6 +252,7 @@ def rounded_rectangle(
     draw_layer: LayerSpec = LAYER.D0_TOP_M1_DRAW,
     ground_mask_layer: LayerSpec | None = None,
     port_type: str | None = "electrical",
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Centred GF rounded DRAW with optional independently expanded MASK.
 
@@ -246,10 +267,14 @@ def rounded_rectangle(
         sampling_radius = corner_radius + (
             ground_mask_margin if ground_mask_layer is not None else 0
         )
-        n_corner_points = curves.arc_points(sampling_radius, 90) if sampling_radius > 0 else 2
+        n_corner_points = (
+            curves.arc_points(sampling_radius, 90, curve_sampling) if sampling_radius > 0 else 2
+        )
         mask_corner_points = n_corner_points
-        if curves.resolve_sampling()[0] == "diameter":
-            n_corner_points = curves.arc_points(corner_radius, 90) if corner_radius > 0 else 2
+        if curves.resolve_sampling(curve_sampling)[0] == "diameter":
+            n_corner_points = (
+                curves.arc_points(corner_radius, 90, curve_sampling) if corner_radius > 0 else 2
+            )
     if n_corner_points < 2:
         raise ValueError("each rounded corner needs its two endpoints")
     c = gf.Component()
@@ -274,25 +299,29 @@ def rounded_rectangle(
             n_corner_points=mask_corner_points,
             layer=ground_mask_layer,
         )
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
-@curves.sampled_cell(tags=["layout", "primitive", "wire_corner"])
+@gf.cell(tags=["layout", "primitive", "wire_corner"])
 def wire_corner(
     cross_section: CrossSectionSpec = "cpw_6_7_6",
     port_names: PortNames = ("e1", "e2"),
     port_types: PortTypes = ("electrical", "electrical"),
     width: float | None = None,
     radius: float | None = None,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Forward GF's sharp wire corner; GF9.48 accepts but ignores radius."""
-    return gf.components.wire_corner(
+    c = gf.components.wire_corner(
         cross_section=cross_section,
         port_names=port_names,
         port_types=port_types,
         width=width,
         radius=radius,
-    )
+    ).copy()
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
 __all__ = [
@@ -304,3 +333,10 @@ __all__ = [
     "rounded_rectangle",
     "wire_corner",
 ]
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(straight)

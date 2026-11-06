@@ -1,11 +1,14 @@
-"""Repository-wide polygon sampling, resolved before GDSFactory cache lookup."""
+"""Repository-wide polygon sampling, passed to every cell as an explicit parameter.
+
+Each PDK cell takes `curve_sampling` and passes it on to nested cells and to the
+curve helpers here. Being an ordinary parameter, it is part of the GDSFactory
+cache key and visible to GDSFactory+, which only discovers plain `@gf.cell`
+factories.
+"""
 
 from __future__ import annotations
 
-from contextlib import contextmanager
-from contextvars import ContextVar
-from functools import wraps
-from inspect import Parameter, signature
+from inspect import signature
 from math import asin, ceil, isfinite, pi, sqrt
 from typing import Literal
 
@@ -15,16 +18,20 @@ import gdsfactory as gf
 # segments before Boolean/grid quantization; fourfold grids preserve axes.
 FABRICATION = (256, None)
 type Sampling = tuple[int | Literal["diameter"], float | None]
+# A profile name or an explicit (full-circle count, optional max sagitta in um).
+type CurveSampling = Sampling | Literal["fabrication", "simulation"]
 # 此直徑分級是否適合模擬尚待驗證；依 Human 肉眼判斷，預期不致對網格生成（meshing）造成過多負擔。
 SIMULATION = ("diameter", None)
 PROFILES = {"fabrication": FABRICATION, "simulation": SIMULATION}
-_current = ContextVar("orcapen_curve_sampling", default=FABRICATION)
+DIAMETER_TIERS_UM = [
+    {"below": 20, "points": 16},
+    {"below": 100, "points": 24},
+    {"below": None, "points": 32},
+]
 
 
-def resolve_sampling(value=None) -> Sampling:
+def resolve_sampling(value: CurveSampling) -> Sampling:
     """Resolve a profile name or (full-circle count, optional sagitta in um)."""
-    if value is None:
-        value = _current.get()
     if isinstance(value, str):
         value = PROFILES[value]
     count, error = value
@@ -37,17 +44,32 @@ def resolve_sampling(value=None) -> Sampling:
     return count, None if error is None else float(error)
 
 
-@contextmanager
-def curve_sampling(profile="fabrication"):
-    """Use one immutable sampling setting for this context and nested cells."""
-    token = _current.set(resolve_sampling(profile))
-    try:
-        yield _current.get()
-    finally:
-        _current.reset(token)
+def record_sampling(component: gf.Component, sampling: CurveSampling) -> None:
+    """Persist the source sampling setting with the geometry it produced."""
+    count, error = resolve_sampling(sampling)
+    component.info["curve_sampling"] = {
+        "points_per_circle": None if count == "diameter" else count,
+        "max_sagitta_um": error,
+    }
+    if count == "diameter":
+        component.info["curve_sampling"]["diameter_tiers_um"] = [
+            dict(tier) for tier in DIAMETER_TIERS_UM
+        ]
 
 
-def circle_segments(radius: float, sampling=None) -> int:
+def sampling_settings(spec, sampling: CurveSampling) -> dict[str, CurveSampling]:
+    """Settings that pass `sampling` on to a component spec that accepts it.
+
+    PDK cells, by name or factory, take `curve_sampling`. External factories,
+    dict specs and prebuilt components keep their own sampling.
+    """
+    factory = gf.get_active_pdk().cells.get(spec) if isinstance(spec, str) else spec
+    if callable(factory) and "curve_sampling" in signature(factory).parameters:
+        return {"curve_sampling": sampling}
+    return {}
+
+
+def circle_segments(radius: float, sampling: CurveSampling) -> int:
     """Full-circle count, optionally increased to meet a circular sagitta bound.
 
     Bound applies to an ideal inscribed circle before DBU snapping/Booleans,
@@ -66,77 +88,20 @@ def circle_segments(radius: float, sampling=None) -> int:
     return count
 
 
-def arc_points(radius: float, angle: float, sampling=None) -> int:
+def arc_points(radius: float, angle: float, sampling: CurveSampling) -> int:
     """Number of samples including both endpoints of a circular arc (degrees)."""
     if not isfinite(angle):
         raise ValueError("angle must be finite")
     return max(2, ceil(circle_segments(radius, sampling) * abs(angle) / 360) + 1)
 
 
-def sampled_cell(function=None, **options):
-    """PDK cell decorator with an explicit cache-key sampling parameter.
-
-    Resolve context before gf.cell is called, not inside its cached body.
-    Nested cells inherit the immutable tuple. No upstream monkeypatch or
-    clear-cache operation is needed when switching profiles in one process.
-    """
-
-    def decorate(func):
-        original = signature(func)
-        if "curve_sampling" in original.parameters:
-            raise TypeError("curve_sampling is reserved for the PDK sampling setting")
-        params = list(original.parameters.values())
-        extra = Parameter(
-            "curve_sampling",
-            Parameter.KEYWORD_ONLY,
-            default=FABRICATION,
-            annotation=Sampling,
-        )
-        insertion = next(
-            (i for i, p in enumerate(params) if p.kind == Parameter.VAR_KEYWORD), len(params)
-        )
-        params.insert(insertion, extra)
-
-        @wraps(func)
-        def construct(*args, **kwargs):
-            selected = resolve_sampling(kwargs.pop("curve_sampling"))
-            with curve_sampling(selected):
-                result = func(*args, **kwargs)
-            # Persist explicit source settings with the geometry, before locking.
-            if result.locked:
-                result = result.copy()
-            result.info["curve_sampling"] = {
-                "points_per_circle": None if selected[0] == "diameter" else selected[0],
-                "max_sagitta_um": selected[1],
-            }
-            if selected[0] == "diameter":
-                result.info["curve_sampling"]["diameter_tiers_um"] = [
-                    {"below": 20, "points": 16},
-                    {"below": 100, "points": 24},
-                    {"below": None, "points": 32},
-                ]
-            return result
-
-        construct.__signature__ = original.replace(parameters=params)
-        cached = gf.cell(construct, **options)
-
-        @wraps(cached)
-        def call(*args, **kwargs):
-            kwargs["curve_sampling"] = resolve_sampling(kwargs.get("curve_sampling"))
-            return cached(*args, **kwargs)
-
-        return call
-
-    return decorate(function) if function is not None else decorate
-
-
-def circle(*, radius=10.0, layer, **kwargs):
-    """GDSFactory circle with the central full-circle count in its cache key."""
-    kwargs.setdefault("angle_resolution", 360 / circle_segments(radius))
+def circle(*, radius=10.0, layer, sampling: CurveSampling, **kwargs):
+    """GDSFactory circle with the selected full-circle count in its cache key."""
+    kwargs.setdefault("angle_resolution", 360 / circle_segments(radius, sampling))
     return gf.components.circle(radius=radius, layer=layer, **kwargs)
 
 
-def ring(*, radius=10.0, width=0.5, layer):
+def ring(*, radius=10.0, width=0.5, layer, sampling: CurveSampling):
     """Full ring with each radial boundary sampled by the same circle rule.
 
     With radius-aware sampling an inner circle may need fewer segments than
@@ -145,29 +110,37 @@ def ring(*, radius=10.0, width=0.5, layer):
     """
     if width <= 0 or radius < width / 2:
         raise ValueError("positive ring width must fit its centerline radius")
-    outer = circle(radius=radius + width / 2, layer=layer)
+    outer = circle(radius=radius + width / 2, layer=layer, sampling=sampling)
     if radius == width / 2:
         return outer
-    inner = circle(radius=radius - width / 2, layer=layer)
+    inner = circle(radius=radius - width / 2, layer=layer, sampling=sampling)
     return gf.boolean(A=outer, B=inner, operation="not", layer=layer)
 
 
-def arc(*, radius=10.0, angle=90.0, **kwargs):
+def arc(*, radius=10.0, angle=90.0, sampling: CurveSampling, **kwargs):
     """Native GF arc with explicit endpoint-inclusive sampling."""
     if kwargs.get("npoints") is None and kwargs.get("angular_step") is None:
-        kwargs["npoints"] = arc_points(radius, angle)
+        kwargs["npoints"] = arc_points(radius, angle, sampling)
     return gf.path.arc(radius=radius, angle=angle, **kwargs)
 
 
-def euler(*, radius=10.0, angle=90.0, **kwargs):
-    """Native GF Euler path with an explicit central sampling budget."""
+def euler(*, radius=10.0, angle=90.0, sampling: CurveSampling, **kwargs):
+    """Native GF Euler path with an explicit sampling budget."""
     if kwargs.get("npoints") is None and kwargs.get("angular_step") is None:
-        kwargs["npoints"] = arc_points(radius, angle)
+        kwargs["npoints"] = arc_points(radius, angle, sampling)
     return gf.path.euler(radius=radius, angle=angle, **kwargs)
 
 
-def bend(*, euler=False, radius=None, angle=90.0, cross_section="cpw_6_7_6", **kwargs):
-    """Native GF bend using centrally selected samples unless explicitly set.
+def bend(
+    *,
+    sampling: CurveSampling,
+    euler=False,
+    radius=None,
+    angle=90.0,
+    cross_section="cpw_6_7_6",
+    **kwargs,
+):
+    """Native GF bend using the selected samples unless explicitly set.
 
     For Euler curves this is a sampling budget, not a circular-sagitta bound.
     GF retains the native bend algorithm, ports and floorplan behavior.
@@ -175,7 +148,7 @@ def bend(*, euler=False, radius=None, angle=90.0, cross_section="cpw_6_7_6", **k
     xs = gf.get_cross_section(cross_section)
     resolved_radius = radius if radius is not None else xs.radius
     if kwargs.get("npoints") is None and kwargs.get("angular_step") is None:
-        kwargs["npoints"] = arc_points(resolved_radius, angle)
+        kwargs["npoints"] = arc_points(resolved_radius, angle, sampling)
     factory = gf.components.bend_euler if euler else gf.components.bend_circular
     result = factory(radius=radius, angle=angle, cross_section=cross_section, **kwargs)
     # Native length is a polygonal arclength and changes with sample count.
@@ -205,9 +178,11 @@ def design_length(component) -> float:
     return float(component.info["length"])
 
 
-def bend_euler(**kwargs):
-    return bend(euler=True, **kwargs)
+def bend_euler(*, sampling: CurveSampling, **kwargs):
+    """Euler bend sampled by `sampling`; see `bend`."""
+    return bend(euler=True, sampling=sampling, **kwargs)
 
 
-def bend_circular(**kwargs):
-    return bend(euler=False, **kwargs)
+def bend_circular(*, sampling: CurveSampling, **kwargs):
+    """Circular bend sampled by `sampling`; see `bend`."""
+    return bend(euler=False, sampling=sampling, **kwargs)

@@ -13,7 +13,7 @@ from orcapen_sc_pdk.tech import (
 )
 
 
-@curves.sampled_cell(tags=["layout", "resonator", "meander"])
+@gf.cell(tags=["layout", "resonator", "meander"])
 def resonator_meander(
     length: float = 4000.0,
     meanders: int = 6,
@@ -30,6 +30,7 @@ def resonator_meander(
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Create a meandering coplanar waveguide resonator.
 
@@ -60,6 +61,7 @@ def resonator_meander(
     }
     if bend_npoints is not None:
         bend_kwargs["npoints"] = bend_npoints
+    bend_kwargs |= curves.sampling_settings(bend_spec, curve_sampling)
     bend = gf.get_component(bend_spec, **bend_kwargs)
 
     num_straights = meanders + 1
@@ -235,4 +237,12 @@ def resonator_meander(
     c.info["straight_lengths"] = tuple(straight_lengths)
     c.info["meanders"] = meanders
 
+    curves.record_sampling(c, curve_sampling)
     return c
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(resonator_meander)

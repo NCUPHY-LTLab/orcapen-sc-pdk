@@ -12,13 +12,14 @@ def _check_positive(name: str, value: float) -> None:
         raise ValueError(f"{name} must be positive, got {value!r}.")
 
 
-@curves.sampled_cell(tags=["layout", "capacitor", "martinis2022"])
+@gf.cell(tags=["layout", "capacitor", "martinis2022"])
 def martinis2022_differential_ribbon_capacitor(
     a_um: float = 50.0,
     b_um: float = 100.0,
     ell_r_um: float = 1391.0,
     # Layers
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return the Martinis 2022 Fig. 7 differential ribbon capacitor layout."""
 
@@ -68,7 +69,15 @@ def martinis2022_differential_ribbon_capacitor(
         orientation=0,
     )
 
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
 __all__ = ["martinis2022_differential_ribbon_capacitor"]
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(martinis2022_differential_ribbon_capacitor)

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from functools import partial
 from math import isfinite
 
 import gdsfactory as gf
 from gdsfactory.typings import CrossSectionSpec, Layer
 
 import orcapen_sc_pdk.curve_sampling as curves
+from orcapen_sc_pdk.cells.layout.primitives import bend_circular, straight
 from orcapen_sc_pdk.tech import LAYER, route_bundle_cpw
 
 
@@ -98,6 +100,7 @@ def _route_once(
     waypoints: tuple[tuple[float, float], ...],
     route_cross_section: CrossSectionSpec,
     cpw_radius: float,
+    curve_sampling: curves.CurveSampling,
 ) -> object:
     routes = route_bundle_cpw(
         component=component,
@@ -106,6 +109,9 @@ def _route_once(
         waypoints=waypoints,
         cross_section=route_cross_section,
         radius=cpw_radius,
+        # Route bends and straights are PDK cells, so they take the sampling explicitly.
+        bend=partial(bend_circular, curve_sampling=curve_sampling),
+        straight=partial(straight, curve_sampling=curve_sampling),
         auto_taper=False,
         raise_on_error=True,
         on_collision="error",
@@ -182,6 +188,7 @@ def _route_arm_with_length(
     mtl_center: tuple[float, float],
     cpw_radius: float,
     route_cross_section: CrossSectionSpec,
+    curve_sampling: curves.CurveSampling,
 ) -> dict[str, object]:
     dbu = float(component.kcl.dbu)
     target_length_um = round(requested_length_um / dbu) * dbu
@@ -212,6 +219,7 @@ def _route_arm_with_length(
             waypoints=route_waypoints,
             route_cross_section=route_cross_section,
             cpw_radius=cpw_radius,
+            curve_sampling=curve_sampling,
         )
 
     base_route = _scratch_route(supplied_waypoints)
@@ -328,6 +336,7 @@ def _route_arm_with_length(
         waypoints=routed_waypoints,
         route_cross_section=route_cross_section,
         cpw_radius=cpw_radius,
+        curve_sampling=curve_sampling,
     )
     route_length_um = _route_length_um(route, dbu)
     if abs(round(route_length_um / dbu) - round(target_length_um / dbu)) > 1:
@@ -417,7 +426,7 @@ def _add_open_end_cap(
     return open_etch_ref, open_cap_port_name
 
 
-@curves.sampled_cell(tags=["layout", "resonator", "intrinsic_purcell"])
+@gf.cell(tags=["layout", "resonator", "intrinsic_purcell"])
 def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
     readout_open_length: float = 2539.512388,
     shared_short_length: float = 2270.302789,
@@ -467,6 +476,7 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         (355.628, -500.0),
         (1922.771, -500.0),
     ),
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return an individual readout/coupled Purcell-filter topology sharing one coupled MTL section.
 
@@ -597,6 +607,7 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         "n_trace_mtl_section",
         length=shared_coupled_length,
         cross_section=coupled_xs,
+        curve_sampling=curve_sampling,
     )
     coupled.dmove((-shared_coupled_length / 2.0, 0.0))
     if mtl_orientation != 0:
@@ -644,6 +655,7 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         mtl_center=mtl_center,
         cpw_radius=cpw_radius,
         route_cross_section=single_xs,
+        curve_sampling=curve_sampling,
     )
     filter_short_info = _route_arm_with_length(
         component=c,
@@ -655,6 +667,7 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         mtl_center=mtl_center,
         cpw_radius=cpw_radius,
         route_cross_section=single_xs,
+        curve_sampling=curve_sampling,
     )
 
     capacitor_component = gf.get_component(
@@ -664,6 +677,7 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         draw_layer=draw_layer,
         etch_layer=etch_layer,
         ground_mask_layer=ground_mask_layer,
+        curve_sampling=curve_sampling,
     )
     filter_open_cap_in_target_orientation = _opposite_orientation(filter_open_anchor[2])
     capacitor = c << capacitor_component
@@ -701,6 +715,7 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         mtl_center=mtl_center,
         cpw_radius=cpw_radius,
         route_cross_section=single_xs,
+        curve_sampling=curve_sampling,
     )
 
     readout_open_info = _route_arm_with_length(
@@ -713,6 +728,7 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         mtl_center=mtl_center,
         cpw_radius=cpw_radius,
         route_cross_section=single_xs,
+        curve_sampling=curve_sampling,
     )
 
     c.info["short_termination"] = "cpw_gap_stop"
@@ -831,9 +847,17 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         "height": float(pair_bbox.height()),
     }
 
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
 __all__ = [
     "capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators",
 ]
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators)

@@ -9,12 +9,13 @@ from orcapen_sc_pdk.ports import add_junction_lumped_port
 from orcapen_sc_pdk.tech import LAYER
 
 
-@curves.sampled_cell(tags=["simulation", "capacitor", "simple_pad", "single_die"])
+@gf.cell(tags=["simulation", "capacitor", "simple_pad", "single_die"])
 def square_pad_capacitor(
     pad_side_um: float = 200.0,
     gap_um: float = 20.0,
     die_side_um: float = 1000.0,
     junction_width_um: float = 2.0,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return one square island surrounded by same-face ground.
 
@@ -102,16 +103,18 @@ def square_pad_capacitor(
     }
     component.info["model_source"] = "Synthetic public single-die LC teaching geometry"
     component.info["junction_sheet_overlap_um"] = sheet_overlap_um
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
-@curves.sampled_cell(tags=["simulation", "capacitor", "circular_pad", "single_die", "circular_arc"])
+@gf.cell(tags=["simulation", "capacitor", "circular_pad", "single_die", "circular_arc"])
 def circular_pad_capacitor(
     outer_radius_um: float = 100.0,
     inner_radius_um: float = 0.0,
     gap_um: float = 20.0,
     die_side_um: float = 1000.0,
     junction_width_um: float = 2.0,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a public disk or annular electrode surrounded by Ground.
 
@@ -132,17 +135,22 @@ def circular_pad_capacitor(
 
     component = gf.Component()
     if inner_radius_um == 0:
-        pad = curves.circle(radius=outer_radius_um, layer=LAYER.D0_TOP_M1_DRAW)
+        pad = curves.circle(
+            radius=outer_radius_um, layer=LAYER.D0_TOP_M1_DRAW, sampling=curve_sampling
+        )
         pad_selector = (0.0, 0.0)
     else:
         pad = curves.ring(
             radius=(outer_radius_um + inner_radius_um) / 2,
             width=outer_radius_um - inner_radius_um,
             layer=LAYER.D0_TOP_M1_DRAW,
+            sampling=curve_sampling,
         )
         pad_selector = ((outer_radius_um + inner_radius_um) / 2, 0.0)
     component << pad
-    opening = curves.circle(radius=opening_radius, layer=LAYER.D0_TOP_GROUND_MASK)
+    opening = curves.circle(
+        radius=opening_radius, layer=LAYER.D0_TOP_GROUND_MASK, sampling=curve_sampling
+    )
     component << opening
     die = gf.components.rectangle(
         size=(die_side_um, die_side_um), centered=True, layer=LAYER.D0_SUBSTRATE_AREA
@@ -259,6 +267,7 @@ def circular_pad_capacitor(
     }
     component.info["model_source"] = "Synthetic public single-die curved LC geometry"
     component.info["junction_sheet_overlap_um"] = source_overlap
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
@@ -277,12 +286,13 @@ def _circle_boundary(radius: float, *, clockwise: bool = False) -> list[dict]:
     ]
 
 
-@curves.sampled_cell(tags=["simulation", "primitive", "curved_strip", "single_die", "circular_arc"])
+@gf.cell(tags=["simulation", "primitive", "curved_strip", "single_die", "circular_arc"])
 def straight_to_circular_strip(
     straight_length_um: float = 100.0,
     bend_radius_um: float = 100.0,
     strip_width_um: float = 10.0,
     die_side_um: float = 1000.0,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a line-to-quarter-circle conductor with actual endpoint ports.
 
@@ -297,7 +307,7 @@ def straight_to_circular_strip(
         raise ValueError("die must contain the curved strip")
     path = gf.path.Path()
     path.append(gf.path.straight(length=straight_length_um))
-    path.append(curves.arc(radius=bend_radius_um, angle=90))
+    path.append(curves.arc(radius=bend_radius_um, angle=90, sampling=curve_sampling))
     strip = gf.path.extrude(path, width=strip_width_um, layer=LAYER.D0_TOP_M1_DRAW)
     component = gf.Component()
     component << strip
@@ -376,7 +386,15 @@ def straight_to_circular_strip(
         ],
     }
     component.info["model_source"] = "Synthetic public straight-to-circular strip"
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
 __all__ = ["square_pad_capacitor", "circular_pad_capacitor", "straight_to_circular_strip"]
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(circular_pad_capacitor)
