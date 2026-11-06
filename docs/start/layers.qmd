@@ -29,6 +29,29 @@ flip-chip stack for the complete two-die assembly. The selection controls which
 physical levels are supplied to a component simulation; it does not select
 nets, terminals, excitations, or solver boundaries.
 
+## View layers in KLayout
+
+KLayout reads layer names, colors and groups from a layer properties file
+(`.lyp`), which OrcaPen generates from `layers.yaml`. In a repository checkout,
+run `pdk.py`:
+
+```bash
+uv run python orcapen_sc_pdk/pdk.py              # updates orcapen_sc_pdk/klayout/layers.lyp
+uv run python orcapen_sc_pdk/pdk.py orcapen.lyp  # writes to a path you choose
+```
+
+In a project that installed `orcapen-sc-pdk`, including the pinned source
+preview, write it from the layer views:
+
+```bash
+uv run python -c "from orcapen_sc_pdk import LAYER_VIEWS; print(LAYER_VIEWS.to_lyp('orcapen.lyp'))"
+```
+
+In KLayout, choose **File → Load Layer Properties** and select the file. To
+load it automatically, run `uv run python -m orcapen_sc_pdk.install_tech` once,
+which links the `orcapen_sc_pdk` technology into KLayout, then select that
+technology for the layout.
+
 ## Select a stack
 
 | Getter | Returned levels |

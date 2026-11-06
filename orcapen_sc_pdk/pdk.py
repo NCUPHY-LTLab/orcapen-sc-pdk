@@ -1,6 +1,14 @@
-"""PDK construction and activation."""
+"""PDK construction and activation.
 
+Run this file to write the KLayout layer properties (.lyp) generated from
+`layers.yaml`:
+
+    uv run python orcapen_sc_pdk/pdk.py [OUTPUT.lyp]
+"""
+
+import argparse
 from functools import lru_cache
+from pathlib import Path
 
 from gdsfactory.pdk import Pdk
 
@@ -46,6 +54,7 @@ from orcapen_sc_pdk.cells import (
     tsv_ground_stitched_cpw,
     wire_corner,
 )
+from orcapen_sc_pdk.config import PATH
 from orcapen_sc_pdk.ports import register_sim_port_types
 from orcapen_sc_pdk.tech import (
     coplanar_waveguide,
@@ -155,3 +164,18 @@ def activate() -> Pdk:
 
     PDK.activate()
     return PDK
+
+
+def write_layer_properties(path: Path = PATH.lyp) -> Path:
+    """Write the KLayout layer properties generated from `layers.yaml`.
+
+    The default path is the bundled `klayout/layers.lyp` that `tech.lyt` loads.
+    """
+
+    return tech.LAYER_VIEWS.to_lyp(path)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Write the OrcaPen KLayout .lyp file.")
+    parser.add_argument("output", nargs="?", type=Path, default=PATH.lyp)
+    print(f"Wrote {write_layer_properties(parser.parse_args().output)}")

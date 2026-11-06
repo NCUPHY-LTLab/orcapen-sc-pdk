@@ -9,32 +9,29 @@ Start with the part of the PDK your change affects.
 
 ## Set up a development checkout
 
-GDSFactory+ is optional and needs a paid subscription. Pick one setup.
-
-**Without GDSFactory+** (KLayout for viewing):
-
 ```bash
 git clone https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git
 cd orcapen-sc-pdk
 uv sync -p 3.12
 ```
 
-This installs the PDK plus the development tools, pytest and Ruff. To view
-layouts, install [KLayout](https://www.klayout.de/) and its klive plugin.
+This installs the PDK plus the development tools, pytest and Ruff. Then set up
+the viewer you use. GDSFactory+ is optional and needs a paid subscription.
 
-**With GDSFactory+** (the VS Code extension):
+**Without GDSFactory+**: install [KLayout](https://www.klayout.de/) and its
+klive plugin. Previews then open in KLayout.
 
-```bash
-git clone https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git
-cd orcapen-sc-pdk
-uv sync -p 3.12 --all-extras
-```
+**With GDSFactory+**: open the checkout in VS Code with the GDSFactory+
+extension (version 2.3 or later) and choose **Setup Automatically** in
+**GF+ Settings → Status**. The extension installs its SDK and the packages its
+worker needs, including the SPICE packages InSpice and vacask, into `.venv`.
+GDSFactory+ requires Python 3.12.
 
-`--all-extras` adds the `gdsfactoryplus` extra, which holds the packages
-GDSFactory+ Worker Health requires, including the SPICE packages InSpice and
-vacask. It is the same command the extension's **Setup Automatically** runs.
-Keep using `--all-extras` afterwards: a plain `uv sync` removes these packages,
-and the extension then shows no components. GDSFactory+ requires Python 3.12.
+- These packages are not in `uv.lock`, so a later `uv sync` removes them.
+  Choose **Setup Automatically** again to reinstall them.
+- The extension also adds a `[tool.uv]` block marked "Managed by GDSFactory+"
+  to `pyproject.toml` and updates `uv.lock`. Keep those edits local and leave
+  them out of commits: they limit the lock file to Linux x86-64 for everyone.
 
 Check: `uv run python --version` reports a supported Python version.
 For documentation dependencies and preview, use
