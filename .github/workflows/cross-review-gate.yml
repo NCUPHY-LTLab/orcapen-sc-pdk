@@ -5,8 +5,10 @@
 #   normal              -> Codex reviewed the head: the connector's Code Review
 #                          summary comment carries codex-review-state:v1 with
 #                          code_review.commit_sha == head, status "completed" and
-#                          has_unresolved_findings == false (or a formal connector
-#                          review on the head), and no Codex thread is unresolved;
+#                          has_unresolved_findings == false (or the latest formal
+#                          connector review on the head is COMMENTED or APPROVED; a
+#                          CHANGES_REQUESTED one fails, a DISMISSED one does not
+#                          count), and no Codex thread on any page is unresolved;
 #                          with label claude-review (not on Claude-authored PRs)
 #                          ili-claude[bot] also approved the head
 #   label codex-fallback -> Codex's GitHub review is unavailable: a Codex-authored
@@ -21,7 +23,7 @@ name: Cross-review gate
 
 on:
   pull_request_target:
-    types: [opened, reopened, synchronize, ready_for_review, labeled]
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
   pull_request_review:
     types: [submitted, dismissed]
   pull_request_review_thread:
@@ -58,10 +60,12 @@ jobs:
           head=$(jq -r .head.sha <<<"$pr"); author=$(jq -r .user.login <<<"$pr")
           reviews=$(gh api --paginate "repos/$R/pulls/$NUM/reviews" | jq -s 'add // []')
           reactions=$(gh api --paginate "repos/$R/issues/$NUM/reactions" | jq -s 'add // []')
-          threads=$(gh api graphql -F owner="${R%/*}" -F name="${R#*/}" -F num="$NUM" -f query='
-            query($owner:String!,$name:String!,$num:Int!){repository(owner:$owner,name:$name){pullRequest(number:$num){
-              reviewThreads(first:100){nodes{isResolved comments(first:1){nodes{author{login}}}}}}}}' \
-            | jq '.data.repository.pullRequest.reviewThreads.nodes')
+          # Every page of review threads: an open finding after the 100th still counts.
+          threads=$(gh api graphql --paginate -F owner="${R%/*}" -F name="${R#*/}" -F num="$NUM" -f query='
+            query($owner:String!,$name:String!,$num:Int!,$endCursor:String){repository(owner:$owner,name:$name){pullRequest(number:$num){
+              reviewThreads(first:100,after:$endCursor){pageInfo{hasNextPage endCursor}
+                nodes{isResolved comments(first:1){nodes{author{login}}}}}}}}' \
+            | jq -s '[.[].data.repository.pullRequest.reviewThreads.nodes[]]')
           labels=$(jq -c '[.labels[].name]' <<<"$pr")
           # The connector edits one summary comment in place, so read all of its comments.
           comments=$(gh api --paginate "repos/$R/issues/$NUM/comments" \
@@ -82,7 +86,11 @@ jobs:
             (receipts | any(.status == "completed" and .has_unresolved_findings == false)) as $clean
             | (receipts | any(.status == "completed" and .has_unresolved_findings == true)) as $dirty
             | (receipts | any(.status != "completed")) as $running
-            | ([$reviews[] | select(.user.login == $connector and .commit_id == $head)] | length > 0) as $formal
+            # A formal connector review counts by its latest state on the head:
+            # COMMENTED or APPROVED is reviewed, CHANGES_REQUESTED blocks, DISMISSED does not count.
+            | ([$reviews[] | select(.user.login == $connector and .commit_id == $head)]
+                | sort_by(.submitted_at) | last | .state // "NONE") as $formal_state
+            | ($formal_state | IN("COMMENTED","APPROVED")) as $formal
             | ($clean or $formal) as $codex_done
             | ([$reviews[] | select(.commit_id == $head and .state == "APPROVED")] | length > 0) as $gh_ok
             | "GitHub approve: \(if $gh_ok then "yes" else "no" end)" as $gh
@@ -95,6 +103,7 @@ jobs:
             # Known open Codex findings block on every path: a fallback replaces an
             # unavailable reviewer, it does not clear what was already raised.
             | if $open > 0 then "failure|\($open) Codex finding(s) unresolved; \($gh)"
+              elif $formal_state == "CHANGES_REQUESTED" then "failure|Codex requested changes on \(short); \($gh)"
               elif $dirty then "failure|Codex found unresolved issues on \(short); \($gh)"
               elif $fallback then
                 (if $author == $codex then $claude else $codex end) as $sub
