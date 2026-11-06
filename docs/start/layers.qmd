@@ -40,10 +40,11 @@ uv run python orcapen_sc_pdk/pdk.py              # updates orcapen_sc_pdk/klayou
 uv run python orcapen_sc_pdk/pdk.py orcapen.lyp  # writes to a path you choose
 ```
 
-In a project that installed `orcapen-sc-pdk`, call the same function:
+In a project that installed `orcapen-sc-pdk`, including the pinned source
+preview, write it from the layer views:
 
 ```bash
-uv run python -c "from orcapen_sc_pdk.pdk import write_layer_properties; print(write_layer_properties('orcapen.lyp'))"
+uv run python -c "from orcapen_sc_pdk import LAYER_VIEWS; print(LAYER_VIEWS.to_lyp('orcapen.lyp'))"
 ```
 
 In KLayout, choose **File → Load Layer Properties** and select the file. To

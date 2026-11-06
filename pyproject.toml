@@ -38,7 +38,8 @@ repository = "https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/"
 circuit-runtime = ["superconducting-circuits-runtime"]
 # Worker runtime for the optional GDSFactory+ VS Code extension. Its Setup runs
 # `uv sync --all-extras`, and Worker Health requires the SPICE (vacask) packages.
-gdsfactoryplus = ["gdsfactoryplus[vacask]>=2.3.516"]
+# The SDK ships only CPython 3.12 wheels, so the extra is empty on 3.13.
+gdsfactoryplus = ["gdsfactoryplus[vacask]>=2.3.516; python_version < '3.13'"]
 
 [dependency-groups]
 dev = [

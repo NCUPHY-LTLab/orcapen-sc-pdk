@@ -43,17 +43,18 @@ component = gf.get_component("resonator")
 component.plot()
 ```
 
-To open a cell in a layout viewer instead, run
-`uv run python -m orcapen_sc_pdk.preview resonator`. It uses the GDSFactory+
-Layout Viewer inside VS Code when the extension is installed, and KLayout
-(through klive) otherwise. GDSFactory+ is optional; see
-[Contributing](docs/developing-features.md) for both environment setups.
+In a [development checkout](docs/developing-features.md), open a cell in a
+layout viewer with `uv run python -m orcapen_sc_pdk.preview resonator`; the
+pinned source preview above does not include this command yet. It uses the
+GDSFactory+ Layout Viewer inside VS Code when the extension is installed, and
+KLayout (through klive) otherwise. GDSFactory+ is optional; Contributing
+describes both environment setups.
 
 To get the KLayout layer properties file (`.lyp`) with OrcaPen's layer names
-and colors, run `uv run python orcapen_sc_pdk/pdk.py orcapen.lyp` in a checkout,
-then load it in KLayout with **File → Load Layer Properties**. See
-[View layers in KLayout](docs/start/layers.qmd#view-layers-in-klayout) for an
-installed package and automatic loading.
+and colors, run `uv run python orcapen_sc_pdk/pdk.py orcapen.lyp` in a
+development checkout, then load it in KLayout with **File → Load Layer
+Properties**. See [View layers in KLayout](docs/start/layers.qmd#view-layers-in-klayout)
+for the command that works with the installed package and for automatic loading.
 
 The version command reports the preview's package metadata, `1.0.0`; that
 number does not indicate a published stable release. See [Get Started](docs/getting-started.md) for setup details. Contributors can

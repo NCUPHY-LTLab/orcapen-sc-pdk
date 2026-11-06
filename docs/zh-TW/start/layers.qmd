@@ -27,10 +27,10 @@ uv run python orcapen_sc_pdk/pdk.py              # 更新 orcapen_sc_pdk/klayout
 uv run python orcapen_sc_pdk/pdk.py orcapen.lyp  # 寫到你指定的路徑
 ```
 
-在已安裝 `orcapen-sc-pdk` 的專案中，呼叫同一個函式：
+在已安裝 `orcapen-sc-pdk` 的專案中（包括上方釘選的原始碼預覽版），直接由圖層視圖寫出：
 
 ```bash
-uv run python -c "from orcapen_sc_pdk.pdk import write_layer_properties; print(write_layer_properties('orcapen.lyp'))"
+uv run python -c "from orcapen_sc_pdk import LAYER_VIEWS; print(LAYER_VIEWS.to_lyp('orcapen.lyp'))"
 ```
 
 在 KLayout 選擇 **File → Load Layer Properties**，再選取該檔案。若要自動載入，先執行一次 `uv run python -m orcapen_sc_pdk.install_tech`，把 `orcapen_sc_pdk` technology 連結到 KLayout，再為版圖選擇這個 technology。
