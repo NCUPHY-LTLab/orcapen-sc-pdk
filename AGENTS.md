@@ -30,6 +30,7 @@ than skipping checks or weakening assertions or coverage.
 ## Shared Policy and Delivery
 
 Use `$github-flow` for branches, allowed paths, CI, PRs, review and delivery.
+Use `$scq-gdsfactory-layout` for layout, component or geometry work.
 Until this repository's required checks and `cross-review-gate` are verified
 and enforced, retain the current CI and existing authorized merge process; do
 not enable per-PR auto-merge. After that gate is verified and enforced, follow
