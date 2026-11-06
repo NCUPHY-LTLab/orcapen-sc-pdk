@@ -44,6 +44,8 @@ disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 
 接地的耦合爪末端有一段寬度等於一個 CPW 線寬的徑向尾段，穿過 CPW 淨空區末端連入接地。浮接的耦合爪是獨立導體。`curve_sampling` 設定所有圓與弧的取樣；`corner_rounding_points=None` 時，倒角點數也由它決定。
 
+元件會檢查攤平後的幾何；如果設定會改變上述連接關係，例如圓盤引線穿過耦合爪、耦合爪碰到或接不到接地，或凸塊落在訊號線的淨空區上，就會丟出 `ValueError`。這時請把接面、耦合爪、訊號線或凸塊環移開。
+
 ## 連接埠、圖層與接地 {#ports-layers-and-ground}
 
 | 連接埠 | 位置 | 寬度 |

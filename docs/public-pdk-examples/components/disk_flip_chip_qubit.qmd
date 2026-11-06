@@ -51,6 +51,11 @@ the end of its CPW clearance into the ground. A floating claw is an isolated
 conductor. `curve_sampling` sets the sampling of every circle and arc;
 `corner_rounding_points=None` takes the corner rounding from it as well.
 
+The cell checks its flattened geometry and raises `ValueError` for settings
+that would change this connectivity: a disk lead that crosses a claw, a claw
+that reaches the ground or misses it, or a bump that lands on a signal
+clearance. Move the junction, claws, lines or bump ring apart instead.
+
 ## Ports, layers and ground
 
 | Port | Position | Width |

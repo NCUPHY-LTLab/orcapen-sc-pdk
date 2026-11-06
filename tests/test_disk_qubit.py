@@ -196,3 +196,32 @@ def test_junction_lumped_port_sits_on_the_simulation_sheet(grounded) -> None:
     assert _covers(sheet, math.hypot(x, y), math.degrees(math.atan2(y, x)))
     # The sheet spans the two lead contacts, about 4 um from the overlap point.
     assert math.hypot(x - 167.938, y + 167.938) < 4.0
+
+
+@pytest.mark.parametrize(
+    ("settings", "message"),
+    [
+        # A floating claw past the clearance radius lands on the ground metal.
+        (
+            {
+                "tc_grounded_sides": (),
+                "tc_landing_span": None,
+                "tc_disk_gap_by_side": (("E", 200.0),),
+            },
+            "claw E must stay inside the ground clearance",
+        ),
+        # The grounding tail stays inside its own mask past the site edge.
+        ({"handoff_half_extent": 480.0}, "grounded TC_N does not reach the ground"),
+        # The disk lead runs through the grounded E claw.
+        ({"junction_angle": 0.0}, "Disk touches the ground metal"),
+        # A bump lands on the readout, or on a line the skip period no longer clears.
+        ({"ro_angle": 11.25}, "bump_01 overlaps a signal clearance"),
+        ({"bump_lattice_count": 16}, "bump_06 overlaps a signal clearance"),
+        # The round tip leaves no straight line before the handoff.
+        ({"ro_tip_radius": 582.0}, "half the RO width inside the handoff square"),
+    ],
+)
+def test_parameters_that_would_join_conductors_are_rejected(settings, message) -> None:
+    PDK.activate()
+    with pytest.raises(ValueError, match=message):
+        PDK.get_component("disk_flip_chip_qubit", **settings)

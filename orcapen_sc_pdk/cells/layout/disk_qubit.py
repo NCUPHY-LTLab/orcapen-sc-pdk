@@ -587,6 +587,57 @@ def _ground(half_extent: float, mask: gf.Component, draw: Layer, mask_layer: Lay
     return ground
 
 
+def _flat_region(component: gf.Component, layer: Layer) -> gf.kdb.Region:
+    flat = component.copy()
+    flat.flatten()
+    return flat.get_region(_layer(layer), merge=True)
+
+
+def _probe(point: tuple[float, float], dbu: float) -> gf.kdb.Region:
+    """A 2-DBU box at ``point``, to pick the merged polygon that contains it."""
+    x, y = round(point[0] / dbu), round(point[1] / dbu)
+    return gf.kdb.Region(gf.kdb.Box(x - 1, y - 1, x + 1, y + 1))
+
+
+def _check_face_connectivity(
+    face: str,
+    conductors: gf.Component,
+    draw: Layer,
+    mask: gf.kdb.Region,
+    half_extent: float,
+    selectors: dict[str, tuple[float, float]],
+    grounded: set[str],
+) -> None:
+    """Reject parameters whose flattened die face joins conductors the cell keeps apart.
+
+    The face's metal is the drawn signal metal plus the site square minus the
+    ground mask, as the ground instance derives it. Each isolated conductor
+    must be its own merged piece away from the ground; each grounded one must
+    reach the ground. Checking built geometry covers every parameter path that
+    can move a conductor onto another, which per-parameter bounds cannot.
+    """
+    dbu = conductors.kcl.dbu
+    edge = round(half_extent / dbu)
+    site = gf.kdb.Region(gf.kdb.Box(-edge, -edge, edge, edge))
+    ground = site - mask
+    metal = (_flat_region(conductors, draw) & site) + ground
+    metal.merge()
+    for name, point in selectors.items():
+        piece = metal.interacting(_probe(point, dbu))
+        touches_ground = not piece.overlapping(ground).is_empty()
+        if name in grounded:
+            if not touches_ground:
+                raise ValueError(
+                    f"{face}: grounded {name} does not reach the ground metal inside the site"
+                )
+            continue
+        if touches_ground:
+            raise ValueError(f"{face}: {name} touches the ground metal")
+        for other, other_point in selectors.items():
+            if other != name and not piece.interacting(_probe(other_point, dbu)).is_empty():
+                raise ValueError(f"{face}: {name} and {other} share metal")
+
+
 @gf.cell(check_instances=False, tags=["layout", "qubit", "disk", "flip_chip"])
 def disk_flip_chip_qubit(
     disk_radius: float | None = None,
@@ -664,6 +715,10 @@ def disk_flip_chip_qubit(
     claws has no preset and needs an explicit ``disk_radius``. All defaults are a layout
     preset, not a measured or qualified device.
 
+    Settings whose flattened geometry would join the disk, a floating claw or
+    a line to another conductor or the ground, leave a grounded claw short of
+    the ground, or put a bump on a signal clearance raise ``ValueError``.
+
     ``tc_disk_gap_by_side`` overrides the claw-to-disk gap per side, as
     ``(("E", 40.0), ...)``. ``tc_landing_span=None`` drops the claw taper. The
     four ``tc_outer_extension_*`` values, given together, end the claw taper
@@ -730,10 +785,16 @@ def disk_flip_chip_qubit(
         raise ValueError("the junction ground lead must end beyond the clearance edge")
     if bump_center_radius <= clearance_radius:
         raise ValueError("the bump ring must lie outside the ground clearance")
-    if not 0 <= ro_tip_radius < _square_edge_radius(handoff_half_extent, ro_angle):
-        raise ValueError("ro_tip_radius must be non-negative and inside the handoff square")
-    if not 0 <= xy_tip_radius < _square_edge_radius(handoff_half_extent, xy_angle):
-        raise ValueError("xy_tip_radius must be non-negative and inside the handoff square")
+    # The round tip needs half the CPW width of straight line before the handoff.
+    for name, tip, angle, width in (
+        ("RO", ro_tip_radius, ro_angle, ro_cpw_width),
+        ("XY", xy_tip_radius, xy_angle, xy_cpw_width),
+    ):
+        if not 0 <= tip < _square_edge_radius(handoff_half_extent, angle) - width / 2:
+            raise ValueError(
+                f"{name.lower()}_tip_radius must be non-negative and half the {name} width"
+                " inside the handoff square"
+            )
     for name, value in (
         ("bump_lattice_count", bump_lattice_count),
         ("bump_skip_period", bump_skip_period),
@@ -781,12 +842,17 @@ def disk_flip_chip_qubit(
             outer = disk_radius + gap + tc_width
             if disk_radius + gap + tc_width / 2 >= inner_lead_end:
                 raise ValueError(f"claw {side} must start inside its CPW lead end")
-            if extension and outer >= min(extension[0], clearance_radius):
-                raise ValueError(f"claw {side} must stay inside the extension start and clearance")
+            if outer >= clearance_radius:
+                raise ValueError(f"claw {side} must stay inside the ground clearance")
+            if extension and outer >= extension[0]:
+                raise ValueError(f"claw {side} must stay inside the extension start")
 
     sampling = curve_sampling
     lead_points = _rounding_points(junction_lead_width / 2, corner_rounding_points, sampling)
     claw_points = _rounding_points(tc_corner_radius or 1.0, corner_rounding_points, sampling)
+
+    def on_axis(radius, angle):
+        return (radius * math.cos(math.radians(angle)), radius * math.sin(math.radians(angle)))
 
     c = gf.Component()
     qface, ground_leads, junction_center = _disk_and_junction(
@@ -858,6 +924,34 @@ def disk_flip_chip_qubit(
     for line, angle in lines.values():
         c_mask.add_ref(line.extract([CMASK])).drotate(angle)
     c_ground_mask = _union(c_mask, CMASK)
+    q_mask_region = _flat_region(q_ground_mask, QMASK)
+    c_mask_region = _flat_region(c_ground_mask, CMASK)
+    claw_selectors = {
+        f"TC_{side}": on_axis(disk_radius + gaps[side] + tc_width / 2, angle)
+        for side, angle in TC_SIDES
+        if include_tc
+    }
+    _check_face_connectivity(
+        "D1_BOTTOM",
+        c,
+        QDRAW,
+        q_mask_region,
+        ground_outer_half_extent,
+        {"Disk": (0.0, 0.0), **claw_selectors},
+        {f"TC_{side}" for side in grounded_sides},
+    )
+    _check_face_connectivity(
+        "D0_TOP",
+        c,
+        CDRAW,
+        c_mask_region,
+        ground_outer_half_extent,
+        {
+            "RO": on_axis(ro_tip_radius + ro_cpw_width / 2, ro_angle),
+            "XY": on_axis(xy_tip_radius + xy_cpw_width / 2, xy_angle),
+        },
+        set(),
+    )
     c.add_ref(q_ground_mask, name="QGroundMask")
     c.add_ref(c_ground_mask, name="CGroundMask")
     if include_ground:
@@ -875,14 +969,21 @@ def disk_flip_chip_qubit(
         under_bump_size=under_bump_size,
         curve_sampling=sampling,
     )
+    # A bump joins the two grounds, so its footprint must clear both dies' masks.
+    bump_footprint = _flat_region(bump, LAYER.D0_D1_UNDER_BUMP)
+    signal_clearance = q_mask_region + c_mask_region
+    dbu = c.kcl.dbu
     bump_names = []
     for index in range(bump_lattice_count):
         if index % bump_skip_period == 0:
             continue
-        theta = math.radians(index * 360.0 / bump_lattice_count)
-        bump_ref = c.add_ref(bump, name=f"bump_{index:02d}")
-        bump_ref.dmove((bump_center_radius * math.cos(theta), bump_center_radius * math.sin(theta)))
-        bump_names.append(bump_ref.name)
+        center = on_axis(bump_center_radius, index * 360.0 / bump_lattice_count)
+        name = f"bump_{index:02d}"
+        placed = bump_footprint.moved(round(center[0] / dbu), round(center[1] / dbu))
+        if not placed.overlapping(signal_clearance).is_empty():
+            raise ValueError(f"{name} overlaps a signal clearance; move the bump ring or the lines")
+        c.add_ref(bump, name=name).dmove(center)
+        bump_names.append(name)
 
     tc_ports = [f"tc_{side}" for side, _ in TC_SIDES] if include_tc else []
     claw_sides = [side for side, _ in TC_SIDES] if include_tc else []
@@ -924,9 +1025,6 @@ def disk_flip_chip_qubit(
             "geometry": {"geometry_source": "gds_polygon", "selector_point_um": point},
             "metadata": {"physical_net": net},
         }
-
-    def on_axis(radius, angle):
-        return (radius * math.cos(math.radians(angle)), radius * math.sin(math.radians(angle)))
 
     c.info["component_semantics"] = {
         "schema_version": 2,
