@@ -73,6 +73,9 @@ if __name__ == "__main__":
 
 - Put reusable layout and process definitions in OrcaPen.
 - Reuse GDSFactory for component composition and routing.
+- Decorate cells with plain `@gf.cell`, the only form GDSFactory+ discovers. A
+  cell with curves takes `curve_sampling: CurveSampling = FABRICATION` and passes it
+  to nested cells and curve helpers; see [Curve sampling](usage/curve-sampling.md).
 - Use SCGSim for simulation preparation, solver integration, and returned results.
 - Keep private layouts, parameters, and run directories in the consuming project.
 

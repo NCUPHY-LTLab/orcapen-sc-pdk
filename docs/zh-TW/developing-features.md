@@ -59,6 +59,7 @@ if __name__ == "__main__":
 
 - 在 OrcaPen 放置可重複利用的佈局與製程定義。
 - 使用 GDSFactory 組合元件與佈線。
+- cell 一律直接以 `@gf.cell` 裝飾，GDSFactory+ 只辨識這種寫法。含曲線的 cell 接收 `curve_sampling: CurveSampling = FABRICATION`，並傳給巢狀元件與曲線 helper；詳見[曲線取樣](../usage/curve-sampling.md)。
 - 使用 SCGSim 準備模擬、整合求解器並分析回傳結果。
 - 將私人佈局、參數與執行目錄保留在使用端專案。
 

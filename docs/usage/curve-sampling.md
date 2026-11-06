@@ -1,10 +1,10 @@
 # 曲線取樣（Curve sampling）
 
-使用同一個 OrcaPen 元件，依用途選擇製程或模擬的曲線點數。設定會傳入巢狀元件，並納入元件快取（cell cache）的身分。
+使用同一個 OrcaPen 元件，依用途選擇製程或模擬的曲線點數。每個 cell 都以一般參數 `curve_sampling` 接收設定，再明確傳給巢狀元件；這個參數因此是元件快取（cell cache）身分的一部分，也能被 GDSFactory+ 辨識。
 
 ## 選擇設定
 
-中央入口是 `orcapen_sc_pdk/curve_sampling.py`。專案可在自己的設定檔保存一組數值，再於建立元件時套用，無須複製 PDK 元件。
+中央入口是 `orcapen_sc_pdk/curve_sampling.py`。專案可在自己的設定檔保存一組數值，建立元件時以 `curve_sampling=` 傳入，無須複製 PDK 元件。
 
 | 設定檔（profile） | 完整圓的基準線段數 | 預設用途 |
 | --- | ---: | --- |
@@ -26,24 +26,20 @@ W6/G7 圓頭金屬的直徑為 6 µm，因此半圓使用 8 段、9 個頂點；
 ```python
 from orcapen_sc_pdk import activate
 from orcapen_sc_pdk.cells import circular_pad_capacitor
-from orcapen_sc_pdk.curve_sampling import curve_sampling
 
 activate()
 
-with curve_sampling("simulation"):
-    coarse = circular_pad_capacitor(outer_radius_um=100)
-
-with curve_sampling("fabrication"):
-    fine = circular_pad_capacitor(outer_radius_um=100)
+coarse = circular_pad_capacitor(outer_radius_um=100, curve_sampling="simulation")
+fine = circular_pad_capacitor(outer_radius_um=100)  # 預設為 "fabrication"
 
 print(coarse.info["curve_sampling"])
 ```
 
-同一個程序切換設定時，不必清除快取。再選回相同參數與取樣設定，會重用該設定的快取元件。
+同一個程序切換設定時，不必清除快取。再選回相同參數與取樣設定，會重用該設定的快取元件。也可用 `PDK.get_component("circular_pad_capacitor", curve_sampling="simulation")` 依名稱建立。
 
 ## 覆寫與重現
 
-每個 OrcaPen cell 都接受 `curve_sampling=(點數, 最大弦高誤差)`。優先順序是元件明確指定、外層設定區塊、製程預設。元件指定的設定也會傳給其子元件；子元件若再明確指定，則以子元件的設定為準。
+每個 OrcaPen cell 都接受 `curve_sampling`，值可以是設定檔名稱 `"fabrication"`、`"simulation"`，或 `(點數, 最大弦高誤差)`；未指定時使用製程預設。元件會把收到的設定明確傳給其子元件與曲線 helper。自行撰寫的 cell 若呼叫 OrcaPen cell，也請把自己的 `curve_sampling` 傳下去，否則子元件會使用製程預設。
 
 ```python
 # 固定完整圓 64 段。
