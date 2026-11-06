@@ -90,7 +90,13 @@ class DocsVersioningTests(unittest.TestCase):
         )
 
     def test_pages_workflow_keeps_strict_notebook_check_and_render(self):
-        workflow = (ROOT / ".github/workflows/pages.yml").read_text()
+        workflows = ROOT / ".github/workflows"
+        workflow = (workflows / "docs-build.yml").read_text()
+        pages = yaml.safe_load((workflows / "pages.yml").read_text())
+        pr = yaml.safe_load((workflows / "pr-ci.yml").read_text())
+        build = "./.github/workflows/docs-build.yml"
+        self.assertEqual(pages["jobs"]["build"]["uses"], build)
+        self.assertEqual(pr["jobs"]["docs"]["uses"], build)
         self.assertIn(
             "uv sync -p 3.12 --locked --no-default-groups --group dev --group docs", workflow
         )
@@ -98,8 +104,8 @@ class DocsVersioningTests(unittest.TestCase):
         self.assertIn("uv run --group docs quarto render docs --no-execute", workflow)
         self.assertNotIn("--check", workflow)
         self.assertNotIn("just docs", workflow)
-        self.assertIn("draft", workflow)
-        self.assertIn("refs/heads/main", workflow)
+        self.assertEqual(pr["jobs"]["docs"]["if"], "${{ !github.event.pull_request.draft }}")
+        self.assertIn("refs/heads/main", pages["jobs"]["deploy"]["if"])
 
     def test_release_reuses_exact_sha_pages_artifact(self):
         workflow = (ROOT / ".github/workflows/release.yml").read_text()
