@@ -49,6 +49,12 @@ Layout Viewer inside VS Code when the extension is installed, and KLayout
 (through klive) otherwise. GDSFactory+ is optional; see
 [Contributing](docs/developing-features.md) for both environment setups.
 
+To get the KLayout layer properties file (`.lyp`) with OrcaPen's layer names
+and colors, run `uv run python orcapen_sc_pdk/pdk.py orcapen.lyp` in a checkout,
+then load it in KLayout with **File → Load Layer Properties**. See
+[View layers in KLayout](docs/start/layers.qmd#view-layers-in-klayout) for an
+installed package and automatic loading.
+
 The version command reports the preview's package metadata, `1.0.0`; that
 number does not indicate a published stable release. See [Get Started](docs/getting-started.md) for setup details. Contributors can
 use [Documentation & Website](docs/docs-publishing.md) to build the docs.

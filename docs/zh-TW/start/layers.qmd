@@ -18,6 +18,23 @@ OrcaPen 將 XY 圖層（Layer）名稱與實體高度、材料、顯示方式及
 
 先依模型選擇單晶粒堆疊，或包含完整雙晶粒組裝的雙晶粒覆晶堆疊。選擇會決定元件模擬使用哪些實體層；不會替你選擇 Nets、端點、激發或求解器邊界。
 
+## 在 KLayout 檢視圖層 {#view-layers-in-klayout}
+
+KLayout 從圖層屬性檔（`.lyp`）讀取圖層名稱、顏色與群組；OrcaPen 由 `layers.yaml` 產生這個檔案。在儲存庫工作目錄中執行 `pdk.py`：
+
+```bash
+uv run python orcapen_sc_pdk/pdk.py              # 更新 orcapen_sc_pdk/klayout/layers.lyp
+uv run python orcapen_sc_pdk/pdk.py orcapen.lyp  # 寫到你指定的路徑
+```
+
+在已安裝 `orcapen-sc-pdk` 的專案中，呼叫同一個函式：
+
+```bash
+uv run python -c "from orcapen_sc_pdk.pdk import write_layer_properties; print(write_layer_properties('orcapen.lyp'))"
+```
+
+在 KLayout 選擇 **File → Load Layer Properties**，再選取該檔案。若要自動載入，先執行一次 `uv run python -m orcapen_sc_pdk.install_tech`，把 `orcapen_sc_pdk` technology 連結到 KLayout，再為版圖選擇這個 technology。
+
 ## 選擇堆疊
 
 | 取得器 | 回傳層級 |
