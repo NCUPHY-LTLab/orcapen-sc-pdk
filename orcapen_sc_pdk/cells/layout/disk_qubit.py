@@ -244,11 +244,9 @@ def _disk_and_junction(
         sim_port_layer=LAYER.D1_BOTTOM_SIM_BOUNDARY,
         curve_sampling=sampling,
     )
-    # Only the fabrication cross is kept; the arm ports locate the two leads.
-    junction = authored.extract([JJ_DRAW])
-    for name in ("o_arm1", "o_arm2"):
-        junction.add_port(name=name, port=authored.ports[name])
-    junction_ref = component.add_ref(junction, name="Junction")
+    # The fabrication cross plus the straight simulation sheet; the arm ports
+    # locate the two leads.
+    junction_ref = component.add_ref(authored, name="Junction")
     junction_ref.dmove((overlap_radius, 0.0))
 
     disk_terminal = tuple(junction_ref.ports["o_arm1"].center)
@@ -282,6 +280,8 @@ def _disk_and_junction(
     ground_leads = gf.Component()
     ground_leads.add_ref(ground_lead).drotate(junction_angle)
     junction_ref.drotate(junction_angle)
+    if include_junction:
+        component.add_port(name="o_junction_lumped", port=junction_ref.ports["o_junction_lumped"])
     # The Manhattan cross overlaps at its local origin, at the overlap radius.
     junction_center = (
         overlap_radius * math.cos(math.radians(junction_angle)),
@@ -591,7 +591,7 @@ def _ground(half_extent: float, mask: gf.Component, draw: Layer, mask_layer: Lay
 def disk_flip_chip_qubit(
     disk_radius: float | None = None,
     include_tc: bool = True,
-    tc_grounded: bool = True,
+    tc_grounded_sides: tuple[str, ...] = ("N", "E", "S", "W"),
     tc_disk_gap: float = 60.0,
     tc_disk_gap_by_side: tuple[tuple[str, float], ...] = (),
     tc_width: float = 60.0,
@@ -629,6 +629,7 @@ def disk_flip_chip_qubit(
     bump_skip_period: int = 4,
     indium_bump_size: float = 20.0,
     under_bump_size: float = 40.0,
+    include_ground: bool = True,
     corner_rounding_points: int | None = None,
     curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
@@ -638,9 +639,9 @@ def disk_flip_chip_qubit(
     clearance, one Manhattan junction from the disk to ground with tapered
     leads, and optionally four arc claws (``include_tc``) at N/E/S/W. Each
     claw tapers to a CPW that ends at the ``tc_<side>`` port on the site
-    square of half extent ``handoff_half_extent``. Grounded claws
-    (``tc_grounded``) end in a radial tail into the ground; floating claws are
-    isolated conductors.
+    square of half extent ``handoff_half_extent``. Claws named in
+    ``tc_grounded_sides`` end in a radial tail into the ground; the others are
+    floating, isolated conductors.
 
     Control die (``D0_TOP``): a circular clearance of the same diameter, a
     readout CPW whose round tip sits at ``ro_tip_radius`` and a drive CPW
@@ -652,12 +653,15 @@ def disk_flip_chip_qubit(
     Each die's ground is a separate sub-instance (``QGround`` / ``CGround``:
     ground metal plus the die domain on ``D1_SUBSTRATE_AREA`` /
     ``D0_SUBSTRATE_AREA``) beside its mask (``QGroundMask`` / ``CGroundMask``),
-    so a parent can drop all four and draw one common ground over several
-    sites. Signal conductors are ``Disk`` (inside ``QFace``), ``TC_<side>``,
-    ``RO`` and ``XY``.
+    so a parent can draw one common ground over several sites:
+    ``include_ground=False`` leaves out ``QGround`` and ``CGround`` and keeps
+    the masks. The junction simulation sheet on ``D1_BOTTOM_SIM_BOUNDARY``
+    carries the ``o_junction_lumped`` port. Signal conductors are ``Disk``
+    (inside ``QFace``), ``TC_<side>``, ``RO`` and ``XY``.
 
-    ``disk_radius=None`` selects the preset radius for ``tc_grounded``:
-    110.5 µm when true, 119.839 µm when false. All defaults are a layout
+    ``disk_radius=None`` selects the preset radius: 110.5 µm when all four
+    claws are grounded, 119.839 µm when none are. A mixed set of grounded
+    claws has no preset and needs an explicit ``disk_radius``. All defaults are a layout
     preset, not a measured or qualified device.
 
     ``tc_disk_gap_by_side`` overrides the claw-to-disk gap per side, as
@@ -674,10 +678,16 @@ def disk_flip_chip_qubit(
     al., QST 7, 035018 (2022). The claws, tapered leads and control-die lines
     are OrcaPen's adaptation.
     """
+    grounded_sides = set(tc_grounded_sides)
+    if len(grounded_sides) != len(tc_grounded_sides) or grounded_sides - {"N", "E", "S", "W"}:
+        raise ValueError("tc_grounded_sides names each of N, E, S, W at most once")
     if disk_radius is None:
-        disk_radius = (
-            GROUNDED_PRESET_DISK_RADIUS_UM if tc_grounded else FLOATING_PRESET_DISK_RADIUS_UM
-        )
+        if grounded_sides == {"N", "E", "S", "W"}:
+            disk_radius = GROUNDED_PRESET_DISK_RADIUS_UM
+        elif not grounded_sides:
+            disk_radius = FLOATING_PRESET_DISK_RADIUS_UM
+        else:
+            raise ValueError("a mixed set of grounded claws needs an explicit disk_radius")
     for name, value in (
         ("disk_radius", disk_radius),
         ("tc_width", tc_width),
@@ -793,7 +803,7 @@ def disk_flip_chip_qubit(
         rounding_points=lead_points,
         sampling=sampling,
     )
-    c.add_ref(qface, name="QFace")
+    qface_ref = c.add_ref(qface, name="QFace")
 
     q_mask = gf.Component()
     q_mask.add_ref(curves.circle(radius=clearance_radius, layer=QMASK, sampling=sampling))
@@ -810,7 +820,7 @@ def disk_flip_chip_qubit(
                 cpw_gap=tc_cpw_gap,
                 extension=extension,
                 clearance_radius=clearance_radius,
-                grounded=tc_grounded,
+                grounded=side in grounded_sides,
                 corner_radius=tc_corner_radius,
                 rounding_points=claw_points,
                 sampling=sampling,
@@ -831,6 +841,8 @@ def disk_flip_chip_qubit(
         line_ref.drotate(angle)
         c.add_port(name=f"{name.lower()}_out", port=line_ref.ports["out"])
         lines[name] = (line, angle)
+    if include_junction:
+        c.add_port(name="o_junction_lumped", port=qface_ref.ports["o_junction_lumped"])
 
     # The ground-side junction lead stays metal: it is cut out of the mask.
     q_ground_mask = gf.boolean(
@@ -847,15 +859,16 @@ def disk_flip_chip_qubit(
         c_mask.add_ref(line.extract([CMASK])).drotate(angle)
     c_ground_mask = _union(c_mask, CMASK)
     c.add_ref(q_ground_mask, name="QGroundMask")
-    c.add_ref(
-        _ground(ground_outer_half_extent, q_ground_mask, QDRAW, QMASK, LAYER.D1_SUBSTRATE_AREA),
-        name="QGround",
-    )
     c.add_ref(c_ground_mask, name="CGroundMask")
-    c.add_ref(
-        _ground(ground_outer_half_extent, c_ground_mask, CDRAW, CMASK, LAYER.D0_SUBSTRATE_AREA),
-        name="CGround",
-    )
+    if include_ground:
+        c.add_ref(
+            _ground(ground_outer_half_extent, q_ground_mask, QDRAW, QMASK, LAYER.D1_SUBSTRATE_AREA),
+            name="QGround",
+        )
+        c.add_ref(
+            _ground(ground_outer_half_extent, c_ground_mask, CDRAW, CMASK, LAYER.D0_SUBSTRATE_AREA),
+            name="CGround",
+        )
 
     bump = indium_bump(
         indium_bump_size=indium_bump_size,
@@ -872,13 +885,12 @@ def disk_flip_chip_qubit(
         bump_names.append(bump_ref.name)
 
     tc_ports = [f"tc_{side}" for side, _ in TC_SIDES] if include_tc else []
-    floating_claws = (
-        [f"TC_{side}" for side, _ in TC_SIDES] if include_tc and not tc_grounded else []
-    )
-    grounded_claws = [f"TC_{side}" for side, _ in TC_SIDES] if include_tc and tc_grounded else []
+    claw_sides = [side for side, _ in TC_SIDES] if include_tc else []
+    floating_claws = [f"TC_{side}" for side in claw_sides if side not in grounded_sides]
+    grounded_claws = [f"TC_{side}" for side in claw_sides if side in grounded_sides]
     c.info["topology"] = (
         "two-die flip-chip disk transmon: D1 disk with one Manhattan junction to ground"
-        + (f", four {'grounded' if tc_grounded else 'floating'} claws" if include_tc else "")
+        + (f", four claws ({len(grounded_claws)} grounded)" if include_tc else "")
         + "; D0 readout and drive tips; indium bump ring"
     )
     c.info["preset_provenance"] = "Layout preset defaults; not a measured or qualified device."
@@ -886,8 +898,18 @@ def disk_flip_chip_qubit(
     c.info["tc_disk_gap_by_side_um"] = {side: float(gap) for side, gap in gaps.items()}
     c.info["junction_center_um"] = junction_center
     c.info["bump_instance_names"] = tuple(bump_names)
-    c.info["ground_instance_names"] = ("QGround", "CGround", "QGroundMask", "CGroundMask")
-    c.info["ordered_port_names"] = (*tc_ports, "ro_out", "xy_out")
+    c.info["ground_instance_names"] = (
+        ("QGround", "CGround", "QGroundMask", "CGroundMask")
+        if include_ground
+        else ("QGroundMask", "CGroundMask")
+    )
+    c.info["grounded_tc_sides"] = tuple(claw.removeprefix("TC_") for claw in grounded_claws)
+    c.info["ordered_port_names"] = (
+        *tc_ports,
+        "ro_out",
+        "xy_out",
+        *(("o_junction_lumped",) if include_junction else ()),
+    )
     c.info["source_references"] = (
         "KQCircuits CircularTransmonSingleIsland (GPL-3.0; cited as prior art, no code used)",
         "https://doi.org/10.1063/1.4940230",
@@ -939,6 +961,7 @@ def disk_flip_chip_qubit(
                 ("QGround", "D1_BOTTOM_GROUND_PLANE", QMASK),
                 ("CGround", "D0_TOP_GROUND_PLANE", CMASK),
             )
+            if include_ground
         ]
         + [
             {
@@ -948,8 +971,20 @@ def disk_flip_chip_qubit(
                 "layer": _layer(QDRAW),
                 "selector_point_um": on_axis(disk_radius + gaps[side] + tc_width / 2, angle),
             }
-            for (side, angle), claw in zip(TC_SIDES, grounded_claws, strict=False)
+            for side, angle in TC_SIDES
+            if (claw := f"TC_{side}") in grounded_claws
         ],
+        "ports": (
+            [
+                {
+                    "name": "o_junction_lumped",
+                    "layer": _layer(LAYER.D1_BOTTOM_SIM_BOUNDARY),
+                    "target_layer": "D1_BOTTOM_M1",
+                }
+            ]
+            if include_junction
+            else []
+        ),
     }
     curves.record_sampling(c, curve_sampling)
     return c

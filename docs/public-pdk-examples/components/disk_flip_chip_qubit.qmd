@@ -17,7 +17,7 @@ from orcapen_sc_pdk import activate
 
 activate()
 grounded = gf.get_component("disk_flip_chip_qubit")
-floating = gf.get_component("disk_flip_chip_qubit", tc_grounded=False)
+floating = gf.get_component("disk_flip_chip_qubit", tc_grounded_sides=())
 disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 ```
 
@@ -27,10 +27,11 @@ disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 
 | Feature | Arguments | Default |
 | --- | --- | --- |
-| Disk island radius | `disk_radius` | `None`: 110.5 µm with grounded claws, 119.839 µm with floating claws |
+| Disk island radius | `disk_radius` | `None`: 110.5 µm with all four claws grounded, 119.839 µm with none; give it explicitly for a mixed set |
 | Ground clearance on both dies | `ground_clearance_diameter` | 700 µm circle |
 | Site square, half side | `ground_outer_half_extent` | 500 µm |
-| Claws at N, E, S, W | `include_tc`, `tc_grounded` | present, grounded |
+| Claws at N, E, S, W | `include_tc` | present |
+| Claws shorted to ground | `tc_grounded_sides` | all four, `("N", "E", "S", "W")` |
 | Claw-to-disk gap | `tc_disk_gap`, per side `tc_disk_gap_by_side` | 60 µm, e.g. `(("E", 40.0),)` |
 | Claw radial width and body span | `tc_width`, `tc_span` | 60 µm, 45° |
 | Claw taper landing span | `tc_landing_span` | 45°; `None` drops the taper |
@@ -57,9 +58,11 @@ conductor. `curve_sampling` sets the sampling of every circle and arc;
 | `tc_N`, `tc_E`, `tc_S`, `tc_W` | claw CPW ends on the port square, facing outward | `tc_cpw_width` |
 | `ro_out` | readout line end at `ro_angle` on the port square | `ro_cpw_width` |
 | `xy_out` | drive line end at `xy_angle` on the port square | `xy_cpw_width` |
+| `o_junction_lumped` | lumped junction port on the simulation sheet across the junction | junction width |
 
 The qubit die uses `D1_BOTTOM_M1_DRAW`, `D1_BOTTOM_GROUND_MASK` and
-`D1_BOTTOM_JJ_DRAW`. The control die uses `D0_TOP_M1_DRAW` and
+`D1_BOTTOM_JJ_DRAW`, with the junction's simulation sheet on
+`D1_BOTTOM_SIM_BOUNDARY`. The control die uses `D0_TOP_M1_DRAW` and
 `D0_TOP_GROUND_MASK`. Bumps use `D0_D1_INDIUM_BUMP` and `D0_D1_UNDER_BUMP`.
 
 Signal conductors are the instances `QFace` (disk and junction), `TC_N`,
@@ -67,8 +70,9 @@ Signal conductors are the instances `QFace` (disk and junction), `TC_N`,
 instances: `QGround` and `CGround` hold the ground metal (site square minus
 mask) and the die domain on `D1_SUBSTRATE_AREA` / `D0_SUBSTRATE_AREA`;
 `QGroundMask` and `CGroundMask` hold the masks. To place several sites under
-one common ground, remove these four instances from each site and draw the
-ground in the parent.
+one common ground, build each site with `include_ground=False`, which leaves out
+`QGround` and `CGround` and keeps the masks, then draw the ground in the parent
+as the common area minus the masks.
 
 ## Sources and adaptations
 

@@ -43,12 +43,12 @@ def grounded():
 @pytest.fixture(scope="module")
 def floating():
     PDK.activate()
-    return PDK.get_component("disk_flip_chip_qubit", tc_grounded=False)
+    return PDK.get_component("disk_flip_chip_qubit", tc_grounded_sides=())
 
 
 def test_default_ports_sit_on_the_handoff_square(grounded) -> None:
     ports = {port.name: port for port in grounded.ports}
-    assert list(ports) == ["tc_N", "tc_E", "tc_S", "tc_W", "ro_out", "xy_out"]
+    assert list(ports) == ["tc_N", "tc_E", "tc_S", "tc_W", "ro_out", "xy_out", "o_junction_lumped"]
     for name, angle in (("tc_N", 90), ("tc_E", 0), ("tc_S", 270), ("tc_W", 180)):
         center = ports[name].dcenter
         assert math.hypot(*center) == pytest.approx(HANDOFF, abs=1e-3)
@@ -78,7 +78,7 @@ def test_claw_gaps_widths_and_per_side_override() -> None:
     PDK.activate()
     component = PDK.get_component(
         "disk_flip_chip_qubit",
-        tc_grounded=False,
+        tc_grounded_sides=(),
         disk_radius=110.0,
         tc_disk_gap_by_side=(("E", 40.0),),
         tc_landing_span=None,
@@ -147,7 +147,7 @@ def test_grounded_and_floating_claw_connectivity(grounded, floating) -> None:
 def test_disk_only_variant_and_separable_ground() -> None:
     PDK.activate()
     component = PDK.get_component("disk_flip_chip_qubit", include_tc=False)
-    assert [port.name for port in component.ports] == ["ro_out", "xy_out"]
+    assert [port.name for port in component.ports] == ["ro_out", "xy_out", "o_junction_lumped"]
     assert not any(instance.name.startswith("TC_") for instance in component.insts)
     signals = component.copy()
     for name in GROUND_INSTANCES:
@@ -157,3 +157,42 @@ def test_disk_only_variant_and_separable_ground() -> None:
     d0 = _region(signals, LAYER.D0_TOP_M1_DRAW)
     assert d0.count() == 2
     assert _region(component, LAYER.D1_SUBSTRATE_AREA).area() == 1000 * 1000 * 1e6
+
+
+def test_claws_are_grounded_per_side() -> None:
+    PDK.activate()
+    component = PDK.get_component(
+        "disk_flip_chip_qubit", tc_grounded_sides=("N", "W"), disk_radius=115.0
+    )
+    q_ground = _region(component, LAYER.D1_BOTTOM_M1_DRAW, "QGround")
+    for side in "NESW":
+        claw = _region(component, LAYER.D1_BOTTOM_M1_DRAW, f"TC_{side}")
+        assert claw.interacting(q_ground).is_empty() is (side not in "NW")
+    assert component.info["grounded_tc_sides"] == ("N", "W")
+
+
+def test_mixed_grounding_needs_an_explicit_disk_radius() -> None:
+    PDK.activate()
+    with pytest.raises(ValueError, match="explicit disk_radius"):
+        PDK.get_component("disk_flip_chip_qubit", tc_grounded_sides=("N",))
+
+
+def test_include_ground_false_keeps_only_the_masks() -> None:
+    PDK.activate()
+    component = PDK.get_component("disk_flip_chip_qubit", include_ground=False)
+    names = {instance.name for instance in component.insts}
+    assert {"QGroundMask", "CGroundMask"} <= names
+    assert not {"QGround", "CGround"} & names
+    assert _region(component, LAYER.D1_SUBSTRATE_AREA).is_empty()
+    assert _region(component, LAYER.D0_SUBSTRATE_AREA).is_empty()
+    assert not _covers(_region(component, LAYER.D1_BOTTOM_M1_DRAW), 425.0, 22.5)
+
+
+def test_junction_lumped_port_sits_on_the_simulation_sheet(grounded) -> None:
+    port = grounded.ports["o_junction_lumped"]
+    sheet = _region(grounded, LAYER.D1_BOTTOM_SIM_BOUNDARY)
+    assert sheet.count() == 1
+    x, y = port.dcenter
+    assert _covers(sheet, math.hypot(x, y), math.degrees(math.atan2(y, x)))
+    # The sheet spans the two lead contacts, about 4 um from the overlap point.
+    assert math.hypot(x - 167.938, y + 167.938) < 4.0

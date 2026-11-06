@@ -13,7 +13,7 @@ from orcapen_sc_pdk import activate
 
 activate()
 grounded = gf.get_component("disk_flip_chip_qubit")
-floating = gf.get_component("disk_flip_chip_qubit", tc_grounded=False)
+floating = gf.get_component("disk_flip_chip_qubit", tc_grounded_sides=())
 disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 ```
 
@@ -23,10 +23,11 @@ disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 
 | 特徵 | 引數 | 預設值 |
 | --- | --- | --- |
-| 圓盤島半徑 | `disk_radius` | `None`：耦合爪接地時 110.5 µm，浮接時 119.839 µm |
+| 圓盤島半徑 | `disk_radius` | `None`：四個耦合爪都接地時 110.5 µm，都不接地時 119.839 µm；只有部分接地時須明確指定 |
 | 兩晶粒的接地淨空區 | `ground_clearance_diameter` | 直徑 700 µm 的圓 |
 | 站點正方形半邊長 | `ground_outer_half_extent` | 500 µm |
-| N、E、S、W 耦合爪 | `include_tc`、`tc_grounded` | 有，接地 |
+| N、E、S、W 耦合爪 | `include_tc` | 有 |
+| 短路到地的耦合爪 | `tc_grounded_sides` | 四個都接地，`("N", "E", "S", "W")` |
 | 耦合爪與圓盤間隙 | `tc_disk_gap`，逐邊 `tc_disk_gap_by_side` | 60 µm，例如 `(("E", 40.0),)` |
 | 耦合爪徑向寬度與本體角度 | `tc_width`、`tc_span` | 60 µm、45° |
 | 耦合爪漸縮著陸角度 | `tc_landing_span` | 45°；`None` 表示不漸縮 |
@@ -50,10 +51,11 @@ disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 | `tc_N`、`tc_E`、`tc_S`、`tc_W` | 耦合爪 CPW 在連接埠正方形上的末端，朝外 | `tc_cpw_width` |
 | `ro_out` | 讀取線在 `ro_angle` 方向、連接埠正方形上的末端 | `ro_cpw_width` |
 | `xy_out` | 驅動線在 `xy_angle` 方向、連接埠正方形上的末端 | `xy_cpw_width` |
+| `o_junction_lumped` | 跨接面模擬面上的集總接面連接埠 | 接面寬度 |
 
-量子位元晶粒使用 `D1_BOTTOM_M1_DRAW`、`D1_BOTTOM_GROUND_MASK` 與 `D1_BOTTOM_JJ_DRAW`。控制晶粒使用 `D0_TOP_M1_DRAW` 與 `D0_TOP_GROUND_MASK`。凸塊使用 `D0_D1_INDIUM_BUMP` 與 `D0_D1_UNDER_BUMP`。
+量子位元晶粒使用 `D1_BOTTOM_M1_DRAW`、`D1_BOTTOM_GROUND_MASK` 與 `D1_BOTTOM_JJ_DRAW`，接面的模擬面位於 `D1_BOTTOM_SIM_BOUNDARY`。控制晶粒使用 `D0_TOP_M1_DRAW` 與 `D0_TOP_GROUND_MASK`。凸塊使用 `D0_D1_INDIUM_BUMP` 與 `D0_D1_UNDER_BUMP`。
 
-訊號導體是 `QFace`（圓盤與接面）、`TC_N`、`TC_E`、`TC_S`、`TC_W`、`RO` 與 `XY` 這些實例。每個晶粒的接地各自獨立：`QGround` 與 `CGround` 含接地金屬（站點正方形減去遮罩）以及 `D1_SUBSTRATE_AREA`／`D0_SUBSTRATE_AREA` 上的晶粒範圍；`QGroundMask` 與 `CGroundMask` 含遮罩。若要讓多個站點共用一個接地，請從每個站點移除這四個實例，再於上層繪製接地。
+訊號導體是 `QFace`（圓盤與接面）、`TC_N`、`TC_E`、`TC_S`、`TC_W`、`RO` 與 `XY` 這些實例。每個晶粒的接地各自獨立：`QGround` 與 `CGround` 含接地金屬（站點正方形減去遮罩）以及 `D1_SUBSTRATE_AREA`／`D0_SUBSTRATE_AREA` 上的晶粒範圍；`QGroundMask` 與 `CGroundMask` 含遮罩。若要讓多個站點共用一個接地，請以 `include_ground=False` 建立每個站點：這會略過 `QGround` 與 `CGround`、保留遮罩，再由上層以共用範圍減去遮罩繪製接地。
 
 ## 來源與調整 {#sources-and-adaptations}
 
