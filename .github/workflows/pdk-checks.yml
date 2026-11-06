@@ -1,7 +1,7 @@
 name: PDK package checks
 
 on:
-  pull_request:
+  workflow_call:
   push:
     branches: [develop, main]
 
