@@ -51,10 +51,28 @@ the end of its CPW clearance into the ground. A floating claw is an isolated
 conductor. `curve_sampling` sets the sampling of every circle and arc;
 `corner_rounding_points=None` takes the corner rounding from it as well.
 
-The cell checks its flattened geometry and raises `ValueError` for settings
-that would change this connectivity: a disk lead that crosses a claw, a claw
-that reaches the ground or misses it, or a bump that lands on a signal
-clearance. Move the junction, claws, lines or bump ring apart instead.
+### Supported adjustments
+
+The cell supports small adjustments around the presets, not every
+combination. Settings that would draw a plausible layout with a short or an
+open raise `ValueError`:
+
+- Each claw stays inside the ground clearance, and `tc_span` is at most 60°.
+- With claws, `junction_angle` and `junction_open_lead_angles` lie on the
+  diagonals (45° + k·90°), between the claws.
+- For grounded claws, the mask end (`handoff_half_extent` plus
+  `tc_cpw_gap`, or plus `tc_outer_extension_end_clearance`) plus one CPW
+  width fits inside `ground_outer_half_extent`.
+- Every bump clears the ground clearance and the readout, drive and claw
+  masks by half the diagonal of its larger square (`indium_bump_size` or
+  `under_bump_size`). Moving `ro_angle` or `xy_angle`, or changing
+  `bump_lattice_count` or `bump_skip_period`, must keep the lines on empty
+  bump sites.
+- `ro_tip_radius` and `xy_tip_radius` leave at least half the CPW width of
+  line before the handoff square.
+
+The caller keeps anything else these rules do not cover, such as the readout
+and drive lines staying clear of each other.
 
 ## Ports, layers and ground
 

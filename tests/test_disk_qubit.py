@@ -210,18 +210,23 @@ def test_junction_lumped_port_sits_on_the_simulation_sheet(grounded) -> None:
             },
             "claw E must stay inside the ground clearance",
         ),
+        # Adjacent claws would close the room left for the diagonal leads.
+        ({"tc_span": 61.0}, "tc_span must be at most 60 degrees"),
         # The grounding tail stays inside its own mask past the site edge.
-        ({"handoff_half_extent": 480.0}, "grounded TC_N does not reach the ground"),
+        ({"handoff_half_extent": 480.0}, "mask end plus one CPW width must fit in the site"),
         # The disk lead runs through the grounded E claw.
-        ({"junction_angle": 0.0}, "Disk touches the ground metal"),
-        # A bump lands on the readout, or on a line the skip period no longer clears.
-        ({"ro_angle": 11.25}, "bump_01 overlaps a signal clearance"),
-        ({"bump_lattice_count": 16}, "bump_06 overlaps a signal clearance"),
+        ({"junction_angle": 0.0}, r"junction and open lead angles must be 45° \+ k·90°"),
+        # A bump lands on the readout, on a line the skip period no longer
+        # clears, or reaches a claw lead with an oversized indium body.
+        ({"ro_angle": 11.25}, "bump_01 overlaps the RO clearance"),
+        ({"bump_lattice_count": 16}, "bump_06 overlaps the RO clearance"),
+        ({"indium_bump_size": 70.0}, "bump_01 overlaps the TC_E clearance"),
+        ({"indium_bump_size": 120.0}, "bump ring must lie outside the ground clearance"),
         # The round tip leaves no straight line before the handoff.
         ({"ro_tip_radius": 582.0}, "half the RO width inside the handoff square"),
     ],
 )
-def test_parameters_that_would_join_conductors_are_rejected(settings, message) -> None:
+def test_settings_outside_the_supported_scope_are_rejected(settings, message) -> None:
     PDK.activate()
     with pytest.raises(ValueError, match=message):
         PDK.get_component("disk_flip_chip_qubit", **settings)

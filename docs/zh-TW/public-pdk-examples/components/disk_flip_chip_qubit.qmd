@@ -44,7 +44,17 @@ disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 
 接地的耦合爪末端有一段寬度等於一個 CPW 線寬的徑向尾段，穿過 CPW 淨空區末端連入接地。浮接的耦合爪是獨立導體。`curve_sampling` 設定所有圓與弧的取樣；`corner_rounding_points=None` 時，倒角點數也由它決定。
 
-元件會檢查攤平後的幾何；如果設定會改變上述連接關係，例如圓盤引線穿過耦合爪、耦合爪碰到或接不到接地，或凸塊落在訊號線的淨空區上，就會丟出 `ValueError`。這時請把接面、耦合爪、訊號線或凸塊環移開。
+### 支援的調整範圍
+
+這個元件支援在預設組合附近小幅調整，不支援任意組合。會畫出看似正常、實際卻短路或斷路的設定，會丟出 `ValueError`：
+
+- 每個耦合爪都要在接地淨空區內，`tc_span` 最多 60°。
+- 有耦合爪時，`junction_angle` 和 `junction_open_lead_angles` 要落在對角線上（45° + k·90°），也就是耦合爪之間。
+- 接地的耦合爪，其遮罩末端（`handoff_half_extent` 加 `tc_cpw_gap`，或加 `tc_outer_extension_end_clearance`）再加一個 CPW 線寬，要在 `ground_outer_half_extent` 之內。
+- 每個凸塊以較大方塊（`indium_bump_size` 或 `under_bump_size`）的半對角線計算，要避開接地淨空區，以及讀出線、驅動線和耦合爪線的遮罩。調整 `ro_angle`、`xy_angle`、`bump_lattice_count` 或 `bump_skip_period` 時，訊號線要維持在空著的凸塊位置上。
+- `ro_tip_radius` 和 `xy_tip_radius` 到交接方框之間，至少要留半個 CPW 線寬的線段。
+
+以上規則沒涵蓋的條件由呼叫端維持，例如讀出線和驅動線彼此不能相碰。
 
 ## 連接埠、圖層與接地 {#ports-layers-and-ground}
 
