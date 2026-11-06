@@ -1,0 +1,79 @@
+---
+title: "圓盤覆晶量子位元"
+sidebar: api
+---
+
+`disk_flip_chip_qubit` 在雙晶片覆晶（flip-chip）疊層上建立一個圓盤 transmon 單元：量子位元晶片上有一個經由單一約瑟夫森接面接地的圓盤島，控制晶片上有讀取線與驅動線，周圍再加一圈接地凸塊。圓盤四周的四個可調耦合器（tunable coupler，TC）爪形電極可以選擇是否加入。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("disk_flip_chip_qubit")
+```
+
+預設是四個爪形電極都接地的版本。同一個 cell 也能建立另外兩種預設：
+
+```python
+disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
+floating_claws = gf.get_component(
+    "disk_flip_chip_qubit", grounded_tc_sides=(), disk_radius=119.839
+)
+```
+
+![預設圓盤量子位元：左為量子位元晶片，右為控制晶片，顯示 DRAW、ETCH 與凸塊圖層。](../../_static/images/components/disk_flip_chip_qubit.svg)
+
+預設值是版圖預設參數，不是量測過或通過製程驗證的元件。所有長度單位都是微米，單元以原點為中心。
+
+## 幾何 {#geometry}
+
+**量子位元晶片**，位於 `D1_BOTTOM` 面：
+
+- 半徑 `disk_radius`（110.5）的圓盤位在直徑 `ground_clearance_diameter`（700）的圓形接地開口中。
+- `D1_BOTTOM_JJ_DRAW` 上的一個 Manhattan 接面把圓盤接到地，重疊處位於 `junction_angle_deg`（315°）方向、半徑 `junction_radius`（237.5）的位置。
+- 兩條接面引線在接面處寬 `junction_lead_width`（2），往落點逐漸變寬成 `junction_taper_span_deg`（20°）的圓弧：一條落在圓盤邊緣，另一條越過開口邊緣 `junction_ground_overlap`（10），落在接地面上。
+- 啟用 `include_tc` 時，北、東、南、西各有一個爪形電極。每個都是寬 `tc_width`（60）、張角 `tc_span_deg`（45°）的環形扇區，與圓盤相距 `tc_disk_gap`（60）。`tc_disk_gap_by_side` 可以個別覆寫某一側的間距。
+- 每個爪形電極寬 `tc_landing_span_deg`（45°）的外側弦，漸縮成中心線寬 `tc_cpw_width`（3）、兩側間隙 `tc_cpw_gap`（40）的共面波導（CPW）。CPW 穿出開口，終止於 `handoff_radius`（約 412.3），也就是旁邊兩顆凸塊底墊的外緣。
+
+**控制晶片**，位於 `D0_TOP` 面：
+
+- 接地面上開一個同樣直徑的開口。
+- 讀取 CPW（中心線寬 7、間隙 6）沿 `readout_angle_deg`（135°）方向，圓頭末端延伸到 `readout_tip_radius`（0），也就是圓盤中心。
+- 驅動 CPW（中心線寬 4、間隙 6）沿 `drive_angle_deg`（225°）方向，末端停在 `drive_tip_radius`（412）。
+
+**凸塊**：24 顆接地凸塊排在半徑 `bump_ring_radius`（400）的圓上。這圈凸塊是 32 個格點每隔 4 個空一格，讓爪形電極、讀取線、驅動線與接面的方向保持淨空。每顆凸塊都是標準的 [`indium_bump`](indium_bump.qmd)：20 µm 的銦凸塊放在 40 µm 的底墊上。
+
+疊層、晶片間距與材料沿用 PDK 的雙晶片覆晶技術設定，這個 cell 不會更改。
+
+## 接地與浮接的爪形電極 {#grounded-and-floating-claws}
+
+列在 `grounded_tc_sides` 裡的爪形電極會短路到地：它 3 µm 的中心線從交接點繼續延伸，穿過 `tc_end_clearance`（40）的間隙，接上接地面。其餘爪形電極保持浮接，CPW 在交接點開路，讓耦合器的走線接上。
+
+要讓爪形電極有自己的引線 CPW，請設定 `tc_lead_start_radius`。從這個半徑往外，爪形電極改用 `tc_lead_width` 與 `tc_lead_gap`，遮罩在交接點外保留 `tc_end_clearance` 的間隙。
+
+## 連接埠 {#ports}
+
+| 連接埠 | 位置 | 用途 |
+| --- | --- | --- |
+| `tc_N`、`tc_E`、`tc_S`、`tc_W` | 爪形電極 CPW 在 `handoff_radius` 處，朝外 | 把耦合器或走線接到爪形電極。 |
+| `readout`、`drive` | D0 CPW 上 max(\|x\|, \|y\|) 等於 `handoff_radius` 的位置 | 連接讀取線與驅動線的走線。 |
+| `o_junction_lumped` | `D1_BOTTOM_SIM_BOUNDARY` 上的接面模擬面 | 模擬用的集總接面連接埠。 |
+
+## 組合多個單元 {#combine-several-sites}
+
+每片晶片的接地面是 `site_size`（1000）的正方形扣掉該晶片的接地遮罩，和晶片範圍一起畫在 DRAW 上。設定 `include_ground=False` 會略過兩片晶片的接地面，單元只留下訊號金屬、接地遮罩與凸塊，由上層版圖在多個單元上畫一整片共用的接地面。耦合器接在 `tc_*` 連接埠上。
+
+## 參考文獻與改編 {#references-and-adaptations}
+
+這個 cell 是 OrcaPen 自行撰寫的原始碼，結合三種已發表的設計：
+
+- **Braumüller 等人（2016）**：圓形開口中的圓形島。[APL 108, 032601](https://doi.org/10.1063/1.4940230)、[arXiv:1509.08014](https://arxiv.org/abs/1509.08014)。
+- **KQCircuits `CircularTransmonSingleIsland`**：經由接面接地的單一島，加上固定半徑的圓弧耦合器。[說明文件（英文）](https://iqm-finland.github.io/KQCircuits/api/kqcircuits.qubits.circular_transmon_single_island.html)。KQCircuits 採用 GPL-3.0 授權，這裡只引用為先前技術，沒有使用它的程式碼。
+- **Kosen 等人（2022）**：以銦凸塊接合的量子位元晶片與控制晶片，讀取與驅動放在控制晶片上。[QST 7, 035018](https://doi.org/10.1088/2058-9565/ac734b)、[arXiv:2112.02717](https://arxiv.org/abs/2112.02717)。
+
+四個接地的爪形電極、漸縮的接面引線，以及把讀取與驅動移到控制晶片上，是這個設計自己的改編，並非出自單一篇論文。
+
+請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.disk_flip_chip_qubit.html#orcapen_sc_pdk.cells.disk_flip_chip_qubit)。

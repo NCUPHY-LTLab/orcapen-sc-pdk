@@ -10,6 +10,7 @@ ports, and layer roles. Geometry dimensions use micrometres.
 | --- | --- |
 | CPW paths and resonators | [straight](straight.qmd), [taper](taper.qmd), [resonator](resonator.qmd), [resonator_hanger](resonator_hanger.qmd), [resonator_meander](resonator_meander.qmd) |
 | Capacitors | [interdigital_capacitor](interdigital_capacitor.qmd), [martinis2022_differential_ribbon_capacitor](martinis2022_differential_ribbon_capacitor.qmd) |
+| Qubits | [disk_flip_chip_qubit](disk_flip_chip_qubit.qmd) |
 | Launch and junction | [launcher](launcher.qmd), [cpw_t_junction](cpw_t_junction.qmd) |
 | Connections and primitives | [airbridge](airbridge.qmd), [indium_bump](indium_bump.qmd), [indium_ground](indium_ground.qmd), [cpw_handoff](cpw_handoff.qmd), [rounded_end_metal_segment](rounded_end_metal_segment.qmd), [rounded_rectangle](rounded_rectangle.qmd), [wire_corner](wire_corner.qmd) |
 

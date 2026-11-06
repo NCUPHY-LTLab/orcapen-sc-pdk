@@ -1,0 +1,119 @@
+---
+title: "Disk flip-chip qubit"
+sidebar: api
+---
+
+`disk_flip_chip_qubit` builds one disk transmon site on the two-die flip-chip
+stack. The site holds a disk island grounded through a single junction on the
+qubit die, readout and drive lines on the control die, and a ring of ground bumps.
+Four tunable-coupler (TC) claws around the disk are optional.
+
+## Build the default component
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+component = gf.get_component("disk_flip_chip_qubit")
+```
+
+The default is the variant with four grounded claws. Two other presets come from
+the same cell:
+
+```python
+disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
+floating_claws = gf.get_component(
+    "disk_flip_chip_qubit", grounded_tc_sides=(), disk_radius=119.839
+)
+```
+
+![Default disk qubit: the qubit die (left) and the control die (right), with DRAW, ETCH and bump layers.](../../_static/images/components/disk_flip_chip_qubit.svg)
+
+The defaults are layout preset values, not a measured or fabrication-qualified
+device. All lengths are in micrometres, and the site is centred at the origin.
+
+## Geometry
+
+**Qubit die**, on the `D1_BOTTOM` face:
+
+- A disk of radius `disk_radius` (110.5) sits inside a circular ground clearance
+  with diameter `ground_clearance_diameter` (700).
+- One Manhattan junction on `D1_BOTTOM_JJ_DRAW` joins the disk to ground. Its
+  overlap is at `junction_radius` (237.5) along `junction_angle_deg` (315°).
+- Both junction leads are `junction_lead_width` (2) wide at the junction. They
+  widen to a `junction_taper_span_deg` (20°) arc where they land: on the disk
+  edge, and `junction_ground_overlap` (10) past the clearance edge, in ground.
+- With `include_tc`, four claws sit at N, E, S and W. Each is an annular sector
+  `tc_width` (60) wide and `tc_span_deg` (45°) across, placed `tc_disk_gap` (60)
+  outside the disk. `tc_disk_gap_by_side` overrides the gap for single sides.
+- Each claw's outer chord, `tc_landing_span_deg` (45°) wide, tapers to a CPW with
+  a `tc_cpw_width` (3) centre and `tc_cpw_gap` (40) gaps. The CPW leaves the
+  clearance and ends at `handoff_radius` (about 412.3), the outer edge of the
+  under-bumps beside it.
+
+**Control die**, on the `D0_TOP` face:
+
+- A clearance of the same diameter is opened in ground.
+- The readout CPW (7 centre, 6 gaps) runs along `readout_angle_deg` (135°). Its
+  rounded tip reaches `readout_tip_radius` (0), the disk centre.
+- The drive CPW (4 centre, 6 gaps) runs along `drive_angle_deg` (225°). Its tip
+  stops at `drive_tip_radius` (412).
+
+**Bumps**: 24 ground bumps on a circle of radius `bump_ring_radius` (400). The ring
+is a 32-site lattice with every 4th site left free, so the claw, readout, drive
+and junction directions stay clear. Each bump is the standard
+[`indium_bump`](indium_bump.qmd): a 20 µm indium square on a 40 µm under-bump.
+
+The stack, die gap and materials come from the PDK's two-die flip-chip
+technology; this cell does not change them.
+
+## Grounded and floating claws
+
+A claw listed in `grounded_tc_sides` is shorted to ground. Its 3 µm centre strip
+continues from the handoff through the `tc_end_clearance` (40) gap and joins the
+ground plane. The other claws stay floating. Their CPW ends open at the handoff,
+ready for a coupler route to attach there.
+
+To give a claw its own lead CPW, set `tc_lead_start_radius`. From that radius
+outward the claw uses `tc_lead_width` and `tc_lead_gap`, and the mask keeps
+`tc_end_clearance` beyond the handoff.
+
+## Ports
+
+| Port | Location | Use |
+| --- | --- | --- |
+| `tc_N`, `tc_E`, `tc_S`, `tc_W` | Claw CPW at `handoff_radius`, facing outward | Connect a coupler or route to a claw. |
+| `readout`, `drive` | D0 CPWs where max(\|x\|, \|y\|) equals `handoff_radius` | Route readout and drive lines. |
+| `o_junction_lumped` | Junction simulation sheet on `D1_BOTTOM_SIM_BOUNDARY` | Lumped junction port for simulation. |
+
+## Combine several sites
+
+Each die's ground is the `site_size` square (1000) minus that die's ground mask,
+drawn on DRAW together with the die area. Set `include_ground=False` to leave
+both grounds out. The site then keeps only its signal metal, ground masks and
+bumps, and a parent layout can draw one ground over several sites. Couplers
+connect at the `tc_*` ports.
+
+## References and adaptations
+
+The cell is OrcaPen-authored source that combines three published patterns:
+
+- **Braumüller et al. (2016):** a circular island inside a circular clearance.
+  [APL 108, 032601](https://doi.org/10.1063/1.4940230),
+  [arXiv:1509.08014](https://arxiv.org/abs/1509.08014).
+- **KQCircuits `CircularTransmonSingleIsland`:** a single island grounded through
+  a junction, with arc couplers at a fixed radius.
+  [Documentation](https://iqm-finland.github.io/KQCircuits/api/kqcircuits.qubits.circular_transmon_single_island.html).
+  KQCircuits is GPL-3.0, so it is cited as prior art only; none of its code is
+  used.
+- **Kosen et al. (2022):** a qubit die and a control die joined by indium bumps,
+  with readout and drive on the control die.
+  [QST 7, 035018](https://doi.org/10.1088/2058-9565/ac734b),
+  [arXiv:2112.02717](https://arxiv.org/abs/2112.02717).
+
+The four grounded claws, the tapered junction leads, and moving readout and drive
+to the control die are this design's own adaptations; they do not come from a
+single paper.
+
+See the [generated API reference](../../reference/cells.disk_flip_chip_qubit.qmd#orcapen_sc_pdk.cells.disk_flip_chip_qubit).

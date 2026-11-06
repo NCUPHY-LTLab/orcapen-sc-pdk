@@ -11,6 +11,7 @@ sidebar: api
 | --- | --- |
 | 共面波導與共振器 | [straight](components/straight.qmd), [taper](components/taper.qmd), [resonator](components/resonator.qmd), [resonator_hanger](components/resonator_hanger.qmd), [resonator_meander](components/resonator_meander.qmd) |
 | 電容器 | [interdigital_capacitor](components/interdigital_capacitor.qmd), [martinis2022_differential_ribbon_capacitor](components/martinis2022_differential_ribbon_capacitor.qmd) |
+| 量子位元 | [disk_flip_chip_qubit](components/disk_flip_chip_qubit.qmd) |
 | 連接結構 | [launcher](components/launcher.qmd), [cpw_t_junction](components/cpw_t_junction.qmd), [airbridge](components/airbridge.qmd), [indium_bump](components/indium_bump.qmd), [indium_ground](components/indium_ground.qmd) |
 | 基本元件 | [cpw_handoff](components/cpw_handoff.qmd), [rounded_end_metal_segment](components/rounded_end_metal_segment.qmd), [rounded_rectangle](components/rounded_rectangle.qmd), [wire_corner](components/wire_corner.qmd) |
 | 模擬版圖 | [模型圖集](test-components.md)中的方形／圓形墊片、有限寬接地 CPW、帶狀導線、覆晶、空氣橋與矽穿孔模型 |

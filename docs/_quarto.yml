@@ -191,6 +191,7 @@ website:
                 - public-pdk-examples/components/resonator_meander.qmd
                 - public-pdk-examples/components/interdigital_capacitor.qmd
                 - public-pdk-examples/components/martinis2022_differential_ribbon_capacitor.qmd
+                - public-pdk-examples/components/disk_flip_chip_qubit.qmd
                 - public-pdk-examples/components/launcher.qmd
                 - public-pdk-examples/components/cpw_t_junction.qmd
                 - public-pdk-examples/components/airbridge.qmd
@@ -215,6 +216,7 @@ website:
                 - reference/cells.cpw_meander_airbridge_lumped_coupon.qmd
                 - reference/cells.cpw_meander_airbridge_wave_coupon.qmd
                 - reference/cells.martinis2022_differential_ribbon_capacitor.qmd
+                - reference/cells.disk_flip_chip_qubit.qmd
         - section: Materials & Interfaces
           contents:
             - reference/materials.get_material_records.qmd
@@ -291,6 +293,7 @@ quartodoc:
         - cells.cpw_meander_airbridge_lumped_coupon
         - cells.cpw_meander_airbridge_wave_coupon
         - cells.martinis2022_differential_ribbon_capacitor
+        - cells.disk_flip_chip_qubit
     - title: Materials
       desc: Copy-returning public material and interface records.
       contents:
