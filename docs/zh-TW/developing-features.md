@@ -7,27 +7,20 @@ sidebar: development
 
 ## 建立開發工作目錄
 
-GDSFactory+ 是選用工具，且需要付費訂閱。請擇一設定。
-
-**不使用 GDSFactory+**（以 KLayout 檢視）：
-
 ```bash
 git clone https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git
 cd orcapen-sc-pdk
 uv sync -p 3.12
 ```
 
-這會安裝 PDK 與開發工具 pytest、Ruff。要檢視佈局，請安裝 [KLayout](https://www.klayout.de/) 及其 klive 外掛。
+這會安裝 PDK 與開發工具 pytest、Ruff。接著設定你使用的檢視工具。GDSFactory+ 是選用工具，且需要付費訂閱。
 
-**使用 GDSFactory+**（VS Code 擴充套件）：
+**不使用 GDSFactory+**：安裝 [KLayout](https://www.klayout.de/) 及其 klive 外掛，預覽會在 KLayout 開啟。
 
-```bash
-git clone https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git
-cd orcapen-sc-pdk
-uv sync -p 3.12 --all-extras
-```
+**使用 GDSFactory+**：用裝有 GDSFactory+ 擴充套件（2.3 版或更新）的 VS Code 開啟工作目錄，在 **GF+ Settings → Status** 選擇 **Setup Automatically**。擴充套件會把它的 SDK 與 worker 所需套件（包括 SPICE 用的 InSpice 與 vacask）安裝到 `.venv`。GDSFactory+ 需要 Python 3.12。
 
-`--all-extras` 會加入 `gdsfactoryplus` extra，內含 GDSFactory+ Worker Health 所需的套件，包括 SPICE 用的 InSpice 與 vacask。擴充套件的 **Setup Automatically** 執行的也是這個指令。之後請持續使用 `--all-extras`：一般的 `uv sync` 會移除這些套件，擴充套件就會看不到元件。GDSFactory+ 需要 Python 3.12。
+- 這些套件不在 `uv.lock` 裡，之後執行 `uv sync` 會把它們移除。再選一次 **Setup Automatically** 即可重新安裝。
+- 擴充套件也會在 `pyproject.toml` 加入標示「Managed by GDSFactory+」的 `[tool.uv]` 區塊，並更新 `uv.lock`。請把這些修改留在本機、不要 commit：它們會讓所有人的 lock 檔只支援 Linux x86-64。
 
 確認：`uv run python --version` 會回報支援的 Python 版本。文件相依套件與預覽方式請見[文件與網站](docs-publishing.md)。
 
