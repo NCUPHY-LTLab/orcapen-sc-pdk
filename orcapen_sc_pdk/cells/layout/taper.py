@@ -6,7 +6,7 @@ import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@curves.sampled_cell(tags=["layout", "primitive", "taper"])
+@gf.cell(tags=["layout", "primitive", "taper"])
 def taper(
     width1: float = 10.0,
     width2: float = 7.0,
@@ -17,6 +17,7 @@ def taper(
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a DRAW taper plus its local CPW clearance and derived ETCH.
 
@@ -65,6 +66,7 @@ def taper(
         layer=draw_layer,
     )
 
+    curves.record_sampling(c, curve_sampling)
     return c
 
 

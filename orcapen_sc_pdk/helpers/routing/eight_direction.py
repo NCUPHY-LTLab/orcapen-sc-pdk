@@ -53,7 +53,9 @@ class EightDirectionRoute:
     component and the plan metrics used to create it.
 
     Example:
-        routes, plans = route_bundle_8dir(c, [p1], [p2], cross_section="cpw_6_7_6")
+        routes, plans = route_bundle_8dir(
+            c, [p1], [p2], cross_section="cpw_6_7_6", curve_sampling=curves.FABRICATION
+        )
     """
 
     reference: gf.ComponentReference
@@ -117,7 +119,9 @@ class GlobalEightDirectionRouteBundle:
     routes plus whether conflict resolution found an optimal bundle.
 
     Example:
-        bundle = route_bundle_8dir_global(c, route_pairs=pairs, keepout_region=keepout)
+        bundle = route_bundle_8dir_global(
+            c, route_pairs=pairs, keepout_region=keepout, curve_sampling=curves.FABRICATION
+        )
     """
 
     routes: list[EightDirectionRoute]
@@ -1313,6 +1317,7 @@ def _plan_route_candidate_8dir(
     euler_angular_step: float | None,
     simplify: float | None,
     route_clearance: float,
+    curve_sampling: curves.CurveSampling,
 ) -> _RouteCandidate8Dir:
     xs = gf.get_cross_section(pair.cross_section or cross_section)
 
@@ -1336,7 +1341,9 @@ def _plan_route_candidate_8dir(
         pair.euler_angular_step if pair.euler_angular_step is not None else euler_angular_step
     )
     if resolved_euler_angular_step is None:
-        resolved_euler_angular_step = 360 / curves.circle_segments(resolved_bend_radius)
+        resolved_euler_angular_step = 360 / curves.circle_segments(
+            resolved_bend_radius, curve_sampling
+        )
     if resolved_euler_angular_step <= 0:
         raise ValueError(
             f"euler_angular_step must be positive, got {resolved_euler_angular_step!r}."
@@ -1479,6 +1486,8 @@ def route_bundle_8dir(
     debug_plan_layer: LayerSpec | None = None,
     debug_path_layer: LayerSpec | None = None,
     debug_path_width: float = 3.0,
+    *,
+    curve_sampling: curves.CurveSampling,
 ) -> tuple[list[EightDirectionRoute], list[EightDirectionRoutePlan]]:
     """Route port pairs with 8-direction A* and CrossSection extrusion.
 
@@ -1488,7 +1497,8 @@ def route_bundle_8dir(
 
     Example:
         routes, plans = route_bundle_8dir(c, ports1=[p1], ports2=[p2],
-                                          cross_section="cpw_6_7_6")
+                                          cross_section="cpw_6_7_6",
+                                          curve_sampling=curves.FABRICATION)
     """
 
     ports1_list = _as_port_list(ports1)
@@ -1509,7 +1519,7 @@ def route_bundle_8dir(
     if debug_path_width <= 0:
         raise ValueError(f"debug_path_width must be positive, got {debug_path_width!r}.")
     if euler_angular_step is None:
-        euler_angular_step = 360 / curves.circle_segments(bend_radius)
+        euler_angular_step = 360 / curves.circle_segments(bend_radius, curve_sampling)
     if euler_angular_step <= 0:
         raise ValueError(f"euler_angular_step must be positive, got {euler_angular_step!r}.")
 
@@ -1659,6 +1669,8 @@ def route_bundle_8dir_global(
     debug_plan_layer: LayerSpec | None = None,
     debug_path_layer: LayerSpec | None = None,
     debug_path_width: float = 3.0,
+    *,
+    curve_sampling: curves.CurveSampling,
 ) -> GlobalEightDirectionRouteBundle:
     """Route multiple nets with CBS-like global conflict search.
 
@@ -1667,7 +1679,9 @@ def route_bundle_8dir_global(
     until a conflict-free set is found.
 
     Example:
-        bundle = route_bundle_8dir_global(c, route_pairs=pairs, route_clearance=10.0)
+        bundle = route_bundle_8dir_global(
+            c, route_pairs=pairs, route_clearance=10.0, curve_sampling=curves.FABRICATION
+        )
     """
 
     if grid_resolution <= 0:
@@ -1710,6 +1724,7 @@ def route_bundle_8dir_global(
             euler_angular_step=euler_angular_step,
             simplify=simplify,
             route_clearance=route_clearance,
+            curve_sampling=curve_sampling,
         )
 
     empty_constraints: tuple[tuple[gf.Region, ...], ...] = tuple(() for _ in pairs)
@@ -1890,6 +1905,8 @@ def route_8dir_all_angle(
     debug_plan_layer: LayerSpec | None = None,
     debug_path_layer: LayerSpec | None = None,
     debug_path_width: float = 3.0,
+    *,
+    curve_sampling: curves.CurveSampling,
 ) -> tuple[list[EightDirectionRoute], EightDirectionRoutePlan]:
     """Route one all-angle-style pair through the 8-direction bundle backend.
 
@@ -1897,7 +1914,9 @@ def route_8dir_all_angle(
     still use the same bend-aware 8-direction route implementation.
 
     Example:
-        routes, plan = route_8dir_all_angle(c, port1, port2, cross_section="cpw_6_7_6")
+        routes, plan = route_8dir_all_angle(
+            c, port1, port2, cross_section="cpw_6_7_6", curve_sampling=curves.FABRICATION
+        )
     """
 
     _ = separation
@@ -1919,6 +1938,7 @@ def route_8dir_all_angle(
         debug_plan_layer=debug_plan_layer,
         debug_path_layer=debug_path_layer,
         debug_path_width=debug_path_width,
+        curve_sampling=curve_sampling,
     )
     return routes, plans[0]
 

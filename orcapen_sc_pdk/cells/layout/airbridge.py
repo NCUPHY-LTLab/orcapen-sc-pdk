@@ -8,7 +8,7 @@ import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@curves.sampled_cell(tags=["layout", "airbridge"])
+@gf.cell(tags=["layout", "airbridge"])
 def airbridge(
     bridge_span: float = 84.0,
     bridge_width: float = 12.0,
@@ -16,6 +16,7 @@ def airbridge(
     # Layers
     airbridge_draw_layer: Layer = LAYER.D0_TOP_AB_DRAW,
     airbridge_via_layer: Layer = LAYER.D0_TOP_AB_VIA,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a same-face airbridge deck with endpoint landing via pads.
 
@@ -94,6 +95,7 @@ def airbridge(
                 ],
             }
             break
+    curves.record_sampling(c, curve_sampling)
     return c
 
 

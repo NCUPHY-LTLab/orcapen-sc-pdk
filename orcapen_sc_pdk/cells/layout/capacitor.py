@@ -13,7 +13,12 @@ from orcapen_sc_pdk.helpers.layout import add_etch_for_component
 from orcapen_sc_pdk.tech import LAYER
 
 
-def _rounded_contour(points, radius: float, cutplanes: tuple[float, float]):
+def _rounded_contour(
+    points,
+    radius: float,
+    cutplanes: tuple[float, float],
+    curve_sampling: curves.CurveSampling,
+):
     """Fillet a merged micrometre contour, leaving outer CPW planes intact.
 
     Circular tangent arcs use the central sampling profile,
@@ -48,7 +53,7 @@ def _rounded_contour(points, radius: float, cutplanes: tuple[float, float]):
         start = (point[0] - setback * u[0], point[1] - setback * u[1])
         center = (start[0] - direction * radius * u[1], start[1] + direction * radius * u[0])
         angle = atan2(start[1] - center[1], start[0] - center[0])
-        steps = curves.arc_points(radius, turn * 180 / pi) - 1
+        steps = curves.arc_points(radius, turn * 180 / pi, curve_sampling) - 1
         rounded.extend(
             (
                 center[0] + radius * cos(angle + turn * i / steps),
@@ -59,7 +64,7 @@ def _rounded_contour(points, radius: float, cutplanes: tuple[float, float]):
     return rounded
 
 
-@curves.sampled_cell(tags=["layout", "capacitor", "interdigital"])
+@gf.cell(tags=["layout", "capacitor", "interdigital"])
 def interdigital_capacitor(
     fingers: int = 20,
     finger_length: float = 100.0,
@@ -74,6 +79,7 @@ def interdigital_capacitor(
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
     corner_radius_um: float = 0.0,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return an IDC with symmetric CPW terminal extensions and derived etch.
 
@@ -244,12 +250,15 @@ def interdigital_capacitor(
         for layer, polygons in contours.items():
             for hull, holes in polygons:
                 outer = gf.Component()
-                outer.add_polygon(_rounded_contour(hull, corner_radius_um, cutplanes), layer=layer)
+                outer.add_polygon(
+                    _rounded_contour(hull, corner_radius_um, cutplanes, curve_sampling), layer=layer
+                )
                 if holes:
                     voids = gf.Component()
                     for hole in holes:
                         voids.add_polygon(
-                            _rounded_contour(hole, corner_radius_um, cutplanes), layer=layer
+                            _rounded_contour(hole, corner_radius_um, cutplanes, curve_sampling),
+                            layer=layer,
                         )
                     rounded << gf.boolean(outer, voids, operation="not", layer=layer)
                 else:
@@ -264,6 +273,7 @@ def interdigital_capacitor(
         etch_layer=etch_layer,
     )
     result.info["cpw_gap_um"] = float(cpw_gap)
+    curves.record_sampling(result, curve_sampling)
     return result
 
 

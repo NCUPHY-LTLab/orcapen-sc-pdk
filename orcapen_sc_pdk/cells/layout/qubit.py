@@ -25,13 +25,14 @@ def _check_positive(name: str, value: float) -> None:
         raise ValueError(f"{name} must be finite and positive, got {value!r}.")
 
 
-@curves.sampled_cell
+@gf.cell
 def _xmon_qubit_pad(
     length: float,
     width: float,
     gap: float,
     draw_layer: Layer,
     ground_mask_layer: Layer,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return two equal crossed bars and their surrounding ground-gap mask."""
 
@@ -40,10 +41,11 @@ def _xmon_qubit_pad(
         c << gf.components.rectangle(size=size, layer=draw_layer, centered=True)
     for size in ((length + 2 * gap, width + 2 * gap), (width + 2 * gap, length + 2 * gap)):
         c << gf.components.rectangle(size=size, layer=ground_mask_layer, centered=True)
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
-@curves.sampled_cell
+@gf.cell
 def _xmon_coupling_electrode(
     qubit_pad_length: float,
     qubit_pad_width: float,
@@ -54,6 +56,7 @@ def _xmon_coupling_electrode(
     port_length: float,
     draw_layer: Layer,
     ground_mask_layer: Layer,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return the north-facing U electrode used on each side of the Xmon."""
 
@@ -106,10 +109,11 @@ def _xmon_coupling_electrode(
         layer=draw_layer,
         port_type="electrical",
     )
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
-@curves.sampled_cell(tags=["layout", "qubit", "kosen2024", "flip_chip"])
+@gf.cell(tags=["layout", "qubit", "kosen2024", "flip_chip"])
 def kosen2024_flip_chip_xmon_qubit(
     qubit_pad_length: float = 309.5,
     qubit_pad_width: float = 24.65,
@@ -135,6 +139,7 @@ def kosen2024_flip_chip_xmon_qubit(
     junction_sim_port_layer: Layer = LAYER.D1_BOTTOM_SIM_BOUNDARY,
     indium_bump_layer: Layer = LAYER.D0_D1_INDIUM_BUMP,
     under_bump_layer: Layer = LAYER.D0_D1_UNDER_BUMP,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a public-preview, four-port flip-chip Xmon coupling topology.
 
@@ -200,6 +205,7 @@ def kosen2024_flip_chip_xmon_qubit(
         gap=qubit_gap,
         draw_layer=q_chip_draw_layer,
         ground_mask_layer=q_chip_ground_mask_layer,
+        curve_sampling=curve_sampling,
     )
 
     electrode = _xmon_coupling_electrode(
@@ -212,6 +218,7 @@ def kosen2024_flip_chip_xmon_qubit(
         port_length=coupling_electrode_port_length,
         draw_layer=q_chip_draw_layer,
         ground_mask_layer=q_chip_ground_mask_layer,
+        curve_sampling=curve_sampling,
     )
     for name, angle in (("o1", 0), ("o2", -90), ("o3", 180), ("o4", 90)):
         electrode_ref = c << electrode
@@ -234,6 +241,7 @@ def kosen2024_flip_chip_xmon_qubit(
         open_side="left-bottom",
         draw_layer=junction_draw_layer,
         sim_port_layer=junction_sim_port_layer,
+        curve_sampling=curve_sampling,
     )
     junction_ref = c << junction
     junction_ref.dmirror_y(0)
@@ -249,6 +257,7 @@ def kosen2024_flip_chip_xmon_qubit(
     up_arm_head = c << curves.circle(
         radius=junction_arm_width / 2,
         layer=q_chip_draw_layer,
+        sampling=curve_sampling,
     )
     up_arm_head.dmove(up_arm_start)
     up_arm_end = pad_lower_edge + junction_arm_width
@@ -265,6 +274,7 @@ def kosen2024_flip_chip_xmon_qubit(
     lower_arm_head = c << curves.circle(
         radius=junction_arm_width / 2,
         layer=q_chip_draw_layer,
+        sampling=curve_sampling,
     )
     lower_arm_head.dmove(lower_arm_start)
     lower_arm_end = outer_gap_lower_edge - junction_arm_width
@@ -311,6 +321,7 @@ def kosen2024_flip_chip_xmon_qubit(
             indium_bump_layer=indium_bump_layer,
             under_bump_layer=under_bump_layer,
             include_under_bump=include_under_bump,
+            curve_sampling=curve_sampling,
         )
         side_positions = tuple(
             bump_center_offset * (-1 + (2 * index + 1) / bump_ring_count_per_side)
@@ -444,6 +455,7 @@ def kosen2024_flip_chip_xmon_qubit(
         },
     }
 
+    curves.record_sampling(c, curve_sampling)
     return c
 
 

@@ -8,7 +8,7 @@ from orcapen_sc_pdk.cells.layout.airbridge import airbridge
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@curves.sampled_cell(tags=["simulation", "chip", "cpw", "small_airbridge_chip"])
+@gf.cell(tags=["simulation", "chip", "cpw", "small_airbridge_chip"])
 def small_airbridge_chip(
     chip_width: float = 2200.0,
     chip_height: float = 900.0,
@@ -27,6 +27,7 @@ def small_airbridge_chip(
     sim_boundary_layer: Layer = LAYER.D0_TOP_SIM_BOUNDARY,
     airbridge_draw_layer: Layer = LAYER.D0_TOP_AB_DRAW,
     airbridge_via_layer: Layer = LAYER.D0_TOP_AB_VIA,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a small symmetric CPW chip with airbridge geometry."""
 
@@ -38,7 +39,12 @@ def small_airbridge_chip(
         raise ValueError(f"airbridge_count must be non-negative, got {airbridge_count!r}.")
 
     c = gf.Component()
-    c << gf.get_component("dicing_edge", size=(chip_width, chip_height), layer=etch_layer)
+    c << gf.get_component(
+        "dicing_edge",
+        size=(chip_width, chip_height),
+        layer=etch_layer,
+        curve_sampling=curve_sampling,
+    )
 
     xs = gf.get_cross_section(
         cpw_xs,
@@ -54,6 +60,7 @@ def small_airbridge_chip(
         etch_layer=etch_layer,
         ground_mask_layer=ground_mask_layer,
         sim_boundary_layer=sim_boundary_layer,
+        curve_sampling=curve_sampling,
     )
 
     left = c << launcher
@@ -75,11 +82,13 @@ def small_airbridge_chip(
                 via_size=airbridge_via_size,
                 airbridge_draw_layer=airbridge_draw_layer,
                 airbridge_via_layer=airbridge_via_layer,
+                curve_sampling=curve_sampling,
             )
             bridge.move((x, 0.0))
 
     c.add_port(name="o_left", port=left.ports["o_pad"])
     c.add_port(name="o_right", port=right.ports["o_pad"])
+    curves.record_sampling(c, curve_sampling)
     return c
 
 

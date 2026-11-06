@@ -87,7 +87,7 @@ def get_indium_ground_bump_spec() -> IndiumGroundBumpSpec:
     }
 
 
-@curves.sampled_cell(tags=["layout", "bump", "indium"])
+@gf.cell(tags=["layout", "bump", "indium"])
 def indium_bump(
     indium_bump_size: float = INDIUM_BUMP_SIZE_UM,
     under_bump_size: float = UNDER_BUMP_SIZE_UM,
@@ -95,6 +95,7 @@ def indium_bump(
     indium_bump_layer: Layer = LAYER.D0_D1_INDIUM_BUMP,
     under_bump_layer: Layer = LAYER.D0_D1_UNDER_BUMP,
     include_under_bump: bool = True,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return one indium bump stack centered at the local origin.
 
@@ -132,10 +133,11 @@ def indium_bump(
                 }
             ],
         }
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
-@curves.sampled_cell(tags=["layout", "bump", "indium"])
+@gf.cell(tags=["layout", "bump", "indium"])
 def indium_ground(
     width: float = 9900.0,
     height: float = 9900.0,
@@ -148,6 +150,7 @@ def indium_ground(
     indium_bump_layer: Layer = LAYER.D0_D1_INDIUM_BUMP,
     under_bump_layer: Layer = LAYER.D0_D1_UNDER_BUMP,
     include_under_bump: bool = True,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a regular indium bump field with optional signal-layout keepouts.
 
@@ -177,6 +180,7 @@ def indium_ground(
         indium_bump_layer=indium_bump_layer,
         under_bump_layer=under_bump_layer,
         include_under_bump=include_under_bump,
+        curve_sampling=curve_sampling,
     )
 
     if keepout_region is None or keepout_region.is_empty():
@@ -189,6 +193,7 @@ def indium_ground(
             row_pitch=pitch,
             centered=True,
         )
+        curves.record_sampling(c, curve_sampling)
         return c
 
     bump_temp = bump.copy()
@@ -216,6 +221,7 @@ def indium_ground(
             bump_ref.move((x, y))
 
     c.ports.clear()
+    curves.record_sampling(c, curve_sampling)
     return c
 
 

@@ -27,13 +27,14 @@ _BRIDGE_X = (-1600, -1400, -1200, -1000, -800, -600, 800, 1000, 1200, 1400, 1600
 _DOMAIN = (-2235.0, -560.0, 2235.0, 1531.5)
 
 
-@curves.sampled_cell(tags=["simulation", "cpw", "finite_ground"])
+@gf.cell(tags=["simulation", "cpw", "finite_ground"])
 def finite_ground_cpw_coupon(
     *,
     trace_length_um: float = 500.0,
     signal_width_um: float = 10.0,
     gap_um: float = 6.0,
     ground_width_um: float = 80.0,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Four-rectangle source coupon with editable dimensions in micrometres.
 
@@ -76,26 +77,38 @@ def finite_ground_cpw_coupon(
             )
         ],
     }
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
-def _shared_core() -> tuple[gf.Component, gf.Component]:
+def _shared_core(
+    curve_sampling: curves.CurveSampling,
+) -> tuple[gf.Component, gf.Component]:
     body = gf.Component()
     mtl_xs = gf.get_cross_section("coupled_cpw_w7_s6_d3", trace_names=("p", "r"))
-    hook = body << n_trace_mtl_section(length=500, cross_section=mtl_xs)
+    hook = body << n_trace_mtl_section(
+        length=500, cross_section=mtl_xs, curve_sampling=curve_sampling
+    )
     hook.move((-250, 11))
-    r_lead = body << straight(length=100, cross_section=_XS)
+    r_lead = body << straight(length=100, cross_section=_XS, curve_sampling=curve_sampling)
     r_lead.connect("o1", hook.ports["r_o2"])
     meander = body << resonator_meander(
-        length=4000, meanders=6, cpw_xs=_XS, cpw_radius=100, open_end=True
+        length=4000,
+        meanders=6,
+        cpw_xs=_XS,
+        cpw_radius=100,
+        open_end=True,
+        curve_sampling=curve_sampling,
     )
     meander.mirror()
     meander.connect("o1", r_lead.ports["o2"])
     short_source = gf.Component()
-    short_lead = short_source << straight(length=100, cross_section=_XS)
+    short_lead = short_source << straight(
+        length=100, cross_section=_XS, curve_sampling=curve_sampling
+    )
     short_lead.connect("o1", hook.ports["r_o1"])
     for side, terminal in (("left", "p_o1"), ("right", "p_o2")):
-        lead = body << straight(length=1500, cross_section=_XS)
+        lead = body << straight(length=1500, cross_section=_XS, curve_sampling=curve_sampling)
         lead.connect("o1", hook.ports[terminal])
         body.add_port(side, port=lead.ports["o2"])
     body.add_port("r_short_anchor", port=short_lead.ports["o2"])
@@ -125,7 +138,7 @@ def _shared_core() -> tuple[gf.Component, gf.Component]:
     common = gf.Component()
     common << body
     common << short
-    canonical_bridge = airbridge()
+    canonical_bridge = airbridge(curve_sampling=curve_sampling)
     landings = gf.Component()
     for y in (-42, 42):
         landing = landings << gf.components.rectangle(
@@ -149,7 +162,12 @@ def _shared_core() -> tuple[gf.Component, gf.Component]:
         ref = bridge << full_bridge
         ref.move((x, 0))
     canonical_meander = resonator_meander(
-        length=4000, meanders=6, cpw_xs=_XS, cpw_radius=100, open_end=True
+        length=4000,
+        meanders=6,
+        cpw_xs=_XS,
+        cpw_radius=100,
+        open_end=True,
+        curve_sampling=curve_sampling,
     )
     # The lowest row is intentionally omitted: its deck also crosses the TL.
     for i in range(1, len(canonical_meander.info["straight_lengths"])):
@@ -160,20 +178,24 @@ def _shared_core() -> tuple[gf.Component, gf.Component]:
     return common, short
 
 
-def _meander_coupon(mode: Literal["lumped", "wave"]) -> gf.Component:
-    common, _short = _shared_core()
+def _meander_coupon(
+    mode: Literal["lumped", "wave"], curve_sampling: curves.CurveSampling
+) -> gf.Component:
+    common, _short = _shared_core(curve_sampling)
     structure = gf.Component()
     structure << common
     for side in ("left", "right"):
         anchor = common.ports[side]
         if mode == "lumped":
-            endpoint = structure << launcher(cpw_xs=_XS)
+            endpoint = structure << launcher(cpw_xs=_XS, curve_sampling=curve_sampling)
             endpoint.connect("o_neck", anchor)
             structure.add_port(f"{side}_signal", port=endpoint.ports["o_pad"])
             structure.add_port(f"{side}_source_locator", port=endpoint.ports["o_lumped"])
         else:
             x = _DOMAIN[0] if side == "left" else _DOMAIN[2]
-            endpoint = structure << straight(length=abs(x - anchor.center[0]), cross_section=_XS)
+            endpoint = structure << straight(
+                length=abs(x - anchor.center[0]), cross_section=_XS, curve_sampling=curve_sampling
+            )
             endpoint.connect("o1", anchor)
             structure.add_port(f"{side}_wave_cut", port=endpoint.ports["o2"])
     domain = gf.Component()
@@ -213,16 +235,24 @@ def _meander_coupon(mode: Literal["lumped", "wave"]) -> gf.Component:
     return c
 
 
-@curves.sampled_cell(tags=["simulation", "cpw", "meander", "airbridge", "lumped"])
-def cpw_meander_airbridge_lumped_coupon() -> gf.Component:
+@gf.cell(tags=["simulation", "cpw", "meander", "airbridge", "lumped"])
+def cpw_meander_airbridge_lumped_coupon(
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
+) -> gf.Component:
     """Selected 17-bridge source with both launchers and actual 202/1 sheets."""
-    return _meander_coupon("lumped")
+    c = _meander_coupon("lumped", curve_sampling)
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
-@curves.sampled_cell(tags=["simulation", "cpw", "meander", "airbridge", "wave"])
-def cpw_meander_airbridge_wave_coupon() -> gf.Component:
+@gf.cell(tags=["simulation", "cpw", "meander", "airbridge", "wave"])
+def cpw_meander_airbridge_wave_coupon(
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
+) -> gf.Component:
     """Same selected core without launchers; through cuts at x = +/-2235 um."""
-    return _meander_coupon("wave")
+    c = _meander_coupon("wave", curve_sampling)
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
 def _pair17_physical_graph(record: dict[str, Any]) -> dict[str, Any]:

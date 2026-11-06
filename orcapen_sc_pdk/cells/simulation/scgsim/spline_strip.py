@@ -101,9 +101,7 @@ def _strip_component(
     return c
 
 
-@curves.sampled_cell(
-    tags=["simulation", "primitive", "curved_strip", "single_die", "interpolation_spline"]
-)
+@gf.cell(tags=["simulation", "primitive", "curved_strip", "single_die", "interpolation_spline"])
 def interpolation_spline_strip(
     through_points_um: tuple[tuple[float, float], ...] = (
         (-200.0, 0.0),
@@ -115,6 +113,7 @@ def interpolation_spline_strip(
     strip_width_um: float = 10.0,
     die_side_um: float = 1000.0,
     samples_per_span: int = 32,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Interpolate a cubic Hermite Y(X) graph through the supplied source points.
 
@@ -143,7 +142,7 @@ def interpolation_spline_strip(
     samples = np.vstack((samples, points[-1]))
     upper = points + (0.0, strip_width_um / 2)
     lower = points - (0.0, strip_width_um / 2)
-    return _strip_component(
+    c = _strip_component(
         samples=samples,
         width=strip_width_um,
         die_side=die_side_um,
@@ -165,9 +164,11 @@ def interpolation_spline_strip(
             ),
         },
     )
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
-@curves.sampled_cell(tags=["simulation", "primitive", "curved_strip", "single_die", "bspline"])
+@gf.cell(tags=["simulation", "primitive", "curved_strip", "single_die", "bspline"])
 def bspline_strip(
     control_points_um: tuple[tuple[float, float], ...] = (
         (-200.0, 0.0),
@@ -183,6 +184,7 @@ def bspline_strip(
     strip_width_um: float = 10.0,
     die_side_um: float = 1000.0,
     samples_per_span: int = 64,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Sample the explicit clamped rational B-spline with de Boor evaluation.
 
@@ -222,7 +224,7 @@ def bspline_strip(
     lower = points - (0.0, strip_width_um / 2)
     start_tangent = degree * w[1] / w[0] * (points[1] - points[0]) / (expanded[degree + 1] - lo)
     end_tangent = degree * w[-2] / w[-1] * (points[-1] - points[-2]) / (hi - expanded[n - 1])
-    return _strip_component(
+    c = _strip_component(
         samples=samples,
         width=strip_width_um,
         die_side=die_side_um,
@@ -258,6 +260,8 @@ def bspline_strip(
             "source_law": "rational clamped B-spline; de Boor homogeneous evaluation",
         },
     )
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
 if __name__ == "__main__":

@@ -19,11 +19,12 @@ from orcapen_sc_pdk.tech import (
 )
 
 
-@curves.sampled_cell(tags=["layout", "cpw"])
+@gf.cell(tags=["layout", "cpw"])
 def cpw_t_junction(
     trunk_length: float = 200.0,
     branch_length: float = 100.0,
     cross_section: CrossSectionSpec = "coplanar_waveguide",
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a CPW T-junction with two trunk ports and one branch port."""
 
@@ -84,13 +85,15 @@ def cpw_t_junction(
 
     component.flatten(merge=False)
 
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
-@curves.sampled_cell(tags=["layout", "cpw"])
+@gf.cell(tags=["layout", "cpw"])
 def n_trace_mtl_section(
     length: float = 500.0,
     cross_section: CrossSectionSpec = "coupled_cpw_w7_s6_d3",
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a cross-section-driven N-trace straight section."""
 
@@ -99,7 +102,9 @@ def n_trace_mtl_section(
 
     xs = gf.get_cross_section(cross_section)
     path = gf.path.straight(length)
-    return gf.path.extrude(path, cross_section=xs)
+    c = gf.path.extrude(path, cross_section=xs)
+    curves.record_sampling(c, curve_sampling)
+    return c
 
 
 def _coupled_mtl_cross_section(
@@ -155,12 +160,13 @@ def _coupled_mtl_cross_section(
     return xs, mtl_xs
 
 
-@curves.sampled_cell(tags=["layout", "cpw", "coupling_segment"])
+@gf.cell(tags=["layout", "cpw", "coupling_segment"])
 def mtl_bend_coupling_section(
     coupled_length: float = 500.0,
     inter_trace_ground_width: float = 3.0,
     bend_radius: float = 100.0,
     cross_section: CrossSectionSpec = "cpw_6_7_6",
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return two coupled CPW traces with four directly attached Euler bends.
 
@@ -181,6 +187,7 @@ def mtl_bend_coupling_section(
     coupled_ref = component << n_trace_mtl_section(
         length=coupled_length,
         cross_section=mtl_xs,
+        curve_sampling=curve_sampling,
     )
     coupled_ref.dmovex(-coupled_length / 2)
 
@@ -188,6 +195,7 @@ def mtl_bend_coupling_section(
         bend_radius=bend_radius,
         inter_trace_ground_width=inter_trace_ground_width,
         cross_section=cross_section,
+        curve_sampling=curve_sampling,
     )
     left_transition.connect("o1", coupled_ref.ports["p_o1"], mirror=True)
 
@@ -195,6 +203,7 @@ def mtl_bend_coupling_section(
         bend_radius=bend_radius,
         inter_trace_ground_width=inter_trace_ground_width,
         cross_section=cross_section,
+        curve_sampling=curve_sampling,
     )
     right_transition.connect("o1", coupled_ref.ports["p_o2"])
 
@@ -222,15 +231,17 @@ def mtl_bend_coupling_section(
         "etch": tuple(int(value) for value in gf.get_layer_tuple(xs[CPW_ETCH_NEG].layer)),
         "ground_mask": tuple(int(value) for value in gf.get_layer_tuple(xs[CPW_GROUND_MASK].layer)),
     }
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
-@curves.sampled_cell(tags=["layout", "cpw", "coupling_segment"])
+@gf.cell(tags=["layout", "cpw", "coupling_segment"])
 def mtl_straight_bend_coupling_section(
     coupled_length: float = 500.0,
     inter_trace_ground_width: float = 3.0,
     bend_radius: float = 100.0,
     cross_section: CrossSectionSpec = "cpw_6_7_6",
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a four-port straight--bend pair around a uniform MTL section.
 
@@ -252,6 +263,7 @@ def mtl_straight_bend_coupling_section(
     coupled_ref = component << n_trace_mtl_section(
         length=coupled_length,
         cross_section=mtl_xs,
+        curve_sampling=curve_sampling,
     )
     coupled_ref.dmovex(-coupled_length / 2)
 
@@ -260,6 +272,7 @@ def mtl_straight_bend_coupling_section(
         bend_radius=bend_radius,
         inter_trace_ground_width=inter_trace_ground_width,
         cross_section=cross_section,
+        curve_sampling=curve_sampling,
     )
     left_transition.connect("o1", coupled_ref.ports["p_o1"], mirror=True)
 
@@ -268,6 +281,7 @@ def mtl_straight_bend_coupling_section(
         bend_radius=bend_radius,
         inter_trace_ground_width=inter_trace_ground_width,
         cross_section=cross_section,
+        curve_sampling=curve_sampling,
     )
     right_transition.connect("o1", coupled_ref.ports["p_o2"])
 
@@ -300,10 +314,11 @@ def mtl_straight_bend_coupling_section(
         "etch": tuple(int(value) for value in gf.get_layer_tuple(xs[CPW_ETCH_NEG].layer)),
         "ground_mask": tuple(int(value) for value in gf.get_layer_tuple(xs[CPW_GROUND_MASK].layer)),
     }
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
-@curves.sampled_cell(tags=["layout", "cpw"])
+@gf.cell(tags=["layout", "cpw"])
 def mtl_straight_bend_transition(
     straight_length: float = 100.0,
     inter_trace_ground_width: float = 3.0,
@@ -311,6 +326,7 @@ def mtl_straight_bend_transition(
     mtl_lead_length: float = 0.0,
     single_trace_lead_length: float = 0.0,
     cross_section: CrossSectionSpec = "cpw_6_7_6",
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a four-port MTL-seam-to-straight-and-bend transition.
 
@@ -339,7 +355,7 @@ def mtl_straight_bend_transition(
         )
 
     xs, mtl_xs = _coupled_mtl_cross_section(cross_section, inter_trace_ground_width)
-    seam = n_trace_mtl_section(length=1.0, cross_section=mtl_xs)
+    seam = n_trace_mtl_section(length=1.0, cross_section=mtl_xs, curve_sampling=curve_sampling)
     component = gf.Component()
 
     p_straight = component << gf.path.extrude(
@@ -347,7 +363,7 @@ def mtl_straight_bend_transition(
         cross_section=xs,
     )
     r_bend = component << gf.path.extrude(
-        curves.euler(radius=bend_radius, angle=90, use_eff=True),
+        curves.euler(radius=bend_radius, angle=90, use_eff=True, sampling=curve_sampling),
         cross_section=xs,
     )
     p_straight.dmovey(seam.ports["p_o1"].center[1])
@@ -367,6 +383,7 @@ def mtl_straight_bend_transition(
         seam_lead = component << n_trace_mtl_section(
             length=mtl_lead_length,
             cross_section=mtl_xs,
+            curve_sampling=curve_sampling,
         )
         seam_lead.connect("p_o2", p_mtl_body)
         p_mtl_port = seam_lead.ports["p_o1"]
@@ -409,16 +426,18 @@ def mtl_straight_bend_transition(
         "o3": int(component.ports["o3"].orientation),
         "o4": int(component.ports["o4"].orientation),
     }
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
-@curves.sampled_cell(tags=["layout", "cpw"])
+@gf.cell(tags=["layout", "cpw"])
 def mtl_bend_bend_transition(
     bend_radius: float = 100.0,
     inter_trace_ground_width: float = 3.0,
     mtl_lead_length: float = 0.0,
     single_trace_lead_length: float = 0.0,
     cross_section: CrossSectionSpec = "cpw_6_7_6",
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a four-port MTL-seam to opposing-bend transition."""
     if not isfinite(bend_radius) or bend_radius <= 0:
@@ -435,15 +454,15 @@ def mtl_bend_bend_transition(
         )
 
     xs, mtl_xs = _coupled_mtl_cross_section(cross_section, inter_trace_ground_width)
-    seam = n_trace_mtl_section(length=1.0, cross_section=mtl_xs)
+    seam = n_trace_mtl_section(length=1.0, cross_section=mtl_xs, curve_sampling=curve_sampling)
     component = gf.Component()
 
     p_bend = component << gf.path.extrude(
-        curves.euler(radius=bend_radius, angle=-90, use_eff=True),
+        curves.euler(radius=bend_radius, angle=-90, use_eff=True, sampling=curve_sampling),
         cross_section=xs,
     )
     r_bend = component << gf.path.extrude(
-        curves.euler(radius=bend_radius, angle=90, use_eff=True),
+        curves.euler(radius=bend_radius, angle=90, use_eff=True, sampling=curve_sampling),
         cross_section=xs,
     )
     p_bend.dmovey(seam.ports["p_o1"].center[1])
@@ -463,6 +482,7 @@ def mtl_bend_bend_transition(
         seam_lead = component << n_trace_mtl_section(
             length=mtl_lead_length,
             cross_section=mtl_xs,
+            curve_sampling=curve_sampling,
         )
         seam_lead.connect("p_o2", p_mtl_body)
         p_mtl_port = seam_lead.ports["p_o1"]
@@ -504,10 +524,11 @@ def mtl_bend_bend_transition(
         "o3": int(component.ports["o3"].orientation),
         "o4": int(component.ports["o4"].orientation),
     }
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
-@curves.sampled_cell(tags=["layout", "cpw"])
+@gf.cell(tags=["layout", "cpw"])
 def launcher(
     pad_width: float = 150.0,
     pad_length: float = 150.0,
@@ -519,6 +540,7 @@ def launcher(
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
     sim_boundary_layer: Layer = LAYER.D0_TOP_SIM_BOUNDARY,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a tapered CPW launcher from a large pad to a CPW neck."""
 
@@ -593,6 +615,7 @@ def launcher(
         layer=sim_boundary_layer,
     )
 
+    curves.record_sampling(component, curve_sampling)
     return component
 
 
