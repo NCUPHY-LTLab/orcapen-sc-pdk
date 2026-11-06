@@ -29,10 +29,11 @@ than skipping checks or weakening assertions or coverage.
 
 ## Shared Policy and Delivery
 
-Use `$v1-lifecycle` for lifecycle and Human research decisions,
-`$scq-collaboration-roles` for relevant ownership and Git routing, and
-`$model-routing` when assigning work. Use `$scq-gdsfactory-layout` for layout,
-component or geometry work. Use `$github-flow` for branches, allowed paths, CI, PRs, review and delivery; squash after CI and `cross-review-gate` pass. These Skills govern their topics; do not duplicate their forms or checklists here.
+Use `$github-flow` for branches, allowed paths, CI, PRs, review and delivery.
+Until this repository's required checks and `cross-review-gate` are verified
+and enforced, retain the current CI and existing authorized merge process; do
+not enable per-PR auto-merge. After that gate is verified and enforced, follow
+the shared GitHub Flow merge process.
 
 ## Code Review Rules
 
