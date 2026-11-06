@@ -9,7 +9,6 @@ import unittest
 import zipfile
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[1]
 SPEC = importlib.util.spec_from_file_location(
     "assemble_docs_release", ROOT / "scripts/assemble_docs_release.py"
@@ -102,8 +101,18 @@ class ReleaseToolingTests(unittest.TestCase):
             history.write_text(
                 json.dumps(
                     [
-                        {"version": "1.0.1", "archive": str(archive_one), "home": "https://example.test/v1.0.1/", "english_home": "https://example.test/v1.0.1/en/"},
-                        {"version": "1.0.0", "archive": str(archive_zero), "home": "https://example.test/v1.0.0/", "english_home": "https://example.test/v1.0.0/en/"},
+                        {
+                            "version": "1.0.1",
+                            "archive": str(archive_one),
+                            "home": "https://example.test/v1.0.1/",
+                            "english_home": "https://example.test/v1.0.1/en/",
+                        },
+                        {
+                            "version": "1.0.0",
+                            "archive": str(archive_zero),
+                            "home": "https://example.test/v1.0.0/",
+                            "english_home": "https://example.test/v1.0.0/en/",
+                        },
                     ]
                 )
             )

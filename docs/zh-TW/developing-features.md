@@ -10,7 +10,7 @@ sidebar: development
 ```bash
 git clone https://github.com/NCUPHY-LTLab/orcapen-sc-pdk.git
 cd orcapen-sc-pdk
-uv sync -p 3.12 --extra dev
+uv sync -p 3.12
 ```
 
 確認：`uv run python --version` 會回報支援的 Python 版本。文件相依套件與預覽方式請見[文件與網站](docs-publishing.md)。

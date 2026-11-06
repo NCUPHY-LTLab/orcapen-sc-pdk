@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
-import yaml
 
+import yaml
 
 ROOT = Path(__file__).parents[1]
 
@@ -91,7 +91,9 @@ class DocsVersioningTests(unittest.TestCase):
 
     def test_pages_workflow_keeps_strict_notebook_check_and_render(self):
         workflow = (ROOT / ".github/workflows/pages.yml").read_text()
-        self.assertIn("uv sync -p 3.12 --locked --group docs --extra dev", workflow)
+        self.assertIn(
+            "uv sync -p 3.12 --locked --no-default-groups --group dev --group docs", workflow
+        )
         self.assertIn("scripts/sync_qmd_notebooks.py notebooks/src notebooks", workflow)
         self.assertIn("uv run --group docs quarto render docs --no-execute", workflow)
         self.assertNotIn("--check", workflow)

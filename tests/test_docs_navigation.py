@@ -25,7 +25,8 @@ class DocsNavigationTests(unittest.TestCase):
                 '<main><a href="/orcapen-sc-pdk/simulation/cases.html#cases">Cases</a></main>'
             )
             (root / "simulation/cases.html").write_text(
-                '<main><a href="../en/guide.html">English guide</a><a href="data.tar.gz" download>Data</a></main>'
+                '<main><a href="../en/guide.html">English guide</a>'
+                '<a href="data.tar.gz" download>Data</a></main>'
             )
             (root / "en/index.html").write_text("<main>English</main>")
             (root / "en/guide.html").write_text("<main>Guide</main>")

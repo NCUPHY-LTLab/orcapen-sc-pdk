@@ -8,7 +8,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-
 ROOT = Path(__file__).parents[1]
 SPEC = importlib.util.spec_from_file_location(
     "fetch_previous_docs_release", ROOT / "scripts/fetch_previous_docs_release.py"

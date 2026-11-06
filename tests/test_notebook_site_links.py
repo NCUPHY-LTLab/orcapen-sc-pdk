@@ -5,7 +5,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[1]
 SPEC = importlib.util.spec_from_file_location(
     "copy_surface_band_sources", ROOT / "scripts/copy_surface_band_sources.py"
