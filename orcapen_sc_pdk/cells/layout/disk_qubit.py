@@ -251,6 +251,13 @@ def _disk_and_junction(
 
     disk_terminal = tuple(junction_ref.ports["o_arm1"].center)
     ground_terminal = tuple(junction_ref.ports["o_arm2"].center)
+    # Each lead ends in a round cap of half its width on its contact, so the
+    # caps would join the disk to ground once the width reaches the spacing.
+    contact_spacing = math.dist(disk_terminal, ground_terminal)
+    if lead_width >= contact_spacing:
+        raise ValueError(
+            f"junction_lead_width must be below the {contact_spacing:.3f} µm contact spacing"
+        )
     disk_edge_y = abs(disk_terminal[1]) + lead_width / 2
     disk_anchor_x = math.sqrt(disk_radius**2 - disk_edge_y**2) - lead_width / 2
     disk_lead = _rounded_lead(
@@ -712,7 +719,8 @@ def disk_flip_chip_qubit(
     short or an open, so they raise ``ValueError``. Claws stay inside the
     ground clearance and span at most 60°; with claws, the junction and open
     leads sit on diagonals (45° + k·90°); a grounded claw's mask end plus one
-    CPW width fits in the site; and every bump, measured by half the diagonal
+    CPW width fits in the site; the junction leads are narrower than
+    the spacing of the junction contacts; and every bump, measured by half the diagonal
     of its larger square, clears the ground clearance and the masks of the
     readout, drive and claw lines.
 

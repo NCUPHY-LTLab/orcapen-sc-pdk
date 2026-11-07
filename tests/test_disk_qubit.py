@@ -222,6 +222,8 @@ def test_junction_lumped_port_sits_on_the_simulation_sheet(grounded) -> None:
         ({"bump_lattice_count": 16}, "bump_06 overlaps the RO clearance"),
         ({"indium_bump_size": 70.0}, "bump_01 overlaps the TC_E clearance"),
         ({"indium_bump_size": 120.0}, "bump ring must lie outside the ground clearance"),
+        # The two lead caps meet and join the disk to ground around the junction.
+        ({"junction_lead_width": 6.0}, "junction_lead_width must be below the 5.657 µm"),
         # The round tip leaves no straight line before the handoff.
         ({"ro_tip_radius": 582.0}, "half the RO width inside the handoff square"),
     ],

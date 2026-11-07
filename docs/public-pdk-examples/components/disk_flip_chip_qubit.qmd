@@ -68,6 +68,8 @@ open raise `ValueError`:
   `under_bump_size`). Moving `ro_angle` or `xy_angle`, or changing
   `bump_lattice_count` or `bump_skip_period`, must keep the lines on empty
   bump sites.
+- `junction_lead_width` stays below the 5.657 µm spacing of the two junction
+  contacts, so the round lead caps do not meet.
 - `ro_tip_radius` and `xy_tip_radius` leave at least half the CPW width of
   line before the handoff square.
 

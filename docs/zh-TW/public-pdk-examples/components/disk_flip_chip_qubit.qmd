@@ -52,6 +52,7 @@ disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 - 有耦合爪時，`junction_angle` 和 `junction_open_lead_angles` 要落在對角線上（45° + k·90°），也就是耦合爪之間。
 - 接地的耦合爪，其遮罩末端（`handoff_half_extent` 加 `tc_cpw_gap`，或加 `tc_outer_extension_end_clearance`）再加一個 CPW 線寬，要在 `ground_outer_half_extent` 之內。
 - 每個凸塊以較大方塊（`indium_bump_size` 或 `under_bump_size`）的半對角線計算，要避開接地淨空區，以及讀出線、驅動線和耦合爪線的遮罩。調整 `ro_angle`、`xy_angle`、`bump_lattice_count` 或 `bump_skip_period` 時，訊號線要維持在空著的凸塊位置上。
+- `junction_lead_width` 要小於兩個接面接點的間距 5.657 µm，兩條引線的圓頭才不會相碰。
 - `ro_tip_radius` 和 `xy_tip_radius` 到交接方框之間，至少要留半個 CPW 線寬的線段。
 
 以上規則沒涵蓋的條件由呼叫端維持，例如讀出線和驅動線彼此不能相碰。
