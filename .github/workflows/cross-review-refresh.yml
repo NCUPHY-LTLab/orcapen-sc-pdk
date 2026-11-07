@@ -1,0 +1,16 @@
+# Install beside cross-review-gate.yml. GitHub may run this file from a PR
+# merge ref. It has no privileges and supplies no evidence to the gate.
+name: Cross-review refresh signal
+
+on:
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions: {}
+
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - run: echo 'Request a fresh evaluation of GitHub review state.'

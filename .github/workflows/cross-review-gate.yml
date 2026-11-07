@@ -1,0 +1,183 @@
+# Required status `cross-review-gate`: the PR's current head commit has been
+# reviewed and nothing raised is still open. Every pass is tied to the full
+# head SHA read when the gate runs; a new push makes every earlier pass stale.
+#
+#   normal              -> Codex reviewed the head: the connector's Code Review
+#                          summary comment carries codex-review-state:v1 with
+#                          code_review.commit_sha == head, status "completed" and
+#                          has_unresolved_findings == false (or the latest formal
+#                          connector review on the head is COMMENTED or APPROVED; a
+#                          CHANGES_REQUESTED one fails, a DISMISSED one does not
+#                          count), and no Codex thread on any page is unresolved;
+#                          with label claude-review (not on Claude-authored PRs)
+#                          ili-claude[bot] also approved the head
+#   label codex-fallback -> Codex's GitHub review is unavailable: a Codex-authored
+#                          PR passes on ili-claude[bot]'s approval of the head;
+#                          any other PR on ili-codex[bot]'s (ili-review-poller)
+#
+# "Codex reviewed" is this harness's own condition. It is not a GitHub
+# APPROVED review and does not replace required approvals or CODEOWNERS; the
+# status text reports the two separately. A 👍, a Security Review state, a
+# running or unparsable state, or a state for another SHA never passes.
+name: Cross-review gate
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+  issue_comment:
+    types: [created, edited]
+  workflow_run:
+    workflows: [Cross-review refresh signal]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  resolve-review-signal:
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      number: ${{ steps.pr.outputs.number }}
+    steps:
+      - name: Resolve open PR from GitHub run metadata
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          R: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # The merge-ref workflow is only a wake-up signal. Never use its
+          # output, artifacts, checkout, or conclusion as review evidence.
+          run=$(jq -ce '.workflow_run | select(.event == "pull_request_review"
+            and (.path | split("@")[0]) == ".github/workflows/cross-review-refresh.yml")' "$GITHUB_EVENT_PATH")
+          repo=$(jq -er '.repository.id | numbers' "$GITHUB_EVENT_PATH")
+          associated=$(jq -ce '.pull_requests // [] | arrays' <<<"$run")
+          manual_refresh() {
+            echo 'Cannot identify one open PR from this review signal; refresh the intended PR in its Conversation tab.' >&2
+            exit 1
+          }
+          if [[ $(jq 'length' <<<"$associated") != 0 ]]; then
+            num=$(jq -er --argjson repo "$repo" 'select(length == 1) | .[0]
+              | select(.base.repo.id == $repo) | .number | numbers | select(. > 0 and floor == .)' <<<"$associated") || manual_refresh
+            pr=$(gh api "repos/$R/pulls/$num")
+            id=$(jq -er '.[0].id | numbers' <<<"$associated") || manual_refresh
+            jq -e --argjson repo "$repo" --argjson id "$id" '.base.repo.id == $repo and .id == $id' <<<"$pr" >/dev/null || manual_refresh
+            if [[ $(jq -er .state <<<"$pr") == closed ]]; then
+              echo 'The PR associated with this review signal is closed.'
+              exit 0
+            fi
+            [[ $(jq -er .state <<<"$pr") == open ]] || manual_refresh
+          else
+            # A review runs on the test merge ref. For fork runs the association
+            # may be absent and head_repository is not proof of the source fork.
+            # Only an exact, unique current test merge SHA can identify the PR.
+            sha=$(jq -er '.head_sha | strings | select(test("^[0-9a-f]{40}$"))' <<<"$run") || manual_refresh
+            prs=$(gh api --paginate --method GET "repos/$R/pulls" -f state=open \
+              | jq -cs --argjson repo "$repo" --arg sha "$sha" \
+                '[.[][] | select(.state == "open" and .base.repo.id == $repo and .merge_commit_sha == $sha) | .number]')
+            num=$(jq -er 'select(length == 1) | .[0] | numbers | select(. > 0 and floor == .)' <<<"$prs") || manual_refresh
+          fi
+          printf 'number=%s\n' "$num" >> "$GITHUB_OUTPUT"
+
+  gate:
+    needs: resolve-review-signal
+    if: >-
+      always() && !cancelled() && (github.event_name == 'pull_request_target' ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request) ||
+      (needs.resolve-review-signal.result == 'success' && needs.resolve-review-signal.outputs.number != ''))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+      statuses: write
+      issues: write
+    concurrency:
+      group: cross-review-gate-${{ github.event.pull_request.number || github.event.issue.number || needs.resolve-review-signal.outputs.number }}
+      cancel-in-progress: false  # serialize writes for a PR; each evaluation reads current state
+    env:
+      GH_TOKEN: ${{ github.token }}
+      R: ${{ github.repository }}
+      NUM: ${{ github.event.pull_request.number || github.event.issue.number || needs.resolve-review-signal.outputs.number }}
+      CODEX: ${{ vars.ILI_CODEX_BOT || 'ili-codex[bot]' }}
+      CLAUDE: ${{ vars.ILI_CLAUDE_BOT || 'ili-claude[bot]' }}
+      CONNECTOR: ${{ vars.CODEX_REVIEW_BOT || 'chatgpt-codex-connector[bot]' }}
+    steps:
+      - name: Evaluate
+        run: |
+          set -euo pipefail
+          pr=$(gh api "repos/$R/pulls/$NUM")
+          if [[ $(jq -er .state <<<"$pr") != open ]]; then exit 0; fi
+          head=$(jq -r .head.sha <<<"$pr"); author=$(jq -r .user.login <<<"$pr")
+          status_url="$GITHUB_SERVER_URL/$R/actions/runs/$GITHUB_RUN_ID"
+          # Once refreshing this head, an API/read failure must not preserve
+          # an earlier success as the result of this evaluation.
+          gh api "repos/$R/statuses/$head" -f state=pending -f context=cross-review-gate \
+            -f description='Refreshing review evidence' -f target_url="$status_url" >/dev/null
+          reviews=$(gh api --paginate "repos/$R/pulls/$NUM/reviews" | jq -s 'add // []')
+          reactions=$(gh api --paginate "repos/$R/issues/$NUM/reactions" | jq -s 'add // []')
+          # Every page of review threads: an open finding after the 100th still counts.
+          threads=$(gh api graphql --paginate -F owner="${R%/*}" -F name="${R#*/}" -F num="$NUM" -f query='
+            query($owner:String!,$name:String!,$num:Int!,$endCursor:String){repository(owner:$owner,name:$name){pullRequest(number:$num){
+              reviewThreads(first:100,after:$endCursor){pageInfo{hasNextPage endCursor}
+                nodes{isResolved comments(first:1){nodes{author{login}}}}}}}}' \
+            | jq -s '[.[].data.repository.pullRequest.reviewThreads.nodes[]]')
+          labels=$(jq -c '[.labels[].name]' <<<"$pr")
+          # The connector edits one summary comment in place, so read all of its comments.
+          comments=$(gh api --paginate "repos/$R/issues/$NUM/comments" \
+            | jq -s --arg c "$CONNECTOR" '[add // [] | .[] | select(.user.login == $c) | {user: {login: .user.login}, body}]')
+          result=$(jq -rn --arg author "$author" --arg head "$head" \
+            --arg codex "$CODEX" --arg claude "$CLAUDE" --arg connector "$CONNECTOR" --argjson labels "$labels" \
+            --argjson reviews "$reviews" --argjson reactions "$reactions" --argjson threads "$threads" \
+            --argjson comments "$comments" '
+            def login: sub("\\[bot\\]$"; "");
+            def last_state($who): [$reviews[] | select(.user.login == $who and .commit_id == $head
+                and (.state | IN("APPROVED","CHANGES_REQUESTED","DISMISSED")))] | sort_by(.submitted_at) | last | .state // "NONE";
+            def short: $head[:7];
+            # Code Review states from the connector summary comment, for this exact head only.
+            def receipts: [$comments[] | select(.user.login == $connector
+                  and (.body | contains("<!-- codex-pull-request-review-summary -->")))
+                | (.body | try (capture("codex-review-state:v1 (?<j>\\{.*\\}) -->").j | fromjson) catch null)
+                | .code_review? | select(type == "object" and .commit_sha == $head)];
+            (receipts | any(.status == "completed" and .has_unresolved_findings == false)) as $clean
+            | (receipts | any(.status == "completed" and .has_unresolved_findings == true)) as $dirty
+            | (receipts | any(.status != "completed")) as $running
+            # A formal connector review counts by its latest state on the head:
+            # COMMENTED or APPROVED is reviewed, CHANGES_REQUESTED blocks, DISMISSED does not count.
+            | ([$reviews[] | select(.user.login == $connector and .commit_id == $head)]
+                | sort_by(.submitted_at) | last | .state // "NONE") as $formal_state
+            | ($formal_state | IN("COMMENTED","APPROVED")) as $formal
+            | ($clean or $formal) as $codex_done
+            | ([$reviews[] | select(.commit_id == $head and .state == "APPROVED")] | length > 0) as $gh_ok
+            | "GitHub approve: \(if $gh_ok then "yes" else "no" end)" as $gh
+            | (($labels | index("codex-fallback")) != null) as $fallback
+            | (($labels | index("claude-review")) != null and $author != $claude) as $want_claude
+            | ([$threads[] | select((.isResolved | not)
+                and (.comments.nodes[0].author.login // "" | login) == ($connector | login))] | length) as $open
+            | ([$reactions[] | select(.user.login == $connector and .content == "+1")] | length > 0) as $thumbs
+            | (if $want_claude then last_state($claude) else "APPROVED" end) as $claude_state
+            # Known open Codex findings block on every path: a fallback replaces an
+            # unavailable reviewer, it does not clear what was already raised.
+            | if $open > 0 then "failure|\($open) Codex finding(s) unresolved; \($gh)"
+              elif $formal_state == "CHANGES_REQUESTED" then "failure|Codex requested changes on \(short); \($gh)"
+              elif $dirty then "failure|Codex found unresolved issues on \(short); \($gh)"
+              elif $fallback then
+                (if $author == $codex then $claude else $codex end) as $sub
+                | last_state($sub) as $s
+                | if $s == "CHANGES_REQUESTED" then "failure|fallback: \($sub) requested changes on \(short); \($gh)"
+                  elif $s != "APPROVED" then "pending|fallback: waiting for \($sub) to review \(short); \($gh)"
+                  elif $sub != $claude and $claude_state != "APPROVED" then "pending|waiting for \($claude) to review \(short); \($gh)"
+                  else "success|fallback: \($sub) approved \(short); \($gh)" end
+              elif $claude_state == "CHANGES_REQUESTED" then "failure|\($claude) requested changes on \(short); \($gh)"
+              elif ($codex_done | not) and $running then "pending|Codex review of \(short) still running; \($gh)"
+              elif ($codex_done | not) and $thumbs then "pending|Codex 👍 is not tied to \(short); Human may merge by hand; \($gh)"
+              elif $codex_done | not then "pending|Codex review of \(short) not confirmed yet; \($gh)"
+              elif $claude_state != "APPROVED" then "pending|Codex reviewed \(short): yes; waiting for \($claude); \($gh)"
+              else "success|Codex reviewed \(short): yes, no open findings; \($gh)" end')
+          state=${result%%|*}; desc=${result#*|}
+          gh api "repos/$R/statuses/$head" -f state="$state" -f context=cross-review-gate \
+            -f description="$desc" -f target_url="$status_url" >/dev/null
+          gh api -X DELETE "repos/$R/issues/$NUM/labels/review-done" >/dev/null 2>&1 || true
+          echo "$state: $desc"
