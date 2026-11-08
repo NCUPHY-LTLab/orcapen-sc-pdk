@@ -15,7 +15,7 @@ uv sync -p 3.12
 
 這會安裝 PDK 與開發工具 pytest、Ruff。接著設定你使用的檢視工具。GDSFactory+ 是選用工具，且需要付費訂閱。
 
-**不使用 GDSFactory+**：安裝 [KLayout](https://www.klayout.de/) 及其 klive 外掛，預覽會在 KLayout 開啟。
+**不使用 GDSFactory+**：安裝 [KLayout](https://www.klayout.de/)。在 KLayout 選擇 **Tools → Manage Packages**，搜尋並安裝 **klive**。保持 KLayout 開啟，執行 `component.show()` 即可直接顯示或更新版圖。安裝細節請見 [GDSFactory 的 KLayout 整合指南](https://gdsfactory.github.io/gdsfactory/notebooks/_2_klayout/)。若要套用 OrcaPen 圖層名稱和顏色，請參閱[在 KLayout 檢視圖層](start/layers.qmd)。
 
 **使用 GDSFactory+**：用裝有 GDSFactory+ 擴充套件（2.3 版或更新）的 VS Code 開啟工作目錄，在 **GF+ Settings → Status** 選擇 **Setup Automatically**。擴充套件會把它的 SDK 與 worker 所需套件（包括 SPICE 用的 InSpice 與 vacask）安裝到 `.venv`。GDSFactory+ 需要 Python 3.12。
 
@@ -26,10 +26,31 @@ uv sync -p 3.12
 
 ## 預覽元件
 
-每個 cell 模組的結尾都有預覽區塊。直接執行該檔案即可，例如在 VS Code 按 **Run Python File**：
+### 從 VS Code 執行 cell 檔案並在 KLayout 檢視
+
+先在 KLayout 安裝 **klive**，再於 OrcaPen 專案資料夾執行一次下列指令，安裝 OrcaPen 的 KLayout 製程設定。
 
 ```bash
-uv run python orcapen_sc_pdk/cells/layout/resonator.py
+uv run python -m orcapen_sc_pdk.install_tech
+```
+
+安裝後重新啟動 KLayout，並保持開啟。在 VS Code 開啟 OrcaPen 的專案資料夾，並安裝 [Microsoft Python 擴充套件](https://marketplace.visualstudio.com/items?itemName=ms-python.python)。在命令選擇區執行 **Python: Select Interpreter**，選擇由 `uv sync` 建立的專案 `.venv`。
+
+> **預覽前先設定 KLayout 畫布。** OrcaPen 教學統一使用接近黑色的畫布（`#1E1E1E`），與圖層配色採用的深色背景一致。macOS 請開啟 **klayout → Preferences…**，其他平台請開啟 **File → Setup**。前往 **Display → Background**，將 **Background color** 設為 `#1E1E1E`（RGB 30、30、30），再按 **Apply**。這個選項控制版圖畫布。圖層顏色與分組由 OrcaPen 製程設定提供。
+
+1. 開啟 `orcapen_sc_pdk/cells/layout/airbridge.py`。
+2. 點擊編輯器右上角的 **執行 Python 檔案**（Run Python File，▶）。Python 擴充套件會執行該檔案及其中的 `if __name__ == "__main__":` 預覽區塊。
+
+   ![VS Code 中 airbridge.py 編輯器右上角標示出的執行 Python 檔案按鈕](../assets/vscode-run-python-airbridge.png)
+
+3. 切換到 KLayout。KLive 會開啟或更新 airbridge 版圖，並套用 `orcapen_sc_pdk` 製程設定。在 Layers 面板展開 **Airbridge**，即可看到繪製層與通孔層。若即時連線無法使用，可在 KLayout 選擇 OrcaPen 製程設定後，手動開啟 `build/gds/airbridge.gds`。
+
+   ![桌面版 KLayout 在教學使用的近黑色畫布上顯示 OrcaPen airbridge 版圖，右側展開 Airbridge 圖層群組](../assets/klayout-klive-airbridge.png)
+
+如果一個檔案定義了多個 cell，直接執行時會預覽 `__main__` 區塊選定的 cell。也可以在終端機直接執行檔案：
+
+```bash
+uv run python orcapen_sc_pdk/cells/layout/airbridge.py
 ```
 
 也可以用名稱預覽任何已註冊的 cell：
