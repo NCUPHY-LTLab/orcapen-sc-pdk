@@ -1070,7 +1070,7 @@ route_single = route_single_cpw = partial(
 )
 route_bundle = route_bundle_cpw = partial(
     gf.routing.route_bundle,
-    cross_section=cpw,
+    cross_section="coplanar_waveguide",
     bend="bend_circular",
 )
 route_single_sbend = route_single_sbend_cpw = partial(
