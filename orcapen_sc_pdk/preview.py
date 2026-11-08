@@ -17,6 +17,7 @@ from typing import Literal
 
 from gdsfactory.typings import ComponentSpec
 
+from orcapen_sc_pdk.install_tech import TECH_NAME
 from orcapen_sc_pdk.pdk import PDK
 
 Viewer = Literal["auto", "gdsfactoryplus", "klayout"]
@@ -46,7 +47,7 @@ def show(component: ComponentSpec, viewer: Viewer = "auto") -> Path:
     else:
         # kfactory only logs a warning when nothing listens on the klive port.
         print("Sent to KLayout through klive; open the GDS file if no window appears.")
-        built.show()
+        built.show(technology=TECH_NAME)
     return gds_path
 
 
