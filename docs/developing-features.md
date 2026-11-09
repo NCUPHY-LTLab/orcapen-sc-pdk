@@ -321,6 +321,8 @@ threshold yet, so it is reported and not asserted. Name every hole that is
 meant to be there. The check takes about 0.02 s on the default disk qubit and
 found both defects above.
 
+This sample is the zero-hole case: the cell has no intended holes.
+
 ```python
 component = together(315)
 result = report(component)
@@ -328,6 +330,31 @@ intended_holes = 0  # name each cut-out you drew on purpose, per layer
 assert result["holes"] == intended_holes
 assert result["min_edge_dbu"] >= 2
 print("min interior angle (reported only):", result["min_angle_deg"])
+```
+
+When a cell has intended holes, the test checks where they are and their
+shape, not only their count: a cut-out moved sideways keeps the same count.
+Compare the merged holes with the cut-out you meant.
+
+```python
+def holes_of(component, layer=LAYER):
+    index = component.kcl.layout.layer(*layer)
+    region = kdb.Region(component.begin_shapes_rec(index)).merged()
+    return kdb.Region(
+        [kdb.Polygon(list(p.each_point_hole(i))) for p in region.each() for i in range(p.holes())]
+    )
+
+
+def plate_with_cutout(x0):  # a 10 um plate with one 1 um square cut-out at x0..x0+1, y 2..3
+    c = gf.Component()
+    for x_min, y_min, x_max, y_max in [(0, 0, 10, 2), (0, 3, 10, 10), (0, 2, x0, 3), (x0 + 1, 2, 10, 3)]:
+        c.add_polygon([(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_min, y_max)], layer=LAYER)
+    return c
+
+
+expected = kdb.Region(kdb.Box(2000, 2000, 3000, 3000))  # the cut-out you meant, in DBU
+assert (holes_of(plate_with_cutout(2)) ^ expected).is_empty()  # right place, right shape
+print("cut-out moved right, differing polygons:", (holes_of(plate_with_cutout(6)) ^ expected).count())
 ```
 
 ### Helpers and structure
@@ -390,7 +417,7 @@ together with the first sourced rule.
 This repository's `develop` branch holds no candidate cells. It is what
 consumers pin and what GDSFactory+ lists, so a candidate there becomes
 something others can depend on. A candidate lives on its Issue branch. The
-PDK maintainers may merge it into a personal branch to preview it. Personal branches
+repository owner may merge it into a personal branch to preview it. Personal branches
 here are public, so a candidate that carries a private design starts in the
 private layout repository instead.
 

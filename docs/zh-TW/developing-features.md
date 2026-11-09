@@ -250,6 +250,8 @@ print("1024 points:", report(lead_on_disk(1024, 800)))  # holes remain
 
 **R8. 每次建構後執行建構檢查。** 「看起來沒問題」不是證據。請在測試中以預設值與支援範圍的各個角落建構 cell，然後斷言沒有非預期的孔洞、沒有短於 2 DBU 的邊，並印出最小內角。內角目前沒有門檻，所以只回報、不斷言。每個刻意存在的孔洞都要明確列出。這項檢查在預設的 disk qubit 上約需 0.02 秒，並找出了上述兩個缺陷。
 
+這個範例是零孔洞的情況：cell 沒有刻意存在的孔洞。
+
 ```python
 component = together(315)
 result = report(component)
@@ -257,6 +259,29 @@ intended_holes = 0  # name each cut-out you drew on purpose, per layer
 assert result["holes"] == intended_holes
 assert result["min_edge_dbu"] >= 2
 print("min interior angle (reported only):", result["min_angle_deg"])
+```
+
+當 cell 有刻意存在的孔洞時，測試要檢查孔洞的位置與形狀，而不只是數量：橫向移動的切口數量不變。請把合併後的孔洞與你預期的切口相比。
+
+```python
+def holes_of(component, layer=LAYER):
+    index = component.kcl.layout.layer(*layer)
+    region = kdb.Region(component.begin_shapes_rec(index)).merged()
+    return kdb.Region(
+        [kdb.Polygon(list(p.each_point_hole(i))) for p in region.each() for i in range(p.holes())]
+    )
+
+
+def plate_with_cutout(x0):  # a 10 um plate with one 1 um square cut-out at x0..x0+1, y 2..3
+    c = gf.Component()
+    for x_min, y_min, x_max, y_max in [(0, 0, 10, 2), (0, 3, 10, 10), (0, 2, x0, 3), (x0 + 1, 2, 10, 3)]:
+        c.add_polygon([(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_min, y_max)], layer=LAYER)
+    return c
+
+
+expected = kdb.Region(kdb.Box(2000, 2000, 3000, 3000))  # the cut-out you meant, in DBU
+assert (holes_of(plate_with_cutout(2)) ^ expected).is_empty()  # right place, right shape
+print("cut-out moved right, differing polygons:", (holes_of(plate_with_cutout(6)) ^ expected).count())
 ```
 
 ### Helper 與結構
@@ -300,7 +325,7 @@ PDK 的使用端不必遵循製程規則。
 
 ### 候選 cell
 
-本儲存庫的 `develop` 分支不放候選 cell。使用端會固定使用這個分支，GDSFactory+ 也會列出其中的 cell，所以放在這裡的候選 cell 會變成別人可以依賴的東西。候選 cell 放在它的 Issue 分支上。PDK 維護者可以把它合併到個人分支來預覽。這裡的個人分支是公開的，所以含有私人設計的候選 cell 要改從私人佈局儲存庫開始。
+本儲存庫的 `develop` 分支不放候選 cell。使用端會固定使用這個分支，GDSFactory+ 也會列出其中的 cell，所以放在這裡的候選 cell 會變成別人可以依賴的東西。候選 cell 放在它的 Issue 分支上。由 repository 擁有者決定是否把它合併到個人分支來預覽。這裡的個人分支是公開的，所以含有私人設計的候選 cell 要改從私人佈局儲存庫開始。
 
 ## 提交變更
 
