@@ -261,7 +261,7 @@ print("min interior angle (reported only):", result["min_angle_deg"])
 
 ### Helper 與結構
 
-這些規則由 PDK 維護者決定。它們讓 cell 檔案容易審查，也讓一次修正能涵蓋所有共用該部件的 cell。
+這些規則由 PDK 維護者決定。不論 cell 檔案多長，它們讓結構容易審查，也讓一次修正能涵蓋所有共用該部件的 cell。
 
 **H1. 先重用，再自己寫。** 請依下列順序使用現有的內容繪製：
 

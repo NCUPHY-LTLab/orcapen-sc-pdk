@@ -332,8 +332,8 @@ print("min interior angle (reported only):", result["min_angle_deg"])
 
 ### Helpers and structure
 
-PDK maintainers decided these rules. They keep cell files short to review and
-let one fix reach every cell that shares a part.
+PDK maintainers decided these rules. They keep a cell's structure easy to
+review, whatever its length, and let one fix reach every cell that shares a part.
 
 **H1. Reuse before you write.** Draw with what exists, in this order:
 
