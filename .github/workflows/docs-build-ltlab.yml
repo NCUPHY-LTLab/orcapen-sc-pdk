@@ -1,0 +1,56 @@
+name: OrcaPen documentation build on LTLab
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: >-
+      github.repository == 'NCUPHY-LTLab/orcapen-sc-pdk'
+      && github.base_ref == 'ci/41-ltlab-docs-pilot-base'
+      && !github.event.pull_request.draft
+      && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.id == github.event.repository.id
+      && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
+      && github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on:
+      group: OrcaPen Docs Pilot
+      labels: ltlab-orcapen-docs
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+      - name: Install Quarto from its verified Linux tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          install_dir="$(mktemp -d "$RUNNER_TEMP/orcapen-quarto.XXXXXX")"
+          archive="$install_dir/quarto.tar.gz"
+          curl --fail --silent --show-error --location --retry 2 \
+            https://github.com/quarto-dev/quarto-cli/releases/download/v1.10.19/quarto-1.10.19-linux-amd64.tar.gz \
+            --output "$archive"
+          printf '%s  %s\n' 8e38c2b2df6a6dbd369ea16e15acded6894545258d13a02f777f81ad18fd7973 "$archive" | sha256sum --check
+          tar -xzf "$archive" --strip-components=1 -C "$install_dir"
+          "$install_dir/bin/quarto" --version
+          printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
+      - run: uv sync -p 3.12 --locked --no-default-groups --group dev --group docs
+      - run: uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
+      - run: uv run --group docs python scripts/build_overview_snippets.py
+      - run: uv run --group docs quarto render docs --no-execute
+      - run: uv run --group docs python scripts/check_docs_navigation.py docs/_site
+      - run: uv run --group docs python scripts/fetch_previous_docs_release.py docs/releases-history.json "${RUNNER_TEMP}/docs-history-assets" --current-version "$(grep -m1 '^version = ' pyproject.toml | cut -d '"' -f2)" --output-manifest "${RUNNER_TEMP}/docs-history-manifest.json"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - run: uv run --group docs python scripts/assemble_docs_release.py docs/_site docs/_release-site --version "$(grep -m1 '^version = ' pyproject.toml | cut -d '"' -f2)" --source-sha "${GITHUB_SHA}" --pages-run "${GITHUB_RUN_ID}" --history-manifest "${RUNNER_TEMP}/docs-history-manifest.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: docs-site
+          path: docs/_release-site
+          if-no-files-found: error
