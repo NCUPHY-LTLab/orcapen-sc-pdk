@@ -16,7 +16,14 @@ permissions:
 
 jobs:
   build:
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    if: >-
+      github.event_name != 'pull_request'
+      || (!github.event.pull_request.draft
+      && !(github.base_ref == 'ci/41-ltlab-docs-pilot-base'
+      && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.id == github.event.repository.id
+      && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
+      && github.event.pull_request.user.login != 'dependabot[bot]'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,6 +47,18 @@ jobs:
           name: docs-site
           path: docs/_release-site
           if-no-files-found: error
+
+  build-ltlab:
+    if: >-
+      github.base_ref == 'ci/41-ltlab-docs-pilot-base'
+      && !github.event.pull_request.draft
+      && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.id == github.event.repository.id
+      && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
+      && github.event.pull_request.user.login != 'dependabot[bot]'
+    uses: NCUPHY-LTLab/orcapen-sc-pdk/.github/workflows/docs-build-ltlab.yml@fe2ba7fb5a31787f1ebec4dfa7f03311f48a2cb5
+    permissions:
+      contents: read
 
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
