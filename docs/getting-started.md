@@ -7,6 +7,10 @@ Install the public source preview, activate its GDSFactory process design kit
 (PDK), and build a registered resonator. Layout creation does not require a
 solver.
 
+With a GDSFactory+ license, you can preview layouts from a local or remote
+OrcaPen project. Without a license, use KLayout with a local project.
+See [Preview Cells](start/preview-cells.qmd) for setup.
+
 ## Install
 
 Use Python 3.12 or 3.13 with uv. For a new Python 3.12 project:
@@ -42,6 +46,8 @@ appears. Physical dimensions are in micrometres.
 
 ## Continue
 
-Explore [common cells](start/common-cells.qmd), [layers and stack](start/layers.qmd),
-[materials and interfaces](start/materials.qmd), or [simulation guides](notebooks.qmd).
-Each simulation guide identifies its own SCGSim version and solver requirements.
+Choose a layout in [Common Cells](start/common-cells.qmd), then set up
+GDSFactory+ or local KLayout with [Preview Cells](start/preview-cells.qmd).
+Continue to [Layers & Stack](start/layers.qmd) and
+[Materials & Interfaces](start/materials.qmd). Each [simulation guide](notebooks.qmd)
+identifies its SCGSim version and solver requirements.
