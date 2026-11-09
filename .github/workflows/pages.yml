@@ -56,7 +56,7 @@ jobs:
       && github.event.pull_request.head.repo.id == github.event.repository.id
       && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
       && github.event.pull_request.user.login != 'dependabot[bot]'
-    uses: NCUPHY-LTLab/orcapen-sc-pdk/.github/workflows/docs-build-ltlab.yml@fe2ba7fb5a31787f1ebec4dfa7f03311f48a2cb5
+    uses: NCUPHY-LTLab/orcapen-sc-pdk/.github/workflows/docs-build-ltlab.yml@6bafaa0828cfebac92e399161e54e470a31bf7f3
     permissions:
       contents: read
 
