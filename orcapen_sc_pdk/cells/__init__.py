@@ -12,6 +12,7 @@ from orcapen_sc_pdk.cells.layout.cpw import (
     n_trace_mtl_section,
 )
 from orcapen_sc_pdk.cells.layout.dicing import dicing_edge
+from orcapen_sc_pdk.cells.layout.disk_qubit import disk_flip_chip_qubit
 from orcapen_sc_pdk.cells.layout.indium import indium_bump, indium_ground
 from orcapen_sc_pdk.cells.layout.junction import manhattan_style_junction
 from orcapen_sc_pdk.cells.layout.martinis import martinis2022_differential_ribbon_capacitor
@@ -69,6 +70,7 @@ __all__ = [
     "interdigital_capacitor",
     "capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators",
     "kosen2024_flip_chip_xmon_qubit",
+    "disk_flip_chip_qubit",
     "launcher",
     "manhattan_style_junction",
     "martinis2022_differential_ribbon_capacitor",

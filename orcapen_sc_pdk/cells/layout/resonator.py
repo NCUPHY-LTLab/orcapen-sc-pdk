@@ -27,7 +27,7 @@ def _component_length(component: gf.Component, name: str) -> float:
     return float(length)
 
 
-@curves.sampled_cell(tags=["layout", "resonator", "hanger", "meander"])
+@gf.cell(tags=["layout", "resonator", "hanger", "meander"])
 def resonator(
     length: float = 4000.0,
     meanders: int = 6,
@@ -58,6 +58,7 @@ def resonator(
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Create a hanger + meander + optional tail CPW resonator.
 
@@ -126,6 +127,7 @@ def resonator(
     }
     if bend_npoints is not None:
         tail_bend_kwargs["npoints"] = bend_npoints
+    tail_bend_kwargs |= curves.sampling_settings(tail_bend_spec, curve_sampling)
     tail_bend = gf.get_component(tail_bend_spec, **tail_bend_kwargs) if tail_bend_angle else None
 
     hanger = resonator_hanger(
@@ -138,6 +140,7 @@ def resonator(
         draw_layer=draw_layer,
         etch_layer=etch_layer,
         ground_mask_layer=ground_mask_layer,
+        curve_sampling=curve_sampling,
     )
     hanger_length = _component_length(hanger, "hanger")
     tail_length = (
@@ -154,6 +157,7 @@ def resonator(
             draw_layer=draw_layer,
             etch_layer=etch_layer,
             ground_mask_layer=ground_mask_layer,
+            curve_sampling=curve_sampling,
         )
         if qubit_resonator_segment_reference_point is not None
         else None
@@ -186,6 +190,7 @@ def resonator(
             draw_layer=draw_layer,
             etch_layer=etch_layer,
             ground_mask_layer=ground_mask_layer,
+            curve_sampling=curve_sampling,
         )
         meander_ref = component << meander
         meander_ref.connect("o1", hanger_ref.ports["o_hanger_end"])
@@ -285,6 +290,7 @@ def resonator(
         draw_layer=draw_layer,
         etch_layer=etch_layer,
         ground_mask_layer=ground_mask_layer,
+        curve_sampling=curve_sampling,
     )
     meander_ref = c << meander
     meander_ref.connect("o1", hanger_ref.ports["o_hanger_end"])
@@ -364,6 +370,7 @@ def resonator(
 
     c.flatten()
 
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
@@ -405,7 +412,7 @@ def _add_tail(
     return final_port
 
 
-@curves.sampled_cell
+@gf.cell
 def _qubit_resonator_segment(
     length: float,
     gap: float = 10.0,
@@ -413,6 +420,7 @@ def _qubit_resonator_segment(
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Rounded-end metal segment used to insert the resonator into a qubit pocket.
 
@@ -447,6 +455,7 @@ def _qubit_resonator_segment(
     semicircle_segment = temp << curves.circle(
         radius=radius,
         layer=draw_layer,
+        sampling=curve_sampling,
     )
     semicircle_segment.move((0, -length + radius))
 
@@ -478,6 +487,7 @@ def _qubit_resonator_segment(
     )
     c.info["length"] = length
 
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
@@ -523,3 +533,10 @@ def _add_open_end(component: gf.Component, port: gf.Port, cross_section: gf.Cros
         allow_layer_mismatch=True,
     )
     component.add_port("o2", port=open_etch.ports["o2"], port_type="placement")
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(resonator)

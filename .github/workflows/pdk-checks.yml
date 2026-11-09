@@ -1,0 +1,162 @@
+name: PDK package checks
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pdk-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        python-version: ["3.12", "3.13"]
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+      MPLBACKEND: Agg
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      RAYON_NUM_THREADS: "2"
+      UV_CONCURRENT_DOWNLOADS: "2"
+      UV_CONCURRENT_BUILDS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.11.33"
+          enable-cache: true
+
+      - name: Install locked package and dev tools
+        id: dependencies
+        run: uv sync --locked --no-default-groups --group dev --python "${{ matrix.python-version }}"
+
+      # Independent checks still run after a test failure; the job remains failed.
+      - name: Ruff lint
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: uv run --no-sync ruff check --no-cache orcapen_sc_pdk tests orcapen_build.py
+
+      - name: Ruff format
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: uv run --no-sync ruff format --check --no-cache orcapen_sc_pdk tests orcapen_build.py
+
+      - name: Existing tests, unmodified
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: uv run --no-sync pytest -p no:cacheprovider --junitxml="$RUNNER_TEMP/pytest.xml" tests
+
+      - name: Build wheel and source archive
+        id: build
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: uv build --sdist --wheel --python "${{ matrix.python-version }}" --out-dir "$RUNNER_TEMP/artifacts"
+
+      - name: Rebuild wheel from source archive
+        id: rebuild
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        shell: bash
+        run: |
+          shopt -s nullglob
+          sdists=("$RUNNER_TEMP/artifacts/"*.tar.gz)
+          test "${#sdists[@]}" -eq 1
+          uv build "${sdists[0]}" --wheel --python "${{ matrix.python-version }}" --out-dir "$RUNNER_TEMP/rebuilt"
+
+      - name: Fresh installed wheels outside checkout
+        if: ${{ !cancelled() && steps.rebuild.outcome == 'success' }}
+        shell: bash
+        run: |
+          uv export --locked --no-default-groups --no-emit-project --output-file "$RUNNER_TEMP/runtime-requirements.txt"
+          project_root="$PWD"
+          export ORCAPEN_EXPECTED_VERSION
+          ORCAPEN_EXPECTED_VERSION="$(uv run --no-sync python -c 'import pathlib,tomllib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+          cd "$RUNNER_TEMP"
+          shopt -s nullglob
+          for kind in artifacts rebuilt; do
+            wheels=("$RUNNER_TEMP/$kind/"*.whl)
+            test "${#wheels[@]}" -eq 1
+            uv venv --python "${{ matrix.python-version }}" "$RUNNER_TEMP/$kind-runtime"
+            python="$RUNNER_TEMP/$kind-runtime/bin/python"
+            uv pip install --python "$python" --requirement "$RUNNER_TEMP/runtime-requirements.txt" "${wheels[0]}"
+            "$python" - <<'PY'
+          import hashlib
+          import importlib.metadata as metadata
+          import importlib.resources as resources
+          import json
+          import os
+          import sys
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          import gdsfactory as gf
+          import yaml
+          import orcapen_sc_pdk as package
+
+          origin = Path(package.__file__).resolve()
+          assert origin.is_relative_to(Path(sys.prefix).resolve()), origin
+          assert "site-packages" in origin.parts, origin
+          assert not origin.is_relative_to(Path(os.environ["GITHUB_WORKSPACE"]).resolve()), origin
+          version = os.environ["ORCAPEN_EXPECTED_VERSION"]
+          assert metadata.version("orcapen-sc-pdk") == package.__version__ == version
+          pdk = package.activate()
+          assert gf.get_active_pdk().name == "orcapen_sc_pdk"
+          root = resources.files("orcapen_sc_pdk")
+          yaml.safe_load(root.joinpath("layers.yaml").read_bytes())
+          ET.fromstring(root.joinpath("klayout/layers.lyp").read_bytes())
+          ET.fromstring(root.joinpath("klayout/tech.lyt").read_bytes())
+          json.loads(root.joinpath("materials.json").read_bytes())
+          json.loads(root.joinpath("cells/simulation/scgsim/cpw_meander_source.json").read_bytes())
+          manifest = json.loads(root.joinpath("_agent_knowledge/manifest.json").read_bytes())
+          assert manifest["distribution"] == "orcapen-sc-pdk"
+          assert manifest["distribution_version"] == version
+          for item in manifest["resources"]:
+              data = root.joinpath("_agent_knowledge", item["path"]).read_bytes()
+              assert hashlib.sha256(data).hexdigest() == item["content_sha256"], item["path"]
+          print(json.dumps({"version": version, "origin": str(origin), "pdk": pdk.name,
+                            "knowledge_resources": len(manifest["resources"])}))
+          for name in sorted(pdk.cells):
+              gf.clear_cache()
+              component = pdk.get_component(name)
+              box = component.dbbox()
+              print(json.dumps({"factory": name, "ports": len(component.ports),
+                                "bbox_um": [box.left, box.bottom, box.right, box.top]}))
+          PY
+          done
+          "$project_root/.venv/bin/python" - <<'PY'
+          import hashlib
+          import json
+          import os
+          import zipfile
+          from pathlib import Path
+
+          temporary = Path(os.environ["RUNNER_TEMP"])
+          original = next((temporary / "artifacts").glob("*.whl"))
+          rebuilt = next((temporary / "rebuilt").glob("*.whl"))
+          def payload(path):
+              with zipfile.ZipFile(path) as archive:
+                  return {name: hashlib.sha256(archive.read(name)).hexdigest()
+                          for name in archive.namelist()
+                          if name.startswith("orcapen_sc_pdk/") and not name.endswith("/")}
+          first, second = payload(original), payload(rebuilt)
+          assert first == second, "Source-archive rebuild changed packaged module/resource bytes"
+          print(json.dumps({"identical_package_entries": len(first)}))
+          PY
+
+      - name: Retain artifacts and test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdk-checks-python-${{ matrix.python-version }}
+          path: |
+            ${{ runner.temp }}/artifacts/*
+            ${{ runner.temp }}/rebuilt/*
+            ${{ runner.temp }}/pytest.xml
+          if-no-files-found: error

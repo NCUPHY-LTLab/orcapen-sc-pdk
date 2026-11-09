@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import gdsfactory as gf
 from gdsfactory.typings import ComponentSpec, CrossSectionSpec
 
+import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
@@ -36,7 +37,9 @@ def _add_launcher_ref(
     draw_layer: Layer,
     etch_layer: Layer,
     ground_mask_layer: Layer,
+    curve_sampling: curves.CurveSampling,
 ) -> gf.ComponentReference:
+    settings = curves.sampling_settings(launcher, curve_sampling)
     ref = c << gf.get_component(
         component=launcher,
         end_gap_width=launcher_end_gap_width,
@@ -44,6 +47,7 @@ def _add_launcher_ref(
         draw_layer=draw_layer,
         etch_layer=etch_layer,
         ground_mask_layer=ground_mask_layer,
+        **settings,
     )
     if rotation:
         ref.rotate(rotation)
@@ -63,6 +67,7 @@ def place_launchers(
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> LauncherRefs:
     """Place the standard four-per-edge launcher assembly on a chip component.
 
@@ -91,6 +96,7 @@ def place_launchers(
             draw_layer=draw_layer,
             etch_layer=etch_layer,
             ground_mask_layer=ground_mask_layer,
+            curve_sampling=curve_sampling,
         )
         for y in left_y
     ]
@@ -105,6 +111,7 @@ def place_launchers(
             draw_layer=draw_layer,
             etch_layer=etch_layer,
             ground_mask_layer=ground_mask_layer,
+            curve_sampling=curve_sampling,
         )
         for x in top_x
     ]
@@ -119,6 +126,7 @@ def place_launchers(
             draw_layer=draw_layer,
             etch_layer=etch_layer,
             ground_mask_layer=ground_mask_layer,
+            curve_sampling=curve_sampling,
         )
         for y in left_y
     ]
@@ -133,6 +141,7 @@ def place_launchers(
             draw_layer=draw_layer,
             etch_layer=etch_layer,
             ground_mask_layer=ground_mask_layer,
+            curve_sampling=curve_sampling,
         )
         for x in bottom_x
     ]

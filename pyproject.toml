@@ -35,13 +35,13 @@ documentation = "https://ncuphy-ltlab.github.io/orcapen-sc-pdk/"
 repository = "https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/"
 
 [project.optional-dependencies]
+circuit-runtime = ["superconducting-circuits-runtime"]
+
+[dependency-groups]
 dev = [
   "pytest>=9.0.0",
   "ruff>=0.15.11",
 ]
-circuit-runtime = ["superconducting-circuits-runtime"]
-
-[dependency-groups]
 docs = [
   "griffe<2",
   "ipykernel",

@@ -10,7 +10,7 @@ from orcapen_sc_pdk.ports import add_mesh_port
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@curves.sampled_cell(tags=["layout", "resonator", "hanger"])
+@gf.cell(tags=["layout", "resonator", "hanger"])
 def resonator_hanger(
     coupling_length: float = 200.0,
     straight_length: float = 160.0,
@@ -23,6 +23,7 @@ def resonator_hanger(
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return the hanger head of a readout resonator.
 
@@ -61,6 +62,7 @@ def resonator_hanger(
     bend_segment1_component = curves.bend_euler(
         angle=90,
         **bend_kwargs,
+        sampling=curve_sampling,
     )
     straight_component = gf.components.straight(
         length=straight_length,
@@ -69,6 +71,7 @@ def resonator_hanger(
     bend_segment2_component = curves.bend_euler(
         angle=bend_segment2_angle,
         **bend_kwargs,
+        sampling=curve_sampling,
     )
 
     coupling_segment = c << coupling_component
@@ -137,4 +140,12 @@ def resonator_hanger(
         + curves.design_length(bend_segment2_component)
     )
 
+    curves.record_sampling(c, curve_sampling)
     return c
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(resonator_hanger)

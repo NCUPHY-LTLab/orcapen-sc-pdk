@@ -6,11 +6,12 @@ import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.tech import LAYER
 
 
-@curves.sampled_cell(tags=["layout", "dicing"])
+@gf.cell(tags=["layout", "dicing"])
 def dicing_edge(
     size: tuple[float, float] = (10000.0, 10000.0),
     width: float = 50.0,
     layer: tuple[int, int] = LAYER.D0_TOP_M1_ETCH,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return a rectangular edge ring on the requested layer.
 
@@ -31,4 +32,12 @@ def dicing_edge(
         layer=layer,
     )
 
+    curves.record_sampling(ring, curve_sampling)
     return ring
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(dicing_edge)

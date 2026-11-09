@@ -14,8 +14,10 @@ from orcapen_sc_pdk.cells.simulation.scgsim.simple_pad import square_pad_capacit
 from orcapen_sc_pdk.tech import LAYER
 
 
-@curves.sampled_cell(tags=["simulation", "chip", "simple_pad", "flip_chip", "bump"])
-def flip_chip_pad_coupon() -> gf.Component:
+@gf.cell(tags=["simulation", "chip", "simple_pad", "flip_chip", "bump"])
+def flip_chip_pad_coupon(
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
+) -> gf.Component:
     """Compose the default lower pad, full upper plane and four Ground bump sites.
 
     The upper conductor uses the D1 bottom-face layer; its outward normal is -Z.
@@ -23,7 +25,7 @@ def flip_chip_pad_coupon() -> gf.Component:
     The four bump children preserve their existing UBM source footprints.
     """
     c = gf.Component()
-    lower = c << square_pad_capacitor()
+    lower = c << square_pad_capacitor(curve_sampling=curve_sampling)
     lower.name = "LOWER_PAD_DIE"
     upper = c << gf.components.rectangle(
         size=(1000.0, 1000.0), centered=True, layer=LAYER.D1_BOTTOM_M1_DRAW
@@ -39,7 +41,7 @@ def flip_chip_pad_coupon() -> gf.Component:
         (250.0, -250.0, "BUMP_PM"),
         (250.0, 250.0, "BUMP_PP"),
     ):
-        bump = c << indium_bump()
+        bump = c << indium_bump(curve_sampling=curve_sampling)
         bump.name = name
         bump.move((x, y))
     c.info["component_semantics"] = {
@@ -60,11 +62,14 @@ def flip_chip_pad_coupon() -> gf.Component:
         "final_electrical_nets": "caller-owned, not assigned",
         "upper_face": "D1_BOTTOM; outward -Z",
     }
+    curves.record_sampling(c, curve_sampling)
     return c
 
 
-@curves.sampled_cell(tags=["simulation", "cpw", "single_die", "airbridge"])
-def cpw_airbridge_coupon() -> gf.Component:
+@gf.cell(tags=["simulation", "cpw", "single_die", "airbridge"])
+def cpw_airbridge_coupon(
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
+) -> gf.Component:
     """Compose positive finite-ground Al CPW with the unchanged canonical bridge.
 
     Preserve the existing partial 12 x 7 um deck/pier overlap, rather than
@@ -85,7 +90,7 @@ def cpw_airbridge_coupon() -> gf.Component:
         size=(500.0, 182.0), centered=True, layer=LAYER.D0_SUBSTRATE_AREA
     )
     substrate.name = "SUBSTRATE"
-    bridge = c << airbridge()
+    bridge = c << airbridge(curve_sampling=curve_sampling)
     bridge.name = "AIRBRIDGE"
     c.info["component_semantics"] = {
         "schema_version": 2,
@@ -108,4 +113,12 @@ def cpw_airbridge_coupon() -> gf.Component:
         "final_electrical_nets": "caller-owned, not assigned",
         "ports": "none; no GF or native port invented",
     }
+    curves.record_sampling(c, curve_sampling)
     return c
+
+
+if __name__ == "__main__":
+    # Imported here because orcapen_sc_pdk.pdk imports this module.
+    from orcapen_sc_pdk.preview import show
+
+    show(cpw_airbridge_coupon)

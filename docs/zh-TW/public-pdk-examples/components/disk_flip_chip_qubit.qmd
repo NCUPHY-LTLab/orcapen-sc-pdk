@@ -1,0 +1,81 @@
+---
+title: "圓盤覆晶量子位元"
+sidebar: api
+---
+
+`disk_flip_chip_qubit` 建立雙晶粒覆晶（flip-chip）transmon 站點，以原點為中心、範圍為 1000 × 1000 µm 的正方形。量子位元晶粒上的圓盤島（disk island）經由一個 Manhattan 接面連到周圍的接地。四個可選的弧形耦合爪（claw）與圓盤耦合，讀取線與驅動線位於控制晶粒。預設值是版圖預設組，不是量測過或驗證過的元件。
+
+## 建立預設元件 {#build-the-default-component}
+
+```python
+import gdsfactory as gf
+from orcapen_sc_pdk import activate
+
+activate()
+grounded = gf.get_component("disk_flip_chip_qubit")
+floating = gf.get_component("disk_flip_chip_qubit", tc_grounded_sides=())
+disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
+```
+
+![預設版圖。左：量子位元晶粒，含圓盤、四個接地耦合爪與接面。右：控制晶粒，含讀取線、驅動線與 24 個銦凸塊。](../../_static/images/components/disk_flip_chip_qubit.svg)
+
+## 幾何 {#geometry}
+
+| 特徵 | 引數 | 預設值 |
+| --- | --- | --- |
+| 圓盤島半徑 | `disk_radius` | `None`：四個耦合爪都接地時 110.5 µm，都不接地時 119.839 µm；只有部分接地時須明確指定 |
+| 兩晶粒的接地淨空區 | `ground_clearance_diameter` | 直徑 700 µm 的圓 |
+| 站點正方形半邊長 | `ground_outer_half_extent` | 500 µm |
+| N、E、S、W 耦合爪 | `include_tc` | 有 |
+| 短路到地的耦合爪 | `tc_grounded_sides` | 四個都接地，`("N", "E", "S", "W")` |
+| 耦合爪與圓盤間隙 | `tc_disk_gap`，逐邊 `tc_disk_gap_by_side` | 60 µm，例如 `(("E", 40.0),)` |
+| 耦合爪徑向寬度與本體角度 | `tc_width`、`tc_span` | 60 µm、45° |
+| 耦合爪漸縮著陸角度 | `tc_landing_span` | 45°；`None` 表示不漸縮 |
+| 耦合爪 CPW 中心線寬與間隙 | `tc_cpw_width`、`tc_cpw_gap` | 3 µm、40 µm |
+| 可選的耦合爪 CPW 延伸 | `tc_outer_extension_start_radius`、`_width`、`_gap`、`_end_clearance` | 關閉 |
+| 連接埠正方形半邊長 | `handoff_half_extent` | 412.314 µm |
+| 接面角度與重疊半徑 | `junction_angle`、`junction_overlap_radius` | 315°、237.5 µm |
+| 接面引線漸縮角度與寬度 | `junction_lead_span`、`junction_lead_width` | 20°、2 µm |
+| 不含接面的開路引線對 | `junction_open_lead_angles` | 無；與 `junction_angle` 相差 90° 的整數倍 |
+| 讀取線角度、尖端半徑、CPW | `ro_angle`、`ro_tip_radius`、`ro_cpw_width`、`ro_cpw_gap` | 135°、0 µm、7 µm、6 µm |
+| 驅動線角度、尖端半徑、CPW | `xy_angle`、`xy_tip_radius`、`xy_cpw_width`、`xy_cpw_gap` | 225°、412 µm、4 µm、6 µm |
+| 凸塊環 | `bump_center_radius`、`bump_lattice_count`、`bump_skip_period` | 400 µm、32 個位置、每第 4 個留空（24 個凸塊） |
+| 凸塊尺寸 | `indium_bump_size`、`under_bump_size` | 20 µm、40 µm 正方形 |
+
+接地的耦合爪末端有一段寬度等於一個 CPW 線寬的徑向尾段，穿過 CPW 淨空區末端連入接地。浮接的耦合爪是獨立導體。`curve_sampling` 設定所有圓與弧的取樣；`corner_rounding_points=None` 時，倒角點數也由它決定。
+
+### 支援的調整範圍
+
+這個元件支援在預設組合附近小幅調整，不支援任意組合。會畫出看似正常、實際卻短路或斷路的設定，會丟出 `ValueError`：
+
+- 每個耦合爪都要在接地淨空區內，`tc_span` 最多 60°。
+- 有耦合爪時，`junction_angle` 和 `junction_open_lead_angles` 要落在對角線上（45° + k·90°），也就是耦合爪之間。
+- 接地的耦合爪，其遮罩末端（`handoff_half_extent` 加 `tc_cpw_gap`，或加 `tc_outer_extension_end_clearance`）再加一個 CPW 線寬，要在 `ground_outer_half_extent` 之內。
+- 每個凸塊以較大方塊（`indium_bump_size` 或 `under_bump_size`）的半對角線計算，要避開接地淨空區，以及讀出線、驅動線和耦合爪線的遮罩。調整 `ro_angle`、`xy_angle`、`bump_lattice_count` 或 `bump_skip_period` 時，訊號線要維持在空著的凸塊位置上。
+- `junction_lead_width` 要小於兩個接面接點的間距 5.657 µm，兩條引線的圓頭才不會相碰。
+- `ro_tip_radius` 和 `xy_tip_radius` 到交接方框之間，至少要留半個 CPW 線寬的線段。
+
+以上規則沒涵蓋的條件由呼叫端維持，例如讀出線和驅動線彼此不能相碰。
+
+## 連接埠、圖層與接地 {#ports-layers-and-ground}
+
+| 連接埠 | 位置 | 寬度 |
+| --- | --- | --- |
+| `tc_N`、`tc_E`、`tc_S`、`tc_W` | 耦合爪 CPW 在連接埠正方形上的末端，朝外 | `tc_cpw_width` |
+| `ro_out` | 讀取線在 `ro_angle` 方向、連接埠正方形上的末端 | `ro_cpw_width` |
+| `xy_out` | 驅動線在 `xy_angle` 方向、連接埠正方形上的末端 | `xy_cpw_width` |
+| `o_junction_lumped` | 跨接面模擬面上的集總接面連接埠 | 接面寬度 |
+
+量子位元晶粒使用 `D1_BOTTOM_M1_DRAW`、`D1_BOTTOM_GROUND_MASK` 與 `D1_BOTTOM_JJ_DRAW`，接面的模擬面位於 `D1_BOTTOM_SIM_BOUNDARY`。控制晶粒使用 `D0_TOP_M1_DRAW` 與 `D0_TOP_GROUND_MASK`。凸塊使用 `D0_D1_INDIUM_BUMP` 與 `D0_D1_UNDER_BUMP`。
+
+訊號導體是 `QFace`（圓盤與接面）、`TC_N`、`TC_E`、`TC_S`、`TC_W`、`RO` 與 `XY` 這些實例。每個晶粒的接地各自獨立：`QGround` 與 `CGround` 含接地金屬（站點正方形減去遮罩）以及 `D1_SUBSTRATE_AREA`／`D0_SUBSTRATE_AREA` 上的晶粒範圍；`QGroundMask` 與 `CGroundMask` 含遮罩。若要讓多個站點共用一個接地，請以 `include_ground=False` 建立每個站點：這會略過 `QGround` 與 `CGround`、保留遮罩，再由上層以共用範圍減去遮罩繪製接地。
+
+## 來源與調整 {#sources-and-adaptations}
+
+- KQCircuits [`CircularTransmonSingleIsland`](https://iqm-finland.github.io/KQCircuits/api/kqcircuits.qubits.circular_transmon_single_island.html)：圓形淨空區中的圓盤島、一個接面接地，以及固定半徑上的弧形耦合器。KQCircuits 採用 GPL-3.0 授權，此處僅作為先前技術引用，未使用任何 KQCircuits 程式碼。
+- J. Braumüller 等，*Concentric transmon qubit featuring fast tunability and an anisotropic magnetic dipole moment*，[Appl. Phys. Lett. 108, 032601 (2016)](https://doi.org/10.1063/1.4940230)：圓形島與圓形淨空區。
+- S. Kosen 等，*Building blocks of a flip-chip integrated superconducting quantum processor*，[Quantum Sci. Technol. 7, 035018 (2022)](https://doi.org/10.1088/2058-9565/ac734b)：以銦凸塊接合的量子位元晶粒與控制晶粒，讀取與驅動位於控制晶粒。
+
+OrcaPen 的調整結合上述模式：四個漸縮成 CPW 且可接地的耦合爪、兩側皆漸縮的接面引線，以及位於控制晶粒的讀取與驅動尖端。這些調整並非出自單一論文。
+
+請見[公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/layout/disk_qubit.py)。

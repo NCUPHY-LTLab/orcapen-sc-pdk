@@ -26,7 +26,7 @@ jobs:
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: 1.10.19
-      - run: uv sync -p 3.12 --locked --group docs --extra dev
+      - run: uv sync -p 3.12 --locked --no-default-groups --group dev --group docs
       - run: uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
       - run: uv run --group docs python scripts/build_overview_snippets.py
       - run: uv run --group docs quarto render docs --no-execute

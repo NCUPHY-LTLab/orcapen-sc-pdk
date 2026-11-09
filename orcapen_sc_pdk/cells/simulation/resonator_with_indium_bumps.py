@@ -9,9 +9,7 @@ from orcapen_sc_pdk.ports import SimulationPortType
 from orcapen_sc_pdk.tech import LAYER, Layer
 
 
-@curves.sampled_cell(
-    tags=["simulation", "chip", "resonator", "resonator_with_indium_bumps", "bump"]
-)
+@gf.cell(tags=["simulation", "chip", "resonator", "resonator_with_indium_bumps", "bump"])
 def resonator_with_indium_bumps(
     resonator_length: float = 4000.0,
     resonator_meanders: int = 6,
@@ -28,6 +26,7 @@ def resonator_with_indium_bumps(
     resonator_ground_mask_layer: Layer = LAYER.D1_BOTTOM_GROUND_MASK,
     indium_bump_layer: Layer = LAYER.D0_D1_INDIUM_BUMP,
     under_bump_layer: Layer = LAYER.D0_D1_UNDER_BUMP,
+    curve_sampling: curves.CurveSampling = curves.FABRICATION,
 ) -> gf.Component:
     """Return one resonator with bumps filling chip padding outside keepout."""
 
@@ -53,6 +52,7 @@ def resonator_with_indium_bumps(
         draw_layer=resonator_draw_layer,
         etch_layer=resonator_etch_layer,
         ground_mask_layer=resonator_ground_mask_layer,
+        curve_sampling=curve_sampling,
     )
     res.move(origin=res.center, destination=(0.0, 0.0))
     c.add_ports(port for port in res.ports if str(port.port_type) == str(SimulationPortType.MESH))
@@ -81,8 +81,10 @@ def resonator_with_indium_bumps(
         indium_bump_layer=indium_bump_layer,
         under_bump_layer=under_bump_layer,
         include_under_bump=include_under_bump,
+        curve_sampling=curve_sampling,
     )
 
+    curves.record_sampling(c, curve_sampling)
     return c
 
 

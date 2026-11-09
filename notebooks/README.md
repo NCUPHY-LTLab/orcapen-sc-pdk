@@ -39,7 +39,6 @@ notebooks/
   ComponentSimulation/        # separately retained historical examples/evidence
   Public_Docs/                # layout catalog
   Tools/                      # general inspection tools
-  Research/                   # separately scoped research
 ```
 
 Source layout families do not define a solver matrix: one layout can serve
@@ -91,7 +90,3 @@ result. The current examples remain CONVERGING.
 Public notebooks contain no private layouts, private run paths or private
 native evidence. See the [Simulation catalog](../docs/simulation/notebooks.qmd)
 for requirements, example pages and downloads. Build the docs with `just docs`.
-
-The FieldCalculator research notebook remains separately scoped under
-`src/Research/FieldCalculator/`; its actual execution/evidence does not become
-SCGSim example evidence through this organization change.

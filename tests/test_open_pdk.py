@@ -32,26 +32,26 @@ def test_pdk_activates_and_builds_public_cells() -> None:
 
 def test_flip_chip_layer_metadata() -> None:
     assert {name for name in LAYER_STACK.layers if "UNDER_BUMP" in name} == {"D0_D1_UNDER_BUMP"}
-    assert LAYER_STACK.layers["D0_TOP_M1"].info == {
-        "simulation_role": "conductor",
-        "layer_type": "conductor",
-        "part_role": "face_metal",
-        "host_void_semantic_id": "D0_TO_D1_GAP",
-        "geometry": {
-            "geometry_source": "die_face_minus_ground_mask",
-            "plane_bounds_ref": "D0_SUBSTRATE",
-        },
-    }
-    assert LAYER_STACK.layers["D1_BOTTOM_M1"].info == {
-        "simulation_role": "conductor",
-        "layer_type": "conductor",
-        "part_role": "face_metal",
-        "host_void_semantic_id": "D0_TO_D1_GAP",
-        "geometry": {
-            "geometry_source": "die_face_minus_ground_mask",
-            "plane_bounds_ref": "D1_SUBSTRATE",
-        },
-    }
+    for name, substrate, interval in (
+        ("D0_TOP_M1", "D0_SUBSTRATE", [0.0, 0.1]),
+        ("D1_BOTTOM_M1", "D1_SUBSTRATE", [8.1, 8.2]),
+    ):
+        info = dict(LAYER_STACK.layers[name].info)
+        physical_layer = info.pop("physical_layer")
+        assert info == {
+            "simulation_role": "conductor",
+            "layer_type": "conductor",
+            "part_role": "face_metal",
+            "host_void_semantic_id": "D0_TO_D1_GAP",
+            "geometry": {
+                "geometry_source": "die_face_minus_ground_mask",
+                "plane_bounds_ref": substrate,
+            },
+        }
+        assert physical_layer["physical_layer_id"] == f"orcapen_sc_pdk:{name}"
+        assert physical_layer["material_id"] == "Al"
+        assert physical_layer["feature_kind"] == "stack_film"
+        assert physical_layer["source_interval_um"] == interval
     bump_info = LAYER_STACK.layers["D0_D1_INDIUM_BUMP"].info
     assert set(bump_info) == {
         "simulation_role",
@@ -60,7 +60,11 @@ def test_flip_chip_layer_metadata() -> None:
         "host_void_semantic_id",
         "geometry",
         "ground_bump_fill_spec",
+        "physical_layer",
     }
+    assert bump_info["physical_layer"]["material_id"] == "In"
+    assert bump_info["physical_layer"]["feature_kind"] == "finite_volume"
+    assert bump_info["physical_layer"]["source_interval_um"] == [0.1, 8.1]
     assert {key: bump_info[key] for key in ("simulation_role", "layer_type", "part_role")} == {
         "simulation_role": "conductor",
         "layer_type": "via",

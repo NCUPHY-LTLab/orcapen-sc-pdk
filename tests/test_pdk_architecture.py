@@ -103,11 +103,13 @@ def test_pdk_registry_does_not_publish_generic_gf_cells() -> None:
         "add_frame",
         "align_wafer",
         "awg",
-        "rounded_rectangle",
     }
 
     assert PDK.base_pdks == []
     assert generic_cells.isdisjoint(PDK.cells)
+    # OrcaPen publishes its own rounded_rectangle, not the GDSFactory generic one.
+    rounded_rectangle = PDK.cells["rounded_rectangle"]
+    assert rounded_rectangle.__module__ == "orcapen_sc_pdk.cells.layout.primitives"
 
 
 def test_q2d_fixture_module_is_retired() -> None:
