@@ -1,9 +1,9 @@
 # OrcaPen SC PDK Agent Instructions
 
-This is the public `NCUPHY-LTLab/orcapen-sc-pdk` repository. The OrcaPen Repo
-Lead owns product source, documentation and the documentation Preview. Private
-layouts, parameters, notebooks and evidence stay private. QPDK is reference
-material; SCGSim owns reusable solver, runtime and result behavior.
+This public `NCUPHY-LTLab/orcapen-sc-pdk` repository owns product source and
+documentation. Private layouts, parameters, notebooks and evidence stay
+private. QPDK is reference material; SCGSim owns reusable solver, runtime and
+result behavior.
 
 ## Task-Scoped Reading
 
@@ -23,11 +23,6 @@ Package usage starts at `docs/usage/index.md`.
 
 ## Implementation and Documentation
 
-The Repo Lead handles small, tightly coupled changes directly. Delegate larger
-implementation, documentation-site or noisy work as needed within the existing
-two-worker limit. Use a team `docs_writer` for substantial writing; there is no
-separate Documentation Lead or recurring prose-approval handoff.
-
 Keep one writer per overlapping path or hunk. Preserve existing work, valid
 results and the running Preview. A change includes its directly related
 documentation and tests under the Human-authorized scope; removing a feature
@@ -36,13 +31,35 @@ than skipping checks or weakening assertions or coverage.
 
 ## Shared Policy and Delivery
 
-Use `$v1-lifecycle` for lifecycle and Human research decisions,
-`$scq-collaboration-roles` for relevant ownership and Git routing, and
-`$model-routing` when assigning work. Use `$scq-gdsfactory-layout` for layout,
-component or geometry work. These shared Skills remain the policy authority;
-do not duplicate their forms or checklists here.
+Use `$github-flow` for branches, allowed paths, CI, PRs, review and delivery.
+Use `$scq-gdsfactory-layout` for layout, component or geometry work.
+Until this repository's required checks and `cross-review-gate` are verified
+and enforced, retain the current CI and existing authorized merge process; do
+not enable per-PR auto-merge. After that gate is verified and enforced, follow
+the shared GitHub Flow merge process.
 
-The original Git owner serializes ordinary commit, push and remote readback,
-preserving unrelated WIP. Integration retains its assigned CI and protected
-delivery work. Publication, merge, release, deployment and consumer pin changes
-follow their separate Human authority.
+## Code Review Rules
+
+- Review against the Issue named on the PR's `Issue:` line; a PR with no
+  readable Issue has unverified acceptance.
+- Review in two stages. First look for counterexamples from the change's
+  normal entry points, including combinations that break assumptions (two
+  valid inputs paired wrongly, two calls writing one output target, a result
+  that passes quality but exceeds a limit the caller set). Then weigh each
+  against the Issue, the public docs and the callers you can see.
+- Each finding states the condition that reproduces it, what the code does,
+  the code or assumption that causes it, and a proposed disposition with its
+  basis: `fix` (a supported use breaks a promised behavior), `document` (the
+  formal flow guarantees a precondition nothing states) or `observe` (no
+  known caller reaches it). "Callers outside this repository not checked" is
+  a valid basis.
+- Flag as P1: a supported use breaking an acceptance criterion, a public
+  contract, data or security, or Human-confirmed UI; an out-of-scope input
+  that silently produces a plausible but wrong result; a test double
+  standing in for the result being claimed (a real solver, database,
+  authorization or integration). A counterexample outside the supported use
+  is not P1 by itself.
+- Test doubles that isolate dependencies are fine; call counts are fine when
+  the count is the contract. Do not ask for checks the Issue does not need.
+- A CI change must say in the PR what runs when, before and after, the
+  expected time change and what could break.
