@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
 ## 建構 cell 幾何
 
-cell 正確，是指它的多邊形就是你想畫的形狀。以下規則說明如何建構出這樣的幾何、如何檢查，以及 cell 在加入 Library 之前可以放在哪裡。每條規則都來自實測到的失敗案例。審查者會依這些規則檢查 cell。
+cell 正確，是指它的多邊形就是你想畫的形狀。以下規則說明如何建構出這樣的幾何、如何檢查，以及 cell 在加入 Library 之前可以放在哪裡。每條建構規則都來自實測到的失敗案例。審查者會依這些規則檢查 cell。
 
 下列範例以已安裝的 GDSFactory 執行，並共用一個 helper：它像光罩寫入器一樣合併一個圖層，並回報合併後剩下的內容。GDS 不儲存孔洞，所以合併後區域中的孔洞會以切割線的形式畫出來。
 
@@ -258,6 +258,22 @@ assert result["holes"] == intended_holes
 assert result["min_edge_dbu"] >= 2
 print("min interior angle (reported only):", result["min_angle_deg"])
 ```
+
+### Helper 與結構
+
+這些規則由 PDK 維護者決定。它們讓 cell 檔案容易審查，也讓一次修正能涵蓋所有共用該部件的 cell。
+
+**H1. 先重用，再自己寫。** 請依下列順序使用現有的內容繪製：
+
+1. `orcapen_sc_pdk.helpers`，例如以 `polar_point` 與 `rotate_point` 取代行內的 `cos` 與 `sin`，以及 `merge_component_layers`、`add_etch_for_component`。
+2. PDK 的 cell 與基本元件，位於 `orcapen_sc_pdk/cells/layout/primitives.py`（`bend_euler`、`rounded_rectangle`、`wire_corner` 等）；請見[共用 layout 基本元件](public-pdk-examples/shared-primitives.md)。
+3. 公開的 GDSFactory API。
+
+現有函式不適用時，請在 PR 中點名該函式並說明原因。
+
+**H2. 新增函式須先取得核准。** 任何不是 `@gf.cell` 元件的新函式，無論是 cell 檔案私有的，或放在 `helpers/` 下共用的，都必須在撰寫前於 Issue 或 PR 取得 PDK 維護者的核准。PR 要列出每個新函式，以及現有函式為何不適用。既有的私有函式，會在其 cell 下次改寫時一併審查。
+
+**H3. 結構比長度重要。** cell 檔案長一點沒有問題。可獨立重用、預覽或模擬的部件，要成為自己的 `@gf.cell`；若其他 cell 也會用到，就放在自己的模組。cell 本體依物理部件的順序撰寫，每個部件以一行簡短的註解標題開頭。
 
 ### 三種檢查
 

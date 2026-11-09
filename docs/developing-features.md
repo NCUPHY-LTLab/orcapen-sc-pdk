@@ -83,8 +83,8 @@ interface. Keep the related documentation next to the public behavior it describ
 
 A cell is correct when its polygons are the shapes you meant to draw. These
 rules say how to build geometry so that it is, how to check it, and where a
-cell may live before it joins the Library. Each rule comes from a measured
-failure. Reviewers check a cell against them.
+cell may live before it joins the Library. Each construction rule comes
+from a measured failure. Reviewers check a cell against them.
 
 The examples below run against the installed GDSFactory. They share this
 helper, which merges a layer the way a mask writer would and reports what is
@@ -329,6 +329,35 @@ assert result["holes"] == intended_holes
 assert result["min_edge_dbu"] >= 2
 print("min interior angle (reported only):", result["min_angle_deg"])
 ```
+
+### Helpers and structure
+
+PDK maintainers decided these rules. They keep cell files short to review and
+let one fix reach every cell that shares a part.
+
+**H1. Reuse before you write.** Draw with what exists, in this order:
+
+1. `orcapen_sc_pdk.helpers`, for example `polar_point` and `rotate_point`
+   instead of inline `cos` and `sin`, `merge_component_layers` and
+   `add_etch_for_component`.
+2. The PDK's cells and primitives in `orcapen_sc_pdk/cells/layout/primitives.py`
+   (`bend_euler`, `rounded_rectangle`, `wire_corner` and others); see
+   [Shared layout primitives](public-pdk-examples/shared-primitives.md).
+3. The public GDSFactory API.
+
+When an existing function does not fit, name it and say why in the PR.
+
+**H2. A new function needs approval first.** Any new function that is not a
+`@gf.cell` component needs the PDK maintainers' approval on the Issue or PR
+before you write it. This holds whether the function is private to a cell file
+or shared under `helpers/`. The PR lists each new function and why the existing
+ones do not fit. Existing private functions are reviewed when their cell is
+next rewritten.
+
+**H3. Structure matters more than length.** A long cell file is acceptable. A
+part that is reusable, previewable or simulated on its own becomes its own
+`@gf.cell`, in its own module when another cell uses it. Write the cell body in
+the order of its physical parts, with a short comment heading for each part.
 
 ### Three kinds of check
 
