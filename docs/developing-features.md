@@ -84,7 +84,7 @@ interface. Keep the related documentation next to the public behavior it describ
 A cell is correct when its polygons are the shapes you meant to draw. These
 rules say how to build geometry so that it is, how to check it, and where a
 cell may live before it joins the Library. Each rule comes from a measured
-failure in a shipped cell. Reviewers check a cell against them.
+failure. Reviewers check a cell against them.
 
 The examples below run against the installed GDSFactory. They share this
 helper, which merges a layer the way a mask writer would and reports what is
@@ -337,7 +337,7 @@ users. Keep them apart: a pass on one says nothing about the others.
 
 | Kind | Asks | Owner | Reach |
 |---|---|---|---|
-| Construction checks | Did the code draw what it meant? No unintended holes, no edge shorter than 2 DBU, minimum interior angle reported | This PDK, in its tests | Required in CI for PDK cells. Opt-in for other layouts |
+| Construction checks | Did the code draw what it meant? No unintended holes, no edge shorter than 2 DBU, minimum interior angle reported | This PDK, in its tests | Run in each PDK cell's tests, starting with the disk flip-chip qubit; other cells gain them as their tests are added. Opt-in for other layouts |
 | Process design rules (DRC) | Can the process make it? Width, spacing and enclosure per layer | This PDK | Opt-in. Consumers may adopt, change or ignore them |
 | Simulation checks | Can the solver model it? | [SCGSim](https://github.com/NCUPHY-LTLab/scgsim) | Defined and run by SCGSim, not by this PDK |
 
@@ -346,7 +346,7 @@ Consumers of the PDK are not required to follow the process rules.
 ### Record a process rule
 
 No process rule is invented. A rule enters only with a source supplied by the
-Human, and each rule records:
+PDK maintainers, and each rule records:
 
 - **Source**: where the number comes from.
 - **Layer**: the layer or layer pair it applies to.
@@ -361,7 +361,7 @@ together with the first sourced rule.
 This repository's `develop` branch holds no candidate cells. It is what
 consumers pin and what GDSFactory+ lists, so a candidate there becomes
 something others can depend on. A candidate lives on its Issue branch. The
-Human may merge it into a personal branch to preview it. Personal branches
+PDK maintainers may merge it into a personal branch to preview it. Personal branches
 here are public, so a candidate that carries a private design starts in the
 private layout repository instead.
 
