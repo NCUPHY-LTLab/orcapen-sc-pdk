@@ -18,7 +18,7 @@ jobs:
       && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on:
       group: OrcaPen Docs Pilot
-      labels: ltlab-orcapen-docs
+      labels: ltlab-ci-basic
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -39,6 +39,19 @@ jobs:
           printf '%s  %s\n' 8e38c2b2df6a6dbd369ea16e15acded6894545258d13a02f777f81ad18fd7973 "$archive" | sha256sum --check
           tar -xzf "$archive" --strip-components=1 -C "$install_dir"
           "$install_dir/bin/quarto" --version
+          printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
+      - name: Install GitHub CLI from its verified Linux tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          install_dir="$(mktemp -d "$RUNNER_TEMP/orcapen-gh.XXXXXX")"
+          archive="$install_dir/gh.tar.gz"
+          curl --fail --silent --show-error --location --retry 2 \
+            https://github.com/cli/cli/releases/download/v2.103.3/gh_2.103.3_linux_amd64.tar.gz \
+            --output "$archive"
+          printf '%s  %s\n' 4c806978ffce1cec70853302a56d70ac6da4f19bae7adca4e1a8ab00633dd91d "$archive" | sha256sum --check
+          tar -xzf "$archive" --strip-components=1 -C "$install_dir"
+          "$install_dir/bin/gh" --version
           printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
       - run: uv sync -p 3.12 --locked --no-default-groups --group dev --group docs
       - run: uv run --group docs python scripts/sync_qmd_notebooks.py notebooks/src notebooks
