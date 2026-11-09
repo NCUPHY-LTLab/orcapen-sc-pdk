@@ -10,7 +10,9 @@ CODE_BLOCK = re.compile(r"^```python\n(.*?)^```", re.MULTILINE | re.DOTALL)
 def python_blocks(page, heading):
     """Python blocks between ``## <heading>`` and the next ``## `` heading."""
     text = (DOCS / page).read_text(encoding="utf-8")
-    section = re.search(rf"^## {re.escape(heading)}\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL)
+    section = re.search(
+        rf"^## {re.escape(heading)}\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL
+    )
     assert section, f"{page} has no '## {heading}' section"
     blocks = CODE_BLOCK.findall(section.group(1))
     assert blocks, f"'## {heading}' in {page} has no Python examples"
