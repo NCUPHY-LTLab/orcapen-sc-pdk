@@ -1,0 +1,81 @@
+---
+title: "預覽元件"
+sidebar: get-started
+---
+
+在 VS Code 預覽 OrcaPen 元件時，請依照是否有 GDSFactory+ 授權選擇檢視工具。
+
+- **有授權，使用 GDSFactory+。** 可以在本機開發，也可以把 OrcaPen 儲存庫和 Python 環境放在遠端主機，透過 VS Code Remote - SSH 開啟專案，在本機的 VS Code 內預覽版圖。
+- **沒有授權，使用 KLayout。** 目前支援的 KLayout 流程需要在同一台電腦上開發與預覽。OrcaPen 儲存庫、Python 環境和桌面版 KLayout 都放在本機。KLive 會將版圖送到 KLayout，並套用 OrcaPen 的圖層分組與配色。
+
+## 使用 GDSFactory+
+
+在 VS Code 開啟 OrcaPen 儲存庫，完成擴充套件設定後即可使用 GF+ 的版圖檢視器。設定方式請見官方的[本機安裝](https://gdsfactory.com/plus/local-install/)及 [Remote - SSH 指南](https://gdsfactory.com/plus/troubleshooting/#using-gdsfactory-over-ssh)。
+
+## 使用 KLayout {#klayout}
+
+### 1. 安裝桌面版 KLayout {#install-klayout}
+
+依照 [KLayout 官方下載與安裝指南](https://www.klayout.de/build.html)安裝適合你作業系統的桌面版，完成後開啟 KLayout。
+
+### 2. 在 KLayout 安裝 GDSFactory 套件 {#install-klive}
+
+從 KLayout 的套件管理員安裝 `gdsfactory`。KLayout 會自動安裝其相依套件，其中的 KLive 負責在 Python 呼叫 `component.show()` 時接收並開啟版圖。
+
+1. 在 KLayout 開啟 **Tools → Manage Packages → Install New Packages**。
+2. 搜尋 `gdsfactory` 並選取結果。點擊勾選按鈕標記安裝，再按 **Apply**。
+
+   ![KLayout 套件管理員，框出 gdsfactory 搜尋欄、勾選按鈕與 Apply](../assets/klayout-gdsfactory-install.png)
+
+3. 初次安裝時，在 **Ready for Installation** 確認清單包含 `klive`，再按 **Ok**。安裝完成後按 **Close**。若 KLayout 詢問是否執行新套件的啟動腳本，按 **Yes**。
+4. 在 **Current Packages** 確認 `klive` 為 **0.4.0 或更新版本**，OrcaPen 才能自動選用製程。若版本較舊，請到 **Update Packages** 更新 `klive`。
+
+   ![KLayout 的 Current Packages 分頁，框出實際安裝的 KLive 0.4.3 版本](../assets/klayout-gdsfactory-klive-version.png)
+
+安裝確認視窗可能顯示相依套件的最低需求版本，實際安裝版本以 **Current Packages** 為準。工具列 Technology 按鈕旁的 **LIVE** 應顯示綠色。若顯示紅色，可點擊該圖示重新啟動 KLive。指示燈說明請見 [KLive 官方文件](https://gdsfactory.github.io/klive/)。
+
+### 3. 將 OrcaPen 儲存庫連到 KLayout {#link-orcapen-technology}
+
+使用已支援圖層分組預覽的本機 OrcaPen 儲存庫，或下載並解壓縮[本教學使用的 OrcaPen 原始碼](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/archive/1de5fe77a1d6a5d9b0f4cb36e9579e47f4004296.zip)。在本機終端機進入該資料夾後，執行下列指令。
+
+```bash
+uv sync -p 3.12
+uv run python -m orcapen_sc_pdk.install_tech
+```
+
+第一個指令建立專案的 `.venv`，並安裝 GDSFactory 等 Python 相依套件。第二個指令將儲存庫中的 `orcapen_sc_pdk/klayout/` 資料夾連到 KLayout，註冊為 `orcapen_sc_pdk` 製程設定。該資料夾包含製程定義（`tech.lyt`）與分組後的圖層屬性（`layers.lyp`）。
+
+重新啟動 KLayout，開啟 **Tools → Manage Technologies**，展開 `orcapen_sc_pdk` 並選擇 **General**。確認製程名稱後關閉對話框。開啟版圖時，也可以在工具列的 Technology 下拉選單找到這項製程。
+
+![KLayout 重啟後的 Technology Manager，框出 OrcaPen 項目和完整製程名稱 orcapen_sc_pdk](../assets/klayout-orcapen-technology.png)
+
+確認 **LIVE** 顯示綠色，並保持 KLayout 開啟。若之後移動儲存庫，請在新位置重跑第二個指令來更新連結。
+
+::: {.callout-tip title="將 KLayout 畫布設為深色"}
+本教學使用近黑色畫布，以搭配 OrcaPen 的圖層配色。macOS 請開啟 **klayout → Preferences…**，其他平台請開啟 **File → Setup**。前往 **Display → Background**，將 **Background color** 設為 `#1E1E1E`（RGB 30、30、30），再按 **Apply**。
+:::
+
+### 4. 從 VS Code 執行元件檔案 {#run-python-file}
+
+在 VS Code 開啟本機 OrcaPen 資料夾，安裝 [Microsoft Python 擴充套件](https://marketplace.visualstudio.com/items?itemName=ms-python.python)。在命令選擇區執行 **Python: Select Interpreter**，選擇專案的 `.venv`。
+
+下列步驟使用未安裝 GF+ 擴充套件的 VS Code 環境。OrcaPen 偵測到 GF+ 時會優先使用它。若已安裝 GF+，可用下方的終端機指令明確指定 KLayout。
+
+1. 開啟 `orcapen_sc_pdk/cells/layout/airbridge.py`。
+2. 點擊編輯器右上角的 **執行 Python 檔案**（Run Python File，▶）。
+
+   ![VS Code 中 airbridge.py 編輯器右上角標示出的執行 Python 檔案按鈕](../assets/vscode-run-python-airbridge.png)
+
+3. 切換到 KLayout。KLive 會開啟或更新空橋（Airbridge）版圖，並套用 `orcapen_sc_pdk` 製程設定。在 **Layers** 面板展開 **Airbridge**，即可看到繪製層與通孔層。若版圖未自動開啟，可在 KLayout 選擇 OrcaPen 製程設定後，手動開啟 `build/gds/airbridge.gds`。
+
+   ![桌面版 KLayout 在教學使用的近黑色畫布上顯示 OrcaPen airbridge 版圖，右側展開 Airbridge 圖層群組](../assets/klayout-klive-airbridge.png)
+
+同一檔案若定義多個元件，這個按鈕會預覽 `__main__` 區塊指定的元件。若要預覽其他已註冊的元件，可在本機終端機指定名稱。以下以諧振器為例。
+
+```bash
+uv run python -m orcapen_sc_pdk.preview resonator --viewer klayout
+```
+
+若要讓自己撰寫的 Python 腳本使用 `component.show()` 傳送版圖，請參閱 [GDSFactory 的 KLayout 整合指南](https://gdsfactory.github.io/gdsfactory/notebooks/_2_klayout/)。若已有 GDS 檔案，可參閱[在 KLayout 檢視圖層](layers.qmd#view-layers-in-klayout)，了解如何載入 OrcaPen 的圖層屬性檔（`.lyp`）。
+
+接著可閱讀[圖層與堆疊](layers.qmd)，查詢圖層名稱、GDS 編號和實體高度。

@@ -123,6 +123,7 @@ website:
       contents:
         - getting-started.md
         - start/common-cells.qmd
+        - start/preview-cells.qmd
         - start/layers.qmd
         - start/materials.qmd
         - section: Layout guides
