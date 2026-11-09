@@ -266,7 +266,7 @@ print("min interior angle (reported only):", result["min_angle_deg"])
 **H1. 先重用，再自己寫。** 請依下列順序使用現有的內容繪製：
 
 1. `orcapen_sc_pdk.helpers`，例如以 `polar_point` 與 `rotate_point` 取代行內的 `cos` 與 `sin`，以及 `merge_component_layers`、`add_etch_for_component`。
-2. PDK 的 cell 與基本元件，位於 `orcapen_sc_pdk/cells/layout/primitives.py`（`bend_euler`、`rounded_rectangle`、`wire_corner` 等）；請見[共用 layout 基本元件](public-pdk-examples/shared-primitives.md)。
+2. PDK 的 cell 與基本元件，位於 `orcapen_sc_pdk/cells/layout/primitives.py`（`bend_euler`、`rounded_rectangle`、`wire_corner` 等）；請見[共用版圖基本元件](public-pdk-examples/shared-primitives.md)。
 3. 公開的 GDSFactory API。
 
 現有函式不適用時，請在 PR 中點名該函式並說明原因。
