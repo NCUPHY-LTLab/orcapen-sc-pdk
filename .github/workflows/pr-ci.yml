@@ -1,0 +1,35 @@
+name: OrcaPen PR checks
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, reopened, synchronize, ready_for_review, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: orcapen-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    uses: ./.github/workflows/pdk-checks.yml
+
+  docs:
+    if: ${{ !github.event.pull_request.draft }}
+    uses: ./.github/workflows/docs-build.yml
+
+  orcapen-ci:
+    if: ${{ always() && !github.event.pull_request.draft }}
+    needs: [package, docs]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require package and documentation success
+        env:
+          PACKAGE_RESULT: ${{ needs.package.result }}
+          DOCS_RESULT: ${{ needs.docs.result }}
+        run: |
+          printf 'Package: %s\nDocumentation: %s\n' "$PACKAGE_RESULT" "$DOCS_RESULT"
+          test "$PACKAGE_RESULT" = success && test "$DOCS_RESULT" = success
