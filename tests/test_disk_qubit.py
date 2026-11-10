@@ -4,6 +4,8 @@ import math
 
 import gdsfactory as gf
 import pytest
+from geometry_checks import MIN_EDGE_DBU, construction_report, interior_angles, polygon_defects
+from kfactory import kdb
 
 from orcapen_sc_pdk.pdk import PDK
 from orcapen_sc_pdk.tech import LAYER
@@ -198,6 +200,134 @@ def test_junction_lumped_port_sits_on_the_simulation_sheet(grounded) -> None:
     assert math.hypot(x - 167.938, y + 167.938) < 4.0
 
 
+# Defaults and the corners of the supported range named in #53, at both curve
+# samplings; junction angles off the diagonals need include_tc=False.
+CONSTRUCTION_BUILDS = {
+    "defaults": {},
+    "include_ground=False": {"include_ground": False},
+    "tc_grounded_sides=()": {"tc_grounded_sides": ()},
+    "include_tc=False": {"include_tc": False},
+    "tc_span=40": {"tc_span": 40.0},
+    "tc_span=60": {"tc_span": 60.0},
+    "tc_landing_span=None": {"tc_landing_span": None},
+    "junction_lead_span=0": {"junction_lead_span": 0.0},
+    "junction_angle=0": {"include_tc": False, "junction_angle": 0.0},
+    "junction_angle=17.3": {"include_tc": False, "junction_angle": 17.3},
+    "N, W grounded": {"tc_grounded_sides": ("N", "W"), "disk_radius": 115.0},
+}
+
+
+def _intended_holes(component, settings) -> dict[tuple[int, int], kdb.Region]:
+    """The cut-outs drawn on purpose, in DBU: each die's ground opening.
+
+    On D0 they are the clearance, which the readout line's mask joins, and the
+    drive line's mask. On D1 the clearance and the claw masks form one opening;
+    a grounded claw reaches into it from the ground. Signal conductors inside
+    an opening are islands and do not change its outline.
+    """
+    if not settings.get("include_ground", True):
+        return {}
+    d1_opening = _region(component, LAYER.D1_BOTTOM_GROUND_MASK, "QGroundMask")
+    for side in component.info["grounded_tc_sides"]:
+        d1_opening -= _region(component, LAYER.D1_BOTTOM_M1_DRAW, f"TC_{side}")
+    return {
+        tuple(LAYER.D0_TOP_M1_DRAW): _region(component, LAYER.D0_TOP_GROUND_MASK, "CGroundMask"),
+        tuple(LAYER.D1_BOTTOM_M1_DRAW): d1_opening.merged(),
+    }
+
+
+@pytest.mark.parametrize("sampling", ["fabrication", "simulation"])
+@pytest.mark.parametrize("build", list(CONSTRUCTION_BUILDS))
+def test_every_polygon_is_drawn_as_meant(build, sampling) -> None:
+    """Construction checks (R8) on every flattened polygon and every merged layer."""
+    PDK.activate()
+    settings = CONSTRUCTION_BUILDS[build]
+    component = PDK.get_component("disk_flip_chip_qubit", curve_sampling=sampling, **settings)
+    intended = _intended_holes(component, settings)
+    # D0: the clearance with the readout mask, and the drive mask. D1: one opening.
+    counts = {tuple(LAYER.D0_TOP_M1_DRAW): 2, tuple(LAYER.D1_BOTTOM_M1_DRAW): 1}
+    for layer, report in construction_report(component).items():
+        assert not report.defects, (layer, report.defects[:5])
+        assert report.min_edge_dbu >= MIN_EDGE_DBU, layer
+        assert report.holes.count() == (counts[layer] if layer in intended else 0), layer
+        assert (report.holes ^ intended.get(layer, kdb.Region())).is_empty(), layer
+        # Reported only; the interior angle has no threshold yet.
+        print(f"{build} [{sampling}] {layer}: min interior angle {report.min_angle_deg}°")
+
+
+@pytest.mark.parametrize("sampling", ["fabrication", "simulation"])
+def test_disk_and_grounds_are_each_one_valid_polygon(sampling) -> None:
+    PDK.activate()
+    component = PDK.get_component("disk_flip_chip_qubit", curve_sampling=sampling)
+    for instance, layer in (
+        ("QFace", LAYER.D1_BOTTOM_M1_DRAW),
+        ("QGround", LAYER.D1_BOTTOM_M1_DRAW),
+        ("CGround", LAYER.D0_TOP_M1_DRAW),
+    ):
+        region = _region(component, layer, instance)
+        assert region.count() == 1, instance
+        assert not polygon_defects(next(iter(region.each()))), instance
+
+
+@pytest.mark.parametrize("sampling", ["fabrication", "simulation"])
+def test_lead_fan_meets_the_disk_without_a_crack(sampling) -> None:
+    """#47 C1: between the fan's sides the disk edge is metal, not a gap between samplings."""
+    PDK.activate()
+    component = PDK.get_component("disk_flip_chip_qubit", curve_sampling=sampling)
+    disk = _region(component, LAYER.D1_BOTTOM_M1_DRAW, "QFace")
+    # The default fan spans junction_angle ± 10° on the 110.5 µm disk; the
+    # crack ran inside the disk circle, within the sagitta of its chords.
+    for radius in (110.5, 110.4, 110.3, 110.2, 110.1, 110.0):
+        for offset in (-9.5 + 0.5 * step for step in range(39)):
+            assert _covers(disk, radius, 315 + offset), (radius, offset)
+
+
+@pytest.mark.parametrize("sampling", ["fabrication", "simulation"])
+def test_claws_are_rounded_once_with_a_square_lead_end(sampling) -> None:
+    """#47 C4: no corner is added back after rounding; only the lead's end stays square."""
+    PDK.activate()
+    component = PDK.get_component(
+        "disk_flip_chip_qubit", curve_sampling=sampling, tc_grounded_sides=()
+    )
+    for side in "NESW":
+        (claw,) = _region(component, LAYER.D1_BOTTOM_M1_DRAW, f"TC_{side}").each()
+        points = list(claw.each_point_hull())
+        # A corner turning by more than 45° is one the rounding left sharp.
+        sharp = [
+            (point.x / 1e3, point.y / 1e3)
+            for point, angle in zip(points, interior_angles(points), strict=True)
+            if abs(angle - 180) > 45
+        ]
+        assert len(sharp) == 2, (side, sharp)
+        assert all(math.hypot(*point) == pytest.approx(HANDOFF, abs=0.01) for point in sharp)
+
+
+def _covers_point(region, point) -> bool:
+    x, y = point
+    return _covers(region, math.hypot(x, y), math.degrees(math.atan2(y, x)))
+
+
+@pytest.mark.parametrize(
+    ("settings", "contributors"),
+    [
+        ({}, ["QGround", "CGround"]),
+        ({"tc_grounded_sides": ("N", "W"), "disk_radius": 115.0}, ["QGround", "CGround"]),
+        ({"include_ground": False}, ["TC_N", "TC_E", "TC_S", "TC_W"]),
+        ({"include_ground": False, "tc_grounded_sides": ()}, []),
+    ],
+)
+def test_ground_contributions_use_the_scgsim_keys(settings, contributors) -> None:
+    """Each entry selects ground metal on its own layer, in SCGSim's documented form."""
+    PDK.activate()
+    component = PDK.get_component("disk_flip_chip_qubit", **settings)
+    entries = component.info["component_semantics"]["ground_plane_contributions"]
+    assert [entry["local_id"] for entry in entries] == contributors
+    for entry in entries:
+        assert set(entry) == {"local_id", "plane_id", "level", "layer", "selector_point_um"}
+        region = _region(component, tuple(entry["layer"]), entry["local_id"])
+        assert _covers_point(region, entry["selector_point_um"]), entry["local_id"]
+
+
 @pytest.mark.parametrize(
     ("settings", "message"),
     [
@@ -226,6 +356,10 @@ def test_junction_lumped_port_sits_on_the_simulation_sheet(grounded) -> None:
         ({"junction_lead_width": 6.0}, "junction_lead_width must be below the 5.657 µm"),
         # The round tip leaves no straight line before the handoff.
         ({"ro_tip_radius": 582.0}, "half the RO width inside the handoff square"),
+        # A taper landing next to a claw's outer corner leaves no room for the
+        # corner radius, on either side of the corner.
+        ({"tc_landing_span": 44.99}, "tc_landing_span must equal tc_span or differ from it"),
+        ({"tc_span": 43.0}, r"by at least 2\.486° \(claw N\)"),
     ],
 )
 def test_settings_outside_the_supported_scope_are_rejected(settings, message) -> None:

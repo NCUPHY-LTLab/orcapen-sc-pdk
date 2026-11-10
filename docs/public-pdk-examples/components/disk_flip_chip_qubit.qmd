@@ -58,6 +58,10 @@ combination. Settings that would draw a plausible layout with a short or an
 open raise `ValueError`:
 
 - Each claw stays inside the ground clearance, and `tc_span` is at most 60°.
+- `tc_landing_span` equals `tc_span`, or differs from it by at least the
+  angle that `2 * tc_corner_radius` subtends at the claw's outer radius
+  (2.486° at the defaults), so the claw's outer corner keeps its full
+  `tc_corner_radius`.
 - With claws, `junction_angle` and `junction_open_lead_angles` lie on the
   diagonals (45° + k·90°), between the claws.
 - For grounded claws, the mask end (`handoff_half_extent` plus
