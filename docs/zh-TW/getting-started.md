@@ -5,6 +5,8 @@ sidebar: get-started
 
 安裝公開原始碼預覽版，啟用其 GDSFactory 製程設計套件（Process Design Kit，PDK），並建立已註冊的諧振器。建立佈局不需要求解器。
 
+有 GDSFactory+ 授權時，可在本機或遠端開發並預覽版圖。沒有授權時，請使用本機 KLayout 流程。設定方式請見[預覽元件](start/preview-cells.qmd)。
+
 ## 安裝
 
 請搭配 uv 使用 Python 3.12 或 3.13。建立 Python 3.12 專案時：
@@ -38,4 +40,4 @@ component.plot()
 
 ## 接續閱讀
 
-請參閱[常用元件](start/common-cells.qmd)、[圖層與堆疊](start/layers.qmd)、[材料與介面](start/materials.qmd)或[模擬指南](notebooks.qmd)。各模擬指南會列出其 SCGSim 版本與求解器需求。
+先從[常用元件](start/common-cells.qmd)選擇要查看的版圖，再依照[預覽元件](start/preview-cells.qmd)設定 GDSFactory+ 或本機 KLayout。接著可參閱[圖層與堆疊](start/layers.qmd)及[材料與介面](start/materials.qmd)。各[模擬指南](notebooks.qmd)會列出其 SCGSim 版本與求解器需求。
