@@ -15,48 +15,19 @@ cd orcapen-sc-pdk
 uv sync -p 3.12
 ```
 
-This installs the PDK plus the development tools, pytest and Ruff. Then set up
-the viewer you use. GDSFactory+ is optional and needs a paid subscription.
-
-**Without GDSFactory+**: install [KLayout](https://www.klayout.de/) and its
-klive plugin. Previews then open in KLayout.
-
-**With GDSFactory+**: open the checkout in VS Code with the GDSFactory+
-extension (version 2.3 or later) and choose **Setup Automatically** in
-**GF+ Settings → Status**. The extension installs its SDK and the packages its
-worker needs, including the SPICE packages InSpice and vacask, into `.venv`.
-GDSFactory+ requires Python 3.12.
-
-- These packages are not in `uv.lock`, so a later `uv sync` removes them.
-  Choose **Setup Automatically** again to reinstall them.
-- The extension also adds a `[tool.uv]` block marked "Managed by GDSFactory+"
-  to `pyproject.toml` and updates `uv.lock`. Keep those edits local and leave
-  them out of commits: they limit the lock file to Linux x86-64 for everyone.
-
-Check: `uv run python --version` reports a supported Python version.
-For documentation dependencies and preview, use
+This installs the PDK plus pytest and Ruff. Run `uv run python --version` to
+check your interpreter. For viewer setup, see [Preview Cells](start/preview-cells.qmd).
+For documentation dependencies and preview, see
 [Documentation & Website](docs-publishing.md).
 
-## Preview a component
+If the GDSFactory+ extension adds machine-specific settings to `pyproject.toml`
+or `uv.lock`, keep those edits in your local checkout.
 
-Every cell module ends with a preview block. Run the file directly, for example
-with **Run Python File** in VS Code:
+## Add a preview to a new cell {#preview-a-component}
 
-```bash
-uv run python orcapen_sc_pdk/cells/layout/resonator.py
-```
-
-To preview any registered cell by name:
-
-```bash
-uv run python -m orcapen_sc_pdk.preview resonator
-```
-
-Both write `build/gds/<cell>.gds` and open it. Inside a VS Code terminal with
-GDSFactory+ installed, the file opens in the GDSFactory+ Layout Viewer.
-Otherwise it is sent to KLayout through klive. Pass `--viewer klayout` or
-`--viewer gdsfactoryplus` to choose explicitly. In a new cell module, end with
-the same block:
+See [Preview Cells](start/preview-cells.qmd) for viewer setup and usage. End new
+cell modules with the following block so users can run the file directly and
+preview the selected cell.
 
 ```python
 if __name__ == "__main__":

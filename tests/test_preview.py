@@ -12,7 +12,9 @@ def opened(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> list[str]:
 
     monkeypatch.chdir(tmp_path)
     calls: list[str] = []
-    monkeypatch.setattr(gf.Component, "show", lambda self, **_: calls.append("klayout"))
+    monkeypatch.setattr(
+        gf.Component, "show", lambda self, *, technology: calls.append(f"klayout:{technology}")
+    )
     monkeypatch.setattr(
         preview.subprocess, "run", lambda command, **_: calls.append(" ".join(command))
     )
@@ -24,7 +26,7 @@ def test_klayout_preview_writes_one_gds_per_factory(opened: list[str]) -> None:
 
     assert gds_path == Path("build/gds/taper.gds")
     assert gds_path.is_file()
-    assert opened == ["klayout"]
+    assert opened == ["klayout:orcapen_sc_pdk"]
 
 
 def test_auto_preview_opens_gds_in_gdsfactoryplus_when_available(
