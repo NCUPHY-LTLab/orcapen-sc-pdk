@@ -219,11 +219,66 @@ def _wrap_with_bumps(
     return wrapped, named_instances
 
 
-def author_common_flip_chip_ground_planes(component: gf.Component) -> gf.Component:
-    """Assign one D0 and one D1 physical ground plane to a final assembly."""
+def author_common_flip_chip_ground_planes(
+    component: gf.Component,
+    *,
+    plane_bounds_um: tuple[float, float, float, float] | None = None,
+) -> gf.Component:
+    """Assign one D0 and one D1 physical ground plane to a final assembly.
+
+    Each plane is the assembly's common area minus its die's ground mask
+    (``D0_TOP_GROUND_MASK``, ``D1_BOTTOM_GROUND_MASK``). The common area is the
+    assembly's bounding box. ``plane_bounds_um``, as ``(x_min, y_min, x_max,
+    y_max)`` in µm, sets it instead: it is drawn on ``D0_SUBSTRATE_AREA`` and
+    ``D1_SUBSTRATE_AREA``, the die footprints the planes take their bounds
+    from, and must contain the whole assembly.
+
+    No ground mask may reach the common area's outline. A mask that touches or
+    cuts the outline leaves ground metal that meets itself at a point or is cut
+    apart, so it raises ``ValueError``. Pass the die or site extent when the
+    assembly ends on a mask, for example a single site drawn with
+    ``include_ground=False``.
+    """
 
     if "component_semantics" in component.info:
         raise ValueError("final assembly already has component_semantics")
+    if plane_bounds_um is not None:
+        x_min, y_min, x_max, y_max = (float(value) for value in plane_bounds_um)
+        assembly = component.dbbox()
+        if not (
+            x_min <= assembly.left
+            and y_min <= assembly.bottom
+            and assembly.right <= x_max
+            and assembly.top <= y_max
+        ):
+            raise ValueError(
+                f"plane_bounds_um {plane_bounds_um!r} must contain the whole assembly, "
+                f"which spans {assembly}"
+            )
+        for layer in (LAYER.D0_SUBSTRATE_AREA, LAYER.D1_SUBSTRATE_AREA):
+            component.add_polygon(
+                [(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_min, y_max)], layer=layer
+            )
+    outline = component.dbbox()
+    for name, mask_layer in (
+        ("D0_TOP_GROUND_MASK", LAYER.D0_TOP_GROUND_MASK),
+        ("D1_BOTTOM_GROUND_MASK", LAYER.D1_BOTTOM_GROUND_MASK),
+    ):
+        mask = component.get_region(mask_layer, merge=True)
+        if mask.is_empty():
+            continue
+        # The region is in database units; compare in micrometres.
+        reach = mask.bbox().to_dtype(component.kcl.dbu)
+        if not (
+            outline.left < reach.left
+            and outline.bottom < reach.bottom
+            and reach.right < outline.right
+            and reach.top < outline.top
+        ):
+            raise ValueError(
+                f"{name} reaches the ground plane outline {outline}; pass "
+                "plane_bounds_um, the die or site extent, so every ground mask lies inside it"
+            )
     d1_mask = tuple(int(value) for value in LAYER.D1_BOTTOM_GROUND_MASK)
     component.info["component_semantics"] = {
         "schema_version": 2,

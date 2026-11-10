@@ -1,9 +1,14 @@
 """Tests for flip-chip coupon indium-bump placement."""
 
+import gdsfactory as gf
 import pytest
 
+from orcapen_sc_pdk.cells.layout.disk_qubit import disk_flip_chip_qubit
 from orcapen_sc_pdk.cells.layout.qubit import kosen2024_flip_chip_xmon_qubit
-from orcapen_sc_pdk.helpers.assembly import place_flip_chip_ground_short_bumps
+from orcapen_sc_pdk.helpers.assembly import (
+    author_common_flip_chip_ground_planes,
+    place_flip_chip_ground_short_bumps,
+)
 from orcapen_sc_pdk.pdk import PDK
 from orcapen_sc_pdk.tech import LAYER
 
@@ -117,3 +122,40 @@ def test_place_flip_chip_ground_short_bumps_full_field_authors_gds_lattice() -> 
     _assert_pitch_separation(_under_bump_centers(coupon.component), pitch_um=80.0)
     assert coupon.coupon_padding_um >= coupon.requested_coupon_padding_um
     assert coupon.stack_coupon_padding_um >= 0.0
+
+
+def _single_site_assembly(**settings):
+    PDK.activate()
+    device = disk_flip_chip_qubit(include_ground=False, include_tc=False, **settings)
+    parent = gf.Component()
+    parent.add_ref(device, name="device")
+    return parent
+
+
+def test_common_ground_planes_refuse_a_mask_on_their_outline() -> None:
+    # Without claws, the readout and drive masks set the site's bounding box.
+    with pytest.raises(ValueError, match="D0_TOP_GROUND_MASK reaches the ground plane outline"):
+        author_common_flip_chip_ground_planes(_single_site_assembly())
+
+
+@pytest.mark.parametrize("lead_span", [20.0, 0.0])
+def test_common_ground_planes_take_the_given_site_bounds(lead_span) -> None:
+    parent = author_common_flip_chip_ground_planes(
+        _single_site_assembly(junction_lead_span=lead_span),
+        plane_bounds_um=(-500.0, -500.0, 500.0, 500.0),
+    )
+    site = gf.kdb.Region(gf.kdb.Box(-500_000, -500_000, 500_000, 500_000))
+    for layer in (LAYER.D0_SUBSTRATE_AREA, LAYER.D1_SUBSTRATE_AREA):
+        assert (parent.get_region(layer, merge=True) ^ site).is_empty()
+    planes = parent.info["component_semantics"]["conductor_regions"]
+    assert [plane["semantic_id"] for plane in planes] == [
+        "D0_TOP_GROUND_PLANE",
+        "D1_BOTTOM_GROUND_PLANE",
+    ]
+
+
+def test_common_ground_plane_bounds_must_hold_the_assembly() -> None:
+    with pytest.raises(ValueError, match="must contain the whole assembly"):
+        author_common_flip_chip_ground_planes(
+            _single_site_assembly(), plane_bounds_um=(-400.0, -400.0, 400.0, 400.0)
+        )

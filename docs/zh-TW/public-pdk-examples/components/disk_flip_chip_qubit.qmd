@@ -49,6 +49,7 @@ disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 這個元件支援在預設組合附近小幅調整，不支援任意組合。會畫出看似正常、實際卻短路或斷路的設定，會丟出 `ValueError`：
 
 - 每個耦合爪都要在接地淨空區內，`tc_span` 最多 60°。
+- `tc_landing_span` 要等於 `tc_span`，或與它至少相差 `2 * tc_corner_radius` 在耦合爪外半徑上所對的角度（預設值下為 2.486°），耦合爪外角才保有完整的 `tc_corner_radius`。
 - 有耦合爪時，`junction_angle` 和 `junction_open_lead_angles` 要落在對角線上（45° + k·90°），也就是耦合爪之間。
 - 接地的耦合爪，其遮罩末端（`handoff_half_extent` 加 `tc_cpw_gap`，或加 `tc_outer_extension_end_clearance`）再加一個 CPW 線寬，要在 `ground_outer_half_extent` 之內。
 - 每個凸塊以較大方塊（`indium_bump_size` 或 `under_bump_size`）的半對角線計算，要避開接地淨空區，以及讀出線、驅動線和耦合爪線的遮罩。調整 `ro_angle`、`xy_angle`、`bump_lattice_count` 或 `bump_skip_period` 時，訊號線要維持在空著的凸塊位置上。
