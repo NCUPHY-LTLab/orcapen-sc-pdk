@@ -39,12 +39,15 @@ def small_airbridge_chip(
         raise ValueError(f"airbridge_count must be non-negative, got {airbridge_count!r}.")
 
     c = gf.Component()
-    c << gf.get_component(
-        "dicing_edge",
-        size=(chip_width, chip_height),
-        layer=etch_layer,
-        curve_sampling=curve_sampling,
-    )
+    # The dicing street is etched. The ground mask carries the same frame, so
+    # ETCH = GROUND_MASK - DRAW holds at the chip edge as it does elsewhere.
+    for frame_layer in (etch_layer, ground_mask_layer):
+        c << gf.get_component(
+            "dicing_edge",
+            size=(chip_width, chip_height),
+            layer=frame_layer,
+            curve_sampling=curve_sampling,
+        )
 
     xs = gf.get_cross_section(
         cpw_xs,

@@ -439,7 +439,7 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
     draw_layer: Layer = LAYER.D0_TOP_M1_DRAW,
     etch_layer: Layer = LAYER.D0_TOP_M1_ETCH,
     ground_mask_layer: Layer = LAYER.D0_TOP_GROUND_MASK,
-    idc_finger_length: float = 59.924760,
+    idc_finger_length: float = 59.925,
     mtl_center: tuple[float, float] = (0.0, 0.0),
     mtl_orientation: float = 0.0,
     filter_open_anchor: tuple[float, float, float] = (-355.628, -1011.0, 270.0),
@@ -483,7 +483,10 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
     Public preview defaults:
     readout_open_length=2539.512388, shared_short_length=2270.302789,
     coupled_length=311.256590,
-    filter_open_length=2319.359517, idc_finger_length=59.924760.
+    filter_open_length=2319.359517, idc_finger_length=59.925.
+
+    ``idc_finger_length`` must lie on the manufacturing grid, like the anchors
+    and waypoints; an off-grid length raises ValueError.
     """
 
     for name, value in (
@@ -584,6 +587,8 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         raise ValueError(f"mtl_center coordinates must be finite, got {mtl_center!r}.")
     _is_grid_aligned(mtl_center[0], dbu, name="mtl_center[0]")
     _is_grid_aligned(mtl_center[1], dbu, name="mtl_center[1]")
+    # An off-grid finger cannot be drawn at its requested length.
+    _is_grid_aligned(idc_finger_length, dbu, name="idc_finger_length")
 
     filter_open_anchor = _coerce_anchor("filter_open_anchor", filter_open_anchor, dbu=dbu)
     readout_open_anchor = _coerce_anchor("readout_open_anchor", readout_open_anchor, dbu=dbu)

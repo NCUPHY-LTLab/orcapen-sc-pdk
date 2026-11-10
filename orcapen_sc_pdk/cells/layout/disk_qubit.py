@@ -19,6 +19,7 @@ device.
 
 from __future__ import annotations
 
+import itertools
 import math
 
 import gdsfactory as gf
@@ -26,6 +27,7 @@ import gdsfactory as gf
 import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.indium import indium_bump
 from orcapen_sc_pdk.cells.layout.junction import manhattan_style_junction
+from orcapen_sc_pdk.helpers.layout.geometry import polar_point
 from orcapen_sc_pdk.tech import LAYER, Layer, coplanar_waveguide
 
 QDRAW, QMASK = LAYER.D1_BOTTOM_M1_DRAW, LAYER.D1_BOTTOM_GROUND_MASK
@@ -175,21 +177,39 @@ def _radial_taper(
     neck_width: float,
     sampling: curves.CurveSampling,
 ) -> gf.Component:
-    """Taper a narrow lead neck to a sampled arc about the qubit centre."""
-    half = landing_span / 2
-    segments = curves.arc_points(landing_radius, landing_span, sampling) - 1
-    arc = [
-        (
-            landing_radius * math.cos(math.radians(-half + landing_span * i / segments)),
-            landing_radius * math.sin(math.radians(-half + landing_span * i / segments)),
-        )
-        for i in range(segments + 1)
-    ]
+    """Taper a narrow lead neck to ``±landing_span / 2`` on a circle about the qubit centre.
+
+    Landing outward, on ground metal, the taper ends on a sampled arc. Landing
+    inward, on the disk, its straight sides cross the disk circle there and run
+    on to where they come closest to the centre, so the union meets the disk's
+    own outline instead of a second sampling of its circle. Where a side
+    crosses the disk at one of its vertices, the side passes through that vertex.
+    """
     taper = gf.Component()
-    taper.add_polygon(
-        [(neck_x, neck_y - neck_width / 2), *arc, (neck_x, neck_y + neck_width / 2)],
-        layer=QDRAW,
-    )
+    half = landing_span / 2
+    if landing_radius >= math.hypot(neck_x, neck_y):
+        segments = curves.arc_points(landing_radius, landing_span, sampling) - 1
+        arc = [
+            polar_point(landing_radius, -half + landing_span * i / segments)
+            for i in range(segments + 1)
+        ]
+        taper.add_polygon(
+            [(neck_x, neck_y - neck_width / 2), *arc, (neck_x, neck_y + neck_width / 2)],
+            layer=QDRAW,
+        )
+        return taper
+    steps = half * curves.circle_segments(landing_radius, sampling) / 360
+    on_vertex = math.isclose(steps, round(steps), abs_tol=1e-9)
+    sides = []
+    for sign in (-1, 1):
+        neck = (neck_x, neck_y + sign * neck_width / 2)
+        landing = polar_point(landing_radius, sign * half)
+        dx, dy = landing[0] - neck[0], landing[1] - neck[1]
+        nearest = -(neck[0] * dx + neck[1] * dy) / (dx**2 + dy**2)
+        inside = (neck[0] + nearest * dx, neck[1] + nearest * dy)
+        sides.append([neck, landing, inside] if on_vertex else [neck, inside])
+    lower, upper = sides
+    taper.add_polygon([*lower, *reversed(upper)], layer=QDRAW)
     return taper
 
 
@@ -320,123 +340,6 @@ def _disk_and_junction(
     return component, ground_leads, junction_center
 
 
-def _claw_taper(
-    geometry: gf.Component,
-    center_radius: float,
-    width: float,
-    landing_span: float,
-    end_radius: float,
-    cpw_width: float,
-    cpw_gap: float,
-) -> gf.Component:
-    """Add a straight taper from the claw outer edge to the CPW, with its mask."""
-    landing_radius = center_radius + width / 2
-    half_angle = math.radians(landing_span / 2)
-    upper = (landing_radius * math.cos(half_angle), landing_radius * math.sin(half_angle))
-    lower = (upper[0], -upper[1])
-    taper = gf.Component()
-    taper.add_polygon(
-        [(end_radius, -cpw_width / 2), lower, upper, (end_radius, cpw_width / 2)], layer=QDRAW
-    )
-    combined = gf.Component()
-    combined.add_ref(geometry)
-    combined.add_ref(taper)
-
-    mask_extension = gf.Component()
-    if width / 2 > cpw_width / 2:
-        mask_edge = cpw_width / 2 + cpw_gap
-        side_dx = upper[0] - end_radius
-        side_dy = upper[1] - cpw_width / 2
-        side_length = math.hypot(side_dx, side_dy)
-        offset_x = cpw_gap * side_dy / side_length
-        offset_y = -cpw_gap * side_dx / side_length
-        mask_extension.add_polygon(
-            [
-                (end_radius, cpw_width / 2),
-                upper,
-                (upper[0] + offset_x, upper[1] + offset_y),
-                (end_radius + offset_x, cpw_width / 2 + offset_y),
-                (end_radius, mask_edge),
-            ],
-            layer=QMASK,
-        )
-        mask_extension.add_polygon(
-            [
-                (end_radius, -cpw_width / 2),
-                lower,
-                (lower[0] + offset_x, lower[1] - offset_y),
-                (end_radius + offset_x, -cpw_width / 2 - offset_y),
-                (end_radius, -mask_edge),
-            ],
-            layer=QMASK,
-        )
-    masks = gf.Component()
-    if _layer(QMASK) in geometry.get_polygons_points(by="tuple"):
-        masks.add_ref(geometry.extract([QMASK]))
-    masks.add_ref(mask_extension)
-    tapered = gf.Component()
-    tapered.add_ref(_union(combined, QDRAW))
-    tapered.add_ref(_union(masks, QMASK))
-    tapered.add_port(name="out", port=geometry.ports["out"])
-    return tapered
-
-
-def _claw_segment(
-    center_radius: float,
-    width: float,
-    span: float,
-    lead_length: float,
-    cpw_width: float,
-    cpw_gap: float,
-    mask_end_extension: float,
-    corner_radius: float,
-    rounding_points: int,
-    sampling: curves.CurveSampling,
-) -> gf.Component:
-    """Arc claw on local +x with a radial CPW lead and an independent mask."""
-    c = gf.Component()
-    outer = center_radius + width / 2
-    arc = c << gf.components.ring(
-        radius=center_radius,
-        width=width,
-        angle=span,
-        angle_resolution=360 / curves.circle_segments(outer, sampling),
-        layer=QDRAW,
-    )
-    arc.drotate(-span / 2)
-    cpw = coplanar_waveguide(
-        width=cpw_width, gap=cpw_gap, draw_layer=QDRAW, ground_mask_layer=QMASK
-    )
-    lead = c << gf.path.straight(lead_length).extrude(cross_section=cpw)
-    lead.dmovex(center_radius)
-    out = _union(c, QDRAW)
-    if corner_radius:
-        # Round only the four arc corners and the two concave CPW shoulders;
-        # the outgoing CPW stays flat.
-        rounded = _force_round_corners(out, QDRAW, corner_radius, rounding_points)
-        windows = gf.Component()
-        inner = center_radius - width / 2
-        corners = [
-            (radius * math.cos(angle), radius * math.sin(angle))
-            for radius in (inner, outer)
-            for angle in (-math.radians(span / 2), math.radians(span / 2))
-        ]
-        shoulder_x = math.sqrt(outer**2 - (cpw_width / 2) ** 2)
-        corners.extend((shoulder_x, sign * cpw_width / 2) for sign in (-1, 1))
-        for point in corners:
-            window = windows << curves.circle(
-                radius=2 * corner_radius, layer=QDRAW, sampling=sampling
-            )
-            window.dmove(point)
-        preserved = gf.boolean(out, windows, operation="not", layer=QDRAW)
-        patches = gf.boolean(rounded, windows, operation="and", layer=QDRAW)
-        out = gf.boolean(preserved, patches, operation="or", layer=QDRAW)
-    mask_route = gf.path.straight(lead_length + mask_end_extension).extrude(cross_section=cpw)
-    (out << mask_route.extract([QMASK])).dmovex(center_radius)
-    out.add_port(name="out", port=lead.ports["o2"])
-    return out
-
-
 def _claw(
     center_radius: float,
     width: float,
@@ -453,46 +356,103 @@ def _claw(
     rounding_points: int,
     sampling: curves.CurveSampling,
 ) -> gf.Component:
-    """One claw on local +x: arc, optional taper, lead or extension, optional ground tail."""
-    inner_end = extension[0] if extension else handoff_radius
-    geometry = _claw_segment(
-        center_radius=center_radius,
-        width=width,
-        span=span,
-        lead_length=inner_end - center_radius,
-        cpw_width=cpw_width,
-        cpw_gap=cpw_gap,
-        mask_end_extension=0.0 if extension else cpw_gap,
-        corner_radius=corner_radius,
-        rounding_points=rounding_points,
-        sampling=sampling,
-    )
-    if extension:
-        # The extension authors its own mask below; keep only the claw metal.
-        signal = geometry.extract([QDRAW])
-        signal.add_port(name="out", port=geometry.ports["out"])
-        geometry = signal
-    if landing_span is not None:
-        geometry = _claw_taper(
-            geometry, center_radius, width, landing_span, taper_end_radius, cpw_width, cpw_gap
-        )
+    """One claw on local +x: arc, optional taper, lead or extension, optional ground tail.
 
+    The arc, the taper and the lead are drawn in this one frame and unioned
+    into one outline, which is rounded once. The lead is drawn past its end and
+    clipped back, so its end stays square.
+    """
+    inner, outer = center_radius - width / 2, center_radius + width / 2
+    # The taper lands on vertices of the outer arc itself, so the two outlines
+    # share them instead of meeting on two samplings of one circle. Both arcs
+    # take their point count from the outer circle.
+    landing = landing_span if landing_span is not None and landing_span < span else span
+    angles = []
+    for start, stop in itertools.pairwise(sorted({-span / 2, -landing / 2, landing / 2, span / 2})):
+        count = curves.arc_points(outer, stop - start, sampling) - 1
+        angles += [start + (stop - start) * i / count for i in range(count)]
+    angles.append(span / 2)
+    outer_arc = [polar_point(outer, angle) for angle in angles]
+    count = curves.arc_points(outer, span, sampling) - 1
+    inner_arc = [polar_point(inner, span * (0.5 - i / count)) for i in range(count + 1)]
+
+    # The claw's own lead ends at the extension start, else at the handoff,
+    # or, when grounded, in a tail of the lead width through the mask end that
+    # overlaps the ground by one lead width.
+    out_width = extension[1] if extension else cpw_width
+    mask_end = handoff_radius + (extension[3] if extension else cpw_gap)
+    tail_end = mask_end + out_width if grounded else handoff_radius
+    lead_end = extension[0] if extension else tail_end
+    overshoot = 2 * corner_radius + cpw_width
+
+    # --- Claw metal: arc, taper and lead as one outline
+    parts = gf.Component()
+    parts.add_polygon(outer_arc + inner_arc, layer=QDRAW)
+    lead = parts << gf.components.rectangle(
+        size=(lead_end + overshoot - center_radius, cpw_width), layer=QDRAW
+    )
+    lead.dmove((center_radius, -cpw_width / 2))
+    if landing_span is not None:
+        if landing_span <= span:
+            lower = outer_arc[angles.index(-landing / 2)]
+            upper = outer_arc[angles.index(landing / 2)]
+        else:
+            upper = polar_point(outer, landing_span / 2)
+            lower = (upper[0], -upper[1])
+        parts.add_polygon(
+            [
+                (taper_end_radius, -cpw_width / 2),
+                lower,
+                upper,
+                (taper_end_radius, cpw_width / 2),
+            ],
+            layer=QDRAW,
+        )
+    if corner_radius:
+        parts = _force_round_corners(parts, QDRAW, corner_radius, rounding_points)
+    kept = gf.components.rectangle(size=(lead_end + outer, 2 * outer), centered=True, layer=QDRAW)
+    end_clip = gf.Component()
+    end_clip.add_ref(kept).dmovex((lead_end - outer) / 2)
+    metal = gf.boolean(parts, end_clip, operation="and", layer=QDRAW)
+
+    # --- Ground mask around the lead and taper
+    masks = gf.Component()
+    cpw = coplanar_waveguide(
+        width=cpw_width, gap=cpw_gap, draw_layer=QDRAW, ground_mask_layer=QMASK
+    )
+    mask_route = gf.path.straight(
+        (extension[0] if extension else mask_end) - center_radius
+    ).extrude(cross_section=cpw)
+    (masks << mask_route.extract([QMASK])).dmovex(center_radius)
+    if landing_span is not None and width / 2 > cpw_width / 2:
+        mask_edge = cpw_width / 2 + cpw_gap
+        side_dx = upper[0] - taper_end_radius
+        side_dy = upper[1] - cpw_width / 2
+        side_length = math.hypot(side_dx, side_dy)
+        offset_x = cpw_gap * side_dy / side_length
+        offset_y = -cpw_gap * side_dx / side_length
+        for sign in (1, -1):
+            masks.add_polygon(
+                [
+                    (taper_end_radius, sign * cpw_width / 2),
+                    (upper[0], sign * upper[1]),
+                    (upper[0] + offset_x, sign * (upper[1] + offset_y)),
+                    (taper_end_radius + offset_x, sign * (cpw_width / 2 + offset_y)),
+                    (taper_end_radius, sign * mask_edge),
+                ],
+                layer=QMASK,
+            )
+
+    # --- Optional extension: a wider CPW from the clearance edge to the handoff
     if extension:
-        start, ext_width, ext_gap, end_clearance = extension
-        ext_cpw = coplanar_waveguide(
-            width=ext_width, gap=ext_gap, draw_layer=QDRAW, ground_mask_layer=QMASK
-        )
-        combined = gf.Component()
-        combined.add_ref(geometry)
-        ext_ref = combined.add_ref(
-            gf.path.straight(handoff_radius - start).extrude(cross_section=ext_cpw)
-        )
-        ext_ref.dmovex(start)
-        masks = gf.Component()
-        masks.add_ref(geometry.extract([QMASK]))
+        start, ext_width, ext_gap, _ = extension
+        ext = gf.Component()
+        ext.add_ref(metal)
+        strip = ext << gf.components.rectangle(size=(tail_end - start, ext_width), layer=QDRAW)
+        strip.dmove((start, -ext_width / 2))
+        metal = _union(ext, QDRAW)
         inner_edge = cpw_width / 2 + cpw_gap
         outer_edge = ext_width / 2 + ext_gap
-        mask_end = handoff_radius + end_clearance
         join = _circle_x_at_y(clearance_radius, outer_edge, QMASK, sampling)
         masks.add_polygon(
             [
@@ -507,39 +467,24 @@ def _claw(
             ],
             layer=QMASK,
         )
-        extended = gf.Component()
-        extended.add_ref(_union(combined, QDRAW))
-        extended.add_ref(_union(masks, QMASK))
-        extended.add_port(name="out", port=ext_ref.ports["o2"])
-        geometry = extended
 
-    claw = _signal_with_mask(geometry, QDRAW, QMASK)
-    if grounded:
-        # A radial tail of the output CPW width runs through the mask end into
-        # the ground and overlaps it by one CPW width.
-        out_width, mask_end = (
-            (extension[1], handoff_radius + extension[3])
-            if extension
-            else (cpw_width, handoff_radius + cpw_gap)
+    claw = gf.Component()
+    claw.add_ref(metal)
+    claw.add_ref(_union(masks, QMASK))
+    # The handoff port is the end of the outgoing CPW, as a route would draw it.
+    out_cpw = (
+        coplanar_waveguide(
+            width=extension[1], gap=extension[2], draw_layer=QDRAW, ground_mask_layer=QMASK
         )
-        tail = gf.Component()
-        tail.add_polygon(
-            [
-                (handoff_radius, -out_width / 2),
-                (mask_end + out_width, -out_width / 2),
-                (mask_end + out_width, out_width / 2),
-                (handoff_radius, out_width / 2),
-            ],
-            layer=QDRAW,
-        )
-        holder = gf.Component()
-        holder.add_ref(claw)
-        holder.add_ref(tail)
-        grounded_claw = gf.Component()
-        grounded_claw.add_ref(_union(holder, QDRAW))
-        grounded_claw.add_ref(claw.extract([QMASK]))
-        grounded_claw.add_port(name="out", port=claw.ports["out"])
-        claw = grounded_claw
+        if extension
+        else cpw
+    )
+    port_line = gf.Component()
+    route = port_line << gf.path.straight(handoff_radius - center_radius).extrude(
+        cross_section=out_cpw
+    )
+    route.dmovex(center_radius)
+    claw.add_port(name="out", port=route.ports["o2"])
     return claw
 
 
@@ -722,7 +667,11 @@ def disk_flip_chip_qubit(
     CPW width fits in the site; the junction leads are narrower than
     the spacing of the junction contacts; and every bump, measured by half the diagonal
     of its larger square, clears the ground clearance and the masks of the
-    readout, drive and claw lines.
+    readout, drive and claw lines. A claw's corners are drawn at
+    ``tc_corner_radius``, so ``tc_landing_span`` equals ``tc_span`` or differs
+    from it by at least the angle that ``2 * tc_corner_radius`` subtends at the
+    claw's outer radius (2.486° at the defaults); a taper landing closer to the
+    claw's outer corner leaves no room for that radius.
 
     Prior art: KQCircuits ``CircularTransmonSingleIsland`` (GPL-3.0, cited
     only, no code used); Braumüller et al., APL 108, 032601 (2016); Kosen et
@@ -842,6 +791,15 @@ def disk_flip_chip_qubit(
                 raise ValueError(f"claw {side} must stay inside the ground clearance")
             if extension and outer >= extension[0]:
                 raise ValueError(f"claw {side} must stay inside the extension start")
+            # A taper landing next to the claw's outer corner leaves an outer
+            # edge, or a taper overhang, too short for the corner radius: the
+            # corner would be rounded far tighter, in single-DBU steps.
+            margin = 2 * math.degrees(tc_corner_radius / outer)
+            if tc_landing_span is not None and 0 < abs(tc_landing_span - tc_span) < margin:
+                raise ValueError(
+                    f"tc_landing_span must equal tc_span or differ from it by at least"
+                    f" {margin:.3f}° (claw {side})"
+                )
         # The supported layouts keep the junction leads on the diagonals, at
         # least 15 degrees from a claw edge; a lead on a claw would short it.
         if tc_span > 60:
@@ -1014,6 +972,14 @@ def disk_flip_chip_qubit(
     def on_axis(radius, angle):
         return (radius * math.cos(math.radians(angle)), radius * math.sin(math.radians(angle)))
 
+    # The claws and their masks run along the axes; the readout and drive
+    # lines are the only other masks that can reach a site corner.
+    ground_corner = max(
+        (45.0, 135.0, 225.0, 315.0),
+        key=lambda corner: min(
+            abs((corner - line + 180) % 360 - 180) for line in (ro_angle, xy_angle)
+        ),
+    )
     c.info["component_semantics"] = {
         "schema_version": 2,
         "conductor_regions": [
@@ -1036,16 +1002,26 @@ def disk_flip_chip_qubit(
                 "XY", "D0_TOP_M1", CDRAW, on_axis(xy_tip_radius + xy_cpw_width / 2, xy_angle), "XY"
             ),
         ],
+        # SCGSim's documented contribution form. SCGSim selects the connected
+        # metal at each selector point. The ground selector lies between the
+        # handoff square and the site edge, on the site diagonal farthest from
+        # the readout and drive lines, so it is ground metal on both dies. A
+        # grounded claw's tail joins it to that ground metal, so the claw is
+        # declared on its own only when the cell draws no ground.
         "ground_plane_contributions": [
             {
                 "local_id": instance,
                 "plane_id": plane,
-                "geometry_source": "die_face_minus_ground_mask",
-                "mask_layer": _layer(mask),
+                "level": level,
+                "layer": _layer(draw),
+                "selector_point_um": on_axis(
+                    math.sqrt(2) * (handoff_half_extent + ground_outer_half_extent) / 2,
+                    ground_corner,
+                ),
             }
-            for instance, plane, mask in (
-                ("QGround", "D1_BOTTOM_GROUND_PLANE", QMASK),
-                ("CGround", "D0_TOP_GROUND_PLANE", CMASK),
+            for instance, plane, level, draw in (
+                ("QGround", "D1_BOTTOM_GROUND_PLANE", "D1_BOTTOM_M1", QDRAW),
+                ("CGround", "D0_TOP_GROUND_PLANE", "D0_TOP_M1", CDRAW),
             )
             if include_ground
         ]
@@ -1058,7 +1034,7 @@ def disk_flip_chip_qubit(
                 "selector_point_um": on_axis(disk_radius + gaps[side] + tc_width / 2, angle),
             }
             for side, angle in TC_SIDES
-            if (claw := f"TC_{side}") in grounded_claws
+            if (claw := f"TC_{side}") in grounded_claws and not include_ground
         ],
         "ports": (
             [
