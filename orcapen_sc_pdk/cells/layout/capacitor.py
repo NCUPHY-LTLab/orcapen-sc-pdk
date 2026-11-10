@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from math import atan2, ceil, cos, hypot, isfinite, pi, sin, tan
+from math import atan2, cos, hypot, isfinite, pi, sin, tan
 
 import gdsfactory as gf
 from gdsfactory.typings import CrossSectionSpec, Layer
@@ -109,62 +109,50 @@ def interdigital_capacitor(
 
     width = finger_length + finger_gap if not half else finger_length
     height = fingers * finger_width + (fingers - 1) * finger_gap
+    pitch = finger_width + finger_gap
 
-    points_1 = [
-        (0, 0),
-        (0, height),
-        (finger_length, height),
-        (finger_length, height - finger_width),
-        (0, height - finger_width),
-        *chain.from_iterable(
-            (
-                (0, height - (2 * index) * (finger_width + finger_gap)),
-                (
-                    finger_length,
-                    height - (2 * index) * (finger_width + finger_gap),
-                ),
-                (
-                    finger_length,
-                    height - (2 * index) * (finger_width + finger_gap) - finger_width,
-                ),
-                (
-                    0,
-                    height - (2 * index) * (finger_width + finger_gap) - finger_width,
-                ),
-            )
-            for index in range(ceil(fingers / 2))
-        ),
-        (0, 0),
-    ]
-    core_capacitor_temp.add_polygon(points=points_1, layer=draw_layer)
-
+    # Each comb is one polygon: its fingers join a spine of positive width, so
+    # the comb is connected without its taper. The spine lies inside the
+    # taper's wide end, so the merged outline does not change: over the spine
+    # width the taper edge moves in by at most finger_width / 8, and the spine
+    # stops finger_width / 4 inside the comb's outermost fingers.
+    taper_narrowing = max(height - cpw_width, finger_width / 4)
+    spine_width = taper_length * finger_width / (4 * taper_narrowing)
+    combs = [(0.0, 1, range(0, fingers, 2))]
     if not half:
-        points_2 = [
-            (width, 0),
-            (width, height),
+        combs.append((width, -1, range(1, fingers, 2)))
+    for root_x, direction, finger_indices in combs:
+        finger_tops = [height - index * pitch for index in finger_indices]
+        if not finger_tops:
+            continue
+        tip_x = root_x + direction * finger_length
+        spine_x = root_x - direction * spine_width
+        spine_top = finger_tops[0] - finger_width / 4
+        spine_bottom = finger_tops[-1] - 3 * finger_width / 4
+        comb_points = [
+            (spine_x, spine_bottom),
+            (spine_x, spine_top),
+            (root_x, spine_top),
             *chain.from_iterable(
                 (
-                    (width, height - (2 * index + 1) * (finger_width + finger_gap)),
-                    (
-                        width - finger_length,
-                        height - (2 * index + 1) * (finger_width + finger_gap),
-                    ),
-                    (
-                        width - finger_length,
-                        height - (2 * index + 1) * (finger_width + finger_gap) - finger_width,
-                    ),
-                    (
-                        width,
-                        height - (2 * index + 1) * (finger_width + finger_gap) - finger_width,
-                    ),
+                    (root_x, top),
+                    (tip_x, top),
+                    (tip_x, top - finger_width),
+                    (root_x, top - finger_width),
                 )
-                for index in range(fingers // 2)
+                for top in finger_tops
             ),
+            (root_x, spine_bottom),
         ]
-        core_capacitor_temp.add_polygon(points=points_2, layer=draw_layer)
+        core_capacitor_temp.add_polygon(points=comb_points, layer=draw_layer)
 
+    # Place the combs and tapers on shared coordinates. An odd number of grid
+    # steps cannot be centred exactly; the comb then sits half a step left.
+    dbu = component.kcl.dbu
+    comb_xmin = -((round(width / dbu) + 1) // 2) * dbu
+    comb_xmax = comb_xmin + width
     core_capacitor = component << core_capacitor_temp
-    core_capacitor.move((-core_capacitor_temp.x, -core_capacitor_temp.y))
+    core_capacitor.dmove((comb_xmin, -height / 2))
 
     in_taper = component << gf.components.taper(
         length=taper_length,
@@ -172,14 +160,14 @@ def interdigital_capacitor(
         width2=height,
         layer=draw_layer,
     )
-    in_taper.movex(-(taper_length + core_capacitor_temp.x))
+    in_taper.dmovex(comb_xmin - taper_length)
     out_taper = component << gf.components.taper(
         length=taper_length,
         width1=height,
         width2=cpw_width,
         layer=draw_layer,
     )
-    out_taper.movex(core_capacitor_temp.x)
+    out_taper.dmovex(comb_xmax)
 
     terminal_extension = gf.path.extrude(
         gf.path.straight(terminal_extension_length_um),
@@ -209,14 +197,14 @@ def interdigital_capacitor(
     mask_points = [
         (component.xmin, cpw_width / 2 + cpw_gap),
         (in_taper.xmin, cpw_width / 2 + cpw_gap),
-        (core_capacitor.xmin, height / 2 + capacitor_ground_gap),
-        (core_capacitor.xmax, height / 2 + capacitor_ground_gap),
+        (comb_xmin, height / 2 + capacitor_ground_gap),
+        (comb_xmax, height / 2 + capacitor_ground_gap),
         (out_taper.xmax, cpw_width / 2 + cpw_gap),
         (component.xmax, cpw_width / 2 + cpw_gap),
         (component.xmax, -cpw_width / 2 - cpw_gap),
         (out_taper.xmax, -cpw_width / 2 - cpw_gap),
-        (core_capacitor.xmax, -height / 2 - capacitor_ground_gap),
-        (core_capacitor.xmin, -height / 2 - capacitor_ground_gap),
+        (comb_xmax, -height / 2 - capacitor_ground_gap),
+        (comb_xmin, -height / 2 - capacitor_ground_gap),
         (in_taper.xmin, -cpw_width / 2 - cpw_gap),
         (component.xmin, -cpw_width / 2 - cpw_gap),
     ]
@@ -230,7 +218,6 @@ def interdigital_capacitor(
         # All geometry authoring/composition remains on public GF APIs.
         rounded = gf.Component()
         contours = {}
-        dbu = component.kcl.dbu
         for layer in (draw_layer, ground_mask_layer):
             merged = component.extract([layer])
             contours[layer] = []
