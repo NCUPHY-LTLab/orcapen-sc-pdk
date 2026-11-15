@@ -10,7 +10,7 @@ toc: true
 
 雙晶片覆晶（flip-chip）transmon 位點：圓盤島以一個 Manhattan 接面連到接地，並有四個可選的弧形耦合爪。讀取線與驅動線位於控制晶片。
 
-![`disk_flip_chip_qubit` 的預設版圖。](../../_static/images/components/disk_flip_chip_qubit.svg)
+![`disk_flip_chip_qubit` 的預設版圖。](../../_static/images/components/disk_flip_chip_qubit_layers.svg)
 
 詳細內容： [元件指南](../../public-pdk-examples/components/disk_flip_chip_qubit.qmd)
 
@@ -20,7 +20,7 @@ toc: true
 
 ![`kosen2024_flip_chip_xmon_qubit` 的預設版圖。](../../_static/images/components/kosen2024_flip_chip_xmon_qubit.svg)
 
-尚無指南或函式參考；請參閱套件中該工廠函式的 docstring。
+詳細內容： [函式參考](../../reference/cells.kosen2024_flip_chip_xmon_qubit.qmd)
 
 ## `manhattan_style_junction`
 
@@ -28,4 +28,4 @@ Manhattan 接面：實際製作的重疊十字，加上在有限元素（FEM）�
 
 ![`manhattan_style_junction` 的預設版圖。](../../_static/images/components/manhattan_style_junction.svg)
 
-尚無指南或函式參考；請參閱套件中該工廠函式的 docstring。
+詳細內容： [函式參考](../../reference/cells.manhattan_style_junction.qmd)

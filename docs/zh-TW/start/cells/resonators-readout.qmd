@@ -36,4 +36,4 @@ toc: true
 
 ![`capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators` 的預設版圖。](../../_static/images/components/capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators.svg)
 
-尚無指南或函式參考；請參閱套件中該工廠函式的 docstring。
+詳細內容： [函式參考](../../reference/cells.capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators.qmd)

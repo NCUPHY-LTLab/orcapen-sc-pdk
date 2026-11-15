@@ -17,3 +17,19 @@ toc: true
 ## 其他位置
 
 僅供模擬的元件在[模擬](../public-pdk-examples/test-components.md)。`straight`、`bend_*`、`rounded_*`、`wire_corner` 與 `cpw_handoff` 等基本元件在[共用基本元件](../public-pdk-examples/shared-primitives.md)。設定與連接埠請見 [API → 元件](../public-pdk-examples/components/index.qmd)。
+
+## 已移動的章節
+
+下列章節原本在本頁，現在各有專屬位置。
+
+### Launcher {#launcher}
+
+Launcher 現在位於[線路與連接](cells/lines-connections.qmd#launcher)。
+
+### Resonator {#resonator}
+
+Resonator 現在位於[共振器與讀取](cells/resonators-readout.qmd#resonator)。
+
+### 橫截面 {#cross-sections}
+
+橫截面 現在位於[線路與連接](cells/lines-connections.qmd#cross-sections)。

@@ -18,7 +18,7 @@ Details: [Component guide](../../public-pdk-examples/components/indium_bump.qmd)
 
 A centered regular field of passive indium bumps that can skip sites overlapping a keepout region.
 
-![Default layout of `indium_ground`.](../../_static/images/components/indium_ground.svg)
+![Default layout of `indium_ground`.](../../_static/images/components/indium_ground.png)
 
 Details: [Component guide](../../public-pdk-examples/components/indium_ground.qmd)
 
@@ -28,4 +28,4 @@ A rectangular edge ring on a chosen layer, drawn as an outer rectangle minus an 
 
 ![Default layout of `dicing_edge`.](../../_static/images/components/dicing_edge.svg)
 
-No guide or function reference yet. Read the factory's docstring in the package.
+Details: [Function reference](../../reference/cells.dicing_edge.qmd)

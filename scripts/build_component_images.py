@@ -73,6 +73,13 @@ STYLES = {
     "D0_D1_UNDER_BUMP": UNDER_BUMP,
 }
 
+# Files that differ from the default `<cell>.svg`. The disk qubit's own guide keeps its
+# hand-annotated figure, so the layer-drawn one goes under another name.
+IMAGE_FILES = {
+    "disk_flip_chip_qubit": "disk_flip_chip_qubit_layers.svg",
+    "indium_ground": "indium_ground.png",
+}
+
 # Cells whose layers sit on two dies are drawn as one panel per die.
 PANELS = {
     "disk_flip_chip_qubit": (
@@ -147,18 +154,24 @@ def draw_cell(cell_name: str, names) -> Path:
     for axes, (title, wanted) in zip(axes_list[0], panels, strict=True):
         draw_panel(axes, component, names, title, wanted)
     figure.tight_layout()
-    path = OUTPUT / f"{cell_name}.svg"
+    path = OUTPUT / IMAGE_FILES.get(cell_name, f"{cell_name}.svg")
+    if path.suffix == ".png":
+        # Thousands of bumps stay legible as pixels, at a fraction of the SVG's size.
+        options = {"dpi": 300, "metadata": {"Software": None}}
+    else:
+        options = {
+            "metadata": {
+                "Date": None,
+                "Description": f"{cell_name} default public source XY polygons. "
+                "Not native simulation evidence.",
+            }
+        }
     figure.savefig(
         path,
-        format="svg",
         # Fit the canvas to every title, label and legend so none is clipped.
         bbox_inches="tight",
         pad_inches=0.15,
-        metadata={
-            "Date": None,
-            "Description": f"{cell_name} default public source XY polygons. "
-            "Not native simulation evidence.",
-        },
+        **options,
     )
     plt.close(figure)
     return path

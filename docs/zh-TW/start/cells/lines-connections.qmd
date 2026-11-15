@@ -6,6 +6,8 @@ toc: true
 
 承載或連接 CPW 與耦合線的元件：饋入晶片、改變寬度、分岔、跨接與耦合區段。定義這些路徑的橫截面列在最後。
 
+MTL 指多導體傳輸線（multi-conductor transmission line）：多條並排、彼此耦合的走線。元件名稱含 MTL 時，表示該元件包含這樣一組耦合的 CPW 走線。
+
 ## `launcher`
 
 從大焊墊漸縮到 CPW 頸部的饋入元件，並標示焊墊側的模擬邊界。
@@ -60,7 +62,7 @@ CPW T 型接面，有兩個主幹連接埠與一個分支連接埠。
 
 ![`mtl_straight_bend_coupling_section` 的預設版圖。](../../_static/images/components/mtl_straight_bend_coupling_section.svg)
 
-尚無指南或函式參考；請參閱套件中該工廠函式的 docstring。
+詳細內容： [函式參考](../../reference/cells.mtl_straight_bend_coupling_section.qmd)
 
 ## `mtl_straight_bend_transition`
 
@@ -68,7 +70,7 @@ CPW T 型接面，有兩個主幹連接埠與一個分支連接埠。
 
 ![`mtl_straight_bend_transition` 的預設版圖。](../../_static/images/components/mtl_straight_bend_transition.svg)
 
-尚無指南或函式參考；請參閱套件中該工廠函式的 docstring。
+詳細內容： [函式參考](../../reference/cells.mtl_straight_bend_transition.qmd)
 
 ## `mtl_bend_bend_transition`
 
@@ -76,8 +78,8 @@ CPW T 型接面，有兩個主幹連接埠與一個分支連接埠。
 
 ![`mtl_bend_bend_transition` 的預設版圖。](../../_static/images/components/mtl_bend_bend_transition.svg)
 
-尚無指南或函式參考；請參閱套件中該工廠函式的 docstring。
+詳細內容： [函式參考](../../reference/cells.mtl_bend_bend_transition.qmd)
 
-## 橫截面
+## 橫截面 {#cross-sections}
 
 選擇已註冊的橫截面，以定義路徑的寬度、橫向偏移、圖層與連接埠。已註冊選項與預設預覽請見[橫截面指南](../../public-pdk-examples/cross-sections.qmd)。

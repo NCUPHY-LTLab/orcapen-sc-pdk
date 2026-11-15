@@ -10,7 +10,7 @@ Qubit islands and their Josephson junctions. Choose one by the qubit style you w
 
 A two-die flip-chip transmon site: a disk island joined to ground by one Manhattan junction, with four optional arc claws. The readout and drive lines sit on the control die.
 
-![Default layout of `disk_flip_chip_qubit`.](../../_static/images/components/disk_flip_chip_qubit.svg)
+![Default layout of `disk_flip_chip_qubit`.](../../_static/images/components/disk_flip_chip_qubit_layers.svg)
 
 Details: [Component guide](../../public-pdk-examples/components/disk_flip_chip_qubit.qmd)
 
@@ -20,7 +20,7 @@ A public-preview four-port flip-chip Xmon coupling topology: crossed bars and fo
 
 ![Default layout of `kosen2024_flip_chip_xmon_qubit`.](../../_static/images/components/kosen2024_flip_chip_xmon_qubit.svg)
 
-No guide or function reference yet. Read the factory's docstring in the package.
+Details: [Function reference](../../reference/cells.kosen2024_flip_chip_xmon_qubit.qmd)
 
 ## `manhattan_style_junction`
 
@@ -28,4 +28,4 @@ A Manhattan junction: the overlap cross that is fabricated, plus a straight shee
 
 ![Default layout of `manhattan_style_junction`.](../../_static/images/components/manhattan_style_junction.svg)
 
-No guide or function reference yet. Read the factory's docstring in the package.
+Details: [Function reference](../../reference/cells.manhattan_style_junction.qmd)

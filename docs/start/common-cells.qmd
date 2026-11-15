@@ -17,3 +17,19 @@ Choose a layout cell by what it is for. Each category page gives one line per ce
 ## Elsewhere
 
 Simulation-only cells are under [Simulation](../public-pdk-examples/test-components.md). Primitives such as `straight`, `bend_*`, `rounded_*`, `wire_corner` and `cpw_handoff` are under [Shared primitives](../public-pdk-examples/shared-primitives.md). Settings and ports stay in [API → Components](../public-pdk-examples/components/index.qmd).
+
+## Moved sections
+
+These sections used to be on this page. Each now has its own place.
+
+### Launcher {#launcher}
+
+Launcher is now under [Lines & Connections](cells/lines-connections.qmd#launcher).
+
+### Resonator {#resonator}
+
+Resonator is now under [Resonators & Readout](cells/resonators-readout.qmd#resonator).
+
+### Cross-sections {#cross-sections}
+
+Cross-sections is now under [Lines & Connections](cells/lines-connections.qmd#cross-sections).

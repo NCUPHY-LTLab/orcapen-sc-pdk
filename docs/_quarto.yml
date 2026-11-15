@@ -224,6 +224,13 @@ website:
                 - reference/cells.cpw_meander_airbridge_lumped_coupon.qmd
                 - reference/cells.cpw_meander_airbridge_wave_coupon.qmd
                 - reference/cells.martinis2022_differential_ribbon_capacitor.qmd
+                - reference/cells.kosen2024_flip_chip_xmon_qubit.qmd
+                - reference/cells.manhattan_style_junction.qmd
+                - reference/cells.capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators.qmd
+                - reference/cells.mtl_straight_bend_coupling_section.qmd
+                - reference/cells.mtl_straight_bend_transition.qmd
+                - reference/cells.mtl_bend_bend_transition.qmd
+                - reference/cells.dicing_edge.qmd
         - section: Materials & Interfaces
           contents:
             - reference/materials.get_material_records.qmd
@@ -300,6 +307,13 @@ quartodoc:
         - cells.cpw_meander_airbridge_lumped_coupon
         - cells.cpw_meander_airbridge_wave_coupon
         - cells.martinis2022_differential_ribbon_capacitor
+        - cells.kosen2024_flip_chip_xmon_qubit
+        - cells.manhattan_style_junction
+        - cells.capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators
+        - cells.mtl_straight_bend_coupling_section
+        - cells.mtl_straight_bend_transition
+        - cells.mtl_bend_bend_transition
+        - cells.dicing_edge
     - title: Materials
       desc: Copy-returning public material and interface records.
       contents:

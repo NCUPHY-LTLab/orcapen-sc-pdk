@@ -36,4 +36,4 @@ A readout resonator with its individual Purcell filter, coupled through one shar
 
 ![Default layout of `capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators`.](../../_static/images/components/capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators.svg)
 
-No guide or function reference yet. Read the factory's docstring in the package.
+Details: [Function reference](../../reference/cells.capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators.qmd)

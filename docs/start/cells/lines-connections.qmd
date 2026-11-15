@@ -6,6 +6,8 @@ toc: true
 
 Pieces that carry or join CPW and coupled-trace lines: launching onto a chip, changing width, branching, bridging and coupled sections. Cross-sections that define these paths are at the end.
 
+MTL means multi-conductor transmission line: several coupled traces that run side by side. Where a cell name says MTL, the cell holds such a set of coupled CPW traces.
+
 ## `launcher`
 
 A tapered CPW launcher from a large pad to a CPW neck. It marks the pad-side simulation boundary.
@@ -60,7 +62,7 @@ A four-port pair around a uniform MTL section. The lower trace stays straight; t
 
 ![Default layout of `mtl_straight_bend_coupling_section`.](../../_static/images/components/mtl_straight_bend_coupling_section.svg)
 
-No guide or function reference yet. Read the factory's docstring in the package.
+Details: [Function reference](../../reference/cells.mtl_straight_bend_coupling_section.qmd)
 
 ## `mtl_straight_bend_transition`
 
@@ -68,7 +70,7 @@ A four-port transition from an MTL seam to a straight trace and a bend.
 
 ![Default layout of `mtl_straight_bend_transition`.](../../_static/images/components/mtl_straight_bend_transition.svg)
 
-No guide or function reference yet. Read the factory's docstring in the package.
+Details: [Function reference](../../reference/cells.mtl_straight_bend_transition.qmd)
 
 ## `mtl_bend_bend_transition`
 
@@ -76,8 +78,8 @@ A four-port transition from an MTL seam to two opposing bends.
 
 ![Default layout of `mtl_bend_bend_transition`.](../../_static/images/components/mtl_bend_bend_transition.svg)
 
-No guide or function reference yet. Read the factory's docstring in the package.
+Details: [Function reference](../../reference/cells.mtl_bend_bend_transition.qmd)
 
-## Cross-sections
+## Cross-sections {#cross-sections}
 
 Choose a registered cross-section to define widths, transverse offsets, layers and connection ports along a path. Browse the [Cross-sections guide](../../public-pdk-examples/cross-sections.qmd) for the registered choices and their default previews.
