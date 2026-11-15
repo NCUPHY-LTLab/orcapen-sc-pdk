@@ -151,6 +151,9 @@ def draw_cell(cell_name: str, names) -> Path:
     figure.savefig(
         path,
         format="svg",
+        # Fit the canvas to every title, label and legend so none is clipped.
+        bbox_inches="tight",
+        pad_inches=0.15,
         metadata={
             "Date": None,
             "Description": f"{cell_name} default public source XY polygons. "
