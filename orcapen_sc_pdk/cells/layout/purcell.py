@@ -10,6 +10,7 @@ from gdsfactory.typings import CrossSectionSpec, Layer
 
 import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.primitives import bend_circular, straight
+from orcapen_sc_pdk.helpers.layout.cpw import add_cpw_open_end
 from orcapen_sc_pdk.tech import LAYER, route_bundle_cpw
 
 
@@ -374,56 +375,19 @@ def _route_arm_with_length(
     }
 
 
-def _add_open_end_cap(
+def _add_readout_open_end(
     component: gf.Component,
     end_port: gf.Port,
-    etch_width: float,
-    cpw_width: float,
-    etch_layer: Layer,
-    mask_layer: Layer,
-    ground_mask_width: float,
-) -> tuple[gf.ComponentReference, str]:
-    """Add OrcaPen-style open-end CPW cap aligned to ``end_port``."""
+    cross_section: gf.CrossSection,
+) -> gf.Port:
+    """Terminate the readout CPW at ``end_port`` and return the outer port."""
 
-    open_etch_comp = gf.components.rectangle(
-        size=(etch_width, cpw_width + 2 * etch_width),
-        layer=etch_layer,
-        centered=True,
-        port_type="optical",
-        port_orientations=(0, 180),
-    )
-    open_mask_comp = gf.components.rectangle(
-        size=(etch_width, ground_mask_width),
-        layer=mask_layer,
-        centered=True,
-        port_type="optical",
-        port_orientations=(0, 180),
-    )
-    open_etch_ref = component << open_etch_comp
-    open_mask_ref = component << open_mask_comp
     orientation = float(end_port.orientation) % 360
-    if orientation == 180.0:
-        connected_port_name = "o2"
-    elif orientation in {0.0, 90.0, 270.0}:
-        connected_port_name = "o1"
-    else:
+    if orientation not in {0.0, 90.0, 180.0, 270.0}:
         raise ValueError(
             f"readout_open end port orientation must be cardinal, got {orientation!r}."
         )
-    open_cap_port_name = "o1" if connected_port_name == "o2" else "o2"
-    open_etch_ref.connect(
-        connected_port_name,
-        end_port,
-        allow_width_mismatch=True,
-        allow_layer_mismatch=True,
-    )
-    open_mask_ref.connect(
-        connected_port_name,
-        end_port,
-        allow_width_mismatch=True,
-        allow_layer_mismatch=True,
-    )
-    return open_etch_ref, open_cap_port_name
+    return add_cpw_open_end(component, end_port, cross_section)
 
 
 @gf.cell(tags=["layout", "resonator", "intrinsic_purcell"])
@@ -816,14 +780,10 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         "filter_open": filter_open_info,
     }
 
-    readout_open_cap, readout_open_cap_port_name = _add_open_end_cap(
+    readout_open_outer_port = _add_readout_open_end(
         component=c,
         end_port=readout_open_cap_anchor_port,
-        etch_width=float(etch_section.width),
-        cpw_width=cpw_width,
-        etch_layer=etch_layer,
-        mask_layer=ground_mask_layer,
-        ground_mask_width=float(ground_mask_section.width),
+        cross_section=single_xs,
     )
 
     c.info["filter_capacitor_instance"] = "interdigital_capacitor"
@@ -838,12 +798,12 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         "center_um": tuple(capacitor.ports["o_capacitor_in"].center),
     }
     c.info["path_geometry"]["readout_open"]["cap_outer_port"] = {
-        "name": readout_open_cap_port_name,
-        "orientation": float(readout_open_cap.ports[readout_open_cap_port_name].orientation),
-        "center_um": tuple(readout_open_cap.ports[readout_open_cap_port_name].center),
+        "name": str(readout_open_outer_port.name),
+        "orientation": float(readout_open_outer_port.orientation),
+        "center_um": tuple(readout_open_outer_port.center),
     }
 
-    c.add_port(port=readout_open_cap.ports[readout_open_cap_port_name], name="o_readout_open")
+    c.add_port(port=readout_open_outer_port, name="o_readout_open")
     c.add_port(port=capacitor.ports["o_capacitor_out"], name="o_feedline_coupling")
 
     pair_bbox = c.bbox()
