@@ -80,3 +80,5 @@ disk_only = gf.get_component("disk_flip_chip_qubit", include_tc=False)
 OrcaPen 的調整結合上述模式：四個漸縮成 CPW 且可接地的耦合爪、兩側皆漸縮的接面引線，以及位於控制晶粒的讀取與驅動尖端。這些調整並非出自單一論文。
 
 請見[公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/layout/disk_qubit.py)。
+
+屬於常用元件的[量子位元](../../start/cells/qubits.qmd)。

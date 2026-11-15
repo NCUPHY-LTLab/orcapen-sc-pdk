@@ -1,0 +1,23 @@
+---
+title: "電容與耦合器"
+sidebar: get-started
+toc: true
+---
+
+電容版圖。依需要的電容型式選擇。
+
+## `interdigital_capacitor`
+
+指叉電容（IDC），兩端有對稱的 CPW 端點延伸並自動導出蝕刻區。連接埠位於外側 CPW 切面。
+
+![`interdigital_capacitor` 的預設版圖。](../../_static/images/components/interdigital_capacitor.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/interdigital_capacitor.qmd) · [函式參考](../../reference/cells.interdigital_capacitor.qmd)
+
+## `martinis2022_differential_ribbon_capacitor`
+
+Martinis 2022 圖 7 的差動帶狀電容版圖。
+
+![`martinis2022_differential_ribbon_capacitor` 的預設版圖。](../../_static/images/components/martinis2022_differential_ribbon_capacitor.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/martinis2022_differential_ribbon_capacitor.qmd) · [函式參考](../../reference/cells.martinis2022_differential_ribbon_capacitor.qmd)

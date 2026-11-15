@@ -1,0 +1,39 @@
+---
+title: "共振器與讀取"
+sidebar: get-started
+toc: true
+---
+
+共面波導（CPW）共振器與讀取結構。依需要完整共振器、僅懸掛段或蛇形段，或帶有 Purcell 濾波器的共振器來選擇。
+
+## `resonator`
+
+由懸掛段、蛇形段與可選尾端組成的 CPW 共振器，可選擇連到量子位元區段的走線。`length` 設定整體中心線長度。
+
+![`resonator` 的預設版圖。](../../_static/images/components/resonator.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/resonator.qmd) · [函式參考](../../reference/cells.resonator.qmd)
+
+## `resonator_hanger`
+
+讀取共振器的懸掛段。其耦合直線置中於原點，上層版圖可據此對齊量子位元的開口。
+
+![`resonator_hanger` 的預設版圖。](../../_static/images/components/resonator_hanger.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/resonator_hanger.qmd) · [函式參考](../../reference/cells.resonator_hanger.qmd)
+
+## `resonator_meander`
+
+蛇形 CPW 共振器本體。`length` 僅適用於蛇形段，同一元件可放在任一晶片面。
+
+![`resonator_meander` 的預設版圖。](../../_static/images/components/resonator_meander.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/resonator_meander.qmd) · [函式參考](../../reference/cells.resonator_meander.qmd)
+
+## `capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators`
+
+讀取共振器與其個別 Purcell 濾波器，經由一段共用的耦合 MTL 區段耦合。預設值為公開預覽設定。
+
+![`capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators` 的預設版圖。](../../_static/images/components/capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators.svg)
+
+尚無指南或函式參考；請參閱套件中該工廠函式的 docstring。

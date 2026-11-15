@@ -1,0 +1,31 @@
+---
+title: "Flip-chip & Packaging"
+sidebar: get-started
+toc: true
+---
+
+Interconnect and chip-edge features. Choose one by the stacking or packaging feature you need.
+
+## `indium_bump`
+
+One centered square indium bump, with an optional under-bump contact pad.
+
+![Default layout of `indium_bump`.](../../_static/images/components/indium_bump.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/indium_bump.qmd)
+
+## `indium_ground`
+
+A centered regular field of passive indium bumps that can skip sites overlapping a keepout region.
+
+![Default layout of `indium_ground`.](../../_static/images/components/indium_ground.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/indium_ground.qmd)
+
+## `dicing_edge`
+
+A rectangular edge ring on a chosen layer, drawn as an outer rectangle minus an inner one. It is meant for an ETCH or marker layer at the chip edge.
+
+![Default layout of `dicing_edge`.](../../_static/images/components/dicing_edge.svg)
+
+No guide or function reference yet. Read the factory's docstring in the package.

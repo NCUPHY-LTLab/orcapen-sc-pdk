@@ -6,6 +6,7 @@ project:
     - "*.md"
     - "home/*.md"
     - "start/*.qmd"
+    - "start/cells/*.qmd"
     - "features/scgsim-integration.md"
     - "features/docs-theme.md"
     - "public-pdk-examples/*.md"
@@ -122,7 +123,13 @@ website:
       title: Get Started
       contents:
         - getting-started.md
-        - start/common-cells.qmd
+        - href: start/common-cells.qmd
+          contents:
+            - start/cells/qubits.qmd
+            - start/cells/resonators-readout.qmd
+            - start/cells/capacitors-couplers.qmd
+            - start/cells/lines-connections.qmd
+            - start/cells/flip-chip-packaging.qmd
         - start/preview-cells.qmd
         - start/layers.qmd
         - start/materials.qmd

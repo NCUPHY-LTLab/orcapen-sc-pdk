@@ -30,3 +30,5 @@ component = gf.get_component("indium_bump")
 此元件沒有連接埠。預設凸塊圖層的材料為銦，標稱堆疊厚度為 8 µm。凸塊下圖層描述接觸幾何形狀，不納入模擬。僅標準凸塊本體圖層具有實體堆疊實體；其他本體圖層僅用於平面版圖。
 
 此工廠函式由[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/indium.py)定義。
+
+屬於常用元件的[覆晶與封裝](../../start/cells/flip-chip-packaging.qmd)。

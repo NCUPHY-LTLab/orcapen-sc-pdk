@@ -1,0 +1,39 @@
+---
+title: "Resonators & Readout"
+sidebar: get-started
+toc: true
+---
+
+CPW resonators and readout structures. Choose one by whether you need a complete resonator, only its hanger or meander, or a resonator with a Purcell filter.
+
+## `resonator`
+
+A CPW resonator built from a hanger, a meander and an optional tail, with an optional route to a qubit segment. `length` sets the total centerline length.
+
+![Default layout of `resonator`.](../../_static/images/components/resonator.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/resonator.qmd) · [Function reference](../../reference/cells.resonator.qmd)
+
+## `resonator_hanger`
+
+The hanger head of a readout resonator. Its coupling straight is centered at the origin, so a parent layout can align it to a qubit pocket.
+
+![Default layout of `resonator_hanger`.](../../_static/images/components/resonator_hanger.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/resonator_hanger.qmd) · [Function reference](../../reference/cells.resonator_hanger.qmd)
+
+## `resonator_meander`
+
+A meandering CPW resonator body. `length` applies to the meander alone, and the same cell can be placed on either chip face.
+
+![Default layout of `resonator_meander`.](../../_static/images/components/resonator_meander.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/resonator_meander.qmd) · [Function reference](../../reference/cells.resonator_meander.qmd)
+
+## `capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators`
+
+A readout resonator with its individual Purcell filter, coupled through one shared coupled MTL section. The defaults are public-preview settings.
+
+![Default layout of `capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators`.](../../_static/images/components/capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators.svg)
+
+No guide or function reference yet. Read the factory's docstring in the package.
