@@ -352,10 +352,16 @@ or shared under `helpers/`. The PR lists each new function and why the existing
 ones do not fit. Existing private functions are reviewed when their cell is
 next rewritten.
 
-**H3. Structure matters more than length.** A long cell file is acceptable. A
-part that is reusable, previewable or simulated on its own becomes its own
-`@gf.cell`, in its own module when another cell uses it. Write the cell body in
-the order of its physical parts, with a short comment heading for each part.
+**H3. A `@gf.cell` stands on its own.** Make a part its own `@gf.cell` only
+when it can be fabricated on its own and simulated on its own, and you can say
+what it is and what it is for. That sentence opens its docstring. A part that
+only has meaning attached to another component is a helper function under H2,
+not a cell. One example is the open-end termination added at a CPW port. A cell
+that another cell uses lives in its own module.
+
+**H4. Structure matters more than length.** A long cell file is acceptable.
+Write the cell body in the order of its physical parts, with a short comment
+heading for each part.
 
 ### Three kinds of check
 
