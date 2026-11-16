@@ -16,7 +16,12 @@ def add_cpw_open_end(
     ``cpw_width + 2 * etch_width`` wide, so the etch wraps the end of the center
     conductor. A second rectangle on the GROUND_MASK layer, ``etch_width`` long
     and ``ground_mask_width`` wide, closes the ground mask over it. Widths and
-    layers come from ``cross_section``; both rectangles are centered on ``port``.
+    layers come from ``cross_section``. Both rectangles start at ``port`` and
+    extend outward, centered on the port's axis.
+
+    ``cross_section`` must describe the CPW at ``port``, including its conductor
+    width and section layout; a mismatch is not detected and builds the
+    termination for the cross-section's widths.
 
     The returned port faces away from the CPW. The caller names it and adds it
     to ``component`` (or reads its position) as it needs.

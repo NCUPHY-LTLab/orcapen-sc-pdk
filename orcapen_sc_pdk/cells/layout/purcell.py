@@ -11,7 +11,7 @@ from gdsfactory.typings import CrossSectionSpec, Layer
 import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.primitives import bend_circular, straight
 from orcapen_sc_pdk.helpers.layout.cpw import add_cpw_open_end
-from orcapen_sc_pdk.tech import LAYER, route_bundle_cpw
+from orcapen_sc_pdk.tech import CPW_ETCH_POS, CPW_GROUND_MASK, LAYER, route_bundle_cpw
 
 
 def _opposite_orientation(orientation: float) -> float:
@@ -375,6 +375,29 @@ def _route_arm_with_length(
     }
 
 
+def _require_cross_section_layers(
+    cross_section: gf.CrossSection,
+    etch_layer: Layer,
+    ground_mask_layer: Layer,
+) -> None:
+    """Refuse a cross-section whose ETCH or GROUND_MASK layer differs from the arguments.
+
+    The CPW line follows the cross-section while the open-end termination follows
+    its sections too, so a mismatch would split one cell over two layer sets.
+    """
+
+    for section_name, argument_name, argument_layer in (
+        (CPW_ETCH_POS, "etch_layer", etch_layer),
+        (CPW_GROUND_MASK, "ground_mask_layer", ground_mask_layer),
+    ):
+        section_layer = tuple(int(value) for value in cross_section[section_name].layer)
+        if section_layer != tuple(int(value) for value in argument_layer):
+            raise ValueError(
+                f"single_cpw_xs section {section_name!r} is on layer {section_layer}, "
+                f"but {argument_name} is {tuple(argument_layer)}; they must match."
+            )
+
+
 def _add_readout_open_end(
     component: gf.Component,
     end_port: gf.Port,
@@ -516,6 +539,8 @@ def capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators(
         ground_mask_layer=ground_mask_layer,
         radius=cpw_radius,
     )
+
+    _require_cross_section_layers(single_xs, etch_layer, ground_mask_layer)
 
     c = gf.Component()
     c.info["topology"] = (
