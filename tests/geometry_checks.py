@@ -1,7 +1,7 @@
 """Construction checks for a built cell: did the code draw the polygons it meant?
 
 These are the checks of the contributor guide's "Construction checks" page
-(``docs/contributing/construction-checks.md``, rule R8). They read the
+(``docs/contributing/construction-checks.md``, rule R18). They read the
 flattened cell in database units (DBU, the integer grid GDS stores; 1 DBU is
 1 nm in this PDK) and answer, per layer:
 
@@ -12,7 +12,8 @@ flattened cell in database units (DBU, the integer grid GDS stores; 1 DBU is
 - the holes of the merged layer, which GDS can only store as cut lines;
 - the smallest interior angle, which is reported and has no threshold yet;
 - when the caller says how many conductors a layer holds, that the merged
-  layer has exactly that many polygons, so no conductor has fallen apart;
+  layer has exactly that many polygons, so no conductor has fallen apart or
+  gone missing;
 - when the caller gives the intended shape of a layer, where the merged layer
   differs from it (the XOR). Differences no wider than ``MIN_EDGE_DBU`` are
   grid rounding and are left out; a split or a slit that narrow is caught by
@@ -58,7 +59,11 @@ def construction_report(
     conductors: dict[Layer, int] | None = None,
     intended: dict[Layer, gf.kdb.Region] | None = None,
 ) -> dict[Layer, LayerReport]:
-    """One report per layer of the flattened cell.
+    """One report per layer of the flattened cell and per layer the caller expects.
+
+    A layer listed in ``conductors`` or ``intended`` is checked even when the
+    cell draws nothing on it, so a missing conductor is a defect, not an
+    absent report.
 
     Args:
         component: the built cell.
@@ -70,9 +75,11 @@ def construction_report(
     """
     conductors = conductors or {}
     intended = intended or {}
+    drawn = flat_layers(component)
+    layers = sorted(set(drawn) | set(conductors) | set(intended))
     return {
-        layer: layer_report(layer, polygons, conductors.get(layer), intended.get(layer))
-        for layer, polygons in sorted(flat_layers(component).items())
+        layer: layer_report(layer, drawn.get(layer, []), conductors.get(layer), intended.get(layer))
+        for layer in layers
     }
 
 
@@ -120,8 +127,9 @@ def layer_report(
         layer=layer,
         polygons=merged.count(),
         holes=merged.holes(),
-        min_edge_dbu=round(min(edges), 2),
-        min_angle_deg=round(min(angles), 2),
+        # An empty layer has no edge and no corner to measure.
+        min_edge_dbu=round(min(edges), 2) if edges else math.inf,
+        min_angle_deg=round(min(angles), 2) if angles else math.inf,
         defects=tuple(defects),
         difference=difference,
     )
