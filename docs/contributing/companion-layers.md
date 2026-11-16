@@ -1,6 +1,7 @@
 ---
 title: "Companion layers from one source"
 sidebar: development
+page-navigation: true
 ---
 
 A conductor in this PDK is described by up to three layers: the metal you draw
@@ -11,7 +12,9 @@ SCGSim derives it from the mask, as the ground plane minus `GROUND_MASK`, plus
 the drawn traces. The two derivations must give the same metal. See
 [Layers](../start/layers.qmd) for the layer list.
 
-The examples on this page run on their own, in order. They share this setup.
+Run this page's examples with
+`uv run pytest tests/test_docs_construction_examples.py -k companion-layers`. They
+run in order and share this setup.
 
 ```python
 import gdsfactory as gf
@@ -38,11 +41,15 @@ def metal_mismatch(component):
     return metal_from_etch ^ metal_from_mask
 ```
 
-## R15. Draw the mask from the metal's source and derive the etch from both {#r15}
+## R13. Derive the etch from a mask drawn with the metal {#r13}
 
-**Rule.** Draw the ground mask from the same anchors and dimensions as the
-metal, put every cleared area (such as a dicing street) on the mask, and derive
-the etch with `add_etch_for_component`, which sets `ETCH = GROUND_MASK − DRAW`.
+**Rule.** Derive the etch with `add_etch_for_component`, which sets
+`ETCH = GROUND_MASK − DRAW`, from a mask drawn with the metal.
+
+- Draw the ground mask from the same anchors as the metal: the named points,
+  such as a port centre or a corner, that both shapes are measured from, with
+  the same dimensions.
+- Put every cleared area, such as a dicing street, on the mask.
 
 An etch drawn by hand is a third, independent description, and nothing keeps
 it in step with the mask. `sample_small_airbridge_chip` had a 2300 × 1000 µm
@@ -53,13 +60,14 @@ derivations differed by about 320,000 µm²
 line, a GDSFactory cross-section draws the metal and its mask from one path; see
 [Cross-sections](../public-pdk-examples/cross-sections.qmd).
 
-![**Problem.** A pad (teal, `DRAW`) with its ground clearance (`GROUND_MASK`,
-grey, here under the amber `ETCH`), and a dicing frame drawn on the etch layer
-only, with the etch drawn by hand. Red marks where the
-etch-derived and the mask-derived metal disagree: the whole frame.](../_static/images/contributing/r15-problem.svg)
+![**Problem.** One panel per layer: the pad on `DRAW`, its clearance on
+`GROUND_MASK`, and a hand-drawn `ETCH` that also holds a dicing frame the mask
+lacks. The last panel marks in red where the etch-derived and the mask-derived
+metal disagree: the whole frame.](../_static/images/contributing/en/r13-problem.svg)
 
-![**Result.** The frame drawn on the mask and the etch derived from the mask
-and the metal: the two derivations agree everywhere.](../_static/images/contributing/r15-result.svg)
+![**Result.** The same panels with the frame drawn on `GROUND_MASK` and the
+etch derived from the mask and the metal: the two derivations agree
+everywhere.](../_static/images/contributing/en/r13-result.svg)
 
 ```python
 PAD, CLEARANCE = (-50, -10, 50, 10), (-70, -30, 70, 30)

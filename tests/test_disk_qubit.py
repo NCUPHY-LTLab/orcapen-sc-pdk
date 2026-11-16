@@ -238,7 +238,7 @@ def _intended_holes(component, settings) -> dict[tuple[int, int], gf.kdb.Region]
 @pytest.mark.parametrize("sampling", ["fabrication", "simulation"])
 @pytest.mark.parametrize("build", list(CONSTRUCTION_BUILDS))
 def test_every_polygon_is_drawn_as_meant(build, sampling) -> None:
-    """Construction checks (R8) on every flattened polygon and every merged layer."""
+    """Construction checks (R18) on every flattened polygon and every merged layer."""
     PDK.activate()
     settings = CONSTRUCTION_BUILDS[build]
     component = PDK.get_component("disk_flip_chip_qubit", curve_sampling=sampling, **settings)

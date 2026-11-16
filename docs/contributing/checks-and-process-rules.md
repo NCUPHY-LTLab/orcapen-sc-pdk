@@ -1,6 +1,7 @@
 ---
 title: "Three kinds of check, and process rules"
 sidebar: development
+page-navigation: true
 ---
 
 Three kinds of check apply to a layout. They answer different questions, have
@@ -33,4 +34,10 @@ adds a page that lists the process rules, and the code that checks them, to
 this guide.
 
 The 2 DBU limit of the construction checks is not a process rule: it is the
-smallest edge a drawing can mean, whatever the process.
+shortest edge a drawing can meaningfully have, whatever the process. A shorter
+edge is a rounding artefact, and it costs the simulation: SCGSim keeps it, and
+the mesher has to resolve it with elements that small. With the 1 nm edges of
+the zero-width slits in the disk-qubit claw present, one measured run of the
+disk qubit ended without a usable mesh (SCGSim
+[Known Geometry Problems](https://github.com/NCUPHY-LTLab/scgsim/blob/develop/docs/known-geometry-problems.qmd),
+C2 and C3; [#47](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/47)).

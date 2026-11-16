@@ -1,6 +1,7 @@
 ---
 title: "One outline, transformed and rounded once"
 sidebar: development
+page-navigation: true
 ---
 
 A conductor drawn from several parts is safe only once its parts are one
@@ -20,8 +21,10 @@ Terms used here:
   fewest polygons, as a mask writer does. `component.get_region(layer,
   merge=True)` returns the merged layer.
 
-The examples on this page run on their own, in order, from the repository root
-with `PYTHONPATH=tests` (for `geometry_checks`). They share this setup.
+Run this page's examples with
+`uv run pytest tests/test_docs_construction_examples.py -k one-outline`. They
+run in order and share this setup. The test puts `tests/` on the import path, where
+`geometry_checks` lives.
 
 ```python
 import gdsfactory as gf
@@ -41,15 +44,18 @@ def merged(component):
 
 
 def short_edges(component):
-    """Edges of the merged layer shorter than 2 DBU.
-
-    Pass all three arguments: KLayout reads ``with_length(0, 2)`` as
-    "length is not 0" (a length and an ``inverse`` flag).
-    """
+    """Edges of the merged layer shorter than 2 DBU."""
     return merged(component).edges().with_length(0, 2, False).count()
 ```
 
-## R1. Merge the parts of a rigid shape in its local frame, then rotate and move it once {#r1}
+`with_length(0, 2, False)` counts the edges at least 0 and less than 2 DBU
+long.[^with-length]
+
+[^with-length]: Pass all three arguments. With two, KLayout reads
+    `with_length(0, 2)` as a length and an `inverse` flag, that is "every edge
+    whose length is not 0".
+
+## R4. Merge the parts of a rigid shape in its local frame, then rotate and move it once {#r4}
 
 **Rule.** Draw every part of a rigid shape in one local frame, merge them into
 one outline there, and only then rotate and move that outline.
@@ -61,11 +67,12 @@ merge leaves an edge of 1 DBU next to it. Merging in the local frame, where
 every coordinate is exact, removes the T-junction before anything is rounded.
 
 ![**Problem.** Two parts in one frame, rotated by 76.5° as two polygons. The
-right panel zooms on the T-junction, where the merged outline has an edge of 1 DBU
-(marked).](../_static/images/contributing/r1-problem.svg)
+right panel zooms on the T-junction, where the merged outline has an edge of
+1 DBU (marked). An edge that short forces the mesher to resolve it with
+elements as small (see [R18](construction-checks.md)).](../_static/images/contributing/en/r4-problem.svg)
 
 ![**Result.** The same parts merged in the local frame, then rotated by 76.5°.
-The right panel shows the same place, with no short edge.](../_static/images/contributing/r1-result.svg)
+The right panel shows the same place, with no short edge.](../_static/images/contributing/en/r4-result.svg)
 
 ```python
 PARTS = [(0, 9.364, 3.3), (9.364, 16.769, 6.1)]  # x0, x1, height in µm; the parts share x = 9.364
@@ -108,51 +115,45 @@ def rotated_one_by_one(angle):  # don't either: each part rotated and moved on i
 ```
 
 `polar_point(radius, angle)`, from `orcapen_sc_pdk.helpers.layout.geometry`,
-returns the point at that radius and angle in degrees. Sweeping the rotation
-over 1200 angles counts the short edges each construction leaves:
+returns the point at that radius and angle in degrees.
 
 ```python
-ANGLES = [step * 0.3 for step in range(1200)]  # 0° to 359.7° in 0.3° steps
 assert short_edges(rotated_parts(76.5)) == 1
+assert short_edges(rotated_one_by_one(69.3)) > 0
 assert short_edges(rotated_outline(76.5)) == 0
-assert sum(short_edges(rotated_parts(angle)) > 0 for angle in ANGLES) == 12
-assert sum(short_edges(rotated_one_by_one(angle)) > 0 for angle in ANGLES) == 28
-assert sum(short_edges(rotated_outline(angle)) > 0 for angle in ANGLES) == 0
 ```
 
-Over 1200 angles, the two polygons rotated together leave a 1 DBU edge at 12
-angles and the parts rotated one by one at 28. The merged outline leaves none.
-Rotating the parts one by one with an off-grid shared coordinate also splits
-the conductor ([R9](grid-and-polygons.md#r9)).
+Swept over 1200 angles in 0.3° steps, the two polygons rotated together leave
+a 1 DBU edge at 12 angles, the parts rotated one by one at 28, and the merged
+outline at none; the sweep runs in the guide's test. Rotating the parts one by
+one with an off-grid shared coordinate also splits the conductor
+([R1](grid-and-polygons.md#r1)).
 
-**How to check.** Sweep the rotation and count the short edges, as above. In a
-cell's test, `construction_report` reports every edge shorter than 2 DBU
-([R8](construction-checks.md)).
+**How to check.** Build the shape at several angles and count the short edges,
+as above. In a cell's test, `construction_report` reports every edge shorter
+than 2 DBU ([R18](construction-checks.md)).
 
-## R6. Union the parts first, round once, and keep a square end by extending and clipping {#r6}
+## R5. Round a conductor once, after all of its parts are joined {#r5}
 
-**Rule.** Round a conductor's corners after all of its parts are joined. To
-keep one end square, extend the outline past that end, round, and clip the
-extension off.
+**Rule.** Round a conductor's corners once, after all of its parts are joined.
+
+- To keep one end square, extend the outline past that end, round, and clip
+  the extension off.
+- Do not round a part and then add another part to it.
 
 Rounding a part and then adding another part leaves notches where the rounded
 corner meets the new part: the corner was rounded although it is no longer a
-corner. In `disk_flip_chip_qubit`, rounding the claw and then adding the taper
-left a 58–65° spike and 16–93 nm jogs
+corner. In `disk_flip_chip_qubit`, rounding a claw (one of the four arms around
+the qubit disk; see the [component page](../public-pdk-examples/components/disk_flip_chip_qubit.qmd))
+and then adding its taper left a 58–65° spike and 16–93 nm jogs
 ([#53](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/53), cause 2).
-
-Do not limit the rounding with circular windows either: cutting rounded
-pieces apart and splicing them back leaves cut points that round 1 DBU apart.
-That left zero-width slits 1.3 µm and 2.3 µm long in the same claw
-([#47](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/47), C2 and C3).
 
 ![**Problem.** A 20 µm claw and a 10 µm taper, each rounded with a 3 µm radius
 and then joined. The right panel zooms on the notch at x = 20 µm, where two
-rounded corners meet.](../_static/images/contributing/r6-problem.svg)
+rounded corners meet.](../_static/images/contributing/en/r5-problem.svg)
 
-![**Result.** The parts joined first and rounded once. The right end is kept
-square by rounding an outline extended by 6 µm and clipping it back to
-x = 30 µm.](../_static/images/contributing/r6-result.svg)
+![**Result.** The same parts joined first and rounded once. The right panel
+shows the same place, without a notch.](../_static/images/contributing/en/r5-result.svg)
 
 ```python
 RADIUS = gf.kcl.to_dbu(3)  # the 3 µm corner radius in DBU; KLayout's rounding works in DBU
@@ -189,12 +190,13 @@ assert (0, 0) not in corners  # the left end is rounded
 
 The two constructions differ by 7.702 µm²: the notches at the top and bottom
 of x = 20 µm, where four corners were rounded that are not corners of the
-joined conductor.
+joined conductor. `square_end` keeps the right end square: the outline runs
+6 µm past x = 30 µm, is rounded, and is clipped back.
 
 **How to check.** A notch is not a hole, a short edge or a self-intersection,
 so only a comparison with the shape you meant finds it. Pass the intended shape
 to `construction_report`; it reports where the layer differs from it
-([R8](construction-checks.md)).
+([R18](construction-checks.md)).
 
 ```python
 from geometry_checks import construction_report  # tests/geometry_checks.py
@@ -211,7 +213,7 @@ assert notched[LAYER].holes.is_empty() and notched[LAYER].min_edge_dbu >= 2
 assert any("differs from the intended shape" in defect for defect in notched[LAYER].defects)
 ```
 
-## R12. Combine shapes with Booleans, not by joining their point lists {#r12}
+## R6. Combine shapes with Booleans, not by joining their point lists {#r6}
 
 **Rule.** Build each part as a closed shape and combine the parts with a
 Boolean operation (union, difference, intersection), never by concatenating
@@ -232,10 +234,10 @@ the rebuilt disk-qubit outlines use Booleans on shapes instead
 
 ![**Problem.** A 40 µm ground square with an 8 µm clearance arc spliced into
 its top edge, with the arc listed in the wrong direction. The dashed line is
-the intended clearance; the stored polygon has none.](../_static/images/contributing/r12-problem.svg)
+the intended clearance; the stored polygon has none.](../_static/images/contributing/en/r6-problem.svg)
 
 ![**Result.** The same ground built as the square minus the clearance circle
-with `gf.boolean`.](../_static/images/contributing/r12-result.svg)
+with `gf.boolean`.](../_static/images/contributing/en/r6-result.svg)
 
 ```python
 def arc(center, radius, start, stop, segments):

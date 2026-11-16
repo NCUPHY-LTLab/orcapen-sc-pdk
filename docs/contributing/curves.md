@@ -1,6 +1,7 @@
 ---
 title: "Curves: joins and cuts"
 sidebar: development
+page-navigation: true
 ---
 
 A curve in GDS is a polygon: its vertices are points sampled on the ideal
@@ -18,8 +19,10 @@ Terms used here:
 - **Hole**: an enclosed gap in a merged polygon. GDS cannot store holes, so a
   writer joins each hole to the outline with a cut line.
 
-The examples on this page run on their own, in order, from the repository root
-with `PYTHONPATH=tests` (for `geometry_checks`). They share this setup.
+Run this page's examples with
+`uv run pytest tests/test_docs_construction_examples.py -k curves`. They
+run in order and share this setup. The test puts `tests/` on the import path, where
+`geometry_checks` lives.
 
 ```python
 import math
@@ -53,11 +56,11 @@ def sagitta(radius, step_deg):
 assert round(sagitta(RADIUS, 360 / 128) * 1000) == 15  # nm
 ```
 
-## R5. Where a straight edge meets a curve, run the edge into the body {#r5}
+## R11. Where a straight edge meets a curve, run the edge into the body {#r11}
 
-**Rule.** Extend a part's straight sides past the curve into the body, or
-reuse the body's own vertices along the join. Never sample a second arc on the
-same radius to meet the first.
+**Rule.** Extend a part's straight sides past the curve into the body, the
+shape the part joins (here the disk), or reuse the body's own vertices along
+the join; never sample a second arc on the same radius to meet the first.
 
 Two samplings of one circle do not coincide on the grid: between their
 vertices the chords cross back and forth within the sagitta, and the slivers
@@ -67,11 +70,12 @@ metal; shrinking that arc by less than its sagitta did not remove them
 ([#53](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/53), cause 1).
 
 ![**Problem.** A lead that flares from 16 µm to ±20° and ends on its own arc,
-100 steps over 40°, at the radius of a 128-point disk. The merged layer has 8 holes
-(marked); the right panel zooms on one.](../_static/images/contributing/r5-problem.svg)
+100 steps over 40°, at the radius of a 128-point disk. The merged layer has
+8 holes along the join (one marked); the right panel zooms close enough on it
+to show its width.](../_static/images/contributing/en/r11-problem.svg)
 
 ![**Result.** The same flare with its straight sides run on into the disk: no
-holes. The right panel shows the same place.](../_static/images/contributing/r5-result.svg)
+holes. The right panel shows the same place.](../_static/images/contributing/en/r11-result.svg)
 
 ```python
 def flared_lead(landing):
@@ -126,7 +130,7 @@ assert round(differ.area() * gf.kcl.dbu**2, 2) == 0.34
 ```
 
 **How to check.** Count the holes of the merged layer, and name every hole you
-meant to draw ([R8](construction-checks.md)).
+meant to draw ([R18](construction-checks.md)).
 
 ```python
 from geometry_checks import construction_report  # tests/geometry_checks.py
@@ -135,7 +139,7 @@ assert construction_report(lead_on_a_second_arc(128, 100))[LAYER].holes.count() 
 assert construction_report(lead_into_the_body(128))[LAYER].holes.is_empty()
 ```
 
-## R14. Where a straight edge or cut crosses a sampled curve, give both one shared vertex {#r14}
+## R12. Where a straight edge or cut crosses a sampled curve, give both one shared vertex {#r12}
 
 **Rule.** Where a straight edge crosses a sampled curve, make the crossing a
 vertex of both outlines: sample the curve so that a vertex sits at the
@@ -145,19 +149,22 @@ Left to the merge, the crossing point is computed and rounded to the grid.
 When it falls within a nanometre of one of the curve's own vertices, the merged
 outline keeps both, 1 DBU apart. In `disk_flip_chip_qubit`, the ground mask
 had 1 DBU edges where a claw taper's mask strip crossed the 350 µm clearance
-circle, at 3 of 60 landing spans
+circle, at 3 of 60 landing spans, the angle over which a claw's taper meets
+the disk side (`tc_landing_span`; see the
+[component page](../public-pdk-examples/components/disk_flip_chip_qubit.qmd))
 ([#63](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/63)).
 
 ![**Problem.** A strip 14.672 µm wide (on the grid) run into a 128-point disk.
 Its edges cross the disk's outline about 0.5 nm from a vertex. The right panel zooms on
-the top crossing, where the merge leaves an edge of 1 DBU (marked).](../_static/images/contributing/r14-problem.svg)
+the top crossing, where the merge leaves an edge of 1 DBU (marked), which a
+mesher has to resolve with elements as small ([R18](construction-checks.md)).](../_static/images/contributing/en/r12-problem.svg)
 
 ![**Result.** The disk sampled from the crossing angle, with the strip ending on
-that vertex. The right panel shows the same place, with no short edge.](../_static/images/contributing/r14-result.svg)
+that vertex. The right panel shows the same place, with no short edge.](../_static/images/contributing/en/r12-result.svg)
 
 ```python
 def short_edges(component):
-    """Edges of the merged layer shorter than 2 DBU (pass all three arguments to with_length)."""
+    """Edges of the merged layer shorter than 2 DBU."""
     return merged(component).edges().with_length(0, 2, False)
 
 
@@ -183,16 +190,17 @@ assert short_edges(strip_across_disk(7.336)).count() == 2  # at (49.459, ±7.336
 assert short_edges(strip_on_shared_vertices(7.336)).count() == 0
 ```
 
-The shared-vertex build adds no short edge of its own at other widths: over
-500 on-grid half widths from 0.04 µm to 20 µm it leaves none.
+`with_length(0, 2, False)` counts the edges at least 0 and less than 2 DBU
+long.[^with-length] The shared-vertex build adds no short edge of its own at
+other widths either: over 500 on-grid half widths from 0.04 µm to 20 µm it
+leaves none; the sweep runs in the guide's test.
 
-```python
-HALF_WIDTHS = [round(0.04 * step, 3) for step in range(1, 501)]
-assert all(short_edges(strip_on_shared_vertices(h)).count() == 0 for h in HALF_WIDTHS)
-```
+[^with-length]: Pass all three arguments. With two, KLayout reads
+    `with_length(0, 2)` as a length and an `inverse` flag, that is "every edge
+    whose length is not 0".
 
 **How to check.** `construction_report` reports every edge shorter than 2 DBU
-with its position ([R8](construction-checks.md)). Build the cell at the
+with its position ([R18](construction-checks.md)). Build the cell at the
 parameter values where a cut crosses a curve near a vertex, as well as at the
 defaults.
 

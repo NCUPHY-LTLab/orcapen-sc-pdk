@@ -1,9 +1,10 @@
 ---
 title: "開始貢獻"
 sidebar: development
+page-navigation: true
 ---
 
-透過[公開儲存庫](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk)貢獻可重複利用的 cell、製程紀錄、範例或文件。本頁說明如何建立工作目錄，以及一項變更如何從 Issue 走到合併的提取要求。若要撰寫 cell，請接著閱讀[什麼是 cell](contributing/what-is-a-cell.md)與[建構規則](contributing/rules.md)。
+透過[公開儲存庫](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk)貢獻可重複利用的 cell、製程紀錄、範例或文件。本頁說明如何建立工作目錄，以及一項變更如何從 Issue 走到合併的 PR。若要撰寫 cell，請接著閱讀[什麼是 cell](contributing/what-is-a-cell.md)與[建構規則](contributing/rules.md)。
 
 ## 建立開發工作目錄
 
@@ -19,9 +20,9 @@ uv sync -p 3.12
 
 ## 一項變更的流程
 
-1. **Issue。** 說明目標，以及怎樣才算完成。較大的工作、新的 cell 或公開介面的變更從這裡開始；小而明確的修正可以直接開提取要求。
+1. **Issue。** 說明目標，以及怎樣才算完成。較大的工作、新的 cell 或公開介面的變更從這裡開始；小而明確的修正可以直接開 PR。
 2. **Issue 分支。** 在為該 Issue 建立、從 `develop` 分出的分支上工作。
-3. **提取要求併入 `develop`。** 寫明對應的 Issue、變更內容，並為每個驗收項目附上證據（見[提交變更](#submit-a-change)）。
+3. **PR 併入 `develop`。** 寫明對應的 Issue、變更內容，並為每個驗收項目附上證據（見[提交變更](#submit-a-change)）。
 4. **審查。** 審查者依 Issue 檢查變更；若是 cell，也依[建構規則](contributing/rules.md)檢查。由 PDK 維護者合併。
 
 ## 為新 cell 加入預覽 {#preview-a-component}
@@ -48,7 +49,7 @@ if __name__ == "__main__":
 
 ## 提交變更 {#submit-a-change}
 
-在提取要求中說明變更的行為、受影響的公開介面及已執行的檢查。已儲存的科學結果應與原始模型及執行環境對應；修改教學不會重新執行結果。
+在 PR 中說明變更的行為、受影響的公開介面及已執行的檢查。已儲存的科學結果應與原始模型及執行環境對應；修改教學不會重新執行結果。
 
 套件角色請見[工作區與相關套件](home/ecosystem-workspace.md)；來源與執行期的界線請見[SCGSim 整合](features/scgsim-integration.md)；筆記本配對與部署請見[文件與網站](docs-publishing.md)。
 

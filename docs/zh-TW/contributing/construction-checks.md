@@ -1,11 +1,12 @@
 ---
 title: "建構檢查"
 sidebar: development
+page-navigation: true
 ---
 
-「看起來沒問題」不是證據：在你檢視 cell 的尺度下，1 nm 的間隙、不到一奈米的邊，或幾平方微米的缺口都看不見。建構檢查讀取建好的 cell，判斷程式碼畫出的是不是它想畫的多邊形。它們位於 `tests/geometry_checks.py`，cell 的測試會呼叫 `construction_report`。
+「看起來沒問題」不是證據：在你檢視 cell 的尺度下，1 nm 的間隙、1 nm 的邊，或幾平方微米的缺口都看不見。建構檢查讀取建好的 cell，判斷程式碼畫出的是不是它想畫的多邊形。它們位於 `tests/geometry_checks.py`，cell 的測試會呼叫 `construction_report`。
 
-本頁範例可以單獨執行，依序在儲存庫根目錄以 `PYTHONPATH=tests` 執行（供 `geometry_checks` 匯入）。它們共用以下設定。
+以 `uv run pytest tests/test_docs_construction_examples.py -k construction-checks` 執行本頁範例。範例依序執行，共用以下設定。測試會把 `tests/` 加入匯入路徑，`geometry_checks` 就在那裡。
 
 ```python
 import gdsfactory as gf
@@ -26,9 +27,14 @@ def merged(component):
     return component.get_region(LAYER, merge=True)
 ```
 
-## R8. 對 cell 支援的每一種建構執行建構檢查 {#r8}
+## R18. 對 cell 支援的每一種建構執行 `construction_report` {#r18}
 
-**規則。** 在 cell 的測試中，以預設值、支援範圍的邊界值與其組合，並在兩種曲線取樣下建構 cell，然後斷言 `construction_report` 沒有發現缺陷：每個導體都是一個有效的多邊形、沒有短於 2 DBU 的邊、只有你刻意畫的孔洞，以及在你能寫出預期形狀的地方，形狀與預期相符。
+**規則。** 在 cell 的測試中，斷言 `construction_report` 在 cell 支援的每一種建構上都沒有發現缺陷。
+
+- 以預設值、支援範圍的邊界值與其組合，並在兩種曲線取樣下建構 cell。
+- 斷言沒有缺陷：每個導體都是一個有效的多邊形、沒有短於 2 DBU 的邊、只有你刻意畫的孔洞，以及在你能寫出預期形狀的地方，形狀與預期相符。
+
+2 DBU 的下限不只是為了整齊。SCGSim 照著給它的輪廓建模，不會移除過短的邊，所以網格產生器必須以同樣小的元素解析 1 nm 的邊：disk qubit 爪形電極中零寬度狹縫的 1 nm 邊還在時，有一次實測的 disk qubit 執行最後沒有得到可用的網格；爪形角落留下的 0.136 µm 邊也迫使網格使用很小的元素（SCGSim [Known Geometry Problems](https://github.com/NCUPHY-LTLab/scgsim/blob/develop/docs/known-geometry-problems.qmd)，C2 到 C4；[#47](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/47)）。
 
 `construction_report(component)` 把 cell 展平，並對每個圖層回報：
 
@@ -40,11 +46,11 @@ def merged(component):
 
 DBU（資料庫單位）是 GDS 儲存的整數格點；本 PDK 的 1 DBU 是 1 nm。
 
-![**問題。** 一個逐一部件做圓角的導體，因此在部件相接處有缺口。它是一個多邊形，沒有孔洞，也沒有過短的邊，所以只檢查孔洞與邊長會讓它通過。](../_static/images/contributing/r8-problem.svg)
+![**問題。** 一個逐一部件做圓角的導體，因此在部件相接處有缺口。它是一個多邊形，沒有孔洞，也沒有過短的邊，所以只檢查孔洞與邊長會讓它通過。](../_static/images/contributing/zh-TW/r18-problem.svg)
 
-![**結果。** 同一個導體與它的預期形狀比較。紅色標出 `construction_report` 回報的差異：那些缺口。](../_static/images/contributing/r8-result.svg)
+![**結果。** 同一個導體與它的預期形狀比較。紅色標出 `construction_report` 回報的差異：那些缺口。](../_static/images/contributing/zh-TW/r18-result.svg)
 
-下面兩個缺陷都能通過只檢查孔洞與邊長的檢查。第一個是被 1 nm 間隙切成兩塊的導體（[R9](grid-and-polygons.md#r9)）；第二個是 [R6](one-outline.md#r6) 中有缺口的導體。
+下面兩個缺陷都能通過只檢查孔洞與邊長的檢查。第一個是被 1 nm 間隙切成兩塊的導體（[R1](grid-and-polygons.md#r1)）；第二個是 [R5](one-outline.md#r5) 中有缺口的導體。
 
 ```python
 def split_conductor():
@@ -113,6 +119,6 @@ assert moved.count() == 1 and not (moved ^ cutout).is_empty()  # same count, wro
 
 ### 在 cell 的測試中
 
-`tests/test_disk_qubit.py::test_every_polygon_is_drawn_as_meant` 就是這個模式：它以預設值與其 Issue 列出的邊界值，在兩種曲線取樣下建構 `disk_flip_chip_qubit`，並對每個圖層斷言沒有缺陷、沒有低於 2 DBU 的邊，且孔洞等於它列出的接地開口。它會印出最小內角，供提取要求參考。
+`tests/test_disk_qubit.py::test_every_polygon_is_drawn_as_meant` 就是這個模式：它以預設值與其 Issue 列出的邊界值，在兩種曲線取樣下建構 `disk_flip_chip_qubit`，並對每個圖層斷言沒有缺陷、沒有低於 2 DBU 的邊，且孔洞等於它列出的接地開口。它會印出最小內角，供 PR 參考。
 
 **如何檢查。** 出現缺陷時測試就會失敗。沒有這種測試的 cell 就沒有建構證據；新增或修改 cell 時，請一併加上。

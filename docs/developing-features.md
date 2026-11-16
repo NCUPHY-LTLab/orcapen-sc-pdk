@@ -1,6 +1,7 @@
 ---
 title: "Start contributing"
 sidebar: development
+page-navigation: true
 ---
 
 Contribute reusable cells, process records, examples, or documentation through

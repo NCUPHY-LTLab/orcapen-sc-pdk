@@ -1,6 +1,7 @@
 ---
 title: "Grid and valid polygons"
 sidebar: development
+page-navigation: true
 ---
 
 GDS stores every coordinate as an integer number of database units (DBU). In
@@ -10,8 +11,10 @@ conductor, a piece of metal that is meant to be electrically continuous: where
 its parts meet, whether its outline is a valid polygon, and whether it is one
 piece.
 
-The examples on this page run on their own, in order, from the repository root
-with `PYTHONPATH=tests` (for `geometry_checks`). They share this setup.
+Run this page's examples with
+`uv run pytest tests/test_docs_construction_examples.py -k grid-and-polygons`. They
+run in order and share this setup. The test puts `tests/` on the import path, where
+`geometry_checks` lives.
 
 ```python
 import gdsfactory as gf
@@ -30,7 +33,7 @@ def merged(component):
     return component.get_region(LAYER, merge=True)
 ```
 
-## R9. Keep every length and position on the 1 nm grid {#r9}
+## R1. Keep every length and position on the 1 nm grid {#r1}
 
 **Rule.** Every length and position you draw with is a whole number of
 nanometres, so that two parts meant to meet land on the same grid point.
@@ -46,10 +49,10 @@ taper in the Purcell readout cell, whose finger length was 59.92476 µm
 ![**Problem.** A pad, a lead and a second pad, each placed at the sum of the
 off-grid lengths before it (10.0004 µm and 5.0004 µm). Each merged polygon has
 its own colour: the second pad is a separate polygon. The right panel shows the 1 nm
-gap at the end of the lead.](../_static/images/contributing/r9-problem.svg)
+gap at the end of the lead.](../_static/images/contributing/en/r1-problem.svg)
 
 ![**Result.** The same chain with on-grid lengths (10 µm and 5 µm) is one
-polygon. The right panel shows the same place.](../_static/images/contributing/r9-result.svg)
+polygon. The right panel shows the same place.](../_static/images/contributing/en/r1-result.svg)
 
 ```python
 def pad_lead_pad(pad_length, lead_length):
@@ -70,10 +73,10 @@ assert merged(on_grid).count() == 1
 ```
 
 **How to check.** A cell rejects an off-grid length or position parameter with
-an error that names it ([R7](input-checks.md#r7c)).
+an error that names it ([R16](input-checks.md#r16)).
 `gf.snap.is_on_grid(value)` tells you whether a value is on the grid. The
 construction checks then count the polygons of each conductor
-([R8](construction-checks.md)).
+([R18](construction-checks.md)).
 
 ```python
 assert not gf.snap.is_on_grid(10.0004)
@@ -84,7 +87,7 @@ Values that come out of trigonometry or curve sampling are off the grid by
 nature. They are not rejected; the rules on the following pages keep them from
 splitting a conductor.
 
-## R10. Draw every polygon valid: no self-intersection, no self-contact {#r10}
+## R2. Draw every polygon valid: no self-intersection, no self-contact {#r2}
 
 **Rule.** Every polygon's outline goes around once without crossing or touching
 itself, and parts of one conductor overlap by a real width, never at a single
@@ -98,10 +101,10 @@ first at (−409.839, 423.274) µm on the control die and at (−500, 452.314) �
 the qubit die ([#47](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/47)).
 
 ![**Problem.** Two pads that touch only at their corner. The merged outline
-passes through (10, 10) µm twice, which the right panel marks.](../_static/images/contributing/r10-problem.svg)
+passes through (10, 10) µm twice, which the right panel marks.](../_static/images/contributing/en/r2-problem.svg)
 
 ![**Result.** The same pads overlapping by 1 µm: one valid outline. The right panel
-shows the same place.](../_static/images/contributing/r10-result.svg)
+shows the same place.](../_static/images/contributing/en/r2-result.svg)
 
 ```python
 def two_pads(overlap):
@@ -119,7 +122,7 @@ overlapping = two_pads(1)
 **How to check.** `construction_report` from `tests/geometry_checks.py`
 checks every drawn and every merged polygon with Shapely, a Python geometry
 library, and names the defect and where it is
-([R8](construction-checks.md)).
+([R18](construction-checks.md)).
 
 ```python
 from geometry_checks import construction_report  # tests/geometry_checks.py
@@ -130,7 +133,7 @@ assert construction_report(overlapping)[LAYER].defects == ()
 
 The report gives positions in DBU: `[10000 10000]` is (10, 10) µm.
 
-## R11. Draw each conductor as one connected polygon of its own {#r11}
+## R3. Draw each conductor as one connected polygon of its own {#r3}
 
 **Rule.** Each conductor is one polygon by its own construction, not only
 after another part is added to it.
@@ -143,9 +146,9 @@ to connect them ([#58](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/58)
 A1). The fix gave each comb a spine.
 
 ![**Problem.** A comb of five fingers without a spine, built on its own: five
-polygons.](../_static/images/contributing/r11-problem.svg)
+polygons.](../_static/images/contributing/en/r3-problem.svg)
 
-![**Result.** The same comb with a 4 µm spine: one polygon.](../_static/images/contributing/r11-result.svg)
+![**Result.** The same comb with a 4 µm spine: one polygon.](../_static/images/contributing/en/r3-result.svg)
 
 ```python
 def comb(spine):
@@ -164,7 +167,7 @@ assert merged(comb(spine=True)).count() == 1
 
 **How to check.** Build the conductor on its own and count its merged
 polygons, or pass the number of conductors per layer to `construction_report`
-([R8](construction-checks.md)).
+([R18](construction-checks.md)).
 
 ```python
 report = construction_report(comb(spine=False), conductors={LAYER: 1})[LAYER]

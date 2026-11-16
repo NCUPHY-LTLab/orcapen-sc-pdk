@@ -1,16 +1,19 @@
 ---
 title: "Construction checks"
 sidebar: development
+page-navigation: true
 ---
 
-"It looks right" is not evidence: a 1 nm gap, a sub-nanometre edge or a dent
-of a few square micrometres is invisible at the scale you view a cell at. The
+"It looks right" is not evidence: a 1 nm gap, a 1 nm edge or a notch of a
+few square micrometres is invisible at the scale you view a cell at. The
 construction checks read the built cell and say whether the code drew the
 polygons it meant. They live in `tests/geometry_checks.py`, and a cell's test
 calls `construction_report`.
 
-The examples on this page run on their own, in order, from the repository root
-with `PYTHONPATH=tests` (for `geometry_checks`). They share this setup.
+Run this page's examples with
+`uv run pytest tests/test_docs_construction_examples.py -k construction-checks`. They
+run in order and share this setup. The test puts `tests/` on the import path, where
+`geometry_checks` lives.
 
 ```python
 import gdsfactory as gf
@@ -31,13 +34,25 @@ def merged(component):
     return component.get_region(LAYER, merge=True)
 ```
 
-## R8. Run the construction checks on every build the cell supports {#r8}
+## R18. Run `construction_report` on every build the cell supports {#r18}
 
-**Rule.** In the cell's test, build it at its defaults and at the boundary
-values of its supported range and their combinations, at both curve samplings,
-and assert that `construction_report` finds no defect: every conductor one
-valid polygon, no edge shorter than 2 DBU, only the holes you meant, and the
-shape you meant where you can state it.
+**Rule.** In the cell's test, assert that `construction_report` finds no
+defect on every build the cell supports.
+
+- Build the cell at its defaults, at the boundary values of its supported range
+  and their combinations, and at both curve samplings.
+- Assert no defect: every conductor one valid polygon, no edge shorter than
+  2 DBU, only the holes you meant, and the shape you meant where you can
+  state it.
+
+The 2 DBU floor matters beyond tidiness. SCGSim builds the outline it is given
+and does not remove short edges, so the mesher has to resolve a 1 nm edge with
+elements that small: with the 1 nm edges of the zero-width slits in the
+disk-qubit claw present, one measured run of the disk qubit ended without a
+usable mesh, and a 0.136 µm edge left at a claw corner forced small mesh
+elements (SCGSim
+[Known Geometry Problems](https://github.com/NCUPHY-LTLab/scgsim/blob/develop/docs/known-geometry-problems.qmd),
+C2 to C4; [#47](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/47)).
 
 `construction_report(component)` flattens the cell and reports, per layer:
 
@@ -57,15 +72,15 @@ DBU (database unit) is the integer grid GDS stores; 1 DBU is 1 nm in this PDK.
 
 ![**Problem.** A conductor rounded part by part, so it has notches where its
 parts meet. It is one polygon, with no hole and no short edge, so a check of
-holes and edge lengths alone passes it.](../_static/images/contributing/r8-problem.svg)
+holes and edge lengths alone passes it.](../_static/images/contributing/en/r18-problem.svg)
 
 ![**Result.** The same conductor checked against its intended shape. Red marks
-the difference `construction_report` reports: the notches.](../_static/images/contributing/r8-result.svg)
+the difference `construction_report` reports: the notches.](../_static/images/contributing/en/r18-result.svg)
 
 The two defects below pass a check of holes and edge lengths alone. The first
 is a conductor split in two by a 1 nm gap
-([R9](grid-and-polygons.md#r9)); the second is the notched conductor of
-[R6](one-outline.md#r6).
+([R1](grid-and-polygons.md#r1)); the second is the notched conductor of
+[R5](one-outline.md#r5).
 
 ```python
 def split_conductor():

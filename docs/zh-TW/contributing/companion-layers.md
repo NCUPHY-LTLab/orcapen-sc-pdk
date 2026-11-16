@@ -1,11 +1,12 @@
 ---
 title: "伴隨圖層出自同一來源"
 sidebar: development
+page-navigation: true
 ---
 
 本 PDK 中的導體最多以三個圖層描述：你繪製的金屬（`DRAW`）、在接地面上清出它周圍空間的接地光罩（`GROUND_MASK`），以及移除金屬處的蝕刻（`ETCH`）。製程堆疊由蝕刻推導金屬，即整個區域減去 `ETCH − DRAW`。SCGSim 由光罩推導金屬，即接地面減去 `GROUND_MASK`，再加上繪製的走線。兩種推導必須得到相同的金屬。圖層清單請見[圖層](../start/layers.qmd)。
 
-本頁範例可以單獨執行，依序執行。它們共用以下設定。
+以 `uv run pytest tests/test_docs_construction_examples.py -k companion-layers` 執行本頁範例。範例依序執行，共用以下設定。
 
 ```python
 import gdsfactory as gf
@@ -32,15 +33,18 @@ def metal_mismatch(component):
     return metal_from_etch ^ metal_from_mask
 ```
 
-## R15. 光罩以金屬的來源繪製，蝕刻由兩者推導 {#r15}
+## R13. 由與金屬一起繪製的光罩推導蝕刻 {#r13}
 
-**規則。** 以與金屬相同的錨點與尺寸繪製接地光罩，把每個清空區域（例如切割道）都放進光罩，並以 `add_etch_for_component` 推導蝕刻；它設定 `ETCH = GROUND_MASK − DRAW`。
+**規則。** 以 `add_etch_for_component` 推導蝕刻，它由與金屬一起繪製的光罩設定 `ETCH = GROUND_MASK − DRAW`。
+
+- 以與金屬相同的錨點與尺寸繪製接地光罩；錨點是兩個形狀共同量測起點的具名點，例如 port 的中心或某個角。
+- 把每個清空區域（例如切割道）都放進光罩。
 
 手繪的蝕刻是第三份獨立的描述，沒有任何東西讓它與光罩保持一致。`sample_small_airbridge_chip` 在蝕刻圖層上有一個 2300 × 1000 µm 的切割框，接地光罩上卻沒有，兩種推導因此相差約 320,000 µm²（[#58](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/58)，A6，於 [#61](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/pull/61) 修正）。對佈線而言，GDSFactory 的 cross-section 會由同一條路徑畫出金屬與它的光罩；請見[橫截面](../public-pdk-examples/cross-sections.qmd)。
 
-![**問題。** 一塊焊墊（青綠色，`DRAW`）與它的接地淨空區（`GROUND_MASK`，灰色，此處位於琥珀色的 `ETCH` 之下），以及只畫在蝕刻圖層上的切割框，蝕刻是手繪的。紅色標出由蝕刻推導與由光罩推導的金屬不一致之處：整個切割框。](../_static/images/contributing/r15-problem.svg)
+![**問題。** 每個圖層一個面板：`DRAW` 上的焊墊、`GROUND_MASK` 上的淨空區，以及手繪的 `ETCH`，其中還有一個光罩沒有的切割框。最後一個面板以紅色標出由蝕刻推導與由光罩推導的金屬不一致之處：整個切割框。](../_static/images/contributing/zh-TW/r13-problem.svg)
 
-![**結果。** 切割框畫在光罩上，蝕刻由光罩與金屬推導：兩種推導處處一致。](../_static/images/contributing/r15-result.svg)
+![**結果。** 同樣的面板，切割框畫在 `GROUND_MASK` 上，蝕刻由光罩與金屬推導：兩種推導處處一致。](../_static/images/contributing/zh-TW/r13-result.svg)
 
 ```python
 PAD, CLEARANCE = (-50, -10, 50, 10), (-70, -30, 70, 30)

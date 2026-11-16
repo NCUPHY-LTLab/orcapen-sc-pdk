@@ -1,6 +1,7 @@
 ---
 title: "三種檢查與製程規則"
 sidebar: development
+page-navigation: true
 ---
 
 適用於版圖的檢查有三種。它們回答不同的問題、有不同的負責方，也觸及不同的使用者，所以其中一種通過，不代表其他種也通過。
@@ -26,4 +27,4 @@ PDK 的使用端不必遵循它的製程規則。
 
 規則是否採用由 PDK 維護者決定。第一條被採用的規則，會在本指南加入一個列出製程規則的頁面，以及檢查這些規則的程式碼。
 
-建構檢查的 2 DBU 下限不是製程規則：不論製程為何，它都是繪圖所能表達的最短邊。
+建構檢查的 2 DBU 下限不是製程規則：不論製程為何，它都是繪圖中有意義的最短邊。更短的邊是捨入留下的痕跡，而且會拖累模擬：SCGSim 會保留它，網格產生器就必須以同樣小的元素解析它。disk qubit 爪形電極中零寬度狹縫的 1 nm 邊還在時，有一次實測的 disk qubit 執行最後沒有得到可用的網格（SCGSim [Known Geometry Problems](https://github.com/NCUPHY-LTLab/scgsim/blob/develop/docs/known-geometry-problems.qmd)，C2 與 C3；[#47](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/47)）。
