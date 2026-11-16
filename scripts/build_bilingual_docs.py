@@ -42,6 +42,8 @@ LABELS = {
     "Package and integration": "套件與整合",
     "Documentation": "文件維護",
     "Package usage resources": "套件使用資源",
+    "Contributing": "參與貢獻",
+    "Write a component": "撰寫元件",
 }
 
 
