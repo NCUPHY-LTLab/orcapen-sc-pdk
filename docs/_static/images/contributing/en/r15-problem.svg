@@ -191,7 +191,7 @@ L 0 3.5
       </g>
      </g>
      <g id="text_1">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: middle" x="73.215555" y="218.117188" transform="rotate(-0 73.215555 218.117188)">75</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: middle" x="73.215555" y="218.117188" transform="rotate(-0 73.215555 218.117188)">75</text>
      </g>
     </g>
     <g id="xtick_2">
@@ -201,7 +201,7 @@ L 0 3.5
       </g>
      </g>
      <g id="text_2">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: middle" x="95.103503" y="218.117188" transform="rotate(-0 95.103503 218.117188)">100</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: middle" x="95.103503" y="218.117188" transform="rotate(-0 95.103503 218.117188)">100</text>
      </g>
     </g>
     <g id="xtick_3">
@@ -211,11 +211,11 @@ L 0 3.5
       </g>
      </g>
      <g id="text_3">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: middle" x="116.991451" y="218.117188" transform="rotate(-0 116.991451 218.117188)">125</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: middle" x="116.991451" y="218.117188" transform="rotate(-0 116.991451 218.117188)">125</text>
      </g>
     </g>
     <g id="text_4">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: middle" x="91.03716" y="230.8275" transform="rotate(-0 91.03716 230.8275)">x (µm)</text>
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: middle" x="91.03716" y="230.8275" transform="rotate(-0 91.03716 230.8275)">x (µm)</text>
     </g>
    </g>
    <g id="matplotlib.axis_2">
@@ -231,7 +231,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_5">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="203.129683" transform="rotate(-0 44.630781 203.129683)">−100</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="203.129683" transform="rotate(-0 44.630781 203.129683)">−100</text>
      </g>
     </g>
     <g id="ytick_2">
@@ -241,7 +241,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_6">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="181.241735" transform="rotate(-0 44.630781 181.241735)">−75</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="181.241735" transform="rotate(-0 44.630781 181.241735)">−75</text>
      </g>
     </g>
     <g id="ytick_3">
@@ -251,7 +251,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_7">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="159.353787" transform="rotate(-0 44.630781 159.353787)">−50</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="159.353787" transform="rotate(-0 44.630781 159.353787)">−50</text>
      </g>
     </g>
     <g id="ytick_4">
@@ -261,7 +261,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_8">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="137.465839" transform="rotate(-0 44.630781 137.465839)">−25</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="137.465839" transform="rotate(-0 44.630781 137.465839)">−25</text>
      </g>
     </g>
     <g id="ytick_5">
@@ -271,7 +271,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_9">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="115.577891" transform="rotate(-0 44.630781 115.577891)">0</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="115.577891" transform="rotate(-0 44.630781 115.577891)">0</text>
      </g>
     </g>
     <g id="ytick_6">
@@ -281,7 +281,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_10">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="93.689942" transform="rotate(-0 44.630781 93.689942)">25</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="93.689942" transform="rotate(-0 44.630781 93.689942)">25</text>
      </g>
     </g>
     <g id="ytick_7">
@@ -291,7 +291,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_11">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="71.801994" transform="rotate(-0 44.630781 71.801994)">50</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="71.801994" transform="rotate(-0 44.630781 71.801994)">50</text>
      </g>
     </g>
     <g id="ytick_8">
@@ -301,7 +301,7 @@ L -3.5 0
       </g>
      </g>
      <g id="text_12">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="49.914046" transform="rotate(-0 44.630781 49.914046)">75</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="49.914046" transform="rotate(-0 44.630781 49.914046)">75</text>
      </g>
     </g>
     <g id="ytick_9">
@@ -311,11 +311,11 @@ L -3.5 0
       </g>
      </g>
      <g id="text_13">
-      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: end" x="44.630781" y="28.026098" transform="rotate(-0 44.630781 28.026098)">100</text>
+      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: end" x="44.630781" y="28.026098" transform="rotate(-0 44.630781 28.026098)">100</text>
      </g>
     </g>
     <g id="text_14">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: middle" x="14.038594" y="112.158594" transform="rotate(-90 14.038594 112.158594)">y (µm)</text>
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: middle" x="14.038594" y="112.158594" transform="rotate(-90 14.038594 112.158594)">y (µm)</text>
     </g>
    </g>
    <g id="patch_5">
@@ -339,7 +339,7 @@ L 130.443539 20.038594
 " style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_15">
-    <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC'; text-anchor: start" x="51.630781" y="14.038594" transform="rotate(-0 51.630781 14.038594)">asked 90°, drawn 60°</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Heiti TC', 'PingFang TC', 'Noto Sans CJK TC', 'Noto Sans TC', 'Microsoft JhengHei'; text-anchor: start" x="51.630781" y="14.038594" transform="rotate(-0 51.630781 14.038594)">asked 90°, drawn 60°</text>
    </g>
   </g>
  </g>

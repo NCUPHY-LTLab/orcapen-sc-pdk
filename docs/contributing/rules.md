@@ -26,8 +26,10 @@ check it. The thumbnails show each problem.
 - An arrow is a port, pointing the way it faces.
 - The panel on the right, where there is one, zooms on the defect; the result
   figure zooms on the same place.
-- Layer figures use one panel per layer: teal `DRAW`, grey `GROUND_MASK`,
-  amber `ETCH`.
+- Layer colours are teal `DRAW`, grey `GROUND_MASK` and amber `ETCH`. A layer
+  figure either has one panel per layer or, when the layers share one panel, a
+  legend that names them; there the colours mean layers, not separate
+  polygons.
 
 ## Terms
 

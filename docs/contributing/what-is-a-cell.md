@@ -48,15 +48,15 @@ assert gf.kcl.to_dbu(1.5) == 1500  # 1 DBU is 1 nm
 assert circle_segments(50, FABRICATION) > 0  # points per circle for this radius and sampling
 ```
 
-## H2. List new helper functions on the Issue for one approval by the Human {#h2}
+## H2. List new helper functions on the Issue for one approval by the repository owner {#h2}
 
 **Rule.** List every new function that is not a `@gf.cell` once on the Issue,
-and wait until the Human, the repository owner, approves the list.
+and wait until the repository owner approves the list.
 
 The list says, for each function, what it does and why no existing one fits
-(H1). The Human approves the whole list once.
+(H1). The repository owner approves the whole list once.
 
-| Needs the Human's approval | Needs none |
+| Needs the repository owner's approval | Needs none |
 |---|---|
 | A new function private to one cell file | A small file-local wrapper of one expression |
 | A new shared function under `orcapen_sc_pdk/helpers/` | A test helper |

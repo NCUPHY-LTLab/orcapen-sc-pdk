@@ -38,13 +38,13 @@ assert gf.kcl.to_dbu(1.5) == 1500  # 1 DBU is 1 nm
 assert circle_segments(50, FABRICATION) > 0  # points per circle for this radius and sampling
 ```
 
-## H2. 新的 helper 函式列在 Issue 上，由 Human 一次核准 {#h2}
+## H2. 新的 helper 函式列在 Issue 上，由儲存庫擁有者一次核准 {#h2}
 
-**規則。** 把每個不是 `@gf.cell` 的新函式在 Issue 上列出一次，等 Human（儲存庫擁有者）核准這份清單之後再撰寫。
+**規則。** 把每個不是 `@gf.cell` 的新函式在 Issue 上列出一次，等儲存庫擁有者核准這份清單之後再撰寫。
 
-清單對每個函式說明它做什麼，以及為何沒有既有函式適用（H1）。Human 一次核准整份清單。
+清單對每個函式說明它做什麼，以及為何沒有既有函式適用（H1）。儲存庫擁有者一次核准整份清單。
 
-| 需要 Human 核准 | 不需要核准 |
+| 需要儲存庫擁有者核准 | 不需要核准 |
 |---|---|
 | 只屬於某個 cell 檔案的新私有函式 | 只包一個運算式、僅在檔案內使用的小型包裝函式 |
 | 放在 `orcapen_sc_pdk/helpers/` 下共用的新函式 | 測試用的 helper |

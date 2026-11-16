@@ -16,6 +16,7 @@ deterministic, so re-running leaves no diff.
 
 from __future__ import annotations
 
+import logging
 import math
 import re
 import sys
@@ -25,7 +26,7 @@ from pathlib import Path
 
 import gdsfactory as gf
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyArrow, PathPatch
+from matplotlib.patches import FancyArrow, Patch, PathPatch
 from matplotlib.path import Path as MplPath
 from matplotlib.ticker import MaxNLocator
 
@@ -57,6 +58,7 @@ LABELS = {
         "about_origin": "turned about the origin",
         "about_centre": "turned about its centre",
         "faces": "port m faces {angle}°",
+        "faces_expected": "port m faces {angle}°, should be {expected}°",
         "holes": "{n} hole(s)",
         "shared_vertex": "shared vertex",
         "mismatch": "metal mismatch",
@@ -67,6 +69,9 @@ LABELS = {
         "passes_simple_check": "1 polygon, 0 holes",
         "difference": "differs from the intended shape",
         "cell": "cell: bend_euler",
+        "DRAW": "DRAW: metal",
+        "GROUND_MASK": "GROUND_MASK: ground clearance",
+        "ETCH": "ETCH: etch",
         "helper": "helper: open end at o2",
     },
     "zh-TW": {
@@ -84,6 +89,7 @@ LABELS = {
         "about_origin": "繞原點轉動",
         "about_centre": "繞自身中心轉動",
         "faces": "port m 朝向 {angle}°",
+        "faces_expected": "port m 朝向 {angle}°，應為 {expected}°",
         "holes": "{n} 個孔洞",
         "shared_vertex": "共用頂點",
         "mismatch": "金屬不一致",
@@ -94,6 +100,9 @@ LABELS = {
         "passes_simple_check": "1 個多邊形、0 個孔洞",
         "difference": "與預期形狀的差異",
         "cell": "cell：bend_euler",
+        "DRAW": "DRAW：金屬",
+        "GROUND_MASK": "GROUND_MASK：接地淨空區",
+        "ETCH": "ETCH：蝕刻",
         "helper": "helper：o2 上的開路端",
     },
 }
@@ -106,6 +115,7 @@ class Scene:
     conductors: list[gf.kdb.Region] = field(default_factory=list)
     layers: list[tuple[str, gf.kdb.Region]] = field(default_factory=list)
     layer_panels: bool = False
+    legend: list[tuple[str, str]] = field(default_factory=list)  # layer name, label
     outlines: list[gf.kdb.Region] = field(default_factory=list)
     difference: gf.kdb.Region | None = None
     markers: list[tuple[float, float]] = field(default_factory=list)
@@ -138,14 +148,24 @@ class FigurePair:
 
 
 def main(rules: list[str]) -> None:
+    # The CJK fallbacks missing on this machine are expected; the SVG still names them.
+    logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
     sys.path.insert(0, str(ROOT / "tests"))  # the pages import geometry_checks
     plt.rcParams.update(
         {
             "svg.fonttype": "none",
             "svg.hashsalt": "orcapen-sc-pdk",
             "font.size": 9,
-            # The second family carries the Traditional Chinese labels.
-            "font.family": ["DejaVu Sans", "Heiti TC"],
+            # The later families carry the Traditional Chinese labels. The SVG
+            # keeps the whole list, so a browser on any platform finds one.
+            "font.family": [
+                "DejaVu Sans",
+                "Heiti TC",
+                "PingFang TC",
+                "Noto Sans CJK TC",
+                "Noto Sans TC",
+                "Microsoft JhengHei",
+            ],
         }
     )
     namespaces: dict[str, dict] = {}
@@ -274,7 +294,7 @@ def r2(ns, overlap, say):
     region = merged(ns["two_pads"](overlap))
     return Scene(
         conductors=[region],
-        markers=repeated_vertex_points(region) or [(10.0, 10.0)],
+        markers=repeated_vertex_points(region),
         note=say("valid_outline" if overlap else "touches_itself"),
     )
 
@@ -337,7 +357,10 @@ def r9(ns, build, say):
     return Scene(
         conductors=[merged(component)],
         ports=[port_arrow(target.ports["t"], TARGET_PORT), port_arrow(ref.ports["m"])],
-        note=say("faces", angle=angle),
+        # The target faces 210°, so a port that meets it must face 30°.
+        note=say("faces", angle=angle)
+        if angle == 30
+        else say("faces_expected", angle=angle, expected=30),
     )
 
 
@@ -425,6 +448,7 @@ def h3(ns, kind, say):
         layers=layer_regions(component, names),
         ports=ports,
         outlines=outlines,
+        legend=[(name, say(name)) for name in ("DRAW", "ETCH", "GROUND_MASK")],
         note=say(kind),
     )
 
@@ -481,6 +505,13 @@ def draw_main_and_zoom(scene: Scene, centre, half_width: float | None):
     draw_scene(main_panel, scene, limits, marker_size=9)
     style_axes(main_panel)
     write_note(main_panel, scene.note)
+    if scene.legend:
+        handles = [
+            Patch(facecolor=LAYER_COLOURS[name], label=label) for name, label in scene.legend
+        ]
+        main_panel.legend(
+            handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=1, frameon=False
+        )
     if zoomed:
         zoom = panels[1]
         x, y = centre
