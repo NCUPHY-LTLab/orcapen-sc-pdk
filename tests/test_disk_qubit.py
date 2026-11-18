@@ -5,7 +5,6 @@ import math
 import gdsfactory as gf
 import pytest
 from geometry_checks import MIN_EDGE_DBU, construction_report, interior_angles, polygon_defects
-from kfactory import kdb
 
 from orcapen_sc_pdk.pdk import PDK
 from orcapen_sc_pdk.tech import LAYER
@@ -217,7 +216,7 @@ CONSTRUCTION_BUILDS = {
 }
 
 
-def _intended_holes(component, settings) -> dict[tuple[int, int], kdb.Region]:
+def _intended_holes(component, settings) -> dict[tuple[int, int], gf.kdb.Region]:
     """The cut-outs drawn on purpose, in DBU: each die's ground opening.
 
     On D0 they are the clearance, which the readout line's mask joins, and the
@@ -239,7 +238,7 @@ def _intended_holes(component, settings) -> dict[tuple[int, int], kdb.Region]:
 @pytest.mark.parametrize("sampling", ["fabrication", "simulation"])
 @pytest.mark.parametrize("build", list(CONSTRUCTION_BUILDS))
 def test_every_polygon_is_drawn_as_meant(build, sampling) -> None:
-    """Construction checks (R8) on every flattened polygon and every merged layer."""
+    """Construction checks (R18) on every flattened polygon and every merged layer."""
     PDK.activate()
     settings = CONSTRUCTION_BUILDS[build]
     component = PDK.get_component("disk_flip_chip_qubit", curve_sampling=sampling, **settings)
@@ -250,7 +249,7 @@ def test_every_polygon_is_drawn_as_meant(build, sampling) -> None:
         assert not report.defects, (layer, report.defects[:5])
         assert report.min_edge_dbu >= MIN_EDGE_DBU, layer
         assert report.holes.count() == (counts[layer] if layer in intended else 0), layer
-        assert (report.holes ^ intended.get(layer, kdb.Region())).is_empty(), layer
+        assert (report.holes ^ intended.get(layer, gf.kdb.Region())).is_empty(), layer
         # Reported only; the interior angle has no threshold yet.
         print(f"{build} [{sampling}] {layer}: min interior angle {report.min_angle_deg}°")
 

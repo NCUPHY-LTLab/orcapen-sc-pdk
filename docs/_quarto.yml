@@ -13,6 +13,7 @@ project:
     - "public-pdk-examples/*.qmd"
     - "public-pdk-examples/components/**/*.qmd"
     - "usage/*.md"
+    - "contributing/*.md"
     - "simulation/**/*.qmd"
     - "papers/*.md"
     - "notebooks/Public_Docs/component_gallery.ipynb"
@@ -244,7 +245,21 @@ website:
       collapse-level: 1
       title: Development
       contents:
-        - developing-features.md
+        - section: Contributing
+          contents:
+            - developing-features.md
+            - section: Write a component
+              contents:
+                - contributing/what-is-a-cell.md
+                - contributing/rules.md
+                - contributing/grid-and-polygons.md
+                - contributing/one-outline.md
+                - contributing/placement.md
+                - contributing/curves.md
+                - contributing/companion-layers.md
+                - contributing/input-checks.md
+                - contributing/construction-checks.md
+            - contributing/checks-and-process-rules.md
         - section: References
           contents:
             - paper-review.md
