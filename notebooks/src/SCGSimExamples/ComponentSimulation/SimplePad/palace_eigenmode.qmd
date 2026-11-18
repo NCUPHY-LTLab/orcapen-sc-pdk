@@ -50,7 +50,7 @@ WORKFLOW_ACTION = "run"
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     import gdsfactory as gf
     from scgsim.geometry import GeometryPlan
-    from scgsim.meshing import DELAUNAY, MesherOptions, UniformBoundaryRecipe
+    from scgsim.meshing import DELAUNAY, MesherOptions
     from scgsim.palace import EigenmodeSim
 
     import orcapen_sc_pdk
@@ -180,15 +180,13 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
 ```{python}
 #| id: pem-mesh
 if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
-    # Element size at every curve of the model, and far from them, in um.
-    NEAR_MESH_SIZE_UM = 10.0
-    FAR_MESH_SIZE_UM = 200.0
+    # SCGSim's default sizing (FeatureRecipe). The former 10/200 um sizes map to
+    # UniformBoundaryRecipe(10, 200), which leaves no clean mesh on this die (#66).
     # Meshing runs on one thread.
     ALGORITHM_3D = DELAUNAY
     GEOMETRY_ORDER = 1  # Geometry mesh degree, not field FEM order.
     HIGH_ORDER_OPTIMIZE = True
     sim.set_mesh(
-        recipe=UniformBoundaryRecipe(near_um=NEAR_MESH_SIZE_UM, far_um=FAR_MESH_SIZE_UM),
         mesher=MesherOptions(
             algorithm_3d=ALGORITHM_3D,
             geometry_order=GEOMETRY_ORDER,

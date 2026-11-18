@@ -66,8 +66,13 @@ Code cells have stable IDs, null execution counts and empty outputs. Retain
 executed notebooks separately with their source, input, runtime and run identity;
 never copy historical output into a changed source as proof of execution.
 
-The current solver examples use the fixed
-[SCGSim v2 RC1 checkpoint](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
+The repository pins
+[SCGSim v3.0.0rc4](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4)
+(`847d18b`). The Palace and geometry examples (SimplePad, CircularPad and
+CpwFiniteGround Palace, Kosen2024 Xmon Palace, GeometrySemantics) use its API
+and run on stock Palace 0.18.1. The AEDT, Q2D and Surface-bands examples still
+carry the API of their earlier checkpoints and do not run on this pin until
+they are moved (NCUPHY-LTLab/orcapen-sc-pdk#66).
 Each source states its exact runtime and optional backend prerequisites.
 Source-only geometry observations and historical examples retain their own
 declared checkpoints. Ordinary project dependencies and pins are not silently
