@@ -19,8 +19,9 @@ This public workflow prepares a Palace manual handoff. It does not submit or run
 from pathlib import Path
 
 import gdsfactory as gf
+from scgsim.geometry import ApproximationProfile, GeometryPlan
+from scgsim.meshing import UniformBoundaryRecipe
 from scgsim.palace import EigenmodeSim, inspect_run_trustworthiness, resolve_palace_result
-from scgsim.sgb import GeometryPlan
 from scgsim.visualization import inspect_palace_geometry
 
 import orcapen_sc_pdk
@@ -57,6 +58,8 @@ if WORKFLOW_ACTION == "prepare_handoff":
         "qubit_pad_length": 309.5,
         "qubit_pad_width": 24.65,
         "qubit_gap": 20.0,
+        # Polygon curves within SCGSim's supported scope (16-32 points per circle).
+        "curve_sampling": "simulation",
     }
     # Requested XY pad; the helper grows it when indium bumps would not fit.
     COUPON_PADDING_UM = 75.0
@@ -96,17 +99,29 @@ thickness modeling convention in its PDK provenance.
 if WORKFLOW_ACTION == "prepare_handoff":
     # Route A models zero-thickness PEC sheets; Route B models finite PEC exclusion shells.
     ROUTE = "A"
-    # A globally maps the two thin sheets to the physical 8.0 um metal gap.
-    ROUTE_A_THIN_FILM = "metal_gap_equivalent"
+    # metal_gap_equivalent lowers the two face films to sheets across the physical
+    # 8.0 um metal gap. Its film bindings state which dielectric face each film sits
+    # on, read from the PDK layer stack: D0_TOP_M1 attaches at its lower face to the
+    # upper face of D0_SUBSTRATE; the flipped D1_BOTTOM_M1 attaches at its upper face
+    # to the lower face of D1_SUBSTRATE. Open for the Human to confirm (#66).
+    ROUTE_A_PROFILE = ApproximationProfile(
+        name="metal_gap_equivalent",
+        revision="v1",
+        parameters={
+            "film_bindings": {
+                "orcapen_sc_pdk:D0_TOP_M1": {
+                    "supporting_entity_id": "D0_SUBSTRATE",
+                    "supporting_side": "upper",
+                },
+                "orcapen_sc_pdk:D1_BOTTOM_M1": {
+                    "supporting_entity_id": "D1_SUBSTRATE",
+                    "supporting_side": "lower",
+                },
+            }
+        },
+    )
     # Add symmetric X/Y/Z padding to the automatic vacuum envelope; only Z is expanded here.
     VACUUM_PADDING_UM = (0.0, 0.0, float(OUTER_VACUUM_THICKNESS_UM))
-    INDIUM_GROUND_FILL = {
-        # Coupon GDS already has indium shorts; SCGSim must not lattice-fill.
-        "fill": False,
-        # Required by the SCGSim fill API even when fill is disabled.
-        "fill_pitch_um": 80.0,
-        "fill_clearance_um": 30.0,
-    }
     # Exact authored GDSFactory port whose sheet geometry and signed direction SGB preserves.
     PORT_NAME = "chip/device/o_junction_lumped"
     # Logical conductor layer containing the two terminal owners of the junction sheet.
@@ -144,11 +159,6 @@ if WORKFLOW_ACTION == "prepare_handoff":
         ),
     })
     plan.set_vacuum_region(padding=VACUUM_PADDING_UM)
-    snapshot = plan.prepare()
-    sim = EigenmodeSim()
-    sim.set_plan(snapshot)
-    sim.set_output_dir(RUN_ROOT)
-    sim.set_indium_ground_bumps(**INDIUM_GROUND_FILL)
     # Select complete validated OrcaPen records immediately before Surface-EPR setup so
     # their public source/description provenance remains visible beside the numeric specs.
     records = validate_interface_preset_records(get_interface_preset_records())
@@ -178,11 +188,13 @@ if WORKFLOW_ACTION == "prepare_handoff":
         }
         for interface_type, preset in selected_interface_presets.items()
     }
-    sim.set_surface_epr(
-        representation=ROUTE,
-        specs=EPR_SPECS,
-        route_a_thin_film=ROUTE_A_THIN_FILM,
-    )
+    # Surface EPR changes the geometry, so the plan holds it; prepare() after it.
+    plan.set_surface_epr(EPR_SPECS)
+    snapshot = plan.prepare()
+    sim = EigenmodeSim()
+    sim.set_route(ROUTE, approximation_profile=ROUTE_A_PROFILE)
+    sim.set_plan(snapshot)
+    sim.set_output_dir(RUN_ROOT)
     sim.add_port(PORT_NAME, layer=PORT_LAYER, layout_sheet=True, inductance=PORT_INDUCTANCE_H)
     sim.set_eigenmode(
         num_modes=NUM_MODES,
@@ -197,13 +209,14 @@ if WORKFLOW_ACTION == "prepare_handoff":
 ```{python}
 #| id: 8571d77f
 if WORKFLOW_ACTION == "prepare_handoff":
-    # Target element size near SGB semantic refinement regions.
-    # Smaller elements resolve interfaces more finely.
+    # Element size at every curve of the model (um); meshing runs on one thread.
     REFINED_MESH_SIZE_UM = 5.0
-    # Upper element size in bulk solution volumes; smaller increases the global tetrahedron count.
+    # Element size far from the curves (um); smaller increases the tetrahedron count.
     MAX_MESH_SIZE_UM = 300.0
 
-    sim.set_mesh(refined_mesh_size=REFINED_MESH_SIZE_UM, max_mesh_size=MAX_MESH_SIZE_UM)
+    sim.set_mesh(
+        recipe=UniformBoundaryRecipe(near_um=REFINED_MESH_SIZE_UM, far_um=MAX_MESH_SIZE_UM)
+    )
     MESH_PATH = sim.mesh()
 ```
 
