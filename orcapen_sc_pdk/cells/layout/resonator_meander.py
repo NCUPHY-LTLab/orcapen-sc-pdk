@@ -4,10 +4,9 @@ import gdsfactory as gf
 from gdsfactory.typings import ComponentSpec, CrossSectionSpec
 
 import orcapen_sc_pdk.curve_sampling as curves
+from orcapen_sc_pdk.helpers.layout.cpw import add_cpw_open_end
 from orcapen_sc_pdk.ports import add_mesh_port
 from orcapen_sc_pdk.tech import (
-    CPW_ETCH_POS,
-    CPW_GROUND_MASK,
     LAYER,
     Layer,
 )
@@ -161,59 +160,12 @@ def resonator_meander(
     if first_ref is None or last_ref is None:
         raise ValueError("Resonator could not be generated correctly.")
 
-    if open_end or open_start:
-        etch_section = xs[CPW_ETCH_POS]
-        ground_mask_section = xs[CPW_GROUND_MASK]
-        open_etch_comp = gf.components.rectangle(
-            size=(
-                etch_section.width,
-                2 * etch_section.width + xs.width,
-            ),
-            layer=etch_section.layer,
-            centered=True,
-            port_type="optical",
-            port_orientations=(0, 180),
-        )
-        open_ground_mask_comp = gf.components.rectangle(
-            size=(
-                etch_section.width,
-                ground_mask_section.width,
-            ),
-            layer=ground_mask_section.layer,
-            centered=True,
-            port_type="optical",
-            port_orientations=(0, 180),
-        )
-
-        def _add_etch_at_port(
-            port_name: str,
-            ref_port: gf.Port,
-            output_port: str,
-        ) -> None:
-            open_etch = c << open_etch_comp
-            open_ground_mask = c << open_ground_mask_comp
-            open_etch.connect(
-                port_name,
-                ref_port,
-                allow_width_mismatch=True,
-                allow_layer_mismatch=True,
-            )
-            open_ground_mask.connect(
-                port_name,
-                ref_port,
-                allow_width_mismatch=True,
-                allow_layer_mismatch=True,
-            )
-            c.add_port(
-                output_port,
-                port=open_etch.ports[output_port],
-                port_type="placement",
-            )
-
-        if open_end:
-            _add_etch_at_port("o1", last_ref.ports["o2"], "o2")
-        if open_start:
-            _add_etch_at_port("o2", first_ref.ports["o1"], "o1")
+    if open_end:
+        outer_port = add_cpw_open_end(c, last_ref.ports["o2"], xs)
+        c.add_port("o2", port=outer_port, port_type="placement")
+    if open_start:
+        outer_port = add_cpw_open_end(c, first_ref.ports["o1"], xs)
+        c.add_port("o1", port=outer_port, port_type="placement")
 
     if not open_end:
         c.add_port("o2", port=last_ref.ports["o2"])

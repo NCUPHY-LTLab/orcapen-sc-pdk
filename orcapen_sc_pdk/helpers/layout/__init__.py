@@ -1,5 +1,6 @@
 """Layout authoring helpers shared by OrcaPen SC layout packages."""
 
+from orcapen_sc_pdk.helpers.layout.cpw import add_cpw_open_end
 from orcapen_sc_pdk.helpers.layout.etch import add_etch_for_component
 from orcapen_sc_pdk.helpers.layout.indium import indium_bump_centers_around_polygon
 from orcapen_sc_pdk.helpers.layout.regions import (
@@ -9,6 +10,7 @@ from orcapen_sc_pdk.helpers.layout.regions import (
 )
 
 __all__ = [
+    "add_cpw_open_end",
     "add_etch_for_component",
     "get_keepout_region",
     "get_keepout_region_from_targets",

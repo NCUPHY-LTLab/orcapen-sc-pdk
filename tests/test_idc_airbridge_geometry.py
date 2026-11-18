@@ -67,3 +67,14 @@ def test_airbridge_chip_etch_and_ground_mask_give_the_same_metal() -> None:
     metal_from_etch = plane - (etch - draw)  # PDK stack: domain - (ETCH - DRAW)
     metal_from_mask = (plane - mask) + draw  # SCGSim: plane - GROUND_MASK, plus the drawn traces
     assert (metal_from_etch ^ metal_from_mask).is_empty()
+
+
+def test_purcell_rejects_a_cross_section_whose_layers_differ_from_its_arguments() -> None:
+    PDK.activate()
+
+    def fixed_layer_cpw(**_ignored: object) -> gf.CrossSection:
+        # Ignores the layer arguments, as a custom CrossSectionSpec factory may.
+        return gf.get_cross_section("cpw_6_7_6")
+
+    with pytest.raises(ValueError, match=r"etch_layer.*must match"):
+        gf.get_component(PURCELL, single_cpw_xs=fixed_layer_cpw, etch_layer=(999, 0))

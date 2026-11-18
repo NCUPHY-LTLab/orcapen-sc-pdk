@@ -8,11 +8,10 @@ from gdsfactory.typings import ComponentSpec, CrossSectionSpec
 import orcapen_sc_pdk.curve_sampling as curves
 from orcapen_sc_pdk.cells.layout.resonator_hanger import resonator_hanger
 from orcapen_sc_pdk.cells.layout.resonator_meander import resonator_meander
+from orcapen_sc_pdk.helpers.layout.cpw import add_cpw_open_end
 from orcapen_sc_pdk.helpers.layout.etch import add_etch_for_component
 from orcapen_sc_pdk.ports import add_mesh_port
 from orcapen_sc_pdk.tech import (
-    CPW_ETCH_POS,
-    CPW_GROUND_MASK,
     LAYER,
     Layer,
 )
@@ -353,11 +352,19 @@ def resonator(
             qubit_route_length = float(route.length) / 1e3
             c.add_port("o2", port=qubit_segment_ref.ports["o_resonator_segment"])
         elif open_end:
-            _add_open_end(c, final_port, tail_xs)
+            c.add_port(
+                "o2",
+                port=add_cpw_open_end(c, final_port, tail_xs),
+                port_type="placement",
+            )
         else:
             c.add_port("o2", port=final_port)
     elif open_end:
-        _add_open_end(c, final_port, tail_xs)
+        c.add_port(
+            "o2",
+            port=add_cpw_open_end(c, final_port, tail_xs),
+            port_type="placement",
+        )
     else:
         c.add_port("o2", port=final_port)
 
@@ -489,50 +496,6 @@ def _qubit_resonator_segment(
 
     curves.record_sampling(c, curve_sampling)
     return c
-
-
-def _add_open_end(component: gf.Component, port: gf.Port, cross_section: gf.CrossSection) -> None:
-    """Add the open-end ETCH and GROUND_MASK caps for an unterminated CPW."""
-
-    etch_section = cross_section[CPW_ETCH_POS]
-    ground_mask_section = cross_section[CPW_GROUND_MASK]
-
-    open_etch_comp = gf.components.rectangle(
-        size=(
-            etch_section.width,
-            2 * etch_section.width + cross_section.width,
-        ),
-        layer=etch_section.layer,
-        centered=True,
-        port_type="optical",
-        port_orientations=(0, 180),
-    )
-    open_ground_mask_comp = gf.components.rectangle(
-        size=(
-            etch_section.width,
-            ground_mask_section.width,
-        ),
-        layer=ground_mask_section.layer,
-        centered=True,
-        port_type="optical",
-        port_orientations=(0, 180),
-    )
-
-    open_etch = component << open_etch_comp
-    open_ground_mask = component << open_ground_mask_comp
-    open_etch.connect(
-        "o1",
-        port,
-        allow_width_mismatch=True,
-        allow_layer_mismatch=True,
-    )
-    open_ground_mask.connect(
-        "o1",
-        port,
-        allow_width_mismatch=True,
-        allow_layer_mismatch=True,
-    )
-    component.add_port("o2", port=open_etch.ports["o2"], port_type="placement")
 
 
 if __name__ == "__main__":
