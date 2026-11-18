@@ -165,7 +165,9 @@ FEM_ORDER = 2
 AMR_MAX_PASSES = 10
 AMR_TOLERANCE = 0.02
 # Each pass refines the elements that hold this share of the estimated error.
-AMR_UPDATE_FRACTION = 0.7
+# At 0.7 the mesh grew about 2.5x per pass and the sixth pass needed more
+# than the 503 GB of the workstation, so this run refines half as much.
+AMR_UPDATE_FRACTION = 0.35
 # Nonconformal refinement splits only the marked elements, without the extra
 # splits a conformal mesh needs to stay connected, so effort stays where the
 # error is.
