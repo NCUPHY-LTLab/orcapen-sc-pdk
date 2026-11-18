@@ -158,6 +158,57 @@ website:
             - simulation/requirements/q2d-cross-section.qmd
             - simulation/requirements/epr-loss.qmd
         - public-pdk-examples/test-components.md
+        - section: Example notebooks
+          contents:
+            - section: SimplePad
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_electrostatic.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_prepare.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_analyze.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_q3d.ipynb
+            - section: SimplePad surface bands
+              contents:
+                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.qmd
+                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_analyze.qmd
+                - notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd
+            - section: CircularPad
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb
+            - section: CPW with finite ground
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/palace_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_modal.ipynb
+                - notebooks/ComponentSimulation/CpwFiniteGround/aedt_hfss_driven_terminal.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwFiniteGround/aedt_q3d.ipynb
+                - notebooks/SCGSimExamples/CrossSectionSimulation/CpwFiniteGround/aedt_q2d.ipynb
+            - section: CPW meander with airbridges
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_eigenmode_rlc.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_lumped.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/CpwMeanderAirbridge/aedt_hfss_driven_terminal_wave.ipynb
+            - section: Kosen 2024 Xmon
+              contents:
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_eigenmode.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/aedt_q3d.ipynb
+                - notebooks/ComponentSimulation/Kosen2024_Xmon/electrostatic_boundary_alignment.ipynb
+            - section: Geometry semantics
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_source_ownership.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_curves_holes_transforms.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/GeometrySemantics/geometry_multilevel_contacts.ipynb
+            - section: TSV
+              contents:
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_eigenmode.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_hfss_driven_terminal.ipynb
+                - notebooks/SCGSimExamples/ComponentSimulation/TSV/aedt_q3d.ipynb
         - section: Reproduce and download
           contents:
             - simulation/recorded-cases.qmd
