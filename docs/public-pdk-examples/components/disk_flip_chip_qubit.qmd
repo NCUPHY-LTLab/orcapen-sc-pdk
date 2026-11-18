@@ -124,3 +124,5 @@ and can be grounded, tapered junction leads on both sides, and readout and
 drive tips on the control die. They do not come from a single paper.
 
 See the [public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/develop/orcapen_sc_pdk/cells/layout/disk_qubit.py).
+
+Part of [Qubits](../../start/cells/qubits.qmd) in Common Cells.

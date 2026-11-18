@@ -34,3 +34,5 @@ electrodes for meshing; they are not route ports.
 
 See the [generated API reference](../../reference/cells.martinis2022_differential_ribbon_capacitor.qmd#orcapen_sc_pdk.cells.martinis2022_differential_ribbon_capacitor)
 and [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/martinis.py).
+
+Part of [Capacitors & Couplers](../../start/cells/capacitors-couplers.qmd) in Common Cells.

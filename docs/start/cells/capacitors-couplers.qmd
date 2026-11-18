@@ -1,0 +1,23 @@
+---
+title: "Capacitors & Couplers"
+sidebar: get-started
+toc: true
+---
+
+Capacitor layouts. Choose one by the capacitor style you need.
+
+## `interdigital_capacitor`
+
+An interdigital capacitor (IDC) with symmetric CPW terminal extensions and a derived etch. Its ports are the outer CPW cut planes.
+
+![Default layout of `interdigital_capacitor`.](../../_static/images/components/interdigital_capacitor.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/interdigital_capacitor.qmd) · [Function reference](../../reference/cells.interdigital_capacitor.qmd)
+
+## `martinis2022_differential_ribbon_capacitor`
+
+The differential ribbon capacitor layout of Fig. 7 in Martinis 2022.
+
+![Default layout of `martinis2022_differential_ribbon_capacitor`.](../../_static/images/components/martinis2022_differential_ribbon_capacitor.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/martinis2022_differential_ribbon_capacitor.qmd) · [Function reference](../../reference/cells.martinis2022_differential_ribbon_capacitor.qmd)

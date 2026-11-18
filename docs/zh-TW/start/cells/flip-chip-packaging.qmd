@@ -1,0 +1,31 @@
+---
+title: "覆晶與封裝"
+sidebar: get-started
+toc: true
+---
+
+互連與晶片邊緣結構。依需要的堆疊或封裝結構選擇。
+
+## `indium_bump`
+
+一個置中的方形銦凸塊，可附帶凸塊下接觸墊。
+
+![`indium_bump` 的預設版圖。](../../_static/images/components/indium_bump.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/indium_bump.qmd)
+
+## `indium_ground`
+
+置中的規則被動銦凸塊陣列，可略過與禁置區重疊的位置。
+
+![`indium_ground` 的預設版圖。](../../_static/images/components/indium_ground.png)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/indium_ground.qmd)
+
+## `dicing_edge`
+
+位於指定圖層的矩形邊緣環，由外矩形減去內矩形構成，用於晶片邊緣的 ETCH 或標記圖層。
+
+![`dicing_edge` 的預設版圖。](../../_static/images/components/dicing_edge.svg)
+
+詳細內容： [函式參考](../../reference/cells.dicing_edge.qmd)

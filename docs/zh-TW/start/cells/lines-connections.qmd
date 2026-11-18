@@ -1,0 +1,85 @@
+---
+title: "線路與連接"
+sidebar: get-started
+toc: true
+---
+
+承載或連接 CPW 與耦合線的元件：饋入晶片、改變寬度、分岔、跨接與耦合區段。定義這些路徑的橫截面列在最後。
+
+MTL 指多導體傳輸線（multi-conductor transmission line）：多條並排、彼此耦合的走線。元件名稱含 MTL 時，表示該元件包含這樣一組耦合的 CPW 走線。
+
+## `launcher`
+
+從大焊墊漸縮到 CPW 頸部的饋入元件，並標示焊墊側的模擬邊界。
+
+![`launcher` 的預設版圖。](../../_static/images/components/launcher.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/launcher.qmd) · [函式參考](../../reference/cells.launcher.qmd)
+
+## `taper`
+
+兩種導體寬度與間隙之間的精簡 CPW 過渡段，連接埠位於中心導體的 DRAW 圖層。
+
+![`taper` 的預設版圖。](../../_static/images/components/taper.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/taper.qmd)
+
+## `cpw_t_junction`
+
+CPW T 型接面，有兩個主幹連接埠與一個分支連接埠。
+
+![`cpw_t_junction` 的預設版圖。](../../_static/images/components/cpw_t_junction.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/cpw_t_junction.qmd) · [函式參考](../../reference/cells.cpw_t_junction.qmd)
+
+## `airbridge`
+
+同面空氣橋：矩形橋面，兩端各有落點通孔墊。它沒有走線連接埠，由上層版圖負責放置與旋轉。
+
+![`airbridge` 的預設版圖。](../../_static/images/components/airbridge.svg)
+
+詳細內容： [元件指南](../../public-pdk-examples/components/airbridge.qmd) · [函式參考](../../reference/cells.airbridge.qmd)
+
+## `n_trace_mtl_section`
+
+由橫截面驅動的 N 條走線直線區段。
+
+![`n_trace_mtl_section` 的預設版圖。](../../_static/images/components/n_trace_mtl_section.svg)
+
+詳細內容： [函式參考](../../reference/cells.n_trace_mtl_section.qmd)
+
+## `mtl_bend_coupling_section`
+
+兩條耦合 CPW 走線，直接接上四個 Euler 彎角。
+
+![`mtl_bend_coupling_section` 的預設版圖。](../../_static/images/components/mtl_bend_coupling_section.svg)
+
+詳細內容： [函式參考](../../reference/cells.mtl_bend_coupling_section.qmd)
+
+## `mtl_straight_bend_coupling_section`
+
+圍繞均勻 MTL 區段的四埠組合。下方走線保持筆直；上方走線在兩側各經一個 90 度 Euler 彎角離開。
+
+![`mtl_straight_bend_coupling_section` 的預設版圖。](../../_static/images/components/mtl_straight_bend_coupling_section.svg)
+
+詳細內容： [函式參考](../../reference/cells.mtl_straight_bend_coupling_section.qmd)
+
+## `mtl_straight_bend_transition`
+
+四埠過渡段，從 MTL 接縫過渡到一條直線走線與一個彎角。
+
+![`mtl_straight_bend_transition` 的預設版圖。](../../_static/images/components/mtl_straight_bend_transition.svg)
+
+詳細內容： [函式參考](../../reference/cells.mtl_straight_bend_transition.qmd)
+
+## `mtl_bend_bend_transition`
+
+四埠過渡段，從 MTL 接縫過渡到兩個相對的彎角。
+
+![`mtl_bend_bend_transition` 的預設版圖。](../../_static/images/components/mtl_bend_bend_transition.svg)
+
+詳細內容： [函式參考](../../reference/cells.mtl_bend_bend_transition.qmd)
+
+## 橫截面 {#cross-sections}
+
+選擇已註冊的橫截面，以定義路徑的寬度、橫向偏移、圖層與連接埠。已註冊選項與預設預覽請見[橫截面指南](../../public-pdk-examples/cross-sections.qmd)。

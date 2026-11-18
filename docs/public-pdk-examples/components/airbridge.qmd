@@ -30,3 +30,5 @@ component = gf.get_component("airbridge")
 The component has no ports. The default layer pair describes an elevated Al deck with finite Al posts. The physical-stack model uses a nominal rectangular deck with finite Al posts. The registered same-face prefixes are `D0_TOP`, `D0_BOTTOM`, `D1_BOTTOM`, and `D1_TOP`; these receive stack semantics. Custom layer pairs remain layout-only.
 
 API: [airbridge reference](../../reference/cells.airbridge.qmd#orcapen_sc_pdk.cells.airbridge). Source: [pinned public definition](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/airbridge.py).
+
+Part of [Lines & Connections](../../start/cells/lines-connections.qmd) in Common Cells.

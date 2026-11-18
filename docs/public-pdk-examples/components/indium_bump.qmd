@@ -30,3 +30,5 @@ component = gf.get_component("indium_bump")
 The component has no ports. The default bump layer is indium with a nominal 8 µm stack thickness. The under-bump layer describes contact geometry and is excluded from simulation. Only the canonical bump-body layer receives a physical-stack entity; alternate body layers remain layout-only.
 
 The [pinned public source](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/indium.py) defines this factory.
+
+Part of [Flip-chip & Packaging](../../start/cells/flip-chip-packaging.qmd) in Common Cells.

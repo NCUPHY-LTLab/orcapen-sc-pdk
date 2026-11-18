@@ -4,32 +4,16 @@ sidebar: get-started
 toc: true
 ---
 
-Use this page to choose a common layout cell or a registered cross-section.
+Choose a layout cell by what it is for. Each category page gives one line per cell, its default layout, and a link to the cell's detailed page.
 
-| Start with | What it provides |
-| --- | --- |
-| [Launcher](#launcher){.text-nowrap} | A pad-to-CPW transition. |
-| [Resonator](#resonator){.text-nowrap} | A CPW hanger and meander layout. |
-| [Cross-sections](#cross-sections){.text-nowrap} | Registered width, offset, layer, and port recipes for paths. |
+| Category | Choose it for | Cells |
+| --- | --- | --- |
+| [Qubits](cells/qubits.qmd){.text-nowrap} | Placing a qubit and its junction | `disk_flip_chip_qubit`, `kosen2024_flip_chip_xmon_qubit`, `manhattan_style_junction` |
+| [Resonators & Readout](cells/resonators-readout.qmd){.text-nowrap} | Readout and resonators | `resonator`, `resonator_hanger`, `resonator_meander`, `capacitive_coupling_intrinsic_individual_purcell_filter_readout_resonators` |
+| [Capacitors & Couplers](cells/capacitors-couplers.qmd){.text-nowrap} | Capacitance and coupling | `interdigital_capacitor`, `martinis2022_differential_ribbon_capacitor` |
+| [Lines & Connections](cells/lines-connections.qmd){.text-nowrap} | Launching, joining and coupling lines | `launcher`, `taper`, `cpw_t_junction`, `airbridge`, `n_trace_mtl_section`, `mtl_bend_coupling_section`, `mtl_straight_bend_coupling_section`, `mtl_straight_bend_transition`, `mtl_bend_bend_transition`, cross-sections |
+| [Flip-chip & Packaging](cells/flip-chip-packaging.qmd){.text-nowrap} | Stacking dies and chip edges | `indium_bump`, `indium_ground`, `dicing_edge` |
 
-## Launcher
+## Elsewhere
 
-`launcher` tapers a large pad to a CPW neck and marks the pad-side simulation
-boundary. The default layout is shown below; see the [Launcher guide](../public-pdk-examples/components/launcher.qmd)
-for its settings and ports.
-
-![Default launcher layout showing the pad, taper, and CPW neck.](../_static/images/components/launcher.svg)
-
-## Resonator
-
-`resonator` combines a CPW hanger and meander, with optional tail and qubit
-segment geometry. The [Resonator guide](../public-pdk-examples/components/resonator.qmd)
-covers its settings and layout interfaces.
-
-![Default resonator layout.](../_static/images/components/resonator.svg)
-
-## Cross-sections
-
-Choose a registered cross-section to define widths, transverse offsets, layers,
-and connection ports along a path. Browse the [Cross-sections guide](../public-pdk-examples/cross-sections.qmd)
-for registered choices and default previews.
+Simulation-only cells are under [Simulation](../public-pdk-examples/test-components.md). Primitives such as `straight`, `bend_*`, `rounded_*`, `wire_corner` and `cpw_handoff` are under [Shared primitives](../public-pdk-examples/shared-primitives.md). Settings and ports stay in [API → Components](../public-pdk-examples/components/index.qmd).

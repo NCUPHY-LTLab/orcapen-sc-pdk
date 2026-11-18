@@ -1,0 +1,85 @@
+---
+title: "Lines & Connections"
+sidebar: get-started
+toc: true
+---
+
+Pieces that carry or join CPW and coupled-trace lines: launching onto a chip, changing width, branching, bridging and coupled sections. Cross-sections that define these paths are at the end.
+
+MTL means multi-conductor transmission line: several coupled traces that run side by side. Where a cell name says MTL, the cell holds such a set of coupled CPW traces.
+
+## `launcher`
+
+A tapered CPW launcher from a large pad to a CPW neck. It marks the pad-side simulation boundary.
+
+![Default layout of `launcher`.](../../_static/images/components/launcher.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/launcher.qmd) · [Function reference](../../reference/cells.launcher.qmd)
+
+## `taper`
+
+A compact CPW transition between two conductor widths and gap sizes, with ports on the center-conductor DRAW layer.
+
+![Default layout of `taper`.](../../_static/images/components/taper.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/taper.qmd)
+
+## `cpw_t_junction`
+
+A CPW T-junction with two trunk ports and one branch port.
+
+![Default layout of `cpw_t_junction`.](../../_static/images/components/cpw_t_junction.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/cpw_t_junction.qmd) · [Function reference](../../reference/cells.cpw_t_junction.qmd)
+
+## `airbridge`
+
+A same-face airbridge: a rectangular deck with a landing via pad at each end. It has no route ports, so a parent layout places and rotates it.
+
+![Default layout of `airbridge`.](../../_static/images/components/airbridge.svg)
+
+Details: [Component guide](../../public-pdk-examples/components/airbridge.qmd) · [Function reference](../../reference/cells.airbridge.qmd)
+
+## `n_trace_mtl_section`
+
+A straight N-trace section driven by a cross-section.
+
+![Default layout of `n_trace_mtl_section`.](../../_static/images/components/n_trace_mtl_section.svg)
+
+Details: [Function reference](../../reference/cells.n_trace_mtl_section.qmd)
+
+## `mtl_bend_coupling_section`
+
+Two coupled CPW traces with four directly attached Euler bends.
+
+![Default layout of `mtl_bend_coupling_section`.](../../_static/images/components/mtl_bend_coupling_section.svg)
+
+Details: [Function reference](../../reference/cells.mtl_bend_coupling_section.qmd)
+
+## `mtl_straight_bend_coupling_section`
+
+A four-port pair around a uniform MTL section. The lower trace stays straight; the upper trace leaves each side through a 90-degree Euler bend.
+
+![Default layout of `mtl_straight_bend_coupling_section`.](../../_static/images/components/mtl_straight_bend_coupling_section.svg)
+
+Details: [Function reference](../../reference/cells.mtl_straight_bend_coupling_section.qmd)
+
+## `mtl_straight_bend_transition`
+
+A four-port transition from an MTL seam to a straight trace and a bend.
+
+![Default layout of `mtl_straight_bend_transition`.](../../_static/images/components/mtl_straight_bend_transition.svg)
+
+Details: [Function reference](../../reference/cells.mtl_straight_bend_transition.qmd)
+
+## `mtl_bend_bend_transition`
+
+A four-port transition from an MTL seam to two opposing bends.
+
+![Default layout of `mtl_bend_bend_transition`.](../../_static/images/components/mtl_bend_bend_transition.svg)
+
+Details: [Function reference](../../reference/cells.mtl_bend_bend_transition.qmd)
+
+## Cross-sections {#cross-sections}
+
+Choose a registered cross-section to define widths, transverse offsets, layers and connection ports along a path. Browse the [Cross-sections guide](../../public-pdk-examples/cross-sections.qmd) for the registered choices and their default previews.

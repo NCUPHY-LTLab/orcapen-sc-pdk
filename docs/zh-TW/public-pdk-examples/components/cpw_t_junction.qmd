@@ -28,3 +28,5 @@ component = gf.get_component("cpw_t_junction")
 `o1` 與 `o2` 位於主幹兩端，`o_branch` 朝向 +Y。幾何圖層由選定的橫截面決定，預設組成請見[橫截面](../cross-sections.qmd)。
 
 請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.cpw_t_junction.html#orcapen_sc_pdk.cells.cpw_t_junction)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/cpw.py)。
+
+屬於常用元件的[線路與連接](../../start/cells/lines-connections.qmd)。

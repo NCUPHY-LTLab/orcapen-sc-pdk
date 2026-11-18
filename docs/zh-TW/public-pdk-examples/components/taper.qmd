@@ -26,3 +26,5 @@ component = gf.get_component("taper")
 ## 連接埠與圖層 {#ports-and-layers}
 
 佈線連接埠為 `o_taper_in` 與 `o_taper_out`，皆位於 DRAW 導體。工廠函式建立 DRAW、GROUND_MASK 與衍生 ETCH 幾何形狀。圖層與連接埠定義請見[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/taper.py)。
+
+屬於常用元件的[線路與連接](../../start/cells/lines-connections.qmd)。

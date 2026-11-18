@@ -42,3 +42,5 @@ component = gf.get_component("interdigital_capacitor")
 ![預設指叉電容的 DRAW 與 ETCH 版圖。](../../_static/images/components/interdigital_capacitor.svg)
 
 請見[自動產生的 API 參考（英文）](/orcapen-sc-pdk/en/reference/cells.interdigital_capacitor.html#orcapen_sc_pdk.cells.interdigital_capacitor)與[指定版本的公開原始碼（英文）](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/blob/0bd9a9e1e8e21d6519f22373f20ef5ce22772a5b/orcapen_sc_pdk/cells/layout/capacitor.py)。
+
+屬於常用元件的[電容與耦合器](../../start/cells/capacitors-couplers.qmd)。
