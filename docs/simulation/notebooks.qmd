@@ -41,16 +41,18 @@ describes the intended model rather than a runnable solver workflow.
 
 ## SimplePad surface bands and local-interface correction
 
-Start with the Q2D example to prepare local-interface field factors, then use
-the Palace example to select original-parent surface bands and analyze returned
-corrections. Download the shared
+The Palace example splits each Surface-EPR film into inset bands at 0.5 µm
+and 1 µm from the gap edges, on SCGSim rc4. The Q2D example prepares
+local-interface field factors; the correction that would combine the two is
+not in rc4. Download the
 <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" download>model JSON</a>
-beside either downloaded notebook or QMD; it owns their geometry and numeric controls.
+beside the Q2D notebook or QMD; it owns that example's geometry and numeric controls.
 
 | Example | Notebook / download | Canonical source download |
 | --- | --- | --- |
 | SimplePad local interfaces — Q2D fields and factors | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd" data-noresolveinput download>QMD</a> |
-| SimplePad — Palace surface bands and returned Q2D correction | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd" data-noresolveinput download>QMD</a> |
+| SimplePad Palace inset bands — prepare and run | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.qmd" data-noresolveinput download>QMD</a> |
+| SimplePad Palace inset bands — analyze | [View](../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_analyze.qmd) · <a href="../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_analyze.ipynb" data-noresolveinput download>IPYNB</a> | <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_analyze.qmd" data-noresolveinput download>QMD</a> |
 
 
 ## TSV examples

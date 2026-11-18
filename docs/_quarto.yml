@@ -28,7 +28,8 @@ project:
     - "notebooks/SCGSimExamples/ComponentSimulation/CircularPad/palace_eigenmode.ipynb"
     # Render these canonical sources beside their companion-relative resources.
     - "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd"
-    - "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd"
+    - "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.qmd"
+    - "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_analyze.qmd"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_electrostatic.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_b_electrostatic.ipynb"
     - "notebooks/ComponentSimulation/Kosen2024_Xmon/palace_route_a_eigenmode.ipynb"

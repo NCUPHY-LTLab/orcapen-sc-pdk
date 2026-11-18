@@ -23,7 +23,7 @@ sidebar: simulation
 | 焊墊 LC 模態及表面／塊材貢獻 | [SimplePad Palace](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/palace_eigenmode.qmd" data-noresolveinput download>QMD</a> |
 | HFSS 原生場積分評估 | [準備交接（Prepare Handoff）→ 執行既有交接包（Run）→ 分析（Analyze）](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode.ipynb) | — |
 | HFSS 原生場積分評估 | [直接執行（Run Directly）](../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb) | <a href="../../notebooks/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/ComponentSimulation/SimplePad/aedt_hfss_eigenmode_run_directly.qmd" data-noresolveinput download>QMD</a> |
-| 明確幾何帶區與局部介面修正 | [SimplePad Palace 表面帶區](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd) · [Q2D 介面因子](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) | — |
+| 明確幾何帶區與局部介面修正 | [SimplePad Palace 表面帶區](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.qmd) · [Q2D 介面因子](../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd) | — |
 
 ## 判讀參與率與損耗
 
@@ -50,6 +50,7 @@ sidebar: simulation
 | 教學 | 下載 |
 | --- | --- |
 | Q2D 局部介面 | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd" data-noresolveinput download>QMD</a> |
-| Palace 表面帶區 | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd" data-noresolveinput download>QMD</a> |
+| Palace 表面帶區 — 準備與執行 | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.qmd" data-noresolveinput download>QMD</a> |
+| Palace 表面帶區 — 分析 | <a href="../../notebooks/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_analyze.ipynb" data-noresolveinput download>IPYNB</a> · <a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_analyze.qmd" data-noresolveinput download>QMD</a> |
 
-請將共用<a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" download>模型 JSON</a>與任一筆記本或 QMD 放在一起。
+請將<a href="../../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" download>模型 JSON</a>與 Q2D 筆記本或 QMD 放在一起。

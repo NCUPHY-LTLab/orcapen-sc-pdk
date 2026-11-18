@@ -113,7 +113,8 @@ def main() -> None:
     output_dir = docs_dir / os.environ["QUARTO_PROJECT_OUTPUT_DIR"]
     source_paths = (
         "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/aedt_q2d_interfaces.qmd",
-        "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands.qmd",
+        "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_prepare_run.qmd",
+        "notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/palace_eigenmode_bands_analyze.qmd",
     )
     for relative in source_paths:
         destination = output_dir / relative
