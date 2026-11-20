@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
+scgsim_revision: "4c3edcabf20964a3e8045634bffcf7b6078eea8c"
 ---
 
 ![Circular-pad coupon: 100 µm radius, 20 µm gap and 1000 µm die.](../../_images/circular-pad.png)
@@ -21,8 +21,8 @@ The east-facing nonmetal locator binds the linear 10 nH inductive branch,
 with no added capacitive branch. It is not ordinary CPW, generic RLC or a
 measured device. Component source owns curved boundary chains and local
 PAD/GROUND facts; this notebook owns final Nets.
-This example uses SCGSim [`v3.0.0rc4`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4)
-(`847d18b`), the revision this repository pins, and stock Palace 0.18.1.
+This example uses SCGSim [`v3.0.0rc6`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc6)
+(`4c3edca`), the revision this repository pins, and stock Palace 0.18.1.
 
 The default `run` action builds, prepares and solves this case, then reads its returned
 results. Choose `AUTHORING_ONLY` for non-solving inputs or `prepare_handoff`
@@ -53,7 +53,7 @@ WORKFLOW_ACTION = "run"
 # AUTHORING_ONLY | prepare_handoff | run | analyze_handoff | save_from_returned | analyze_saved_epr
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     import gdsfactory as gf
-    from scgsim.geometry import GeometryPlan
+    from scgsim.geometry import GeometryPlan, LumpedElement
     from scgsim.meshing import HXT, MesherOptions
     from scgsim.palace import EigenmodeSim
 
@@ -144,15 +144,16 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
             for kind, record in interface_presets.items()
         }
     )
+    # The junction sheet's inductor is a fact of the device, so the plan holds it too.
+    PORT_NAME = "chip/o_junction_lumped"
+    PORT_INDUCTANCE_H = 10e-9
+    PORT_CAPACITANCE_F = 0.0  # Inductive-only model; the element is given no capacitance.
+    plan.set_lumped_elements([LumpedElement(PORT_NAME, inductance_h=PORT_INDUCTANCE_H)])
     snapshot = plan.prepare()
     sim = EigenmodeSim()
     sim.set_route(ROUTE)
     sim.set_plan(snapshot)
     sim.set_output_dir(RUN_ROOT)
-    PORT_NAME = "chip/o_junction_lumped"
-    PORT_INDUCTANCE_H = 10e-9
-    PORT_CAPACITANCE_F = 0.0  # Inductive-only model; no Palace capacitive branch.
-    sim.add_port(PORT_NAME, layer="D0_TOP_M1", layout_sheet=True, inductance=PORT_INDUCTANCE_H)
     sim.set_epr_request(
         surface_interfaces=("MA", "MS", "SA"), bulk_domain_ids=None, port_names=(PORT_NAME,)
     )

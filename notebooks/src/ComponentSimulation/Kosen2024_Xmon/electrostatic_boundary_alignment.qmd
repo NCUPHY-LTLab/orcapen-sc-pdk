@@ -20,10 +20,10 @@ agreement threshold or equivalence claim is defined here.
 
 ::: {.callout-warning title="These runs are read with the SCGSim that wrote them"}
 The four runs were written by SCGSim `1.0.0.dev15` (`8f64684`). The pinned
-SCGSim `v3.0.0rc4` keeps the names used below but refuses run folders written
+SCGSim `v3.0.0rc6` keeps the names used below but refuses run folders written
 by `3.0.0rc1` or earlier, so on the current pin these cells read the runs only
 with `8f64684`. Producing them again needs the two Q3D runs, which wait for the
-AEDT notebooks to move to `v3.0.0rc4`
+AEDT notebooks to move to `v3.0.0rc6`
 ([#66](https://github.com/NCUPHY-LTLab/orcapen-sc-pdk/issues/66)).
 :::
 
