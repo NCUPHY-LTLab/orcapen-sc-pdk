@@ -42,9 +42,9 @@ describes the intended model rather than a runnable solver workflow.
 ## SimplePad surface bands and local-interface correction
 
 The Palace example splits each Surface-EPR film into inset bands at 0.5 µm
-and 1 µm from the gap edges, on SCGSim rc5. The Q2D example prepares
+and 1 µm from the gap edges, on SCGSim rc6. The Q2D example prepares
 local-interface field factors; the correction that would combine the two is
-not in rc5. Download the
+not in rc6. Download the
 <a href="../notebooks/src/SCGSimExamples/SurfaceBands/SimplePad/simplepad_interface_model.json" download>model JSON</a>
 beside the Q2D notebook or QMD; it owns that example's geometry and numeric controls.
 

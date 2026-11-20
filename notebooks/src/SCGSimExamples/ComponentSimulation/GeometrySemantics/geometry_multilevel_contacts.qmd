@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "20a5d2b2bf48eb8600564c7f3df205b8be913a9d"
+scgsim_revision: "4c3edcabf20964a3e8045634bffcf7b6078eea8c"
 ---
 
 ![Distinct multilevel sources: flip-chip lower and upper faces, and the stock CPW airbridge.](../../_images/multilevel-coupons.png)
@@ -21,7 +21,7 @@ and [material/stack/Z requirements](../../../../simulation/tools/materials-stack
 OrcaPen supplies physical layers and coupon contact intent; callers assign Nets;
 SCGSim owns preparation and all native geometry/assignment/mesh mechanics.
 
-These cells use SCGSim [`v3.0.0rc5`][scgsim-rc5] (`20a5d2b`), the revision this
+These cells use SCGSim [`v3.0.0rc6`][scgsim-rc6] (`4c3edca`), the revision this
 repository pins.
 Native contacts remain unobserved. No notebook run or saved output is attached.
 
@@ -50,7 +50,7 @@ display(
     {
         "observation_id": OBSERVATION_ID,
         "scgsim_version": importlib.metadata.version("scgsim"),
-        "scgsim_revision": "20a5d2b2bf48eb8600564c7f3df205b8be913a9d",
+        "scgsim_revision": "4c3edcabf20964a3e8045634bffcf7b6078eea8c",
         "units": "XY, Z intervals and physical thickness: um",
         "evidence_stage": "source and physical-interpretation records",
     }
@@ -243,4 +243,4 @@ claiming those later stages. No tolerance or contact eligibility Gate is added.
 Missing source declarations or unsupported public preparation fail visibly;
 there is no notebook-local fallback, guessed contact reconstruction, or result.
 
-[scgsim-rc5]: https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc5
+[scgsim-rc6]: https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc6

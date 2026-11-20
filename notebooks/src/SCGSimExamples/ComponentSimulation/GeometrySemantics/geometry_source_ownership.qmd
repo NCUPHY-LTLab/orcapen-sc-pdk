@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "20a5d2b2bf48eb8600564c7f3df205b8be913a9d"
+scgsim_revision: "4c3edcabf20964a3e8045634bffcf7b6078eea8c"
 ---
 
 ![Distinct source inputs: square pad, circular pad and the authored Xmon ground-short coupon.](../../_images/source-ownership.png)
@@ -20,7 +20,7 @@ the caller assigns final Nets, and SCGSim prepares the geometry.
 Read the [source-ownership tool requirements](../../../../simulation/tools/source-ownership.qmd).
 This notebook owns the concrete case settings, not a second semantic schema.
 
-These cells use SCGSim [`v3.0.0rc5`][scgsim-rc5] (`20a5d2b`), the revision this
+These cells use SCGSim [`v3.0.0rc6`][scgsim-rc6] (`4c3edca`), the revision this
 repository pins. No
 notebook run or saved output is attached.
 
@@ -45,7 +45,7 @@ display(
     {
         "observation_id": OBSERVATION_ID,
         "scgsim_version": importlib.metadata.version("scgsim"),
-        "scgsim_revision": "20a5d2b2bf48eb8600564c7f3df205b8be913a9d",
+        "scgsim_revision": "4c3edcabf20964a3e8045634bffcf7b6078eea8c",
         "units": "XY and Z: um; port orientation: degrees",
         "evidence_stage": "source records only; no native model",
     }
@@ -224,4 +224,4 @@ members. No recovery path rewrites the source or fabricates missing records.
 Native geometry/assignments and returned-run analysis are separate future
 observations; no capacitance, contact, EPR, or solver result is claimed here.
 
-[scgsim-rc5]: https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc5
+[scgsim-rc6]: https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc6

@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "20a5d2b2bf48eb8600564c7f3df205b8be913a9d"
+scgsim_revision: "4c3edcabf20964a3e8045634bffcf7b6078eea8c"
 ---
 
 ![Circular-pad coupon: 100 µm radius, 20 µm gap and 1000 µm die.](../../_images/circular-pad.png)
@@ -21,8 +21,8 @@ The east-facing nonmetal locator binds the linear 10 nH inductive branch,
 with no added capacitive branch. It is not ordinary CPW, generic RLC or a
 measured device. Component source owns curved boundary chains and local
 PAD/GROUND facts; this notebook owns final Nets.
-This example uses SCGSim [`v3.0.0rc5`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc5)
-(`20a5d2b`), the revision this repository pins, and stock Palace 0.18.1.
+This example uses SCGSim [`v3.0.0rc6`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc6)
+(`4c3edca`), the revision this repository pins, and stock Palace 0.18.1.
 
 The default `run` action builds, prepares and solves this case, then reads its returned
 results. Choose `AUTHORING_ONLY` for non-solving inputs or `prepare_handoff`

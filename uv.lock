@@ -1897,7 +1897,7 @@ requires-dist = [
 provides-extras = ["circuit-runtime"]
 
 [package.metadata.requires-dev]
-aedt-notebooks = [{ name = "scgsim", extras = ["aedt"], git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=20a5d2b2bf48eb8600564c7f3df205b8be913a9d" }]
+aedt-notebooks = [{ name = "scgsim", extras = ["aedt"], git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=4c3edcabf20964a3e8045634bffcf7b6078eea8c" }]
 dev = [
     { name = "pytest", specifier = ">=9.0.0" },
     { name = "ruff", specifier = ">=0.15.11" },
@@ -1914,7 +1914,7 @@ ecosystem-dev = [
     { name = "pandas", specifier = ">=2.0" },
     { name = "plotly", specifier = ">=6.0.0" },
 ]
-palace-notebooks = [{ name = "scgsim", extras = ["palace", "visualization"], git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=20a5d2b2bf48eb8600564c7f3df205b8be913a9d" }]
+palace-notebooks = [{ name = "scgsim", extras = ["palace", "visualization"], git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=4c3edcabf20964a3e8045634bffcf7b6078eea8c" }]
 
 [[package]]
 name = "orjson"
@@ -2953,8 +2953,8 @@ wheels = [
 
 [[package]]
 name = "scgsim"
-version = "3.0.0rc5"
-source = { git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=20a5d2b2bf48eb8600564c7f3df205b8be913a9d#20a5d2b2bf48eb8600564c7f3df205b8be913a9d" }
+version = "3.0.0rc6"
+source = { git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=4c3edcabf20964a3e8045634bffcf7b6078eea8c#4c3edcabf20964a3e8045634bffcf7b6078eea8c" }
 dependencies = [
     { name = "numpy" },
     { name = "plotly" },

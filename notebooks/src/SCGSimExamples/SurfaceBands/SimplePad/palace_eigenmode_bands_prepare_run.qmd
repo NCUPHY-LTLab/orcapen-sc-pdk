@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "20a5d2b2bf48eb8600564c7f3df205b8be913a9d"
+scgsim_revision: "4c3edcabf20964a3e8045634bffcf7b6078eea8c"
 ---
 
 This is the [SimplePad eigenmode example](../../ComponentSimulation/SimplePad/palace_eigenmode.qmd)
@@ -29,15 +29,15 @@ machine. To run on a cluster instead, stop before **Run on this machine** and
 send the run folder there. Read the returned folder with the
 [analysis notebook](palace_eigenmode_bands_analyze.qmd).
 
-This example uses SCGSim [`v3.0.0rc5`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc5)
-(`20a5d2b`), the revision this repository pins, and stock Palace 0.18.1.
+This example uses SCGSim [`v3.0.0rc6`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc6)
+(`4c3edca`), the revision this repository pins, and stock Palace 0.18.1.
 LiteratureCentral MA/MS/SA films are model assumptions, not measured loss.
 
 ::: {.callout-note title="What bands do not do yet"}
 SGB cuts bands into conductor tops, conductor bottoms and the substrate
 surface, never into a sidewall, so the sidewall rows stay whole. The Q2D
 correction that would replace the near-edge band with a local cross-section
-result is not in SCGSim rc5; the [Q2D interface example](aedt_q2d_interfaces.qmd)
+result is not in SCGSim rc6; the [Q2D interface example](aedt_q2d_interfaces.qmd)
 stays separate until it is.
 :::
 
