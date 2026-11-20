@@ -17,6 +17,11 @@ This notebook reads a run folder written by the
 run returns, on this machine or from a cluster. It needs no layout, mesh or
 Palace.
 
+It also reads a run that stopped early. With the example's settings, the
+eleventh solve needs about 670 GB, more than the 503 GB workstation the
+example was run on, so that run ends with exit code 137. Its first ten passes
+are still read below.
+
 ## Returned Run
 
 Set the two values the prepare-and-run notebook printed. The handoff ID
@@ -26,8 +31,9 @@ proves the folder is the run that notebook prepared.
 #| id: band-analyze-inputs
 from pathlib import Path
 
+import pandas as pd
 from IPython.display import display
-from scgsim.palace import inspect_run_trustworthiness, resolve_palace_result
+from scgsim.palace import inspect_run_trustworthiness
 
 RETURNED_RUN_DIR = Path("<run_dir printed by the prepare-and-run notebook>")
 EXPECTED_HANDOFF_ID = "<handoff_id printed by the prepare-and-run notebook>"
@@ -35,24 +41,71 @@ EXPECTED_HANDOFF_ID = "<handoff_id printed by the prepare-and-run notebook>"
 
 ## Run Status and Convergence
 
-This report also reads a run that stopped early: which passes finished, how
-the frequency moved between them, and how long each took.
+The report reads finished and stopped runs alike: which passes finished, why
+the run ended, how the frequency moved between passes, and how long each took.
 
 ```{python}
 #| id: band-analyze-trust
 report = inspect_run_trustworthiness(RETURNED_RUN_DIR)
+if report.identity["handoff_id"] != EXPECTED_HANDOFF_ID:
+    raise ValueError(
+        f"{RETURNED_RUN_DIR} holds handoff {report.identity['handoff_id']}, "
+        f"not {EXPECTED_HANDOFF_ID}: set the folder the prepare-and-run notebook printed."
+    )
 display(report.show_run_trustworthiness(show_details=True))
 display(report.show_simulation_benchmark(show_details=True))
 ```
 
 ## Surface EPR by Band
 
-Only a completed run resolves; an unfinished one stops here with the reason.
-The physics report lists each surface's whole participation, then splits the
-banded surfaces into their 0–0.5 µm, 0.5–1 µm and beyond-1 µm rows.
+Values of the last pass read. The physics report lists each surface's whole
+participation, then splits the banded surfaces into their 0–0.5 µm, 0.5–1 µm
+and beyond-1 µm rows.
 
 ```{python}
 #| id: band-analyze-physics
-result = resolve_palace_result(RETURNED_RUN_DIR, expected_handoff_id=EXPECTED_HANDOFF_ID)
-display(result.show_physics_quantities(ranking_limit=None))
+display(report.show_physics_quantities(ranking_limit=None))
+```
+
+## Band Totals by Pass
+
+MA, MS and SA totals of the 0.5–1 µm and beyond-1 µm bands in every pass,
+then each pass's change from the one before, |x(n) − x(n−1)| / |x(n)|.
+Palace reports cumulative insets: the 0.5 µm inset holds both bands and the
+1 µm inset only the outer one, so the 0.5–1 µm band is their difference.
+
+```{python}
+#| id: band-analyze-by-pass
+INSET_MARGINS_UM = (0.5, 1.0)
+
+
+def band_totals(amr_pass):
+    """Sum one pass's inset rows per interface type, then split them into bands."""
+    by_margin = {}
+    for record in amr_pass.surface_margin_epr[0].records:
+        key = (record.interface_type, record.margin_um)
+        by_margin[key] = by_margin.get(key, 0.0) + record.participation
+    inner, outer = INSET_MARGINS_UM
+    totals = {}
+    for kind in ("MA", "MS", "SA"):
+        totals[f"{kind} 0.5–1 µm"] = by_margin[(kind, inner)] - by_margin[(kind, outer)]
+        totals[f"{kind} > 1 µm"] = by_margin[(kind, outer)]
+    return totals
+
+
+by_pass = pd.DataFrame(
+    [
+        {
+            "pass": amr_pass.pass_number,
+            "unknowns": amr_pass.degrees_of_freedom,
+            "f (GHz)": amr_pass.frequencies_ghz[0],
+            **band_totals(amr_pass),
+        }
+        for amr_pass in report.passes
+    ]
+).set_index("pass")
+values = by_pass.drop(columns="unknowns")
+change_percent = ((values - values.shift()).abs() / values.abs() * 100).round(2)
+display(by_pass)
+display(change_percent)
 ```

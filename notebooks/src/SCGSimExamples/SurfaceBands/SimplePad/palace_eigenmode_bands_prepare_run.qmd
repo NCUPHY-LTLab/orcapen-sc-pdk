@@ -218,7 +218,12 @@ display({"run_dir": str(HANDOFF.run_dir), "handoff_id": HANDOFF.handoff_id})
 
 ## Run on this Machine
 
+A run that stops before its last pass, for example when the machine runs out
+of memory, keeps every pass it finished. This cell reports the exit code
+instead of raising, and the analysis notebook reads the finished passes.
+
 ```{python}
 #| id: band-prepare-run
-subprocess.run([str(HANDOFF.script_path)], cwd=HANDOFF.run_dir, check=True)
+completed = subprocess.run([str(HANDOFF.script_path)], cwd=HANDOFF.run_dir)
+display({"exit_code": completed.returncode, "run_dir": str(HANDOFF.run_dir)})
 ```
