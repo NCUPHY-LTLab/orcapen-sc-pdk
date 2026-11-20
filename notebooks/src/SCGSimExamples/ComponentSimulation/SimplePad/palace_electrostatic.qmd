@@ -9,8 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
-scgsim_source_archive_sha256: "4126a6f162f30d5fdaf4242b69cda2c17531bbaf0315f60ba09f7acb5e63c10d"
+scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
 ---
 
 ![Square-pad coupon: 200 µm pad, 20 µm gap and 1000 µm die.](../../_images/square-pad.png)
@@ -21,11 +20,8 @@ die. The current PDK supplies 100 nm Al above 500 µm Si. The authored
 20.002 × 2 µm east locator is nonmetal and adds no L/C branch here.
 The exterior remains natural, not grounded.
 
-Fresh construction requires the shared SCGSim source environment associated
-with this example; no released wheel is claimed to provide these APIs.
-Retained results keep their recorded runtime identities.
-
-Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
+This example uses SCGSim [`v3.0.0rc4`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4)
+(`847d18b`), the revision this repository pins, and stock Palace 0.18.1.
 
 The default `run` action builds, prepares and solves this case, then reads its returned
 results. Choose `AUTHORING_ONLY` for non-solving inputs or `prepare_handoff`
@@ -47,7 +43,8 @@ from uuid import uuid4
 
 import gdsfactory as gf
 from IPython.display import display
-from scgsim.geometry import ApproximationProfile, GeometryPlan
+from scgsim.geometry import GeometryPlan
+from scgsim.meshing import DELAUNAY, MesherOptions
 from scgsim.palace import ElectrostaticSim, inspect_run_trustworthiness, resolve_palace_result
 
 import orcapen_sc_pdk
@@ -95,7 +92,6 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     )
     plan.set_nets({"pad": ("chip/PAD",), "ground": ("chip/GROUND",)})
     plan.set_vacuum_region(padding=(250.0, 250.0, 1000.0))
-    snapshot = plan.prepare()
     display(component)
     display({"bbox_um": str(component.dbbox()), "ports": component.ports})
 ```
@@ -105,18 +101,13 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
 ```{python}
 #| id: pes-problem
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
-    APPROXIMATION_PROFILE = ApproximationProfile(name="route_b", revision="v1", parameters={})
-    sim = ElectrostaticSim(approximation_profile=APPROXIMATION_PROFILE)
-    sim.set_plan(snapshot)
-    sim.set_output_dir(RUN_ROOT)
     ROUTE = "B"
     records = validate_interface_preset_records(get_interface_preset_records())
     preset_names = {kind: f"LiteratureCentral_{kind}" for kind in ("MA", "MS", "SA")}
     interface_presets = {kind: records[name] for kind, name in preset_names.items()}
-    sim.set_surface_epr(
-        approximation_profile=APPROXIMATION_PROFILE,
-        representation=ROUTE,
-        specs={
+    # Surface EPR changes the geometry, so the plan holds it; prepare() after it.
+    plan.set_surface_epr(
+        {
             kind: {
                 "thickness": record["thickness"],
                 "permittivity": record["permittivity"],
@@ -125,8 +116,13 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
                 "preset": preset_names[kind],
             }
             for kind, record in interface_presets.items()
-        },
+        }
     )
+    snapshot = plan.prepare()
+    sim = ElectrostaticSim()
+    sim.set_route(ROUTE)
+    sim.set_plan(snapshot)
+    sim.set_output_dir(RUN_ROOT)
     SAVE_FIELDS = 1
     EXTERIOR_BOUNDARY_POLICY = "none"
     sim.add_terminal("pad", net_id="pad")
@@ -153,22 +149,17 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
 ```{python}
 #| id: pes-mesh
 if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
-    REFINED_MESH_SIZE_UM = 10.0
-    MAX_MESH_SIZE_UM = 200.0
-    # Geometry order is distinct from field FEM order; SCGSim owns meshing defaults.
-    ALGORITHM_3D = "Delaunay"
-    MESH_THREADS = 1
-    SURFACE_THREADS = 1
+    # SCGSim's default sizing (FeatureRecipe). The former 10/200 um sizes map to
+    # UniformBoundaryRecipe(10, 200), which leaves no clean mesh on this die (#66).
+    # Geometry order is distinct from field FEM order. Meshing runs on one thread.
     GEOMETRY_ORDER = 1
     HIGH_ORDER_OPTIMIZE = True
     sim.set_mesh(
-        refined_mesh_size=REFINED_MESH_SIZE_UM,
-        max_mesh_size=MAX_MESH_SIZE_UM,
-        algorithm_3d=ALGORITHM_3D,
-        threads=MESH_THREADS,
-        surface_threads=SURFACE_THREADS,
-        geometry_order=GEOMETRY_ORDER,
-        high_order_optimize=HIGH_ORDER_OPTIMIZE,
+        mesher=MesherOptions(
+            algorithm_3d=DELAUNAY,
+            geometry_order=GEOMETRY_ORDER,
+            high_order_optimize=HIGH_ORDER_OPTIMIZE,
+        ),
     )
     MESH_PATH = sim.mesh()
     display(MESH_PATH)
@@ -214,8 +205,8 @@ Retain its handoff ID independently of the returned package.
 
 ::: {.callout-warning title="Prepare the required Palace wrapper before running"}
 Select an actual MPI wrapper, not a direct ELF: the generated script supplies
-`-np 8 -nt 1`. The native executable must include the corrected Palace
-`4e9e1b7232b4c8ca8b964be7e70f1848f578de37` source; this notebook does not install it.
+`-np 8 -nt 1`. Stock Palace 0.18.1 runs this case; this notebook does not
+install it.
 :::
 
 ```{python}

@@ -9,8 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
-scgsim_source_archive_sha256: "4126a6f162f30d5fdaf4242b69cda2c17531bbaf0315f60ba09f7acb5e63c10d"
+scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
 ---
 
 ![Circular-pad coupon: 100 µm radius, 20 µm gap and 1000 µm die.](../../_images/circular-pad.png)
@@ -22,11 +21,8 @@ The east-facing nonmetal locator binds the linear 10 nH inductive branch,
 with no added capacitive branch. It is not ordinary CPW, generic RLC or a
 measured device. Component source owns curved boundary chains and local
 PAD/GROUND facts; this notebook owns final Nets.
-Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
-
-Fresh construction requires the shared SCGSim source environment associated
-with this example; no released wheel is claimed to provide these APIs.
-Retained results keep their recorded runtime identities.
+This example uses SCGSim [`v3.0.0rc4`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4)
+(`847d18b`), the revision this repository pins, and stock Palace 0.18.1.
 
 The default `run` action builds, prepares and solves this case, then reads its returned
 results. Choose `AUTHORING_ONLY` for non-solving inputs or `prepare_handoff`
@@ -57,7 +53,8 @@ WORKFLOW_ACTION = "run"
 # AUTHORING_ONLY | prepare_handoff | run | analyze_handoff | save_from_returned | analyze_saved_epr
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     import gdsfactory as gf
-    from scgsim.geometry import ApproximationProfile, GeometryPlan
+    from scgsim.geometry import GeometryPlan
+    from scgsim.meshing import HXT, MesherOptions
     from scgsim.palace import EigenmodeSim
 
     import orcapen_sc_pdk
@@ -116,39 +113,27 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     )
     plan.set_nets({"pad": ("chip/PAD",), "ground": ("chip/GROUND",)})
     plan.set_vacuum_region(padding=(250.0, 250.0, 1000.0))
-    snapshot = plan.prepare()
     display(component)
-    display(
-        {
-            "bbox_um": str(component.dbbox()),
-            "ports": component.ports,
-            "paired_gds_sha256": snapshot.gds_sha256,
-        }
-    )
+    display({"bbox_um": str(component.dbbox()), "ports": component.ports})
 ```
 
 ## Configure EPR / Problem
 
 LiteratureCentral MA/MS/SA are synthetic model conventions, not measured
-process data. EPR is baseline unmasked / zero-inset only. Positive-inset
-perimeter distances use chords in the selected Palace runtime; this workflow
-does not claim exact curved mask separation or introduce a mask study.
+process data. The specs ask for the whole surfaces only. Setting
+`inset_margins_um` in a spec would add bands a given distance from the gap
+edge, which SCGSim cuts into the geometry; this workflow introduces no such study.
 
 ```{python}
 #| id: cpe-problem
 if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
     ROUTE = "B"
-    APPROXIMATION_PROFILE = ApproximationProfile(name="route_b", revision="v1", parameters={})
-    sim = EigenmodeSim(approximation_profile=APPROXIMATION_PROFILE)
-    sim.set_plan(snapshot)
-    sim.set_output_dir(RUN_ROOT)
     records = validate_interface_preset_records(get_interface_preset_records())
     preset_names = {kind: f"LiteratureCentral_{kind}" for kind in ("MA", "MS", "SA")}
     interface_presets = {kind: records[name] for kind, name in preset_names.items()}
-    sim.set_surface_epr(
-        approximation_profile=APPROXIMATION_PROFILE,
-        representation=ROUTE,
-        specs={
+    # Surface EPR changes the geometry, so the plan holds it; prepare() after it.
+    plan.set_surface_epr(
+        {
             kind: {
                 "thickness": record["thickness"],
                 "permittivity": record["permittivity"],
@@ -157,8 +142,13 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
                 "preset": preset_names[kind],
             }
             for kind, record in interface_presets.items()
-        },
+        }
     )
+    snapshot = plan.prepare()
+    sim = EigenmodeSim()
+    sim.set_route(ROUTE)
+    sim.set_plan(snapshot)
+    sim.set_output_dir(RUN_ROOT)
     PORT_NAME = "chip/o_junction_lumped"
     PORT_INDUCTANCE_H = 10e-9
     PORT_CAPACITANCE_F = 0.0  # Inductive-only model; no Palace capacitive branch.
@@ -182,6 +172,7 @@ if WORKFLOW_ACTION in {"AUTHORING_ONLY", "prepare_handoff", "run"}:
             "inductance_h": PORT_INDUCTANCE_H,
             "capacitance_f": PORT_CAPACITANCE_F,
             "interface_presets": interface_presets,
+            "paired_gds_sha256": snapshot.gds_sha256,
         }
     )
     display(sim.input_summary())
@@ -195,21 +186,18 @@ curve arrangement, source rebinding, elevation and one HighOrder optimization.
 ```{python}
 #| id: cpe-mesh
 if WORKFLOW_ACTION in {"prepare_handoff", "run"}:
-    REFINED_MESH_SIZE_UM = 10.0
-    MAX_MESH_SIZE_UM = 200.0
-    ALGORITHM_3D = "HXT"
-    MESH_THREADS = 8
-    SURFACE_THREADS = 1
-    GEOMETRY_ORDER = 2
+    # SCGSim's default sizing (FeatureRecipe). The former 10/200 um sizes map to
+    # UniformBoundaryRecipe(10, 200), which leaves no clean mesh on this die (#66).
+    # Meshing runs on one thread; the former MESH_THREADS has no replacement.
+    ALGORITHM_3D = HXT
+    GEOMETRY_ORDER = 2  # Geometry mesh degree, not field FEM order.
     HIGH_ORDER_OPTIMIZE = True
     sim.set_mesh(
-        refined_mesh_size=REFINED_MESH_SIZE_UM,
-        max_mesh_size=MAX_MESH_SIZE_UM,
-        algorithm_3d=ALGORITHM_3D,
-        threads=MESH_THREADS,
-        surface_threads=SURFACE_THREADS,
-        geometry_order=GEOMETRY_ORDER,
-        high_order_optimize=HIGH_ORDER_OPTIMIZE,
+        mesher=MesherOptions(
+            algorithm_3d=ALGORITHM_3D,
+            geometry_order=GEOMETRY_ORDER,
+            high_order_optimize=HIGH_ORDER_OPTIMIZE,
+        ),
     )
     MESH_PATH = sim.mesh()
     display(MESH_PATH)
@@ -322,19 +310,11 @@ if WORKFLOW_ACTION in {"run", "analyze_handoff", "save_from_returned"}:
 
 ### Physics Analysis Results
 
-Historical `_08` only: the frequency moves from 5.310657080530 to 5.573354161115 GHz across the
-recorded refinements; the configured four-refinement maximum was reached.
-The final native indicator is 0.1186681863426 versus the configured 0.02;
-this is an observation, not a numerical-adequacy criterion. All five
-postprocessing phases emitted two PCG nonconvergences at 10000 iterations
-(final relative residuals 9.537e-6 and 2.349e-5). The initial natural
-PMC/ZeroCharge boundary warning also remains part of the run evidence.
-The typed EPR result contains nine surface, two bulk and one junction row.
-The raw signed Palace junction participation is -0.9948401783541
-(`signed_palace=true`): it is neither absolute-valued nor interpreted as a
-negative physical energy. Surface values are unmasked, zero-inset baselines;
-the interface losses are synthetic model inputs. See the
-[derived evidence tables and provenance](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/develop/notebooks/ComponentSimulation/CircularPad/evidence/README.md).
+The physics view opens with each mode's frequency and Q, then the Surface-EPR
+participation, one figure per interface kind. The junction participation
+Palace reports is signed (`signed_palace=true`): it is neither absolute-valued
+nor interpreted as a negative physical energy. Surface values cover the whole
+surfaces, with no insets; the interface losses are synthetic model inputs.
 
 ```{python}
 #| id: cpe-physics
@@ -388,11 +368,7 @@ if WORKFLOW_ACTION in {"save_from_returned", "analyze_saved_epr"}:
 
 ### Simulation Performance / Benchmarks
 
-Read actual emitted geometric node/order data and native AMR histories beside
-the declared controls. The final native metadata records 846008 ND unknowns and
-114197 tetrahedra, using 8 MPI processes × 1 OpenMP thread. Ordinary saved
-VTU output across eight pieces contains 10-node Lagrange tetrahedra (VTK 71)
-and 6-node Lagrange triangles (VTK 69). That observes quadratic serialization
-after AMR, not exact shared-node motion or geometric accuracy. Continuous-circle
-fidelity and interior nodal state beyond those saved outputs remain unmeasured.
+Read the benchmark's mesh, unknowns, time and resources per AMR pass beside
+the declared controls. Second-order geometry gives curved element faces; it
+does not by itself establish continuous-circle fidelity or geometric accuracy.
 No Q/T1, cross-solver equivalence, accuracy or convergence conclusion follows.

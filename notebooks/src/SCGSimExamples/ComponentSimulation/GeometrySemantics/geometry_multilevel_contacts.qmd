@@ -9,8 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
-scgsim_source_archive_sha256: "4126a6f162f30d5fdaf4242b69cda2c17531bbaf0315f60ba09f7acb5e63c10d"
+scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
 ---
 
 ![Distinct multilevel sources: flip-chip lower and upper faces, and the stock CPW airbridge.](../../_images/multilevel-coupons.png)
@@ -22,10 +21,8 @@ and [material/stack/Z requirements](../../../../simulation/tools/materials-stack
 OrcaPen supplies physical layers and coupon contact intent; callers assign Nets;
 SCGSim owns preparation and all native geometry/assignment/mesh mechanics.
 
-Fresh construction uses the shared SCGSim source environment associated with
-these calls; no released wheel is claimed to provide the same APIs. A prior
-bounded source-only observation used the pinned [SCGSim v2 RC1 checkpoint][scgsim-rc1];
-that historical observation does not establish this notebook's behavior.
+These cells use SCGSim [`v3.0.0rc4`][scgsim-rc4] (`847d18b`), the revision this
+repository pins.
 Native contacts remain unobserved. No notebook run or saved output is attached.
 
 ## Environment and observation identity
@@ -37,8 +34,12 @@ from uuid import uuid4
 
 import gdsfactory as gf
 from IPython.display import display
-from scgsim.aedt import prepare_planar_geometry_input
-from scgsim.geometry import ApproximationProfile, GeometryPlan, summarize_geometry_input
+from scgsim.geometry import (
+    ApproximationProfile,
+    GeometryPlan,
+    interpret_physical_geometry,
+    summarize_geometry_input,
+)
 
 import orcapen_sc_pdk
 from orcapen_sc_pdk import get_material_records
@@ -49,9 +50,9 @@ display(
     {
         "observation_id": OBSERVATION_ID,
         "scgsim_version": importlib.metadata.version("scgsim"),
-        "scgsim_authoring_source": "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED",
+        "scgsim_revision": "847d18bb3969801857943adc5941608e1cc55c60",
         "units": "XY, Z intervals and physical thickness: um",
-        "evidence_stage": "source and detached preparation records",
+        "evidence_stage": "source and physical-interpretation records",
     }
 )
 orcapen_sc_pdk.activate()
@@ -182,52 +183,50 @@ for case_id, stack, snapshot in (
     )
 ```
 
-## Public Solid and Thin Film preparation maps
+## Public Solid and Thin Film interpretation maps
 
 Both choices consume the same immutable source snapshot. `solid` retains
 physical bodies. `thin_film` removes source-declared stack-film height once,
 keeps source-declared retained solids, and collapses the local deck film
 on its declared contact side without removing the deck height from the global
 stack. Source/effective intervals and physical-layer identities are produced
-by SCGSim, not a notebook mapping function. Empty junction/contribution inputs
-mean no excitation or Surface-EPR study is selected here.
+by SCGSim's `interpret_physical_geometry`, the step every Palace and AEDT
+preparation takes, not by a notebook mapping function. It builds no CAD body
+or mesh; no excitation or Surface-EPR study is selected here.
 
-The earlier isolated source observation completed both airbridge maps and
-flip-chip Solid preparation. In that historical source cohort, flip-chip Thin
-Film stopped because the PDK bump level lacked an `aedt_modeling` declaration.
-The current neutral declaration classifies `D0_D1_INDIUM_BUMP` as `finite_volume`, preserving its
-finite physical height in either representation. The historical error does not
-describe the current source, and the revised declaration has not been executed
-here. The editable selection below starts with the airbridge maps; select
-`06-flip-chip` to inspect the requested preparation records. Neither declaration
-nor portable preparation establishes native contact or mesh coverage.
+`D0_D1_INDIUM_BUMP` is declared `finite_volume`, preserving its finite
+physical height in either representation. The editable selection below starts
+with the airbridge maps; select `06-flip-chip` to inspect the flip-chip
+records. Neither declaration nor interpretation establishes native contact or
+mesh coverage.
 
 ```{python}
 #| id: gmc-modeling-preparation
-prepared_cases = {}
+interpreted_cases = {}
 MODELING_CASE = "07-airbridge"  # 06-flip-chip | 07-airbridge
 MODELING_CHOICES = ("solid", "thin_film")
-component, snapshot = {
-    "06-flip-chip": (flip, flip_snapshot),
-    "07-airbridge": (bridge, bridge_snapshot),
-}[MODELING_CASE]
+snapshot = {"06-flip-chip": flip_snapshot, "07-airbridge": bridge_snapshot}[MODELING_CASE]
 for modeling in MODELING_CHOICES:
     approximation_profile = ApproximationProfile(name=modeling, revision="v1", parameters={})
-    prepared = prepare_planar_geometry_input(
-        snapshot.geometry_input,
-        prepared_stack=snapshot.stack,
-        modeling=approximation_profile.name,
-        source_dbu_um=component.kcl.dbu,
+    _, _, representation = interpret_physical_geometry(
+        snapshot.geometry_input, snapshot.stack, approximation_profile
     )
-    prepared_cases[(MODELING_CASE, modeling)] = prepared
+    interpreted_cases[(MODELING_CASE, modeling)] = representation
     display(
         {
             "case_id": MODELING_CASE,
             "modeling": modeling,
-            "model_sha256": prepared.model_sha256,
-            "source_sha256": prepared.source_sha256,
-            "scgsim_modeling_map": prepared.source["modeling"],
-            "prepared_conductors": prepared.source["conductors"],
+            "representation_source_sha256": representation.source_sha256,
+            "collapse_intervals_um": representation.collapse_intervals,
+            "entities": {
+                entity_id: {
+                    "physical_layer_id": facts["physical_layer_id"],
+                    "representation": facts["representation"],
+                    "source_interval_um": facts["source_interval_um"],
+                    "effective_interval_um": facts["effective_interval_um"],
+                }
+                for entity_id, facts in representation.entities.items()
+            },
             "source_snapshot_gds_sha256": snapshot.gds_sha256,
         }
     )
@@ -235,8 +234,8 @@ for modeling in MODELING_CHOICES:
 
 ## Native contact and mesh observations remain future work
 
-`GeometryPlan.prepare()` and `prepare_planar_geometry_input()` produce source
-and portable preparation records, not native bodies or meshes. No CAD/native
+`GeometryPlan.prepare()` and `interpret_physical_geometry()` produce source
+and physical-interpretation records, not native bodies or meshes. No CAD/native
 launch, Gmsh, mesh, terminal assignment, solve, or fields are requested here.
 Inspect actual bump endpoint contacts, post/base and deck/post interfaces,
 Signal clearance, retained holes, and native source/effective Z readback before
@@ -244,4 +243,4 @@ claiming those later stages. No tolerance or contact eligibility Gate is added.
 Missing source declarations or unsupported public preparation fail visibly;
 there is no notebook-local fallback, guessed contact reconstruction, or result.
 
-[scgsim-rc1]: https://github.com/OrPenStrike/scgsim/tree/85d8bedb733b1e17737d935029618351b30ea5de
+[scgsim-rc4]: https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4

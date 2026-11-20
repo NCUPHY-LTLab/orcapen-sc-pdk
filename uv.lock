@@ -325,6 +325,21 @@ wheels = [
 ]
 
 [[package]]
+name = "cadquery-ocp-novtk"
+version = "7.8.1.1.post1"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b9/6e/ca31ee2fdc9fcbaa3235e28a4de32ebb0c74fe04d6caa9ebb97bb5162a63/cadquery_ocp_novtk-7.8.1.1.post1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:d764d26f2bb20882ba7da89683511ec791974876b266390ad5f99b68cc415deb", size = 68303688, upload-time = "2025-01-29T14:37:29.905Z" },
+    { url = "https://files.pythonhosted.org/packages/18/03/007dc1787d047f3bd7b02975f87438682650b78e4270685aa7c8eb6209d5/cadquery_ocp_novtk-7.8.1.1.post1-cp312-cp312-macosx_11_0_x86_64.whl", hash = "sha256:335950ea504a648554c84e8c0789444610dab1316a7bcd5bd84e18cc450463af", size = 69227026, upload-time = "2025-01-29T14:37:39.586Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/6a/c973f2b530651193dec6f5c14b50226abddc6d2a065b57ac866069f208ff/cadquery_ocp_novtk-7.8.1.1.post1-cp312-cp312-manylinux_2_31_x86_64.whl", hash = "sha256:e38588360db511a56562ab6374e1406dd395669db05b2d828f359549b1ffbe19", size = 69960064, upload-time = "2025-01-29T14:37:54.131Z" },
+    { url = "https://files.pythonhosted.org/packages/50/4e/4c1b3f0e6f45efcb8ca9ec9aabd996e223d55e7c01273b09080f9672e057/cadquery_ocp_novtk-7.8.1.1.post1-cp312-cp312-win_amd64.whl", hash = "sha256:72b1266c881b53116fd075c62084b0bcf90694fc43c4b1958a34b4006d3019cf", size = 51530378, upload-time = "2025-01-29T14:38:02.707Z" },
+    { url = "https://files.pythonhosted.org/packages/96/3d/a69da3fa6ceb383c856598a68caa39efc28a14ae91377990734d774aaae6/cadquery_ocp_novtk-7.8.1.1.post1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:ceae50c2ddea609fd257269098705c4361bee044ac466d55e020d9d281023a96", size = 68304378, upload-time = "2025-01-29T14:38:12.112Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/6f/223ec505bcef117e0ad443193c8cb3d36f7cae8cdac4956d946e51c97089/cadquery_ocp_novtk-7.8.1.1.post1-cp313-cp313-macosx_11_0_x86_64.whl", hash = "sha256:f51db5d4ffd81186fc01ed2d013a27aee6a4e35d560e72147b7c2a2fd204c7a3", size = 69229053, upload-time = "2025-01-29T14:38:22.035Z" },
+    { url = "https://files.pythonhosted.org/packages/74/08/1de4750b267a500ca900b3c7ab754790afe7f9dbb8a301258739b72c69e2/cadquery_ocp_novtk-7.8.1.1.post1-cp313-cp313-manylinux_2_31_x86_64.whl", hash = "sha256:cefc6f42fdbe40f0bc936d934b28bd6d46039c14c472dfa2a1c8f6721de3ad59", size = 69958218, upload-time = "2025-01-29T14:38:31.962Z" },
+    { url = "https://files.pythonhosted.org/packages/2e/d1/977223a3bc5ba4a9ee3e5b778f803a1d4d2dc95e93627a072a8c317eac25/cadquery_ocp_novtk-7.8.1.1.post1-cp313-cp313-win_amd64.whl", hash = "sha256:abbe9ef3e9f66e39f947b66f4a0dc8cedaafa04ec62931182206bd15bdb5ae60", size = 51530931, upload-time = "2025-01-29T14:38:44.748Z" },
+]
+
+[[package]]
 name = "certifi"
 version = "2026.5.20"
 source = { registry = "https://pypi.org/simple" }
@@ -1882,7 +1897,7 @@ requires-dist = [
 provides-extras = ["circuit-runtime"]
 
 [package.metadata.requires-dev]
-aedt-notebooks = [{ name = "scgsim", extras = ["aedt"], git = "https://github.com/OrPenStrike/scgsim.git?rev=0051d6e8924d8e79c0e03b560592ec65fe5659a1" }]
+aedt-notebooks = [{ name = "scgsim", extras = ["aedt"], git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=847d18bb3969801857943adc5941608e1cc55c60" }]
 dev = [
     { name = "pytest", specifier = ">=9.0.0" },
     { name = "ruff", specifier = ">=0.15.11" },
@@ -1899,7 +1914,7 @@ ecosystem-dev = [
     { name = "pandas", specifier = ">=2.0" },
     { name = "plotly", specifier = ">=6.0.0" },
 ]
-palace-notebooks = [{ name = "scgsim", extras = ["palace", "visualization"], git = "https://github.com/OrPenStrike/scgsim.git?rev=0051d6e8924d8e79c0e03b560592ec65fe5659a1" }]
+palace-notebooks = [{ name = "scgsim", extras = ["palace", "visualization"], git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=847d18bb3969801857943adc5941608e1cc55c60" }]
 
 [[package]]
 name = "orjson"
@@ -2938,8 +2953,8 @@ wheels = [
 
 [[package]]
 name = "scgsim"
-version = "2.0.0rc1"
-source = { git = "https://github.com/OrPenStrike/scgsim.git?rev=0051d6e8924d8e79c0e03b560592ec65fe5659a1#0051d6e8924d8e79c0e03b560592ec65fe5659a1" }
+version = "3.0.0rc4"
+source = { git = "https://github.com/NCUPHY-LTLab/scgsim.git?rev=847d18bb3969801857943adc5941608e1cc55c60#847d18bb3969801857943adc5941608e1cc55c60" }
 dependencies = [
     { name = "numpy" },
     { name = "plotly" },
@@ -2947,13 +2962,16 @@ dependencies = [
 
 [package.optional-dependencies]
 aedt = [
+    { name = "cadquery-ocp-novtk" },
     { name = "gdstk" },
     { name = "pyaedt" },
+    { name = "shapely" },
 ]
 palace = [
     { name = "gdsfactory" },
     { name = "gdstk" },
     { name = "gmsh" },
+    { name = "shapely" },
 ]
 visualization = [
     { name = "meshio" },

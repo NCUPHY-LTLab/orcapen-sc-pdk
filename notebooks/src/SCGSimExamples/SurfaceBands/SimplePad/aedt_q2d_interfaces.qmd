@@ -11,7 +11,7 @@ execute:
   enabled: false
 ---
 
-Prepare a Q2D model of the SimplePad's facing straight edges, then save the returned MA/MS/SA field factors for the [Palace band example](palace_eigenmode_bands.qmd). Edit geometry and numeric controls only in [the companion model](simplepad_interface_model.json); ordinary `json.load` supplies values to the typed constructors below.
+Prepare a Q2D model of the SimplePad's facing straight edges, then save the returned MA/MS/SA field factors. The [Palace band example](palace_eigenmode_bands_prepare_run.qmd) cannot apply them yet: SCGSim rc4 has no Q2D correction. Edit geometry and numeric controls only in [the companion model](simplepad_interface_model.json); ordinary `json.load` supplies values to the typed constructors below.
 
 Use a separately provisioned CPython 3.12.14 / GDSFactory 9.48.0 environment with an ordinary OrcaPen wheel built from pinned public source `c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c` and the selected SCGSim candidate.
 
@@ -315,4 +315,4 @@ elif WORKFLOW_ACTION == "prepare_handoff":
     display(HANDOFF.archive_path)
 ```
 
-The source material records are pinned in [public OrcaPen](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c/orcapen_sc_pdk/materials.json). Continue with [the Palace band example](palace_eigenmode_bands.qmd) using the actual returned directory.
+The source material records are pinned in [public OrcaPen](https://github.com/OrPenStrike/orcapen-sc-pdk/blob/c75a1d4d2ee07e86a3b5d9b491609e5a1a5b850c/orcapen_sc_pdk/materials.json). The [Palace band example](palace_eigenmode_bands_prepare_run.qmd) cannot apply these factors until SCGSim has the Q2D correction.

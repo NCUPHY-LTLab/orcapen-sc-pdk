@@ -7,6 +7,7 @@ generated API reference are shared build inputs, not a second editable copy.
 from __future__ import annotations
 
 import copy
+import json
 import os
 import re
 import shutil
@@ -38,6 +39,11 @@ LABELS = {
     "Reproduce and download": "重現與下載",
     "Model variants": "模型變體",
     "Simulation tutorials": "模擬教學",
+    "Example notebooks": "範例 Notebook",
+    "SimplePad surface bands": "SimplePad 表面帶區",
+    "CPW with finite ground": "有限接地 CPW",
+    "CPW meander with airbridges": "含空橋的 CPW 蜿蜒線",
+    "Geometry semantics": "幾何語意",
     "Simulation concepts": "模擬概念",
     "Package and integration": "套件與整合",
     "Documentation": "文件維護",
@@ -59,6 +65,23 @@ def localize_labels(value: object) -> None:
             localize_labels(item)
 
 
+def page_title(source: Path) -> str:
+    """The title Quarto gives a page: front matter, else the first level-1 heading."""
+    if source.suffix == ".ipynb":
+        # A notebook's front matter and heading live in its first cells.
+        cells = json.loads(source.read_text())["cells"]
+        text = "\n".join("".join(cell["source"]) for cell in cells[:2])
+    else:
+        text = source.read_text()
+    if text.startswith("---\n"):
+        metadata = yaml.safe_load(text.split("---", 2)[1]) or {}
+        return str(metadata.get("title", source.stem))
+    return next(
+        (line[2:].strip() for line in text.splitlines() if line.startswith("# ")),
+        source.stem,
+    )
+
+
 def route_untranslated_navigation(value: object, authored: Path, english: Path) -> None:
     """Keep untranslated menu entries on the actual English edition."""
 
@@ -67,20 +90,12 @@ def route_untranslated_navigation(value: object, authored: Path, english: Path) 
         if parsed.scheme or parsed.netloc or target.startswith(("/", "#")):
             return None
         source = english / parsed.path
-        if source.suffix not in {".md", ".qmd"} or (authored / parsed.path).is_file():
+        if source.suffix not in {".md", ".qmd", ".ipynb"} or (authored / parsed.path).is_file():
             return None
         # Shared generated API pages are copied into the child project.
         if parsed.path.startswith("reference/") or not source.is_file():
             return None
-        text = source.read_text()
-        if text.startswith("---\n"):
-            metadata = yaml.safe_load(text.split("---", 2)[1]) or {}
-            title = metadata.get("title", source.stem)
-        else:
-            title = next(
-                (line[2:].strip() for line in text.splitlines() if line.startswith("# ")),
-                source.stem,
-            )
+        title = page_title(source)
         href = "en/" + str(Path(parsed.path).with_suffix(".html"))
         if parsed.query:
             href += "?" + parsed.query

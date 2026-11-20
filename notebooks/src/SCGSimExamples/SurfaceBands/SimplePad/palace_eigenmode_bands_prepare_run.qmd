@@ -1,0 +1,229 @@
+---
+title: "SimplePad — Palace Surface EPR with inset bands: prepare and run"
+jupyter:
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+  simulation_notebook:
+    kind: single
+execute:
+  enabled: false
+scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
+---
+
+This is the [SimplePad eigenmode example](../../ComponentSimulation/SimplePad/palace_eigenmode.qmd)
+with inset bands added to its Surface-EPR films. Everything else is the same:
+a 200 µm square pad, a 20 µm gap and a 1000 µm die of 100 nm Al on 500 µm Si,
+closed by a linear 10 nH lumped inductor between pad and ground.
+
+Without bands, the participation of the sidewall films kept growing with every
+adaptive pass: the field at a metal edge is singular, so a finer mesh keeps
+finding more energy there. Bands split each surface by its distance from the
+gap edge, here at 0.5 µm and 1 µm, so the report shows how much of each
+surface's participation sits within 0.5 µm of an edge, between 0.5 and 1 µm,
+and beyond.
+
+This notebook builds the case and writes a run folder, then runs it on this
+machine. To run on a cluster instead, stop before **Run on this machine** and
+send the run folder there. Read the returned folder with the
+[analysis notebook](palace_eigenmode_bands_analyze.qmd).
+
+This example uses SCGSim [`v3.0.0rc4`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4)
+(`847d18b`), the revision this repository pins, and stock Palace 0.18.1.
+LiteratureCentral MA/MS/SA films are model assumptions, not measured loss.
+
+::: {.callout-note title="What bands do not do yet"}
+SGB cuts bands into conductor tops, conductor bottoms and the substrate
+surface, never into a sidewall, so the sidewall rows stay whole. The Q2D
+correction that would replace the near-edge band with a local cross-section
+result is not in SCGSim rc4; the [Q2D interface example](aedt_q2d_interfaces.qmd)
+stays separate until it is.
+:::
+
+## Setup and Imports
+
+```{python}
+#| id: band-prepare-imports
+import importlib.metadata
+import os
+import subprocess
+from pathlib import Path
+from uuid import uuid4
+
+import gdsfactory as gf
+from IPython.display import display
+from scgsim.geometry import GeometryPlan
+from scgsim.meshing import DELAUNAY, MesherOptions
+from scgsim.palace import EigenmodeSim
+
+import orcapen_sc_pdk
+from orcapen_sc_pdk import (
+    get_interface_preset_records,
+    get_material_records,
+    validate_interface_preset_records,
+)
+from orcapen_sc_pdk.tech import get_single_die_layer_stack
+
+RUN_ID = f"simple_pad_palace_bands_{uuid4().hex}"
+RUN_ROOT = Path.cwd() / ".artifacts" / "SimplePadSurfaceBands" / RUN_ID
+display({"scgsim_version": importlib.metadata.version("scgsim"), "run_id": RUN_ID})
+```
+
+## Build Component Coupon
+
+```{python}
+#| id: band-prepare-component
+PAD_SIDE_UM = 200.0
+GAP_UM = 20.0
+DIE_SIDE_UM = 1000.0
+JUNCTION_WIDTH_UM = 2.0
+orcapen_sc_pdk.activate()
+gf.clear_cache()
+component = gf.get_component(
+    "square_pad_capacitor",
+    pad_side_um=PAD_SIDE_UM,
+    gap_um=GAP_UM,
+    die_side_um=DIE_SIDE_UM,
+    junction_width_um=JUNCTION_WIDTH_UM,
+)
+plan = GeometryPlan(
+    component=component,
+    root_id="chip",
+    layer_stack=get_single_die_layer_stack(),
+    material_records=get_material_records(),
+    coupon_padding_um=0.0,
+)
+plan.set_nets({"pad": ("chip/PAD",), "ground": ("chip/GROUND",)})
+plan.set_vacuum_region(padding=(250.0, 250.0, 1000.0))
+display(component)
+```
+
+## Surface EPR Films and Bands
+
+```{python}
+#| id: band-prepare-surface-epr
+# Band edges, measured from each gap edge, strictly increasing.
+INSET_MARGINS_UM = (0.5, 1.0)
+records = validate_interface_preset_records(get_interface_preset_records())
+preset_names = {kind: f"LiteratureCentral_{kind}" for kind in ("MA", "MS", "SA")}
+interface_presets = {kind: records[name] for kind, name in preset_names.items()}
+# Bands are geometry, so the plan holds them and prepare() comes after.
+plan.set_surface_epr(
+    {
+        kind: {
+            "thickness": record["thickness"],
+            "permittivity": record["permittivity"],
+            "loss_tangent": record["loss_tangent"],
+            "source": record["source"],
+            "preset": preset_names[kind],
+            "inset_margins_um": INSET_MARGINS_UM,
+        }
+        for kind, record in interface_presets.items()
+    }
+)
+snapshot = plan.prepare()
+display({"inset_margins_um": INSET_MARGINS_UM, "interface_presets": interface_presets})
+```
+
+## Configure the Eigenmode Problem
+
+```{python}
+#| id: band-prepare-problem
+ROUTE = "B"
+PORT_NAME = "chip/o_junction_lumped"
+PORT_INDUCTANCE_H = 10e-9
+sim = EigenmodeSim()
+sim.set_route(ROUTE)
+sim.set_plan(snapshot)
+sim.set_output_dir(RUN_ROOT)
+sim.add_port(PORT_NAME, layer="D0_TOP_M1", layout_sheet=True, inductance=PORT_INDUCTANCE_H)
+sim.set_epr_request(
+    surface_interfaces=("MA", "MS", "SA"), bulk_domain_ids=None, port_names=(PORT_NAME,)
+)
+sim.set_eigenmode(num_modes=1, target=1e9, tolerance=1e-6, save=1)
+display(sim.input_summary())
+```
+
+## Build Mesh
+
+```{python}
+#| id: band-prepare-mesh
+# SCGSim's default sizing (FeatureRecipe) also sizes the band faces.
+sim.set_mesh(
+    mesher=MesherOptions(algorithm_3d=DELAUNAY, geometry_order=1, high_order_optimize=True),
+)
+MESH_PATH = sim.mesh()
+display(MESH_PATH)
+```
+
+## Generate Config
+
+```{python}
+#| id: band-prepare-config
+FEM_ORDER = 2
+AMR_MAX_PASSES = 10
+AMR_TOLERANCE = 0.02
+# Each pass refines the elements that hold this share of the estimated error.
+# At 0.7 the mesh grew about 2.5x per pass and the sixth pass needed more
+# than the 503 GB of the workstation, so this run refines half as much.
+AMR_UPDATE_FRACTION = 0.35
+# Nonconformal refinement splits only the marked elements, without the extra
+# splits a conformal mesh needs to stay connected, so effort stays where the
+# error is.
+AMR_NONCONFORMAL = True
+sim.set_numerical(
+    order=FEM_ORDER,
+    tolerance=1e-6,
+    max_iterations=2000,
+    solver_type="Default",
+    preconditioner="Default",
+    device="CPU",
+    amr_max_passes=AMR_MAX_PASSES,
+    amr_tolerance=AMR_TOLERANCE,
+    amr_update_fraction=AMR_UPDATE_FRACTION,
+    amr_nonconformal=AMR_NONCONFORMAL,
+    save_adapt_iterations=True,
+    output_paraview=True,
+    output_grid_function=False,
+)
+CONFIG_PATH = sim.write_config()
+display(CONFIG_PATH)
+display(sim.mesh_summary())
+```
+
+## Write the Run Folder
+
+The run folder holds the mesh, the Palace config and the script that runs
+them. Set `PALACE_EXECUTABLE` to an MPI wrapper of Palace 0.18.1 built with
+OpenMP, and `PALACE_SETUP_COMMANDS` to any setup lines it needs.
+
+The solve is likely limited by memory bandwidth, so run one case at a time on
+the whole machine: 30 MPI processes with 2 OpenMP threads each fill a 32-core,
+64-thread workstation. Lower `RESOURCES` on a smaller machine.
+
+Keep the two values this cell prints: the analysis notebook needs both.
+
+```{python}
+#| id: band-prepare-handoff
+RESOURCES = {"processes": 30, "threads": 2, "command_style": "wrapper"}
+HANDOFF = sim.prepare_handoff(
+    profile="direct-local",
+    executable=os.environ["PALACE_EXECUTABLE"],
+    resources=RESOURCES,
+    setup_commands=tuple(os.environ.get("PALACE_SETUP_COMMANDS", "").splitlines()),
+)
+display({"run_dir": str(HANDOFF.run_dir), "handoff_id": HANDOFF.handoff_id})
+```
+
+## Run on this Machine
+
+A run that stops before its last pass, for example when the machine runs out
+of memory, keeps every pass it finished. This cell reports the exit code
+instead of raising, and the analysis notebook reads the finished passes.
+
+```{python}
+#| id: band-prepare-run
+completed = subprocess.run([str(HANDOFF.script_path)], cwd=HANDOFF.run_dir)
+display({"exit_code": completed.returncode, "run_dir": str(HANDOFF.run_dir)})
+```

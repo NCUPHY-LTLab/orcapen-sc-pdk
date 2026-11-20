@@ -74,24 +74,5 @@
   "local_length_mesh_status": "UNASSIGNED: source requests 0.001um interface and 0.5um bulk are not applied in this illustration.",
   "matrix_run_control": {"setup_name": "Setup1", "frequency_ghz": 6.0, "maximum_passes": 3, "convergence_percent": 1.0, "minimum_passes": 1, "minimum_converged_passes": 1, "percent_refinement": 30.0},
   "aedt_version": "2024.2",
-  "resources_proposed": {"cores": 4, "ram_limit_percent": 8, "tasks": 1, "math_threads": 1, "admission": "NOT_ADMITTED"},
-  "palace": {
-    "component_name": "square_pad_capacitor",
-    "component_parameters": {"pad_side_um": 200.0, "gap_um": 20.0, "die_side_um": 1000.0, "junction_width_um": 2.0},
-    "include_airbridges": false,
-    "vacuum_padding_um": [250.0, 250.0, 1000.0],
-    "root_id": "chip", "coupon_padding_um": 0.0,
-    "nets": {"pad": ["chip/PAD"], "ground": ["chip/GROUND"]},
-    "approximation": {"name": "route_b", "revision": "v1", "parameters": {}},
-    "port": {"name": "chip/o_junction_lumped", "layer": "D0_TOP_M1", "layout_sheet": true, "inductance": 1e-8},
-    "eigenmode": {"num_modes": 1, "target": 1e9, "tolerance": 1e-6, "save": 1},
-    "mesh_controls": {"refined_mesh_size_um": 10.0, "max_mesh_size_um": 200.0, "algorithm_3d": "Delaunay", "threads": 1, "surface_threads": 1, "geometry_order": 1, "high_order_optimize": true},
-    "numerical_controls": {"order": 2, "tolerance": 1e-6, "max_iterations": 2000, "solver_type": "Default", "preconditioner": "Default", "device": "CPU", "amr_max_passes": 10, "amr_tolerance": 0.02, "amr_update_fraction": 0.15, "amr_nonconformal": false, "save_adapt_iterations": true, "output_paraview": true, "output_grid_function": false},
-    "handoff_resources": {"processes": 8, "threads": 1, "command_style": "wrapper"},
-    "band_cuts_um": [0.5, 1.0], "precision_um": 0.001,
-    "boundary_segments": null,
-    "edge_selection": "All original outer/hole loops of each caller-selected source-backed parent; never child seams.",
-    "correction": {"mode": 1, "sample_lower_um": 0.5, "replacement_upper_um": 1.0},
-    "factor_application": "One illustrative straight-edge factor per interface across all selected parents, including multiple MA top/wall parents; corner/outer-edge equivalence remains unverified."
-  }
+  "resources_proposed": {"cores": 4, "ram_limit_percent": 8, "tasks": 1, "math_threads": 1, "admission": "NOT_ADMITTED"}
 }
