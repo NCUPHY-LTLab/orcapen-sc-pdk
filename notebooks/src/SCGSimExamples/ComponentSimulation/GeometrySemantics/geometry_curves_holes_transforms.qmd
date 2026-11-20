@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
+scgsim_revision: "20a5d2b2bf48eb8600564c7f3df205b8be913a9d"
 ---
 
 ![Disk and annulus: distinct authored holes and opening geometry.](../../_images/curves-pads.png)
@@ -25,7 +25,7 @@ OrcaPen owns canonical curve laws and sampled source polygons; SCGSim owns
 their source binding and any later native representation. This notebook owns
 concrete inputs and displays real records rather than a second normalizer.
 
-These cells use SCGSim [`v3.0.0rc4`][scgsim-rc4] (`847d18b`), the revision this
+These cells use SCGSim [`v3.0.0rc5`][scgsim-rc5] (`20a5d2b`), the revision this
 repository pins.
 Native conformity remains unobserved, including OCC interpolation versus the
 authored Hermite law. No notebook run or saved output is attached.
@@ -59,7 +59,7 @@ display(
     {
         "observation_id": OBSERVATION_ID,
         "scgsim_version": importlib.metadata.version("scgsim"),
-        "scgsim_revision": "847d18bb3969801857943adc5941608e1cc55c60",
+        "scgsim_revision": "20a5d2b2bf48eb8600564c7f3df205b8be913a9d",
         "units": "XY and Z: um; rotations: degrees",
     }
 )
@@ -296,4 +296,4 @@ and qualified identities must later be checked against actual native objects.
 SCGSim's public errors remain visible. Do not silently strip curves to make an
 authored-curve native request appear supported.
 
-[scgsim-rc4]: https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4
+[scgsim-rc5]: https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc5

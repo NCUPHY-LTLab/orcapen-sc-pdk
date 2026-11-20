@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
+scgsim_revision: "20a5d2b2bf48eb8600564c7f3df205b8be913a9d"
 ---
 
 This notebook reads a run folder written by the

@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
+scgsim_revision: "20a5d2b2bf48eb8600564c7f3df205b8be913a9d"
 ---
 
 This is the [SimplePad eigenmode example](../../ComponentSimulation/SimplePad/palace_eigenmode.qmd)
@@ -29,15 +29,15 @@ machine. To run on a cluster instead, stop before **Run on this machine** and
 send the run folder there. Read the returned folder with the
 [analysis notebook](palace_eigenmode_bands_analyze.qmd).
 
-This example uses SCGSim [`v3.0.0rc4`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4)
-(`847d18b`), the revision this repository pins, and stock Palace 0.18.1.
+This example uses SCGSim [`v3.0.0rc5`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc5)
+(`20a5d2b`), the revision this repository pins, and stock Palace 0.18.1.
 LiteratureCentral MA/MS/SA films are model assumptions, not measured loss.
 
 ::: {.callout-note title="What bands do not do yet"}
 SGB cuts bands into conductor tops, conductor bottoms and the substrate
 surface, never into a sidewall, so the sidewall rows stay whole. The Q2D
 correction that would replace the near-edge band with a local cross-section
-result is not in SCGSim rc4; the [Q2D interface example](aedt_q2d_interfaces.qmd)
+result is not in SCGSim rc5; the [Q2D interface example](aedt_q2d_interfaces.qmd)
 stays separate until it is.
 :::
 
@@ -53,7 +53,7 @@ from uuid import uuid4
 
 import gdsfactory as gf
 from IPython.display import display
-from scgsim.geometry import GeometryPlan
+from scgsim.geometry import GeometryPlan, LumpedElement
 from scgsim.meshing import DELAUNAY, MesherOptions
 from scgsim.palace import EigenmodeSim
 
@@ -108,7 +108,7 @@ INSET_MARGINS_UM = (0.5, 1.0)
 records = validate_interface_preset_records(get_interface_preset_records())
 preset_names = {kind: f"LiteratureCentral_{kind}" for kind in ("MA", "MS", "SA")}
 interface_presets = {kind: records[name] for kind, name in preset_names.items()}
-# Bands are geometry, so the plan holds them and prepare() comes after.
+# Bands are geometry, so the plan holds them; prepare() comes after, with the port.
 plan.set_surface_epr(
     {
         kind: {
@@ -122,7 +122,6 @@ plan.set_surface_epr(
         for kind, record in interface_presets.items()
     }
 )
-snapshot = plan.prepare()
 display({"inset_margins_um": INSET_MARGINS_UM, "interface_presets": interface_presets})
 ```
 
@@ -133,11 +132,13 @@ display({"inset_margins_um": INSET_MARGINS_UM, "interface_presets": interface_pr
 ROUTE = "B"
 PORT_NAME = "chip/o_junction_lumped"
 PORT_INDUCTANCE_H = 10e-9
+# The junction sheet's inductor is a fact of the device, so the plan holds it too.
+plan.set_lumped_elements([LumpedElement(PORT_NAME, inductance_h=PORT_INDUCTANCE_H)])
+snapshot = plan.prepare()
 sim = EigenmodeSim()
 sim.set_route(ROUTE)
 sim.set_plan(snapshot)
 sim.set_output_dir(RUN_ROOT)
-sim.add_port(PORT_NAME, layer="D0_TOP_M1", layout_sheet=True, inductance=PORT_INDUCTANCE_H)
 sim.set_epr_request(
     surface_interfaces=("MA", "MS", "SA"), bulk_domain_ids=None, port_names=(PORT_NAME,)
 )

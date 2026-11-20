@@ -9,7 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_revision: "847d18bb3969801857943adc5941608e1cc55c60"
+scgsim_revision: "20a5d2b2bf48eb8600564c7f3df205b8be913a9d"
 ---
 
 ![Square-pad coupon: 200 µm pad, 20 µm gap and 1000 µm die.](../../_images/square-pad.png)
@@ -20,8 +20,8 @@ die. The current PDK supplies 100 nm Al above 500 µm Si. The authored
 20.002 × 2 µm east locator is nonmetal and adds no L/C branch here.
 The exterior remains natural, not grounded.
 
-This example uses SCGSim [`v3.0.0rc4`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4)
-(`847d18b`), the revision this repository pins, and stock Palace 0.18.1.
+This example uses SCGSim [`v3.0.0rc5`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc5)
+(`20a5d2b`), the revision this repository pins, and stock Palace 0.18.1.
 
 The default `run` action builds, prepares and solves this case, then reads its returned
 results. Choose `AUTHORING_ONLY` for non-solving inputs or `prepare_handoff`
