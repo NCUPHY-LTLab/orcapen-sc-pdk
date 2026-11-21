@@ -66,7 +66,7 @@ display(result.simulation_benchmark())
 
 這項操作需要已授權的 AEDT 主機，會開啟已保存專案的工作副本並評估場積分，但不呼叫原生求解。請在另一份筆記本使用以下範例；它是文件程式碼，不會隨本筆記本的「全部執行」啟動。
 
-在範例中直接填入原始已求解資料夾及已保存解清單的絕對路徑，並選擇新的分析輸出位置。使用原始已求解資料的規格、幾何、模態請求及薄膜設定。
+在範例中直接填入原始已求解資料夾及已保存解清單的絕對路徑，並選擇新的分析輸出位置。使用原始已求解資料的規格、已準備模型（`model/` 資料夾）、模態請求及薄膜設定，不重新建立版圖。
 
 ```python
 import json
@@ -98,13 +98,12 @@ output_dir = (
 saved_epr = analyze_epr(
     saved_solution=saved_solution,
     aedt_version=original_spec.aedt_version,
-    geometry=original_spec.geometry,
+    model=original_spec.model,
     project_name=original_spec.project_name,
     design_name=original_spec.design_name,
     run_control=original_spec.run_control,
     epr_request=original_spec.epr_request,
     output_dir=output_dir,
-    geometry_workers=1,
 )
 display(saved_epr)
 ```
@@ -124,4 +123,4 @@ display(detached)
 display(reanalyze_epr(detached))
 ```
 
-如需比較另一組文獻損耗假設，可明確傳入 `surface_defaults` 或 `group_overrides`；欄位與作用範圍見 [SCGSim 原始 API](https://github.com/NCUPHY-LTLab/scgsim/blob/0f6b4e5c54aff4891492976a5dd58387cc1a1787/src/scgsim/aedt/epr/analysis.py)。輸出保留為另一份分析，不覆寫原始結果。
+如需比較另一組文獻損耗假設，可明確傳入 `surface_defaults` 或 `group_overrides`；欄位與作用範圍見 [SCGSim 原始 API](https://github.com/NCUPHY-LTLab/scgsim/blob/v3.0.0rc6/src/scgsim/aedt/epr/reanalysis.py)。輸出保留為另一份分析，不覆寫原始結果。
