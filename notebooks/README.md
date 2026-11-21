@@ -67,8 +67,8 @@ executed notebooks separately with their source, input, runtime and run identity
 never copy historical output into a changed source as proof of execution.
 
 The repository pins
-[SCGSim v3.0.0rc4](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc4)
-(`847d18b`). The Palace and geometry examples (SimplePad, CircularPad and
+[SCGSim v3.0.0rc6](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc6)
+(`4c3edca`). The Palace and geometry examples (SimplePad, CircularPad and
 CpwFiniteGround Palace, Kosen2024 Xmon Palace, GeometrySemantics, and the
 SimplePad Palace inset-band example) use its API and run on stock Palace
 0.18.1. The AEDT and Q2D examples still carry the API of their earlier
