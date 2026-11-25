@@ -71,9 +71,11 @@ The repository pins
 (`4c3edca`). The Palace and geometry examples (SimplePad, CircularPad and
 CpwFiniteGround Palace, Kosen2024 Xmon Palace, GeometrySemantics, and the
 SimplePad Palace inset-band example) use its API and run on stock Palace
-0.18.1. The AEDT and Q2D examples still carry the API of their earlier
-checkpoints and do not run on this pin until
-they are moved (NCUPHY-LTLab/orcapen-sc-pdk#66).
+0.18.1. So do these AEDT examples, which run with AEDT 2024.2: SimplePad HFSS
+Eigenmode (Prepare Handoff, Run, Run Directly and Analyze) and Q3D, and
+CpwFiniteGround HFSS Eigenmode. The other AEDT and Q2D
+examples still carry the API of their earlier checkpoints and do not run on
+this pin until they are moved (NCUPHY-LTLab/orcapen-sc-pdk#66).
 Each source states its exact runtime and optional backend prerequisites.
 Source-only geometry observations and historical examples retain their own
 declared checkpoints. Ordinary project dependencies and pins are not silently

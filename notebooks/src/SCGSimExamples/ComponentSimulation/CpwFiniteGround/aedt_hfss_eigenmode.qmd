@@ -9,8 +9,7 @@ jupyter:
     kind: single
 execute:
   enabled: false
-scgsim_authoring_source: LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED
-scgsim_source_archive_sha256: "4126a6f162f30d5fdaf4242b69cda2c17531bbaf0315f60ba09f7acb5e63c10d"
+scgsim_revision: "4c3edcabf20964a3e8045634bffcf7b6078eea8c"
 ---
 
 ![Finite-ground CPW: 500 µm length, 10 µm signal, 6 µm gaps and 80 µm grounds.](../../_images/finite-cpw.png)
@@ -23,9 +22,10 @@ explicitly replacing the prior Nb sheet model. It has no wave/lumped ports.
 The body-first facade uses native mesh behavior; it does not expose the prior
 CPW `LengthMeshSpec` operation.
 
-Fresh construction requires the shared SCGSim source environment associated
-with this example; no released wheel is claimed to provide these APIs.
-Retained results keep their recorded runtime identities.
+This example uses SCGSim [`v3.0.0rc6`](https://github.com/NCUPHY-LTLab/scgsim/tree/v3.0.0rc6)
+(`4c3edca`), the revision this repository pins, installed with
+`uv sync --locked --group aedt-notebooks`. Retained results keep their recorded
+runtime identities.
 
 Published historical baseline: [SCGSim](https://github.com/OrPenStrike/scgsim/tree/c9270c7e76e0b2df187dddde462079e00d410dd0).
 
@@ -65,7 +65,6 @@ RUN_ID = f"cpw_hfss_eigenmode_{uuid4().hex}"
 OUTPUT_ROOT = Path.cwd() / ".artifacts" / "SCGSimExamples" / "CpwFiniteGround"
 RUN_DIR = OUTPUT_ROOT / RUN_ID
 RETURNED_RUN_DIR = None  # Set independently to an immutable returned-run directory.
-SCGSIM_RUNTIME_SOURCE = "LOCAL_SHARED_PHYSICAL_CANDIDATE_UNCOMMITTED"
 RESOURCES = AedtResources(cores=4, ram_limit_percent=30)
 MODELING = "solid"
 APPROXIMATION_PROFILE = ApproximationProfile(name=MODELING, revision="v1", parameters={})
@@ -183,7 +182,7 @@ if WORKFLOW_ACTION != "analyze_handoff":
 ```{python}
 #| id: hfss-eigenmode-7
 if WORKFLOW_ACTION != "analyze_handoff":
-    sim = EigenmodeSim(modeling=APPROXIMATION_PROFILE.name)
+    sim = EigenmodeSim(modeling=APPROXIMATION_PROFILE.name, aedt_version=aedt_version)
     sim.set_plan(snapshot)
     sim.set_output_dir(RUN_DIR)
     # No wave or lumped excitations in this Eigenmode case.
